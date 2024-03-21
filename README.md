@@ -1,13 +1,35 @@
-# GooeyAI Chat Widget
+# Quick Setup Guide
 
-React was setup using Vite + Typescript
+1. Install Node LTS version (v18) using [nvm](https://github.com/nvm-sh/nvm)
+```bash
+nvm install 18.12.0
+```
+2. Clone this repo
+```bash
+git clone https://github.com/GooeyAI/gooey-web-widget.git
+```
+4. cd into your cloned directory & install dependencies
+```bash
+npm install
+```
+5. Start React server
+```bash
+npm run dev
+```
+6. Open [localhost:5173](http://localhost:5173) in your browser
+7. Build library
+ ```bash
+npm run build
+```
+8. Find the output in `dist/`
+9. Test injection by opening `test-site/index.html`
 
+## Notes
 
-test-site folder contains the demo site
+- `src/widgets/*` -> List of Embeddable React Components
 
+- `/test-site/index.html` -> Test Injection in html file
 
+- `src/lib.ts` -> Library entry point
 
-Below is the architecture for the project
-
-
-![Screenshot 2024-01-23 at 12 33 09 PM](https://github.com/anish-work/gooey-chat/assets/65861855/dbb340df-dbef-4db8-b07a-698c1fe2fff2)
+- `vite.config.js` -> Configuration for bundling the library
