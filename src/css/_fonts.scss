@@ -1,0 +1,69 @@
+@import './_breakpoints.scss';
+@import './_mixins.scss';
+
+$fontsizes: (
+  10_500: [10px, 500],
+  10_600: [10px, 600],
+  11_500: [11px, 500],
+  11_600: [11px, 600],
+  11_700: [11px, 700],
+  12_400: [12px, 400],
+  12_500: [12px, 500],
+  12_600: [12px, 600],
+  13_400: [13px, 400],
+  13_500: [13px, 500],
+  13_600: [13px, 600],
+  13_700: [13px, 700],
+  14_400: [14px, 400],
+  14_500: [14px, 500],
+  14_600: [14px, 600],
+  15_400: [15px, 400],
+  15_500: [15px, 500],
+  15_600: [15px, 600],
+  15_700: [15px, 700],
+  16_400: [16px, 400],
+  16_500: [16px, 500],
+  16_600: [16px, 600],
+  16_700: [16px, 700],
+  17_600: [17px, 600],
+  18_400: [18px, 400],
+  18_500: [18px, 500],
+  18_600: [18px, 600],
+  18_700: [18px, 700],
+  20_400: [20px, 400],
+  22_400: [22px, 400],
+  20_600: [20px, 600],
+  20_700: [20px, 700],
+  24_400: [24px, 400],
+  24_500: [24px, 500],
+  24_600: [24px, 600],
+  24_700: [24px, 700],
+  25_600: [25px, 600],
+  25_700: [25px, 700],
+  28_600: [28px, 600],
+  30_700: [30px, 700],
+  32_600: [32px, 600],
+  36_600: [36px, 600],
+  44_500: [44px, 500],
+  44_600: [44px, 600],
+  52_600: [52px, 600],
+  60_600: [60px, 600],
+  64_600: [64px, 600],
+);
+
+@each $name, $props in $fontsizes {
+  .font_#{$name} {
+    font-size: nth($props, 1) !important;
+    font-weight: nth($props, 2) !important;
+  }
+
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    @include media-breakpoint-up($breakpoint) {
+      $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+      .#{$infix}-font_#{$name} {
+        font-size: nth($props, 1) !important;
+        font-weight: nth($props, 2) !important;
+      }
+    }
+  }
+}

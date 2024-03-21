@@ -1,0 +1,170 @@
+@import "./colors.scss";
+
+// Text classes
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+.hover-underline:hover {
+  text-decoration: underline;
+}
+
+//  Hover Classes
+
+.hover-grow:hover {
+  transition: transform 0.1s ease-in;
+  transform: scale(1.1);
+  z-index: 99;
+}
+
+.hover-grow:active {
+  transition: transform 0.1s ease-in;
+  transform: scale(1);
+}
+
+.hover-bg-primary:hover {
+  background-color: $primary;
+  color: $dark-grey
+}
+
+/* Add this attribute to the element that needs a tooltip */
+[data-tooltip] {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+
+/* Hide the tooltip content by default */
+[data-tooltip]:before,
+[data-tooltip]:after {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Position tooltip above the element */
+[data-tooltip]:before {
+  position: absolute;
+  bottom: 15%;
+  left: calc(-100% - 8px);
+  margin-bottom: 5px;
+  padding: 7px;
+  width: fit-content;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background-color: #000;
+  background-color: hsla(0, 0%, 20%, 0.9);
+  color: #fff;
+  content: attr(data-tooltip);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Show tooltip content on hover */
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+  visibility: visible;
+  opacity: 1;
+}
+
+.br-large-right {
+  border-radius: 0px 16px 16px 0px;
+}
+
+.br-large-left {
+  border-radius: 16px 0px 0px 16px;
+}
+
+.text-underline {
+  text-decoration: underline;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-decoration-none {
+  text-decoration: none;
+}
+
+.translucent-text {
+  opacity: 0.67;
+}
+
+.br-default {
+  border-radius: 8px !important;
+}
+
+.br-small {
+  border-radius: 4px !important;
+}
+
+.br-large {
+  border-radius: 16px !important;
+}
+
+.b-1 {
+  border: 1px solid #ddd;
+}
+
+.b-btm-1 {
+  border-bottom: 1px solid #ddd;
+}
+
+.b-top-1 {
+  border-top: 1px solid #ddd;
+}
+
+.b-none {
+  border: none !important;
+}
+.hero-height {
+  min-height: auto;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.overflow-x-clip {
+  overflow-x: clip;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.br-circle {
+  border-radius: 50%;
+}
+
+.cr-pointer {
+  cursor: pointer;
+}
+.stroke-white {
+  stroke: white !important;
+}
+
+@media (max-width: 1100px) {
+  .xs-text-center {
+    text-align: center;
+  }
+
+  .xs-b-none {
+    border: none;
+  }
+}
