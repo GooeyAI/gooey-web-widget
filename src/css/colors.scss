@@ -1,0 +1,26 @@
+@import './_breakpoints.scss';
+@import './_mixins.scss';
+@import './colors.module.scss';
+
+@each $name, $value in $colors {
+  .bg-#{$name} {
+    background-color: $value !important;
+  }
+  .text-#{$name} {
+    color: $value !important;
+  }
+  .b-#{$name} {
+    border-color: $value !important;
+  }
+  @each $breakpoint in map-keys($grid-breakpoints) {
+    @include media-breakpoint-up($breakpoint) {
+      $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+      .#{$infix}-bg-#{$name} {
+        background-color:$value !important;
+      }
+      .#{$infix}-text-#{$name} {
+        color:$value !important;
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Nunito", arial ;
+  letter-spacing: 1px;
+  color:#000;
+  -webkit-font-smoothing:antialiased
+}
+p {
+  color: unset
+}
+a {
+  text-decoration: none;
+}
+body {
+  overflow: hidden;
+  background: none #dedede !important;
+  margin: 0;
+}
+

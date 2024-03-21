@@ -1,0 +1,28 @@
+
+// main function definition - e.g xs-mt-10, md-p-10
+@mixin make-responsive($values, $prefixes, $grid-breakpoints, $unit) {
+  @each $breakpoint-name, $breakpoint-value in $grid-breakpoints {
+    // if xs value = 0, set it global without media queries
+    @if($breakpoint-value == 0) {
+      @each $attr-short, $attr-long in $prefixes {
+        @each $value in $values {
+          .#{$breakpoint-name}-#{$attr-short}-#{$value} {
+            #{$attr-long}: #{$value}#{$unit} !important;
+          }
+        }
+      }
+    }
+    // breakpoint values that not equal to 0
+    @else {
+      @media screen and (min-width: $breakpoint-value) {
+        @each $attr-short, $attr-long in $prefixes {
+          @each $value in $values {
+            .#{$breakpoint-name}-#{$attr-short}-#{$value} {
+              #{$attr-long}: #{$value}#{$unit} !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}

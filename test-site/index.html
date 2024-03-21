@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body style="background-color: #dedede;">
+      <div id="gooey-embed"></div>
+      <link href="../dist/style.css" rel="stylesheet"/>
+      <script src="../dist/lib.js"></script>
+      <script>
+          const config = {
+            type: "chat-widget", // type of widget
+            secret_key: "sk-Iz3GoLjIIXLeCqiGbWf1WshXAYd2pWXNhxQJSYwBnMePqtsw",
+            bot_id:"nuwsqmzp",
+            target_div_id: "gooey-embed", // pass the id of the div where you want to mount the widget
+            bot_profile : {
+              title: 'Farmer.CHAT',
+              description: "An AI Assistant designed to help farmer extension agents in India.",
+              created_by: "Digital Green",
+              display_picture: "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
+            }
+          }
+          GooeyEmbed.mount(config);
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+@import "src/css/colors.module.scss";
+
+.gooeyChat-chat-input {
+  width: 100%;
+  bottom: 0px;
+  background: transparent;
+}
+
+.gooeyChat-chat-input textarea {
+  outline: none;
+  width: 100%;
+  border: none;
+  height: 44px;
+  max-height: 200px;
+  transition: margin 0.2s ;
+  resize: none;
+  white-space: nowrap;
+  position: relative;
+}
+
+.gooeyChat-chat-input-focused {
+  outline: 2px solid $dark-grey;
+}
+
+.gooeyChat-chat-input textarea::placeholder {
+  word-wrap: nowrap;
+}
