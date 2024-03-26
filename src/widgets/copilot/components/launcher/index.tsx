@@ -1,9 +1,9 @@
-import brandLogo from "src/assets/brand-logo.svg";
+
 import "./launcher.scss";
 import { useSystemContext } from "src/contexts/hooks";
 
 const Launcher = () => {
-  const { toggleWidget }: any = useSystemContext();
+  const { toggleWidget, botProfile }: any = useSystemContext();
   return (
     <div
       style={{
@@ -14,10 +14,10 @@ const Launcher = () => {
     >
       <button
         onClick={toggleWidget}
-        className="gooeyChat-launchButton hover-grow cr-pointer br-large bx-shadowA bg-darkGrey button-hover"
-        style={{ height: "56px", width: "56px" }}
+        className="gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover"
+        style={{ height: "56px", width: "56px", borderRadius: "50%"}}
       >
-        <img src={brandLogo} className="logo react" alt="React logo" />
+        <img src={botProfile?.display_picture} className="logo react" alt="React logo" style={{ objectFit: 'contain', width : '100%'}}/>
       </button>
     </div>
   );

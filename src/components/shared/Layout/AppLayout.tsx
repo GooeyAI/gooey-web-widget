@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 import "./appLayout.css";
-import HomeIcon from "src/assets/SvgIcons/HomeIcon";
-import MessageIcon from "src/assets/SvgIcons/MessageIcon";
+import HomeIcon from "src/assets/svgIcons/HomeIcon";
+import MessageIcon from "src/assets/svgIcons/MessageIcon";
 
 type Props = {
-  children: string | JSX.Element | JSX.Element[] | (() => JSX.Element);
+  children: JSX.Element | JSX.Element[] | (() => JSX.Element);
   view?: string;
   onViewChange?: (val: string) => void;
 };

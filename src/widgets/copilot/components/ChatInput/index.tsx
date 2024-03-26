@@ -6,7 +6,7 @@ import AttachFilesButton from "./AttachFilesButton";
 import clsx from "clsx";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 
-const CHAT_INPUT_ID = "gooeyChat-input";
+export const CHAT_INPUT_ID = "gooeyChat-input";
 
 const ChatInput = () => {
   const { botProfile }: any = useSystemContext();
@@ -115,11 +115,11 @@ const ChatInput = () => {
       >
         Powered by {" "}
         <a
-          href="https://gooey.ai"
+          href="https://gooey.ai/copilot/"
           target="_ablank"
           className="text-darkGrey text-underline"
         >
-          Gooey.ai
+          Gooey.AI
         </a>
       </p>
     </div>

@@ -108,7 +108,7 @@ const MessagesContextProvider = (props: any) => {
         // setTimeout(() => {
         //   addResponse(newResponse);
         //   setIsSendingMessage(false);
-        // }, 4000);
+        // }, 2000);
       }
     } catch (err) {
       console.log("Api Failed!", err);

@@ -1,10 +1,9 @@
 .gooey-incomingMsg {
-  max-width: 100%;
+  width: 100%;
   height: auto;
   word-wrap: normal;
-  border-bottom: 1px solid #eee;
-  overflow: auto;
-  overflow-wrap: break-word;
+  // border-bottom: 1px solid #eee;
+  overflow: hidden;
   animation: fade-in-A 0.4s;
   border-top: 1px solid #eee;
 }

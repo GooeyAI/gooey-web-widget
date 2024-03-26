@@ -12,7 +12,7 @@ const ResponseLoader = (props: any) => {
   }, [props.show]);
   if (!props.show) return null;
   return (
-    <div ref={LoaderRef} className="p-16 b-1 br-large anim-typing">
+    <div ref={LoaderRef} className="p-8 pl-16 b-1 br-large anim-typing">
       <p>Loading response... </p>
     </div>
   );

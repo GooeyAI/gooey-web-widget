@@ -55,13 +55,13 @@ const Messages = () => {
   return (
     <div
       className={clsx(
-        "flex-1 bg-white overflow-scroll p-16 br-large-right d-flex flex-col",
+        "flex-1 bg-white overflow-scroll p-16 br-large-right d-flex flex-col overflow-x-hidden",
         isEmpty ? "justify-end" : "justify-start"
       )}
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <Responses queue={Array.from(messages.keys())} data={messages} />
-      {!!messages?.size && !isSending && <Suggestions />}
+      {/* {!!messages?.size && !isSending && <Suggestions />} */}
       <ResponseLoader show={isSending} />
     </div>
   );

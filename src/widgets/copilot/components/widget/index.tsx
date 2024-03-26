@@ -3,33 +3,32 @@ import "./widget.scss";
 import { useState } from "react";
 import Header from "../Header";
 import Messages from "../Messages";
-import ChatInput from "../ChatInput";
+import ChatInput, { CHAT_INPUT_ID } from "../ChatInput";
 import Home from "../Home";
+import { useMessagesContext } from "src/contexts/hooks";
 
 const Widget = () => {
-  const [view, setView] = useState("messages");
-  const handleChangeView = (val: string) => {
-    setView(val);
+  const { flushData }: any = useMessagesContext();
+  // const [view, setView] = useState("messages");
+  const handleChangeView = () => {
+    flushData();
+    let ele = document.getElementById(CHAT_INPUT_ID);
+    ele?.focus();
   };
   return (
     <main
       id="gooeyChat-widget-container"
       className="bg-white flex-1 d-flex flex-col justify-start overflow-hidden"
     >
-      <AppLayout onViewChange={handleChangeView} view={view}>
-        <>
-          {view === "messages" ? (
-            <div
-              className="pos-relative d-flex flex-col flex-1"
-              style={{ maxHeight: "100%" }}
-            >
-              <Header onViewChange={handleChangeView} />
-              <Messages />
-              <ChatInput />
-            </div>
-          ) : null}
-          <div>{view === "home" && <Home />}</div>
-        </>
+      <AppLayout>
+        <div
+          className="pos-relative d-flex flex-col flex-1"
+          style={{ maxHeight: "100%" }}
+        >
+          <Header onViewChange={handleChangeView} />
+          <Messages />
+          <ChatInput />
+        </div>
       </AppLayout>
     </main>
   );
