@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { BotMessageLayout } from "../Messages/IncomingMsg";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 
 const ResponseLoader = (props: any) => {
   const LoaderRef = useRef(null);
@@ -12,8 +14,9 @@ const ResponseLoader = (props: any) => {
   }, [props.show]);
   if (!props.show) return null;
   return (
-    <div ref={LoaderRef} className="p-8 pl-16 b-1 br-large anim-typing">
-      <p>Loading response... </p>
+    <div ref={LoaderRef}>
+      <BotMessageLayout />
+      <CircleBeat className="anim-blink ml-36 mt-4" size={16} />
     </div>
   );
 };

@@ -2,33 +2,8 @@ import clsx from "clsx";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
-import PlaceholderMessage, { DEMO_QUERIES } from "./PlaceholderMessage";
-
-import Button from "src/components/shared/Buttons/Button";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-
-const Suggestions = () => {
-  const { initializeQuery }: any = useMessagesContext();
-  return (
-    <div className="pb-16">
-      <p className="font_12_500 mb-12">You can also ask about</p>
-      <Button
-        className="mb-8"
-        variant="filled"
-        onClick={() => initializeQuery(DEMO_QUERIES.c)}
-      >
-        {DEMO_QUERIES.a}
-      </Button>
-      <Button
-        className="mt-8 mb-8"
-        variant="filled"
-        onClick={() => initializeQuery(DEMO_QUERIES.d)}
-      >
-        {DEMO_QUERIES.b}
-      </Button>
-    </div>
-  );
-};
+import PlaceholderMessage from "./PlaceholderMessage";
+import { useMessagesContext } from "src/contexts/hooks";
 
 const Responses = (props: any) => {
   const que = props.queue;

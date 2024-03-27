@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { messageApiSource, sendMessageApi } from "../api/message";
+import { useSystemContext } from "./hooks";
 
 interface IncomingMsg {
   input_prompt: string;
@@ -70,7 +71,8 @@ const createNewQuery = (query: string) => {
 export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
-  const { botId, secretKey } = props;
+  const { config } = useSystemContext();
+  const { bot_id: botId, secret_key: secretKey } = config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
 

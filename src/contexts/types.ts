@@ -1,4 +1,4 @@
-export type CopilotConfigType =  null | {
+export interface CopilotConfigType {
   secret_key: string;
   bot_id: string;
   bot_profile: {
@@ -9,4 +9,4 @@ export type CopilotConfigType =  null | {
   };
   link_color: string;
   icon_text: string;
-}
+};
