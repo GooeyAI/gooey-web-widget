@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { sendMessageApi } from "../api/message";
+import { messageApiSource, sendMessageApi } from "../api/message";
 
 interface IncomingMsg {
   input_prompt: string;
@@ -128,6 +128,20 @@ const MessagesContextProvider = (props: any) => {
   const flushData = () => {
     setMessages(new Map());
   };
+
+  const cancelApiCall = () => {
+    messageApiSource.cancel("Operation canceled by the user.");
+    // check if state has more than 2 message then remove the last one
+    if (messages.size > 2) {
+      const newMessages = new Map(messages);
+      newMessages.delete(Array.from(messages.keys()).pop());
+      setMessages(newMessages);
+    } else {
+      flushData()
+    }
+    setIsSendingMessage(false);
+  };
+
   const valueMessages = {
     sendPrompt,
     messages,
@@ -135,6 +149,7 @@ const MessagesContextProvider = (props: any) => {
     initializeQuery,
     preLoadData,
     flushData,
+    cancelApiCall,
   };
 
   return (

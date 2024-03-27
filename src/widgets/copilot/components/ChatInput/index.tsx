@@ -2,29 +2,22 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import "./chatInput.scss";
 import { useEffect, useRef, useState } from "react";
 
-import AttachFilesButton from "./AttachFilesButton";
 import clsx from "clsx";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import CircleUP from "src/assets/SvgIcons/CircleUP";
+import CircleStop from "src/assets/SvgIcons/CircleStop";
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
 
 const ChatInput = () => {
   const { botProfile }: any = useSystemContext();
-  const { initializeQuery }: any = useMessagesContext();
+  const { initializeQuery, isSending, cancelApiCall }: any = useMessagesContext();
   const [value, setValue] = useState("");
-  // const [file, setFile] = useState("");
-
-  const [isExpanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
 
   const handleInputChange = (e: any) => {
-    if (isExpanded) setExpanded(false);
     const { value } = e.target;
     setValue(value);
-  };
-
-  const handleFocus = () => {
-    setExpanded(false);
   };
 
   const handlePressEnter = (e: any) => {
@@ -50,34 +43,26 @@ const ChatInput = () => {
     ele!.style!.height = "44px";
   };
 
-  const handleAttachClick = () => {
-    const ele: HTMLElement | null = inputRef.current;
-    setExpanded((prev) => {
-      ele!.style.marginLeft = prev ? "0" : "6px";
-      return !prev;
-    });
-    return null;
+  const handleCancelSend = () => {
+    cancelApiCall();
   };
 
-  const showSend = !!value.length;
+  const showSend = !!value.length || isSending;
   useEffect(() => {
     const ele: HTMLElement | null = inputRef.current;
-    if (!isExpanded) ele!.style.marginLeft = "0";
     if (showSend) ele!.style.marginRight = "0";
     else ele!.style.marginRight = "0";
-  }, [showSend, isExpanded]);
+  }, [showSend]);
 
   return (
     <div className="gooeyChat-chat-input pr-8 pl-8">
       {/* Typing area */}
-      <div className="br-large text-left d-flex flex-col justify-start b-1" id='gooeyChat-input-container'>
+      <div
+        className="br-large text-left d-flex flex-col justify-start b-1"
+        id="gooeyChat-input-container"
+      >
         {/* In line input */}
-        <div className="d-flex align-center justify-between pr-8 pl-8 flex-1">
-          <AttachFilesButton
-            open={isExpanded}
-            onAttachClick={handleAttachClick}
-          />
-
+        <div className="d-flex align-center pr-8 pl-8 flex-1">
           {/* Typing area */}
           {
             <textarea
@@ -87,9 +72,8 @@ const ChatInput = () => {
               onInput={handleChangeLine}
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
-              onFocus={handleFocus}
               className={clsx(
-                "br-large font_16_500 bg-white p-12",
+                "br-large font_16_500 bg-white p-12 flex-1",
                 showSend ? "w-80" : "w-100"
               )}
               placeholder={`Message ${botProfile.title}`}
@@ -98,12 +82,8 @@ const ChatInput = () => {
 
           {/* Send Actions */}
           {showSend && (
-            <IconButton
-              data-tooltip={"Send"}
-              onClick={handleSendMessage}
-              className="hover-grow br-large pl-16 pr-16"
-            >
-              {"⬆"}
+            <IconButton onClick={isSending ? handleCancelSend : handleSendMessage}>
+              {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
             </IconButton>
           )}
         </div>
@@ -113,7 +93,7 @@ const ChatInput = () => {
         className="font_10_500 pt-4 pb-4 mr-12 text-darkGrey pr-12 text-center"
         style={{ fontSize: "8px" }}
       >
-        Powered by {" "}
+        Powered by{" "}
         <a
           href="https://gooey.ai/copilot/"
           target="_ablank"
