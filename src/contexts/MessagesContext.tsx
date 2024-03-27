@@ -5,6 +5,7 @@ import { messageApiSource, sendMessageApi } from "../api/message";
 interface IncomingMsg {
   input_prompt: string;
   messages: [];
+  citation_style: "symbol" | "number";
 }
 
 // const DummyData: any = {
@@ -88,6 +89,7 @@ const MessagesContextProvider = (props: any) => {
     sendPrompt({
       input_prompt: query,
       messages: _messages,
+      citation_style: "symbol",
     });
     addResponse(newQuery);
   };
