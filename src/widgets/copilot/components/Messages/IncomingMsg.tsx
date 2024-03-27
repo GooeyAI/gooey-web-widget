@@ -3,7 +3,7 @@ import "./incoming.scss";
 
 export const BotMessageLayout = () => {
   const { config } = useSystemContext()
-  const { display_picture, title } = config?.bot_profile;
+  const { display_picture, title }: any = config?.bot_profile;
   return (
     <div className="d-flex align-center">
       <div

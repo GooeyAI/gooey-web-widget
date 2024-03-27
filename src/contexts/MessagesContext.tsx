@@ -72,7 +72,7 @@ export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
   const { config } = useSystemContext();
-  const { bot_id: botId, secret_key: secretKey } = config;
+  const { bot_id: botId, secret_key: secretKey }: any = config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
 

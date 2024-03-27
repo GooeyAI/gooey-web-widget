@@ -1,10 +1,8 @@
 import AppLayout from "src/components/shared/Layout/AppLayout";
 import "./widget.scss";
-import { useState } from "react";
 import Header from "../Header";
 import Messages from "../Messages";
 import ChatInput, { CHAT_INPUT_ID } from "../ChatInput";
-import Home from "../Home";
 import { useMessagesContext } from "src/contexts/hooks";
 
 const Widget = () => {

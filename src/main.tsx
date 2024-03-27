@@ -7,8 +7,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <CopilotChatWidget
       config={{
-        secret_key: process.env.GOOEY_API_KEY || '',
-        bot_id: process.env.REACT_APP_BOT_ID || '',
+        secret_key: process.env.GOOEY_API_KEY || "",
+        bot_id: process.env.REACT_APP_BOT_ID || "",
         bot_profile: {
           title: "Farmer.CHAT",
           description:
@@ -19,6 +19,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         },
         link_color: "#FFD700",
         icon_text: "Chat with us",
+        questions: [
+          "When should I plant chili?",
+          "How can I get rid of black ants on my coffee?",
+        ],
+        show_gooey_branding: true,
+        show_sources: false,
+        bot_name: "Farmer.CHAT",
       }}
     />
   </React.StrictMode>

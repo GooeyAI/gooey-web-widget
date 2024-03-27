@@ -1,8 +1,7 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 import "./appLayout.css";
-import HomeIcon from "src/assets/svgIcons/HomeIcon";
-import MessageIcon from "src/assets/svgIcons/MessageIcon";
+import HomeIcon from "src/assets/SvgIcons/HomeIcon";
 
 type Props = {
   children: JSX.Element | JSX.Element[] | (() => JSX.Element);
@@ -57,7 +56,6 @@ const AppLayout = ({
               onClick={() => onViewChange("messages")}
               className="d-flex flex-col align-center pt-12 pb-12 hover-bg-primary flex-1 cr-pointer"
             >
-              <MessageIcon style={{ width: "24px" }} />
               <p className="mt-6">Chat</p>
             </div>
           </div>

@@ -5,7 +5,7 @@ export type SystemContextType = {
   open: boolean;
   mode: string;
   toggleWidget: () => void;
-  config: CopilotConfigType;
+  config: null | CopilotConfigType;
 };
 
 export const SystemContext = createContext<SystemContextType>({

@@ -1,4 +1,3 @@
-import React from "react";
 import SvgIcon from "src/components/shared/SvgIcon";
 
 const CircleBeat = (props: any) => {
