@@ -10,11 +10,10 @@ const getHeaders = (secretKey: string) => {
   };
 };
 
-export const messageApiSource = axios.CancelToken.source();
-export const sendMessageApi = (body: any, botId: string, secretKey: string) => {
+export const sendMessageApi = (body: any, botId: string, secretKey: string, cancelToken: any) => {
   const headers = getHeaders(secretKey);
   return axios.post(`${BASE_URL_VIDEO_BOTS}/?example_id=${botId}`, body, {
     headers,
-    cancelToken: messageApiSource.token,
+    cancelToken: cancelToken.token,
   });
 };

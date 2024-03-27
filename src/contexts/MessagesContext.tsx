@@ -1,7 +1,8 @@
-import { createContext, useState } from "react";
+import { createContext, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { messageApiSource, sendMessageApi } from "../api/message";
+import { sendMessageApi } from "../api/message";
 import { useSystemContext } from "./hooks";
+import axios from "axios";
 
 interface IncomingMsg {
   input_prompt: string;
@@ -75,6 +76,7 @@ const MessagesContextProvider = (props: any) => {
   const { bot_id: botId, secret_key: secretKey }: any = config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
+  const apiSource = useRef(axios.CancelToken.source());
 
   const initializeQuery = (query: string) => {
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
@@ -104,7 +106,7 @@ const MessagesContextProvider = (props: any) => {
 
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
-      const res = await sendMessageApi(payload, botId, secretKey);
+      const res = await sendMessageApi(payload, botId, secretKey, apiSource.current);
       if (res.status === 200) {
         const newResponse = createNewResponse(res.data, payload);
         // const newResponse = createNewResponse(DummyData, payload);
@@ -115,7 +117,7 @@ const MessagesContextProvider = (props: any) => {
         // }, 2000);
       }
     } catch (err) {
-      console.log("Api Failed!", err);
+      console.error("Api Failed!", err);
     } finally {
       setIsSendingMessage(false);
     }
@@ -134,15 +136,14 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const cancelApiCall = () => {
-    messageApiSource.cancel("Operation canceled by the user.");
+    apiSource?.current.cancel("Operation canceled by the user.");
     // check if state has more than 2 message then remove the last one
     if (messages.size > 2) {
       const newMessages = new Map(messages);
       newMessages.delete(Array.from(messages.keys()).pop());
       setMessages(newMessages);
-    } else {
-      flushData()
-    }
+    } else flushData();
+    apiSource.current = axios.CancelToken.source();
     setIsSendingMessage(false);
   };
 

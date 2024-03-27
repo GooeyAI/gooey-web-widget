@@ -23,6 +23,7 @@ const ChatInput = () => {
 
   const handlePressEnter = (e: any) => {
     if (e.keyCode === 13 && !e.shiftKey) {
+      if(isSending) return;
       e.preventDefault();
       handleSendMessage();
     }
