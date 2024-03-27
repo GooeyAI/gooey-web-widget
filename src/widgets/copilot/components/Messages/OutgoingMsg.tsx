@@ -10,11 +10,6 @@ const OutgoingMsg = (props: any) => {
           className="bot-avatar bg-primary mr-12"
           style={{ width: "24px", height: "24px", borderRadius: "100%" }}
         >
-          {/* <img
-            src={botProfile?.display_picture}
-            alt="bot-avatar"
-            style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-          /> */}
         </div>
         <p className="font_16_600">You</p>
       </div>

@@ -10,8 +10,8 @@ export const DEMO_QUERIES = {
 };
 
 const BotProfile = () => {
-  const { botProfile }: any = useSystemContext();
-  const { title, description, display_picture, created_by } = botProfile;
+  const { config }: any = useSystemContext();
+  const { title, description, display_picture, created_by } = config?.bot_profile;
   return (
     <div className="d-flex flex-col justify-center align-center text-center">
       <div

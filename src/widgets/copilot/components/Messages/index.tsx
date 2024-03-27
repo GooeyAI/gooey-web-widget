@@ -5,7 +5,7 @@ import OutgoingMsg from "./OutgoingMsg";
 import PlaceholderMessage, { DEMO_QUERIES } from "./PlaceholderMessage";
 
 import Button from "src/components/shared/Buttons/Button";
-import { useMessagesContext } from "src/contexts/hooks";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 
 const Suggestions = () => {
   const { initializeQuery }: any = useMessagesContext();
@@ -41,8 +41,14 @@ const Responses = (props: any) => {
         const responseData = msgs.get(id);
         const role = responseData.role;
 
-        if(role === "user") return <OutgoingMsg data={responseData} key={id} />;
-        return <IncomingMsg data={responseData} key={id} /> 
+        if (role === "user")
+          return (
+            <OutgoingMsg
+              data={responseData}
+              key={id}
+            />
+          );
+        return <IncomingMsg data={responseData} key={id} />;
       })}
     </>
   );

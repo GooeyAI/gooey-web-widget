@@ -6,14 +6,9 @@ export default class GooeyEmbed {
   static el = null;
 
   static mount(initialConfig) {
-    const { secret_key, bot_id, type, target_div_id, bot_profile } = initialConfig;
-    const component = (
-      <CopilotChatWidget
-        secret_key={secret_key}
-        bot_id={bot_id}
-        bot_profile={bot_profile}
-      />
-    );
+    const { secret_key, bot_id, type, target_div_id, bot_profile } =
+      initialConfig;
+    const component = <CopilotChatWidget config={initialConfig} />;
 
     function doRender() {
       if (GooeyEmbed.el) {

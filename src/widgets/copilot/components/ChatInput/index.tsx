@@ -10,7 +10,7 @@ import CircleStop from "src/assets/SvgIcons/CircleStop";
 export const CHAT_INPUT_ID = "gooeyChat-input";
 
 const ChatInput = () => {
-  const { botProfile }: any = useSystemContext();
+  const { config }: any = useSystemContext();
   const { initializeQuery, isSending, cancelApiCall }: any = useMessagesContext();
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
@@ -54,6 +54,7 @@ const ChatInput = () => {
     else ele!.style.marginRight = "0";
   }, [showSend]);
 
+  const  { bot_profile } = config
   return (
     <div className="gooeyChat-chat-input pr-8 pl-8">
       {/* Typing area */}
@@ -76,7 +77,7 @@ const ChatInput = () => {
                 "br-large font_16_500 bg-white p-12 flex-1",
                 showSend ? "w-80" : "w-100"
               )}
-              placeholder={`Message ${botProfile.title}`}
+              placeholder={`Message ${bot_profile.title}`}
             />
           }
 

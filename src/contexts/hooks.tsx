@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { MessagesContext } from "./MessagesContext";
-import { SystemContext } from "./SystemContext";
+import { SystemContext, SystemContextType } from "./SystemContext";
 
 export const useMessagesContext = () => useContext(MessagesContext);
-export const useSystemContext = () => useContext(SystemContext);
+export const useSystemContext = (): SystemContextType => useContext(SystemContext);

@@ -1,9 +1,9 @@
-
 import "./launcher.scss";
 import { useSystemContext } from "src/contexts/hooks";
 
 const Launcher = () => {
-  const { toggleWidget, botProfile }: any = useSystemContext();
+  const { toggleWidget, config }: any = useSystemContext();
+  const { bot_profile, icon_text } = config;
   return (
     <div
       style={{
@@ -15,9 +15,19 @@ const Launcher = () => {
       <button
         onClick={toggleWidget}
         className="gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover"
-        style={{ height: "56px", width: "56px", borderRadius: "50%"}}
+        style={{ borderRadius: "30px", padding: 0 }}
       >
-        <img src={botProfile?.display_picture} className="logo react" alt="React logo" style={{ objectFit: 'contain', width : '100%'}}/>
+        {!!icon_text && <p className="font_16_600 p-12">{icon_text}</p>}
+        <img
+          src={bot_profile?.display_picture}
+          alt="Copilot logo"
+          style={{
+            objectFit: "contain",
+            borderRadius: "50%",
+            width: "56px",
+            height: "56px",
+          }}
+        />
       </button>
     </div>
   );
