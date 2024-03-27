@@ -11,7 +11,8 @@ export const CHAT_INPUT_ID = "gooeyChat-input";
 
 const ChatInput = () => {
   const { config }: any = useSystemContext();
-  const { initializeQuery, isSending, cancelApiCall }: any = useMessagesContext();
+  const { initializeQuery, isSending, cancelApiCall }: any =
+    useMessagesContext();
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
 
@@ -54,9 +55,9 @@ const ChatInput = () => {
     else ele!.style.marginRight = "0";
   }, [showSend]);
 
-  const  { bot_profile } = config
+  const { bot_profile, show_gooey_branding } = config;
   return (
-    <div className="gooeyChat-chat-input pr-8 pl-8">
+    <div className={clsx("gooeyChat-chat-input pr-8 pl-8", !show_gooey_branding && 'pb-8')}>
       {/* Typing area */}
       <div
         className="br-large text-left d-flex flex-col justify-start b-1"
@@ -83,26 +84,30 @@ const ChatInput = () => {
 
           {/* Send Actions */}
           {showSend && (
-            <IconButton onClick={isSending ? handleCancelSend : handleSendMessage}>
+            <IconButton
+              onClick={isSending ? handleCancelSend : handleSendMessage}
+            >
               {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
             </IconButton>
           )}
         </div>
       </div>
       {/* Blur Background - Mast head */}
-      <p
-        className="font_10_500 pt-4 pb-4 mr-12 text-darkGrey pr-12 text-center"
-        style={{ fontSize: "8px" }}
-      >
-        Powered by{" "}
-        <a
-          href="https://gooey.ai/copilot/"
-          target="_ablank"
-          className="text-darkGrey text-underline"
+      {!!show_gooey_branding && (
+        <p
+          className="font_10_500 pt-4 pb-4 mr-12 text-darkGrey pr-12 text-center"
+          style={{ fontSize: "8px" }}
         >
-          Gooey.AI
-        </a>
-      </p>
+          Powered by{" "}
+          <a
+            href="https://gooey.ai/copilot/"
+            target="_ablank"
+            className="text-darkGrey text-underline"
+          >
+            Gooey.AI
+          </a>
+        </p>
+      )}
     </div>
   );
 };
