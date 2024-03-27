@@ -16,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           created_by: "Digital Green",
           display_picture:
             "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
+          creator_link: "https://digitalgreen.org/",
         },
         link_color: "#FFD700",
         icon_text: "Chat with us",
