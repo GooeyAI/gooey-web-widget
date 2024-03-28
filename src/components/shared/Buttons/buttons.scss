@@ -32,8 +32,11 @@ button {
 
 // Variant - TEXT
 .button-text:disabled {
-  color: $muted;
+  color: $muted !important;
   fill: $light;
+}
+.button-text:disabled:hover {
+  border: 1px solid transparent;
 }
 .button-text:hover {
   border: 1px solid #eee;
@@ -41,3 +44,6 @@ button {
 .button-text:active {
   background-color: #eee;
 }
+.button-text:active:disabled {
+  background-color: unset;
+};

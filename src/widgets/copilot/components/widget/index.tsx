@@ -23,7 +23,7 @@ const Widget = () => {
           className="pos-relative d-flex flex-col flex-1"
           style={{ maxHeight: "100%" }}
         >
-          <Header onViewChange={handleChangeView} />
+          <Header onEditClick={handleChangeView} />
           <Messages />
           <ChatInput />
         </div>

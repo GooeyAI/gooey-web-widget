@@ -143,7 +143,7 @@ const MessagesContextProvider = (props: any) => {
       newMessages.delete(Array.from(messages.keys()).pop());
       setMessages(newMessages);
     } else flushData();
-    apiSource.current = axios.CancelToken.source();
+    apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsSendingMessage(false);
   };
 

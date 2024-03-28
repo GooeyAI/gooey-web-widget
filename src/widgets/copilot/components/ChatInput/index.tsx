@@ -1,6 +1,6 @@
 import IconButton from "src/components/shared/Buttons/IconButton";
 import "./chatInput.scss";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import clsx from "clsx";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
@@ -90,7 +90,7 @@ const ChatInput = () => {
 
           {/* Send Actions */}
           <IconButton
-            disabled={value.trim().length === 0}
+            disabled={!isSending && value.trim().length === 0}
             onClick={isSending ? handleCancelSend : handleSendMessage}
           >
             {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
