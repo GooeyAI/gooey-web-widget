@@ -8,7 +8,7 @@ $white: #FFF;
 $grey: #f7f3f3;
 $light: #f0f0f0;
 $border-color: #eee;
-
+$muted:#6c757d;
 $colors: (
     "primary": $primary,
     "secondary": $secondary,
@@ -16,6 +16,7 @@ $colors: (
     "white": $white,
     "grey": $grey,
     "light": $light,
+    "muted": $muted
 );
 
 :export {

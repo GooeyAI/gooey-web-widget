@@ -19,10 +19,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           creator_link: "https://digitalgreen.org/",
         },
         link_color: "#FFD700",
-        icon_text: "Chat with us",
+        icon_text: "Help",
         questions: [
           "When should I plant chili?",
           "How can I get rid of black ants on my coffee?",
+          "What is the best time to grow pepper in India?",
         ],
         show_gooey_branding: true,
         show_sources: false,

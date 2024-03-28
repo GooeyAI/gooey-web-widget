@@ -18,6 +18,13 @@ button {
     background-color: #eee;
 }
 
+.button-outlined {
+    border: 1px solid #eee;
+}
+.button-outlined:hover {
+    background-color: #f9f9f9;
+}
+
 .button-filled:hover {
     border: 1px solid #0d0d0d;
 }

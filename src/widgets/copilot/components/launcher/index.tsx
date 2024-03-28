@@ -14,20 +14,20 @@ const Launcher = () => {
     >
       <button
         onClick={toggleWidget}
-        className="gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover"
+        className="gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover pl-6 pt-6 pb-6 bg-white"
         style={{ borderRadius: "30px", padding: 0 }}
       >
-        {!!icon_text && <p className="font_16_600 p-12">{icon_text}</p>}
         <img
           src={bot_profile?.display_picture}
           alt="Copilot logo"
           style={{
             objectFit: "contain",
             borderRadius: "50%",
-            width: "56px",
-            height: "56px",
+            width: "36px",
+            height: "36px",
           }}
         />
+        {!!icon_text && <p className="font_16_600 p-8">{icon_text}</p>}
       </button>
     </div>
   );

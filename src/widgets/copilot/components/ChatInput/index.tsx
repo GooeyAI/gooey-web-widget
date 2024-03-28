@@ -65,7 +65,7 @@ const ChatInput = () => {
         id="gooeyChat-input-container"
       >
         {/* In line input */}
-        <div className="d-flex align-center pr-8 pl-8 flex-1">
+        <div className="d-flex align-center pr-8 pl-2 flex-1">
           {/* Typing area */}
           {
             <textarea

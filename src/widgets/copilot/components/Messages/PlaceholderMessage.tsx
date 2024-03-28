@@ -28,9 +28,14 @@ const BotProfile = () => {
       </div>
       <div>
         <p className="font_24_500 mb-16">{title}</p>
-        <p className="font_14_500 mb-12 d-flex align-center justify-center">
+        <p className="font_12_500 text-muted mb-12 d-flex align-center justify-center">
           By {created_by}
-          <a href={creator_link || "/"} target="_ablank" style={{ marginBottom: '-5px', color: "#eee"}} className="ml-6">
+          <a
+            href={creator_link || "/"}
+            target="_ablank"
+            style={{ marginBottom: "-5px", color: "#eee" }}
+            className="ml-6"
+          >
             <IconGlobeNet size={14} />
           </a>
         </p>
@@ -42,26 +47,20 @@ const BotProfile = () => {
 
 const PlaceholderMessage = () => {
   const { initializeQuery }: any = useMessagesContext();
+  const { config } = useSystemContext();
   return (
     <div className="no-scroll-bar w-100">
       <BotProfile />
-      <div className="mb-8 w-100 mt-48">
-        <Button
-          variant="filled"
-          onClick={() => initializeQuery(DEMO_QUERIES.a)}
-          className="w-100 text-left font_14_500"
-        >
-          {DEMO_QUERIES.a}
-        </Button>
-      </div>
-      <div className="mt-16 w-100">
-        <Button
-          variant="filled"
-          onClick={() => initializeQuery(DEMO_QUERIES.b)}
-          className="w-100 text-left font_14_500"
-        >
-          {DEMO_QUERIES.b}
-        </Button>
+      <div className="w-100 mt-48">
+        {config?.questions.map((que) => (
+          <Button
+            variant="outlined"
+            onClick={() => initializeQuery(que)}
+            className="mb-8 w-100 text-left font_12_500"
+          >
+            {que}
+          </Button>
+        ))}
       </div>
     </div>
   );

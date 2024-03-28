@@ -3,6 +3,7 @@ import "./header.scss";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import { useSystemContext } from "src/contexts/hooks";
 import IconClose from "src/assets/SvgIcons/IconClose";
+import clsx from "clsx";
 
 type HeaderProps = {
   onViewChange: (val: string) => void;
@@ -18,16 +19,16 @@ const Header = ({ onViewChange }: HeaderProps) => {
           className="p-4 cr-pointer flex-1"
           onClick={() => toggleWidget()}
         >
-          <IconClose />
+          <IconClose size={20} />
         </IconButton>
       </div>
       <p className="font_16_700">Farmer.CHAT</p>
       <div>
         <IconButton
-          className="p-4 cr-pointer flex-1"
+          className={clsx("p-4 cr-pointer flex-1", )}
           onClick={() => onViewChange("home")}
         >
-          <IconPencilEdit />
+          <IconPencilEdit size={20} />
         </IconButton>
       </div>
     </div>

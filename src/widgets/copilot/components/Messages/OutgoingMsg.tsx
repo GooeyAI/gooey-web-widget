@@ -1,3 +1,4 @@
+import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
 import "./outgoing.scss";
 
 const OutgoingMsg = (props: any) => {
@@ -6,12 +7,8 @@ const OutgoingMsg = (props: any) => {
   return (
     <div className="gooey-outgoingMsg mb-12">
       <div className="d-flex align-center mb-8">
-        <div
-          className="bot-avatar bg-primary mr-12"
-          style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-        >
-        </div>
-        <p className="font_16_600">You</p>
+        <IconUserCircle size={24} />
+        <p className="font_16_600 ml-12">You</p>
       </div>
       <p className="font_20_400 anim-typing"> {input_text || input_prompt}</p>
     </div>
