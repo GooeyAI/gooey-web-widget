@@ -2,6 +2,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import "./incoming.scss";
 import Button from "src/components/shared/Buttons/Button";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
+import clsx from "clsx";
 
 export const DEMO_QUERIES = {
   a: "When should I plant chili?",
@@ -52,11 +53,15 @@ const PlaceholderMessage = () => {
     <div className="no-scroll-bar w-100">
       <BotProfile />
       <div className="w-100 mt-48">
-        {config?.questions.map((que) => (
+        {config?.questions.map((que, idx) => (
           <Button
+            key={que}
             variant="outlined"
             onClick={() => initializeQuery(que)}
-            className="mb-8 w-100 text-left font_12_500"
+            className={clsx(
+              "w-100 text-left font_12_500",
+              idx !== config?.questions.length - 1 && "mb-8"
+            )}
           >
             {que}
           </Button>
