@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           creator_link: "https://digitalgreen.org/",
         },
         link_color: "#FFD700",
-        icon_text: "Help",
+        widget_text: "Help",
         questions: [
           "When should I plant chili?",
           "How can I get rid of black ants on my coffee?",

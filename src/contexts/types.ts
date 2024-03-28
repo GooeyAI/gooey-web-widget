@@ -10,7 +10,7 @@ export interface CopilotConfigType {
     creator_link?: string;
   };
   link_color: string;
-  icon_text: string;
+  widget_text: string;
   show_gooey_branding: boolean;
   questions: string[];
   show_sources: boolean;

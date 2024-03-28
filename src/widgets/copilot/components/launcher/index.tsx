@@ -1,9 +1,11 @@
+import clsx from "clsx";
 import "./launcher.scss";
 import { useSystemContext } from "src/contexts/hooks";
 
 const Launcher = () => {
   const { toggleWidget, config }: any = useSystemContext();
-  const { bot_profile, icon_text } = config;
+  const { bot_profile, widget_text } = config;
+  const iconSize = widget_text ? 36 : 56;
   return (
     <div
       style={{
@@ -14,7 +16,10 @@ const Launcher = () => {
     >
       <button
         onClick={toggleWidget}
-        className="gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover pl-6 pt-6 pb-6 bg-white"
+        className={clsx(
+          "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
+          widget_text && "pl-6 pt-6 pb-6 "
+        )}
         style={{ borderRadius: "30px", padding: 0 }}
       >
         <img
@@ -23,11 +28,11 @@ const Launcher = () => {
           style={{
             objectFit: "contain",
             borderRadius: "50%",
-            width: "36px",
-            height: "36px",
+            width: iconSize + "px",
+            height: iconSize + "px",
           }}
         />
-        {!!icon_text && <p className="font_16_600 p-8">{icon_text}</p>}
+        {!!widget_text && <p className="font_16_600 p-8">{widget_text}</p>}
       </button>
     </div>
   );
