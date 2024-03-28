@@ -1,12 +1,13 @@
 import SvgIcon from "src/components/shared/SvgIcon";
 
-const IconClose = () => {
+const IconClose = (props: any) => {
+  const size = props.size || 16;
   return (
     <SvgIcon>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
+        width={size}
+        height={size}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
