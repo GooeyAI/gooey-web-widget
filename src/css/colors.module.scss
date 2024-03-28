@@ -1,22 +1,24 @@
-@import './_breakpoints.scss';
-@import './_mixins.scss';
+@import "./_breakpoints.scss";
+@import "./_mixins.scss";
 
 $primary: hsl(169, 55%, 82%);
 $secondary: hsl(12, 100%, 97%);
 $dark-grey: #282626;
-$white: #FFF;
+$white: #fff;
 $grey: #f7f3f3;
 $light: #f0f0f0;
 $border-color: #eee;
-$muted:#6c757d;
+$muted: #6c757d;
+$almost-black: #090909;
 $colors: (
-    "primary": $primary,
-    "secondary": $secondary,
-    "darkGrey": $dark-grey,
-    "white": $white,
-    "grey": $grey,
-    "light": $light,
-    "muted": $muted
+  "primary": $primary,
+  "secondary": $secondary,
+  "darkGrey": $dark-grey,
+  "white": $white,
+  "grey": $grey,
+  "light": $light,
+  "muted": $muted,
+  "almostBlack": $almost-black,
 );
 
 :export {
