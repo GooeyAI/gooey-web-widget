@@ -1,0 +1,32 @@
+
+button {
+    background: none transparent;
+    display: block;
+    padding-inline: 0px;
+    margin: 0px;
+    padding-block: 0px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+
+.button-filled {
+    background-color: #eee;
+}
+
+.button-filled:hover {
+    border: 1px solid #0d0d0d;
+}
+
+
+.button-text:hover {
+    border: 1px solid #eee;
+}
+
+.button-text:active {
+    background-color: #eee;
+}
