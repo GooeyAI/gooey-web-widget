@@ -8,7 +8,7 @@ import CircleUP from "src/assets/SvgIcons/CircleUP";
 import CircleStop from "src/assets/SvgIcons/CircleStop";
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
-
+const INPUT_HEIGHT = 34;
 const ChatInput = () => {
   const { config }: any = useSystemContext();
   const { initializeQuery, isSending, cancelApiCall }: any =
@@ -16,24 +16,31 @@ const ChatInput = () => {
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
 
+  const resetHeight = () => {
+    const ele: HTMLElement | null = inputRef.current;
+    ele!.style!.height = INPUT_HEIGHT + "px";
+  };
+
   const handleInputChange = (e: any) => {
     const { value } = e.target;
+    if(!value.trim().length) resetHeight();
     setValue(value);
   };
 
   const handlePressEnter = (e: any) => {
     if (e.keyCode === 13 && !e.shiftKey) {
-      if(isSending) return;
+      if (isSending) return;
       e.preventDefault();
       handleSendMessage();
+    } else if (e.keyCode === 13 && e.shiftKey) {
+      handleChangeLine();
     }
   };
 
-  const handleChangeLine = (e: any) => {
+  const handleChangeLine = () => {
     // increase height by 24px
-    e.preventDefault();
     const ele: HTMLElement | null = inputRef.current;
-    ele!.style.height = "";
+    ele!.style!.height = "";
     ele!.style!.height = ele!.scrollHeight - 2 + "px";
   };
 
@@ -41,8 +48,7 @@ const ChatInput = () => {
     if (!value.trim()) return null;
     initializeQuery(value.trim());
     setValue("");
-    const ele: HTMLElement | null = inputRef.current;
-    ele!.style!.height = "44px";
+    resetHeight();
   };
 
   const handleCancelSend = () => {
@@ -50,53 +56,51 @@ const ChatInput = () => {
   };
 
   const showSend = !!value.length || isSending;
-  useEffect(() => {
-    const ele: HTMLElement | null = inputRef.current;
-    if (showSend) ele!.style.marginRight = "0";
-    else ele!.style.marginRight = "0";
-  }, [showSend]);
-
   const { bot_profile, show_gooey_branding } = config;
   return (
-    <div className={clsx("gooeyChat-chat-input pr-8 pl-8", !show_gooey_branding && 'pb-8')}>
+    <div
+      className={clsx(
+        "gooeyChat-chat-input pr-8 pl-8",
+        !show_gooey_branding && "pb-8"
+      )}
+    >
       {/* Typing area */}
       <div
         className="br-large text-left d-flex flex-col justify-start b-1"
         id="gooeyChat-input-container"
       >
         {/* In line input */}
-        <div className="d-flex align-center pr-8 pl-2 flex-1">
+        <div className="d-flex align-end pr-4 pl-4 pt-2 pb-4 flex-1">
           {/* Typing area */}
           {
             <textarea
               value={value}
               ref={inputRef}
               id={CHAT_INPUT_ID}
-              onInput={handleChangeLine}
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
               className={clsx(
-                "br-large font_16_500 bg-white p-12 flex-1",
+                "br-large font_16_500 bg-white pt-6 pb-4 pr-12 pl-12 flex-1",
                 showSend ? "w-80" : "w-100"
               )}
+              style={{ height: INPUT_HEIGHT + "px" }}
               placeholder={`Message ${bot_profile.title}`}
             />
           }
 
           {/* Send Actions */}
-          {showSend && (
-            <IconButton
-              onClick={isSending ? handleCancelSend : handleSendMessage}
-            >
-              {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
-            </IconButton>
-          )}
+          <IconButton
+            disabled={value.trim().length === 0}
+            onClick={isSending ? handleCancelSend : handleSendMessage}
+          >
+            {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
+          </IconButton>
         </div>
       </div>
-      {/* Blur Background - Mast head */}
+      {/* Gooey Branding */}
       {!!show_gooey_branding && (
         <p
-          className="font_10_500 pt-4 pb-4 mr-12 text-darkGrey pr-12 text-center"
+          className="font_10_500 pt-4 pb-4 text-darkGrey text-center"
           style={{ fontSize: "8px" }}
         >
           Powered by{" "}
