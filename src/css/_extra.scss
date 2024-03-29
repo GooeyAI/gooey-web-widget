@@ -106,22 +106,19 @@
 }
 
 .b-1 {
-  border: 1px solid #ddd;
+  border: 1px solid $border-color;
 }
 
 .b-btm-1 {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid $border-color;
 }
 
 .b-top-1 {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid $border-color;
 }
 
 .b-none {
   border: none !important;
-}
-.hero-height {
-  min-height: auto;
 }
 
 .overflow-hidden {

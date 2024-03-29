@@ -14,6 +14,10 @@ button {
   padding: 8px;
   color: $almost-black;
 }
+button:disabled {
+  color: $muted !important;
+  fill: $light;
+}
 
 // Variant - FILED
 .button-filled {
@@ -32,10 +36,6 @@ button {
 }
 
 // Variant - TEXT
-.button-text:disabled {
-  color: $muted !important;
-  fill: $light;
-}
 .button-text:disabled:hover {
   border: 1px solid transparent;
 }
@@ -48,3 +48,7 @@ button {
 .button-text:active:disabled {
   background-color: unset;
 };
+
+.button-text-alt:hover {
+  border: 1px solid transparent;
+}

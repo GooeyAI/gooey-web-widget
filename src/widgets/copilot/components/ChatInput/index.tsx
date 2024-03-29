@@ -8,7 +8,7 @@ import CircleUP from "src/assets/SvgIcons/CircleUP";
 import CircleStop from "src/assets/SvgIcons/CircleStop";
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
-const INPUT_HEIGHT = 34;
+const INPUT_HEIGHT = 44;
 const ChatInput = () => {
   const { config }: any = useSystemContext();
   const { initializeQuery, isSending, cancelApiCall }: any =
@@ -23,7 +23,7 @@ const ChatInput = () => {
 
   const handleInputChange = (e: any) => {
     const { value } = e.target;
-    if(!value.trim().length) resetHeight();
+    if (!value.trim().length) resetHeight();
     setValue(value);
   };
 
@@ -55,7 +55,6 @@ const ChatInput = () => {
     cancelApiCall();
   };
 
-  const showSend = !!value.length || isSending;
   const { bot_profile, show_gooey_branding } = config;
   return (
     <div
@@ -64,43 +63,36 @@ const ChatInput = () => {
         !show_gooey_branding && "pb-8"
       )}
     >
-      {/* Typing area */}
-      <div
-        className="br-large text-left d-flex flex-col justify-start b-1"
-        id="gooeyChat-input-container"
-      >
-        {/* In line input */}
-        <div className="d-flex align-end pr-4 pl-4 pt-2 pb-4 flex-1">
-          {/* Typing area */}
-          {
-            <textarea
-              value={value}
-              ref={inputRef}
-              id={CHAT_INPUT_ID}
-              onChange={handleInputChange}
-              onKeyDown={handlePressEnter}
-              className={clsx(
-                "br-large font_16_500 bg-white pt-6 pb-4 pr-12 pl-12 flex-1",
-                showSend ? "w-80" : "w-100"
-              )}
-              style={{ height: INPUT_HEIGHT + "px" }}
-              placeholder={`Message ${bot_profile.title}`}
-            />
-          }
+      <div className="pos-relative">
+        {/* Typing area */}
+        <textarea
+          value={value}
+          ref={inputRef}
+          id={CHAT_INPUT_ID}
+          onChange={handleInputChange}
+          onKeyDown={handlePressEnter}
+          className={clsx(
+            "br-large b-1 font_16_500 bg-white pt-10 pb-10 pr-40 pl-12 flex-1 m-0"
+          )}
+          style={{ height: INPUT_HEIGHT + "px" }}
+          placeholder={`Message ${bot_profile.title}`}
+        ></textarea>
 
-          {/* Send Actions */}
-          <IconButton
-            disabled={!isSending && value.trim().length === 0}
-            onClick={isSending ? handleCancelSend : handleSendMessage}
-          >
-            {isSending ? <CircleStop size={20} /> : <CircleUP size={20} />}
-          </IconButton>
-        </div>
+        {/* Send Actions */}
+        <IconButton
+          style={{ position: "absolute", right: "8px", bottom: "8.75px" }}
+          disabled={!isSending && value.trim().length === 0}
+          variant="text-alt"
+          className="p-4"
+          onClick={isSending ? handleCancelSend : handleSendMessage}
+        >
+          {isSending ? <CircleStop size={24} /> : <CircleUP size={24} />}
+        </IconButton>
       </div>
       {/* Gooey Branding */}
       {!!show_gooey_branding && (
         <p
-          className="font_10_500 pt-4 pb-4 text-darkGrey text-center"
+          className="font_10_500 pt-4 pb-6 text-darkGrey text-center m-0"
           style={{ fontSize: "8px" }}
         >
           Powered by{" "}

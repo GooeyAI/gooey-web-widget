@@ -6,7 +6,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: "medium" | "small" | "large";
   children?: ReactNode;
   className?: string;
-  variant?: "filled" | "contained" | "outlined" | "text";
+  variant?: "filled" | "contained" | "outlined" | "text" | "text-alt";
 }
 
 const Button = ({
