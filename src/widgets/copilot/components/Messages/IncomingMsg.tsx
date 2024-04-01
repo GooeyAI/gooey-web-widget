@@ -25,11 +25,11 @@ export const BotMessageLayout = () => {
 const IncomingMsg = (props: any) => {
   const { output_text = "Placeholder Text ....", references = [] } = props.data;
   return (
-    <div className="gooey-incomingMsg pb-12 pr-8" id={props?.id}>
+    <div className="gooey-incomingMsg pb-12 pr-8" >
       <Sources data={references} />
       <BotMessageLayout />
       <div className="ml-36 mt-4">
-        <p className="font_16_400 anim-typing">{output_text}</p>
+        <p className="font_16_400 anim-typing" id={props?.id}>{output_text}</p>
       </div>
     </div>
   );

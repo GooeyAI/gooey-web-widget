@@ -104,6 +104,14 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
+  const scrollToMessage = (id: string) => {
+    // scroll to the last message
+    setTimeout(() => {
+      const element = document.getElementById(id);
+      if (element) element.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 200)
+    
+  }
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
       const res = await sendMessageApi(payload, botId, secretKey, apiSource.current);
@@ -111,6 +119,7 @@ const MessagesContextProvider = (props: any) => {
         const newResponse = createNewResponse(res.data, payload);
         // const newResponse = createNewResponse(DummyData, payload);
         addResponse(newResponse);
+        scrollToMessage(newResponse.id);
         // setTimeout(() => {
         //   addResponse(newResponse);
         //   setIsSendingMessage(false);
