@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { url } from "inspector";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconListTimeline from "src/assets/SvgIcons/IconListTimeline";
 
