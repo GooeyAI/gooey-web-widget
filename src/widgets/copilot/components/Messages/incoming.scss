@@ -1,4 +1,35 @@
+@import "src/css/colors.module.scss";
+
 .gooey-incomingMsg {
   width: 100%;
   word-wrap: normal;
+}
+
+.sources-listContainer {
+  display: flex;
+  max-width: calc(100% + 16px); // 16px is the padding of the parent container
+  overflow-x: auto;
+}
+
+.sources-card {
+  background-color: $light;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 160px;
+  min-height: 64px;
+  padding: 8px;
+  border: 1px solid transparent;
+};
+
+.sources-card:hover {
+  border: 1px solid $muted;
+}
+
+.sources-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  word-break: break-all;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

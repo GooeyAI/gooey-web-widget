@@ -1,5 +1,6 @@
 import { useSystemContext } from "src/contexts/hooks";
 import "./incoming.scss";
+import Sources from "./Sources";
 
 export const BotMessageLayout = () => {
   const { config } = useSystemContext()
@@ -22,9 +23,10 @@ export const BotMessageLayout = () => {
 };
 
 const IncomingMsg = (props: any) => {
-  const { output_text = "Placeholder Text ...." } = props.data;
+  const { output_text = "Placeholder Text ....", references = [] } = props.data;
   return (
-    <div className="gooey-incomingMsg pb-12 pr-8">
+    <div className="gooey-incomingMsg pb-12 pr-8" id={props?.id}>
+      <Sources data={references} />
       <BotMessageLayout />
       <div className="ml-36 mt-4">
         <p className="font_16_400 anim-typing">{output_text}</p>

@@ -23,7 +23,7 @@ const Responses = (props: any) => {
               key={id}
             />
           );
-        return <IncomingMsg data={responseData} key={id} />;
+        return <IncomingMsg data={responseData} key={id} id={id} />;
       })}
     </>
   );

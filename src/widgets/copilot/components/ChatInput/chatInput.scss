@@ -11,9 +11,9 @@
   outline: none;
   max-height: 200px;
   resize: none;
-  white-space: nowrap;
   position: relative;
 }
+
 .gooeyChat-chat-input textarea:focus{
   outline: 1px solid $light;
 }
