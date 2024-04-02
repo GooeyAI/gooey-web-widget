@@ -26,10 +26,15 @@ const Sources = ({ data }: any) => {
               )}
             >
               <p className="font_10_500">
-                [{index+1}] {hasFormat ? title.slice(0, title.length - 4) : title} 
+                {hasFormat ? title.slice(0, title.length - 4) : title}
               </p>
-              <p className="font_10_500">{pageNum}</p>
-              <div style={{ position: 'absolute', bottom: '6px', right: '8px'}}>
+              <p className="font_10_500">
+                {pageNum}
+                {pageNum ? "⋅" : ""}[{index + 1}]
+              </p>
+              <div
+                style={{ position: "absolute", bottom: "6px", right: "8px" }}
+              >
                 <IconExternalLink size={8} />
               </div>
             </div>
