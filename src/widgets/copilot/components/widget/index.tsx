@@ -6,13 +6,15 @@ import ChatInput, { CHAT_INPUT_ID } from "../ChatInput";
 import { useMessagesContext } from "src/contexts/hooks";
 
 const Widget = () => {
-  const { flushData }: any = useMessagesContext();
+  const { flushData, cancelApiCall }: any = useMessagesContext();
   // const [view, setView] = useState("messages");
   const handleChangeView = () => {
+    cancelApiCall();
     flushData();
     let ele = document.getElementById(CHAT_INPUT_ID);
     ele?.focus();
   };
+  
   return (
     <main
       id="gooeyChat-widget-container"

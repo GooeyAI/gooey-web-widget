@@ -147,6 +147,7 @@ const MessagesContextProvider = (props: any) => {
 
   const flushData = () => {
     setMessages(new Map());
+    setIsSendingMessage(false);
   };
 
   const cancelApiCall = () => {

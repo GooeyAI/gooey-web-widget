@@ -11,7 +11,7 @@ type HeaderProps = {
 
 const Header = ({ onEditClick }: HeaderProps) => {
   const { toggleWidget }: any = useSystemContext();
-  const { messages, cancelApiCall }:any = useMessagesContext()
+  const { messages }:any = useMessagesContext()
   const isEmpty = !messages?.size;
   return (
     <div className="p-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center">
@@ -31,7 +31,7 @@ const Header = ({ onEditClick }: HeaderProps) => {
           disabled={isEmpty}
           variant="text"
           className={clsx("p-4 cr-pointer flex-1", )}
-          onClick={() => messages.size === 1 ? cancelApiCall() : onEditClick()}
+          onClick={() => onEditClick()}
         >
           <IconPencilEdit size={20} />
         </IconButton>
