@@ -26,7 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           "What is the best time to grow pepper in India?",
         ],
         show_gooey_branding: true,
-        show_sources: false,
+        show_sources: true,
         bot_name: "Farmer.CHAT",
       }}
     />

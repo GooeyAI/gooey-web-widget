@@ -15,7 +15,8 @@
   background-color: $light;
   border-radius: 12px;
   cursor: pointer;
-  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
   min-height: 64px;
   padding: 8px;
   border: 1px solid transparent;
