@@ -3,7 +3,7 @@ import "./incoming.scss";
 import Sources from "./Sources";
 
 export const BotMessageLayout = () => {
-  const { config } = useSystemContext()
+  const { config } = useSystemContext();
   const { display_picture, title }: any = config?.bot_profile;
   return (
     <div className="d-flex align-center">
@@ -26,11 +26,15 @@ const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
   const { output_text = "Placeholder Text ....", references = [] } = props.data;
   return (
-    <div className="gooey-incomingMsg pb-12 pr-8" >
+    <div className="gooey-incomingMsg pb-12 pr-8">
       {config?.show_sources && <Sources data={references} />}
       <BotMessageLayout />
       <div className="ml-36 mt-4">
-        <p className="font_16_400 anim-typing gooey-output-text" id={props?.id}>{output_text}</p>
+        <p
+          className="font_16_400 anim-typing gooey-output-text"
+          id={props?.id}
+          dangerouslySetInnerHTML={{ __html: output_text }}
+        />
       </div>
     </div>
   );

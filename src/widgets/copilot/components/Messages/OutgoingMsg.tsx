@@ -10,7 +10,7 @@ const OutgoingMsg = (props: any) => {
         <IconUserCircle size={24} />
         <p className="font_16_600 ml-12">You</p>
       </div>
-      <p className="font_20_400 anim-typing"> {input_text || input_prompt}</p>
+      <p className="font_20_400 anim-typing gooey-outgoing-Text"> {input_text || input_prompt}</p>
     </div>
   );
 };

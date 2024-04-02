@@ -10,6 +10,7 @@ interface IncomingMsg {
   citation_style: "symbol" | "number";
 }
 
+const CITATION_STYLE = "number";
 // const DummyData: any = {
 //   id: "nechmmpx",
 //   url: "https://gooey.ai/copilot/?run_id=nechmmpx&uid=1rEtOkAoatWu9667PzzK8VYiR4j2",
@@ -93,7 +94,7 @@ const MessagesContextProvider = (props: any) => {
     sendPrompt({
       input_prompt: query,
       messages: _messages,
-      citation_style: "number",
+      citation_style: CITATION_STYLE,
     });
     addResponse(newQuery);
   };
@@ -109,11 +110,16 @@ const MessagesContextProvider = (props: any) => {
     setTimeout(() => {
       const element = document.getElementById(id);
       if (element) element.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 200)
-  }
+    }, 200);
+  };
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
-      const res = await sendMessageApi(payload, botId, secretKey, apiSource.current);
+      const res = await sendMessageApi(
+        payload,
+        botId,
+        secretKey,
+        apiSource.current
+      );
       if (res.status === 200) {
         const newResponse = createNewResponse(res.data, payload);
         // const newResponse = createNewResponse(DummyData, payload);
