@@ -6,7 +6,7 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   const openInWindow = (url: string) => window.open(url, "_blank");
   return (
-    <div style={{ overflowX: "visible" }} className="mb-4">
+    <div style={{ overflowX: "visible" }} className="mb-8">
       <div className="d-flex align-center">
         <IconListTimeline size={16} />
         <p className="font_16_400 ml-20">Sources</p>
@@ -26,10 +26,10 @@ const Sources = ({ data }: any) => {
               )}
             >
               <p className="font_10_500">
-                {hasFormat ? title.slice(0, title.length - 4) : title}
+                [{index+1}] {hasFormat ? title.slice(0, title.length - 4) : title} 
               </p>
               <p className="font_10_500">{pageNum}</p>
-              <div style={{ position: 'absolute', bottom: '4px', right: '8px'}}>
+              <div style={{ position: 'absolute', bottom: '6px', right: '8px'}}>
                 <IconExternalLink size={8} />
               </div>
             </div>

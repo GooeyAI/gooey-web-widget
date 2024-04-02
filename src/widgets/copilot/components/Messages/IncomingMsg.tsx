@@ -30,7 +30,7 @@ const IncomingMsg = (props: any) => {
       {config?.show_sources && <Sources data={references} />}
       <BotMessageLayout />
       <div className="ml-36 mt-4">
-        <p className="font_16_400 anim-typing" id={props?.id}>{output_text}</p>
+        <p className="font_16_400 anim-typing gooey-output-text" id={props?.id}>{output_text}</p>
       </div>
     </div>
   );

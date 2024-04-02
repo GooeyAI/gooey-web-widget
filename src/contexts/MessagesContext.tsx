@@ -93,7 +93,7 @@ const MessagesContextProvider = (props: any) => {
     sendPrompt({
       input_prompt: query,
       messages: _messages,
-      citation_style: "symbol",
+      citation_style: "number",
     });
     addResponse(newQuery);
   };
@@ -110,7 +110,6 @@ const MessagesContextProvider = (props: any) => {
       const element = document.getElementById(id);
       if (element) element.scrollIntoView({ behavior: "smooth", block: "end" });
     }, 200)
-    
   }
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
