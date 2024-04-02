@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body style="background-color: #dedede;">
+      <div id="gooey-embed"></div>
+      <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@v0.1.4/dist/style.css" rel="stylesheet"/>
+      <script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@v0.1.4/dist/lib.js"></script>
+      <script>
+          const config = {
+            type: "chat-widget-popup", // type of widget
+            secret_key: "API_SECRET_KEY", // API secret key',
+            bot_id: "BOT_ID", // Bot ID
+            bot_profile: {
+              title: "Farmer.CHAT",
+              description:
+                "An AI Assistant designed to help farmer extension agents in India.",
+              created_by: "Digital Green",
+              display_picture:
+                "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
+              creator_link: "https://digitalgreen.org/",
+            },
+            target_div_id: "gooey-embed",
+            link_color: "#FFD700",
+            widget_text: "Help",
+            questions: [
+              "When should I plant chili?",
+              "How can I get rid of black ants on my coffee?",
+              "What is the best time to grow pepper in India?",
+            ],
+            show_gooey_branding: true,
+            show_sources: false,
+            bot_name: "Farmer.CHAT",
+          }
+          GooeyEmbed.mount(config);
+      </script>
+    </div>
+  </body>
+</html>
