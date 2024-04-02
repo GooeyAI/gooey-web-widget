@@ -1,5 +1,5 @@
 # Widget Setup Guide
-1. Copy below code inside <body> in the target html file (where you want to embed the widget)
+1. Copy below code inside `<body>` in the target html file (where you want to embed the widget)
 ```bash
 <div id="gooey-embed"></div>
 <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/style.css" rel="stylesheet"/>
