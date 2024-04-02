@@ -69,8 +69,6 @@ npm run build
 
 - `src/widgets/*` -> List of Embeddable React Components
 
-- `/test-site/index.html` -> Test Injection in html file
-
 - `src/lib.ts` -> Library entry point
 
 - `vite.config.js` -> Configuration for bundling the library
