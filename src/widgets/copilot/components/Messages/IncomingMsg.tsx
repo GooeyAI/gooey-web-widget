@@ -24,7 +24,12 @@ export const BotMessageLayout = () => {
 
 const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
-  const { output_text = "Placeholder Text ....", references = [] } = props.data;
+  const {
+    output_text = "Placeholder Text ....",
+    references = [],
+    output_audio = [],
+  } = props.data;
+  const audioTrack = output_audio[0];
   return (
     <div className="gooey-incomingMsg pb-12 pr-8">
       {config?.show_sources && <Sources data={references} />}
@@ -35,6 +40,11 @@ const IncomingMsg = (props: any) => {
           id={props?.id}
           dangerouslySetInnerHTML={{ __html: output_text }}
         />
+        {audioTrack && (
+          <div className="mt-16">
+            <audio controls src={audioTrack}></audio>
+          </div>
+        )}
       </div>
     </div>
   );
