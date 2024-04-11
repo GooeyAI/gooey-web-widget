@@ -16,6 +16,7 @@ const WithFabLauncher: FC<WithFabLauncherType> = ({ children, open }) => (
       width: "100vw",
       background: "none",
       overflow: "auto",
+      zIndex: 1,
     }}
   >
     {!open && <Launcher />}
