@@ -7,30 +7,33 @@ import clsx from "clsx";
 
 type HeaderProps = {
   onEditClick: () => void;
+  hideClose?: boolean;
 };
 
-const Header = ({ onEditClick }: HeaderProps) => {
+const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
   const { toggleWidget }: any = useSystemContext();
-  const { messages }:any = useMessagesContext()
+  const { messages }: any = useMessagesContext();
   const isEmpty = !messages?.size;
   return (
     <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center">
       <div>
         {/* Logo */}
-        <IconButton
-          variant="text"
-          className="gp-4 cr-pointer flex-1"
-          onClick={() => toggleWidget()}
-        >
-          <IconClose size={20} />
-        </IconButton>
+        {!hideClose && (
+          <IconButton
+            variant="text"
+            className="gp-4 cr-pointer flex-1"
+            onClick={() => toggleWidget()}
+          >
+            <IconClose size={20} />
+          </IconButton>
+        )}
       </div>
       <p className="font_16_700">Farmer.CHAT</p>
       <div>
         <IconButton
           disabled={isEmpty}
           variant="text"
-          className={clsx("gp-4 cr-pointer flex-1", )}
+          className={clsx("gp-4 cr-pointer flex-1")}
           onClick={() => onEditClick()}
         >
           <IconPencilEdit size={20} />

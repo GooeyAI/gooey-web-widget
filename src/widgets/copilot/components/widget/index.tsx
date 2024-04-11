@@ -36,7 +36,7 @@ const CopilotWidget: FC<CopilotWidgetType> = ({ isDirect }) => {
             className="pos-relative d-flex flex-col flex-1 align-center justify-start overflow-hidden"
             style={{ maxHeight: "100%" }}
           >
-            <Header onEditClick={handleEditClick} />
+            <Header onEditClick={handleEditClick} hideClose={isDirect} />
 
             {/* Limited Width for large devices */}
             <div
