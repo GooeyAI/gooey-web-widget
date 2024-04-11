@@ -28,7 +28,6 @@
       ],
       show_gooey_branding: true,
       show_sources: false,
-      bot_name: "Farmer.CHAT",
     }
     GooeyEmbed.mount(config);
 </script>

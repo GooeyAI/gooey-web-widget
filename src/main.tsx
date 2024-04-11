@@ -28,7 +28,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         ],
         show_gooey_branding: true,
         show_sources: true,
-        bot_name: "Farmer.CHAT",
       }}
     />
   </React.StrictMode>
