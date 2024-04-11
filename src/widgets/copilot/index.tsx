@@ -1,22 +1,24 @@
-
 import { useSystemContext } from "src/contexts/hooks";
-import Launcher from "./components/launcher";
-import Widget from "./components/widget";
+import CopilotWidget from "./components/widget";
+import WithFabLauncher from "src/components/containers/withFabLauncher";
+import { SystemContextType } from "src/contexts/SystemContext";
 
 function ChatWidget() {
-  const { open }: any = useSystemContext();
-  return (
-    <div
-      tabIndex={-1}
-      role="reigon"
-      id=""
-      className="pos-relative"
-      style={{ height: "100vh", width: "100vw", background: "none", overflow: "auto" }}
-    >
-      {!open && <Launcher />}
-      {open && <Widget />}
-    </div>
-  );
+  const { config, open }: SystemContextType = useSystemContext();
+
+  // TYPE = DIRECT - INSERT DIRECTLY INSIDE DIV
+  if (config?.type === "copilot-direct") return <CopilotWidget isDirect />;
+
+  // TYPE = FAB - INSERT INTO FAB LAUNCHER
+  if (config?.type === "copilot-fab")
+    return (
+      <WithFabLauncher open={open || false}>
+        <CopilotWidget />
+      </WithFabLauncher>
+    );
+
+  // Support more type here
+  return null;
 }
 
 export default ChatWidget;
