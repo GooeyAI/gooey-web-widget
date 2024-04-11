@@ -7,6 +7,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <CopilotChatWidget
       config={{
+        type:'copilot-fab',
         secret_key: process.env.GOOEY_API_KEY || "",
         bot_id: process.env.REACT_APP_BOT_ID || "",
         bot_profile: {

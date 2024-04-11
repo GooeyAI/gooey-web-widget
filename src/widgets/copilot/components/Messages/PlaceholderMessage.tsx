@@ -52,14 +52,14 @@ const PlaceholderMessage = () => {
   return (
     <div className="no-scroll-bar w-100">
       <BotProfile />
-      <div className="w-100 mt-48">
+      <div className="mt-48 gooey-placeholderMsg-container">
         {config?.questions.map((que, idx) => (
           <Button
             key={que}
             variant="outlined"
             onClick={() => initializeQuery(que)}
             className={clsx(
-              "w-100 text-left font_12_500",
+              "text-left font_12_500",
               idx !== config?.questions.length - 1 && "mb-8"
             )}
           >
