@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/lib.js"></script>
 <script>
     const config = {
-      type: "chat-widget-popup", // type of widget
+      type: "copilot-fab", // type of widget (copilot-fab / copilot-direct)
       secret_key: "API_SECRET_KEY", // API secret key
       bot_id: "BOT_ID", // Bot ID
       bot_profile: {
@@ -37,6 +37,14 @@
 2. Replace "API_SECRET_KEY" and "BOT_ID" with your values
 
 - `/test.html` -> Refer to this file to check how html code should look like
+
+## Widget Types
+
+#### `copilot-fab`: This type renders a Floating Action Button in the window with pop-up widget.
+<img width="400" alt="Screenshot 2024-04-11 at 4 43 31 PM" src="https://github.com/GooeyAI/gooey-web-widget/assets/65861855/677fc8b5-340c-426b-a140-81aefa4c88b8">
+
+#### `copilot-direct`: This will directly insert the widget in the targeted div.
+<img width="400" alt="Screenshot 2024-04-11 at 4 39 57 PM" src="https://github.com/GooeyAI/gooey-web-widget/assets/65861855/33fd3a35-4bf0-4700-be48-dc0d169d6ed3">
 
 
 # Project Setup Guide
