@@ -18,7 +18,7 @@ const BotProfile = () => {
   return (
     <div className="d-flex flex-col justify-center align-center text-center">
       <div
-        className="bot-avatar mr-8 mb-24 bg-primary"
+        className="bot-avatar gmr-8 gmb-24 bg-primary"
         style={{ width: "48px", height: "48px", borderRadius: "100%" }}
       >
         <img
@@ -28,19 +28,19 @@ const BotProfile = () => {
         />
       </div>
       <div>
-        <p className="font_24_500 mb-16">{title}</p>
-        <p className="font_12_500 text-muted mb-12 d-flex align-center justify-center">
+        <p className="font_24_500 gmb-16">{title}</p>
+        <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
           By {created_by}
           <a
             href={creator_link || "/"}
             target="_ablank"
             style={{ marginBottom: "-5px", color: "#eee" }}
-            className="ml-6"
+            className="gml-6"
           >
             <IconGlobeNet size={14} />
           </a>
         </p>
-        <p className="font_12_400 pl-32 pr-32">{description}</p>
+        <p className="font_12_400 gpl-32 gpr-32">{description}</p>
       </div>
     </div>
   );
@@ -52,7 +52,7 @@ const PlaceholderMessage = () => {
   return (
     <div className="no-scroll-bar w-100">
       <BotProfile />
-      <div className="mt-48 gooey-placeholderMsg-container">
+      <div className="gmt-48 gooey-placeholderMsg-container">
         {config?.questions.map((que, idx) => (
           <Button
             key={que}
@@ -60,7 +60,7 @@ const PlaceholderMessage = () => {
             onClick={() => initializeQuery(que)}
             className={clsx(
               "text-left font_12_500",
-              idx !== config?.questions.length - 1 && "mb-8"
+              idx !== config?.questions.length - 1 && "gmb-8"
             )}
           >
             {que}

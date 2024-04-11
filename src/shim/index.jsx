@@ -6,8 +6,7 @@ export default class GooeyEmbed {
   static el = null;
 
   static mount(initialConfig) {
-    const { secret_key, bot_id, type, target_div_id, bot_profile } =
-      initialConfig;
+    const { target_div_id } = initialConfig;
     const component = <CopilotChatWidget config={initialConfig} />;
 
     function doRender() {
@@ -17,7 +16,7 @@ export default class GooeyEmbed {
       const el = document.getElementById(target_div_id);
       if (!el) {
         console.error(
-          `Element whose id should be ${target_div_id} not found in DOM`
+          `Cannot find element with id ${target_div_id} in DOM`
         );
       }
       el.setAttribute("class", "gooey-embed-container");

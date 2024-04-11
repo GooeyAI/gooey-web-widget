@@ -6,12 +6,12 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   const openInWindow = (url: string) => window.open(url, "_blank");
   return (
-    <div style={{ overflowX: "visible" }} className="mb-8">
+    <div style={{ overflowX: "visible" }} className="gmb-8">
       <div className="d-flex align-center">
         <IconListTimeline size={16} />
-        <p className="font_16_400 ml-20">Sources</p>
+        <p className="font_16_400 gml-20">Sources</p>
       </div>
-      <div className="mt-8 ml-36 sources-listContainer">
+      <div className="gmt-8 gml-36 sources-listContainer">
         {data.map((source: any, index: number) => {
           if (!source) return null;
           const [title, pageNum] = (source?.title || "").split(",");
@@ -22,7 +22,7 @@ const Sources = ({ data }: any) => {
               key={source?.title + index}
               className={clsx(
                 "sources-card d-flex flex-col justify-between pos-relative",
-                index !== data.length - 1 && "mr-12"
+                index !== data.length - 1 && "gmr-12"
               )}
             >
               <p className="font_10_500">

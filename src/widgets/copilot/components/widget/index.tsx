@@ -41,7 +41,7 @@ const CopilotWidget: FC<CopilotWidgetType> = ({ isDirect }) => {
             {/* Limited Width for large devices */}
             <div
               style={{ maxWidth: "760px", height: "100%" }}
-              className="d-flex flex-col flex-1 p-0 w-100 overflow-hidden"
+              className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden"
             >
               <Messages />
               <ChatInput />

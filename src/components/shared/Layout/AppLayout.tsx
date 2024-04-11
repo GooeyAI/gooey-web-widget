@@ -42,7 +42,7 @@ const AppLayout = ({
             <div
               onClick={() => onViewChange("home")}
               className={clsx(
-                "d-flex flex-col align-center pt-12 pb-12  flex-1 cr-pointer",
+                "d-flex flex-col align-center gpt-12 gpb-12  flex-1 cr-pointer",
                 view === "home" ? "bg-darkGrey text-white" : "hover-bg-primary"
               )}
             >
@@ -50,13 +50,13 @@ const AppLayout = ({
                 style={{ width: "24px" }}
                 className={clsx(view === "home" && "stroke-white")}
               />
-              <p className="mt-6">Home</p>
+              <p className="gmt-6">Home</p>
             </div>
             <div
               onClick={() => onViewChange("messages")}
-              className="d-flex flex-col align-center pt-12 pb-12 hover-bg-primary flex-1 cr-pointer"
+              className="d-flex flex-col align-center gpt-12 gpb-12 hover-bg-primary flex-1 cr-pointer"
             >
-              <p className="mt-6">Chat</p>
+              <p className="gmt-6">Chat</p>
             </div>
           </div>
         )}

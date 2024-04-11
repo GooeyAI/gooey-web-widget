@@ -59,8 +59,8 @@ const ChatInput = () => {
   return (
     <div
       className={clsx(
-        "gooeyChat-chat-input pr-8 pl-8",
-        !show_gooey_branding && "pb-8"
+        "gooeyChat-chat-input gpr-8 gpl-8",
+        !show_gooey_branding && "gpb-8"
       )}
     >
       <div className="pos-relative">
@@ -72,7 +72,7 @@ const ChatInput = () => {
           onChange={handleInputChange}
           onKeyDown={handlePressEnter}
           className={clsx(
-            "br-large b-1 font_16_500 bg-white pt-10 pb-10 pr-40 pl-12 flex-1 m-0"
+            "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-12 flex-1 gm-0"
           )}
           style={{ height: INPUT_HEIGHT + "px" }}
           placeholder={`Message ${bot_profile.title}`}
@@ -83,7 +83,7 @@ const ChatInput = () => {
           style={{ position: "absolute", right: "8px", bottom: "8.75px" }}
           disabled={!isSending && value.trim().length === 0}
           variant="text-alt"
-          className="p-4"
+          className="gp-4"
           onClick={isSending ? handleCancelSend : handleSendMessage}
         >
           {isSending ? <CircleStop size={24} /> : <CircleUP size={24} />}
@@ -92,7 +92,7 @@ const ChatInput = () => {
       {/* Gooey Branding */}
       {!!show_gooey_branding && (
         <p
-          className="font_10_500 pt-4 pb-6 text-darkGrey text-center m-0"
+          className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
           style={{ fontSize: "8px" }}
         >
           Powered by{" "}

@@ -22,27 +22,27 @@ const AttachFilesButton = ({
           {!open ? (
             <IconButton
               onClick={handleOpenClick}
-              className="pl-8 pr-8 br-large font_24_500 h-100 hover-grow"
+              className="gpl-8 gpr-8 br-large font_24_500 h-100 hover-grow"
             >
               <IconPaperClip />
             </IconButton>
           ) : (
             <IconButton
               onClick={handleOpenClick}
-              className="pt-12 pb-11 pl-16 pr-16 br-large font_16_600 h-100 hover-grow"
+              className="gpt-12 gpb-11 gpl-16 gpr-16 br-large font_16_600 h-100 hover-grow"
             >
               ❌
             </IconButton>
           )}
           {open && (
             <div className="d-flex align-center">
-              <IconButton className="br-large font_16_500 h-100 hover-grow ml-12">
+              <IconButton className="br-large font_16_500 h-100 hover-grow gml-12">
                 🎤
               </IconButton>
-              <IconButton className="pt-12 pb-11 pl-16 pr-16 br-large font_16_500 h-100 hover-grow ml-12">
+              <IconButton className="gpt-12 gpb-11 gpl-16 gpr-16 br-large font_16_500 h-100 hover-grow gml-12">
                 📹
               </IconButton>
-              <IconButton className="pt-12 pb-11 pl-16 pr-16 br-large font_16_500 h-100 hover-grow ml-12">
+              <IconButton className="gpt-12 gpb-11 gpl-16 gpr-16 br-large font_16_500 h-100 hover-grow gml-12">
                 📄
               </IconButton>
             </div>

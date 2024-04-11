@@ -16,7 +16,7 @@ const ResponseLoader = (props: any) => {
   return (
     <div ref={LoaderRef}>
       <BotMessageLayout />
-      <CircleBeat className="anim-blink ml-36 mt-4" size={16} />
+      <CircleBeat className="anim-blink gml-36 gmt-4" size={16} />
     </div>
   );
 };

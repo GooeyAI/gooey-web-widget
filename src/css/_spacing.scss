@@ -32,7 +32,7 @@ $space-prefixes : (
 // Make normal spacing - e.g p-10, m-10, mt-10
 @each $attr-short, $attr-long in $space-prefixes {
   @each $value in $space-values {
-    .#{$attr-short}-#{$value} {
+    .g#{$attr-short}-#{$value} {
       #{$attr-long}: #{$value}#{'px'} !important;
     }
   }

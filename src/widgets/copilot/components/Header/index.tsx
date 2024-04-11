@@ -14,12 +14,12 @@ const Header = ({ onEditClick }: HeaderProps) => {
   const { messages }:any = useMessagesContext()
   const isEmpty = !messages?.size;
   return (
-    <div className="p-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center">
+    <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center">
       <div>
         {/* Logo */}
         <IconButton
           variant="text"
-          className="p-4 cr-pointer flex-1"
+          className="gp-4 cr-pointer flex-1"
           onClick={() => toggleWidget()}
         >
           <IconClose size={20} />
@@ -30,7 +30,7 @@ const Header = ({ onEditClick }: HeaderProps) => {
         <IconButton
           disabled={isEmpty}
           variant="text"
-          className={clsx("p-4 cr-pointer flex-1", )}
+          className={clsx("gp-4 cr-pointer flex-1", )}
           onClick={() => onEditClick()}
         >
           <IconPencilEdit size={20} />

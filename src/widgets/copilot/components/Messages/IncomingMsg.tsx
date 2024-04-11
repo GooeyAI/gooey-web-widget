@@ -8,7 +8,7 @@ export const BotMessageLayout = () => {
   return (
     <div className="d-flex align-center">
       <div
-        className="bot-avatar bg-primary mr-12"
+        className="bot-avatar bg-primary gmr-12"
         style={{ width: "24px", height: "24px", borderRadius: "100%" }}
       >
         <img
@@ -31,17 +31,17 @@ const IncomingMsg = (props: any) => {
   } = props.data;
   const audioTrack = output_audio[0];
   return (
-    <div className="gooey-incomingMsg pb-12 pr-8">
+    <div className="gooey-incomingMsg gpb-12 gpr-8">
       {config?.show_sources && <Sources data={references} />}
       <BotMessageLayout />
-      <div className="ml-36 mt-4">
+      <div className="gml-36 gmt-4">
         <p
           className="font_16_400 anim-typing gooey-output-text"
           id={props?.id}
           dangerouslySetInnerHTML={{ __html: output_text }}
         />
         {audioTrack && (
-          <div className="mt-16">
+          <div className="gmt-16">
             <audio controls src={audioTrack}></audio>
           </div>
         )}
