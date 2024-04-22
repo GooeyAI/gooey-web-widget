@@ -42,7 +42,6 @@ const Messages = () => {
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <Responses queue={Array.from(messages.keys())} data={messages} />
-      {/* {!!messages?.size && !isSending && <Suggestions />} */}
       <ResponseLoader show={isSending} />
     </div>
   );

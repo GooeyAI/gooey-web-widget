@@ -1,6 +1,9 @@
 import { useSystemContext } from "src/contexts/hooks";
 import "./incoming.scss";
 import Sources from "./Sources";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import ResponseLoader from "../Loader";
 
 export const BotMessageLayout = () => {
   const { config } = useSystemContext();
@@ -21,25 +24,42 @@ export const BotMessageLayout = () => {
     </div>
   );
 };
-
+const getOutputText = (data: any) => {
+  const { type = "", status = "", text, detail, output_text = {} } = data;
+  if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
+    if (text) return text;
+    else return detail;
+  }
+  if (type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && status === "completed") {
+    return output_text[0];
+  }
+};
 const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
-  const {
-    output_text = "Placeholder Text ....",
-    references = [],
-    output_audio = [],
-  } = props.data;
+  const { references = [], output_audio = [], type } = props.data;
   const audioTrack = output_audio[0];
+  const output = getOutputText(props.data);
+  const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+  if(!output) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12 gpr-8">
       {config?.show_sources && <Sources data={references} />}
       <BotMessageLayout />
       <div className="gml-36 gmt-4">
-        <p
-          className="font_16_400 anim-typing gooey-output-text"
-          id={props?.id}
-          dangerouslySetInnerHTML={{ __html: output_text }}
-        />
+        <div>
+          <p
+            className="font_16_400 anim-typing gooey-output-text"
+            id={props?.id}
+            dangerouslySetInnerHTML={{ __html: output }}
+          />
+          {isStreaming && (
+            <CircleBeat
+              className="anim-blink gml-4"
+              size={16}
+              style={{ display: "inline", marginBottom: '-2px' }}
+            />
+          )}
+        </div>
         {audioTrack && (
           <div className="gmt-16">
             <audio controls src={audioTrack}></audio>
