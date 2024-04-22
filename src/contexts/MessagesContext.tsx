@@ -1,6 +1,5 @@
 import { createContext, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { sendMessageApi } from "../api/message";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
 import {
@@ -160,6 +159,8 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const cancelApiCall = () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     if(window?.GooeyEventSource) GooeyEventSource.close();
     else apiSource?.current.cancel("Operation canceled by the user.");
     // check if state has more than 2 message then remove the last one

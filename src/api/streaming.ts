@@ -45,6 +45,8 @@ export const getStreamUrlApi = async (
 
 export const getDataFromStream = (sseUrl: string, setterFn: any) => {
   const evtSource = new EventSource(sseUrl);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   window.GooeyEventSource = evtSource;
   evtSource.onmessage = (event) => {
     // parse the message as JSON
