@@ -8,10 +8,10 @@
 <script>
   const config = {
     target: "#gooey-embed",
-    mode: "popup", // or alternatively, "inline"
     payload: {
       integration_id: "<Your Integration ID>"
     },
+    mode: "popup", // or alternatively, "inline"
     theme: {
       showGooeyBranding: true,
       showSources: false,
@@ -39,9 +39,14 @@
 
 ## Configuration Options
 
-##### `target: string`
+##### `target: string` **Required**
 
 Specifies the [CSS selector](https://www.w3schools.com/css/css_selectors.asp) of the div where the widget will be embedded.
+
+##### `payload: object` **Required**
+
+Contains the data sent to the Gooey API, which typically includes the `integration_id`.
+Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Integrations/operation/video-bots__stream_create) for additional payload options.
 
 ##### `mode: string (popup | inline)`
 
@@ -54,11 +59,6 @@ Determines how the Gooey widget is displayed on your site:
 - `inline`: This mode embeds the widget directly within the page content at the location specified by the `target`. Suitable for integrating the widget as a part of your webpage like a contact form.
 
   <img width="400" alt="Screenshot 2024-04-11 at 4 39 57 PM" src="https://github.com/GooeyAI/gooey-web-widget/assets/65861855/33fd3a35-4bf0-4700-be48-dc0d169d6ed3">
-
-##### `payload: object`
-
-Contains the data sent to the Gooey API, which typically includes the `integration_id`. 
-Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Integrations/operation/video-bots__stream_create) for additional payload options.
 
 ##### `content: object`
 
@@ -73,7 +73,6 @@ Defines the textual content and related URLs for the bot's appearance and initia
 - `botWebsiteUrl`: A URL to the bot's or company's homepage, which can be accessed for more information.
 
 ##### `theme: object`
-
 
 Controls visual aspects of the widget, including colors and branding visibility.                             
 
