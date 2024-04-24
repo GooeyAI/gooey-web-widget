@@ -17,6 +17,7 @@ button {
 button:disabled {
   color: $muted !important;
   fill: $light;
+  cursor: unset;
 }
 
 // Variant - FILED
