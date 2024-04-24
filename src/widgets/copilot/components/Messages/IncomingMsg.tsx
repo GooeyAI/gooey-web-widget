@@ -35,12 +35,12 @@ const getOutputText = (data: any) => {
   }
 };
 
-function linkifyText(text) {
+function linkifyText(text: string) {
   // Regular expression to match URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   
   // Replace URLs with <a> tags
-  return text.replaceAll(urlRegex, function(url) {
+  return text.replace(urlRegex, function(url: string) {
       return '<a href="' + url + '" target="_blank">' + url + '</a>';
   });
 }
