@@ -26,7 +26,7 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
             className="gp-4 cr-pointer flex-1"
             onClick={() => toggleWidget()}
           >
-            <IconClose size={20} />
+            <IconClose size={24} />
           </IconButton>
         )}
       </div>
@@ -38,7 +38,7 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
           className={clsx("gp-4 cr-pointer flex-1")}
           onClick={() => onEditClick()}
         >
-          <IconPencilEdit size={20} />
+          <IconPencilEdit size={24} />
         </IconButton>
       </div>
     </div>
