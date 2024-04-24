@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useRef, useState } from "react";
 import CircleUP from "src/assets/SvgIcons/CircleUP";
 import IconClose from "src/assets/SvgIcons/IconClose";
@@ -20,7 +21,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const [send, setSend] = useState<boolean>(false);
   const [chunks, setChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  
+
   useEffect(() => {
     // timer logic
     let intervalId: any;
@@ -36,10 +37,10 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
     mediaRecorder.onstop = function () {
-      stream?.getTracks().forEach(track => track?.stop());
-    }
+      stream?.getTracks().forEach((track) => track?.stop());
+    };
     mediaRecorder.ondataavailable = function (e) {
-      setChunks(prev => [...prev, e.data]);
+      setChunks((prev) => [...prev, e.data]);
     };
     setIsRunning(true);
   };
@@ -59,12 +60,18 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       console.log("The mediaDevices.getUserMedia() method is not supported.");
       return;
     }
-    navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+    const userMedia =
+      navigator?.mediaDevices?.getUserMedia || // @ts-expect-error
+      navigator?.mediaDevices?.webkitGetUserMedia || // @ts-expect-error
+      navigator?.mediaDevices?.mozGetUserMedia || // @ts-expect-error
+      navigator?.mediaDevices?.msGetUserMedia;
+    if (!userMedia) return console.error("getUserMedia not supported");
+    userMedia(constraints).then(onSuccess, onError);
   }, []);
 
   useEffect(() => {
     // @TODO - Work around - to send without useEffect
-    if(!send || !chunks.length) return; // do nothing and set send true on click
+    if (!send || !chunks.length) return; // do nothing and set send true on click
     const recordedBlob = new Blob(chunks as Blob[], {
       type: "audio/webm;codecs=ogg",
     });
@@ -80,7 +87,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
 
   const handleSend = () => {
     handleStopRecording();
-    setSend(true);// hack to fix the ondataavailable issue
+    setSend(true); // hack to fix the ondataavailable issue
   };
 
   // Minutes calculation
