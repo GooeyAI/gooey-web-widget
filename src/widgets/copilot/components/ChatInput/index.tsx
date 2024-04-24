@@ -7,7 +7,6 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import CircleUP from "src/assets/SvgIcons/CircleUP";
 import CircleStop from "src/assets/SvgIcons/CircleStop";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
-import IconClose from "src/assets/SvgIcons/IconClose";
 import InlineAudioRecorder from "./InlineAudioRecorder";
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
@@ -63,8 +62,8 @@ const ChatInput = () => {
     setIsRecording(true);
   };
 
-  const handleSendRecording = (file: File) => {
-    initializeQuery(file, 'audio');
+  const handleSendRecording = (blob: Blob) => {
+    initializeQuery(blob, 'audio');
     setIsRecording(false);
   };
 
