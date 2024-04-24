@@ -10,6 +10,7 @@ $light: #f0f0f0;
 $border-color: #eee;
 $muted: #6c757d;
 $almost-black: #090909;
+$gooey-danger: #dc3545;
 $colors: (
   "primary": $primary,
   "secondary": $secondary,
@@ -19,10 +20,12 @@ $colors: (
   "light": $light,
   "muted": $muted,
   "almostBlack": $almost-black,
+  "gooeyDanger": $gooey-danger,
 );
 
 :export {
   primary: $primary;
   secondary: $secondary;
   border-color: $border-color;
+  gooeyDanger: $gooey-danger;
 }

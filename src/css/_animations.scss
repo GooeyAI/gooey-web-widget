@@ -60,11 +60,21 @@
   animation: typing 0.25s steps(30), blink-border .2s step-end infinite alternate;
   overflow: hidden;
 }
-@keyframes blink {
+
+@keyframes border-blink {
   50% {
     border-color: transparent
   }
 }
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
+}
+
 @keyframes typing {
   from {
     opacity: 0;
@@ -74,12 +84,15 @@
     opacity: 1;
   }
 }
-
-.anim-blink {
-  animation: blink 0.5s infinite;
+.anim-blink-self {
+  animation: blink 1s infinite;
 }
 
-@keyframes blink {
+.anim-blink {
+  animation: border-blink 0.5s infinite;
+}
+
+@keyframes border-blink {
   0% {
     opacity: 0;
   }

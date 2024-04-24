@@ -7,21 +7,23 @@ import {
   getDataFromStream,
   getStreamUrlApi,
 } from "src/api/streaming";
+import { uploadFileToGooey } from "src/api/file-upload";
 
 interface IncomingMsg {
-  input_text: string;
+  input_text?: string;
+  input_audio?: string;
   messages: [];
   citation_style: "symbol" | "number";
 }
 
 const CITATION_STYLE = "number";
 
-const createNewQuery = (query: string) => {
+const createNewQuery = (query: string | Blob, type: string) => {
   return {
     id: uuidv4(),
-    input_text: query,
+    [`input_${type}`]: query,
     role: "user",
-    type: ["text"],
+    type: [type],
   };
 };
 
@@ -36,7 +38,10 @@ const MessagesContextProvider = (props: any) => {
 
   const currentStreamRef = useRef<any>(null);
 
-  const initializeQuery = (query: string) => {
+  const initializeQuery = (
+    payload: string | Blob,
+    type: string = "text"
+  ) => {
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
     const _messages: any = [
       ...(lastResponse?.output?.final_prompt.slice(1) || []),
@@ -49,9 +54,12 @@ const MessagesContextProvider = (props: any) => {
       });
     }
     setIsSendingMessage(true);
-    const newQuery = createNewQuery(query);
+    let newQuery = {};
+    if (type === "text") newQuery = createNewQuery(payload, type);
+    if (type === "audio")
+      newQuery = createNewQuery(URL.createObjectURL(payload as Blob), type);
     sendPrompt({
-      input_text: query,
+      [`input_${type}`]: payload,
       messages: _messages,
       citation_style: CITATION_STYLE,
     });
@@ -73,9 +81,8 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const updateStreamedMessage = (payload: any) => {
-    console.log(payload, '>>');
-     // stream start
-     if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
+    // stream start
+    if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
       currentStreamRef.current = payload!.bot_message_id;
       setMessages((prev: any) => {
         const newConversations = new Map(prev);
@@ -86,7 +93,7 @@ const MessagesContextProvider = (props: any) => {
         return newConversations;
       });
       setIsSendingMessage(false);
-      scrollToMessage(currentStreamRef?.current || '');
+      scrollToMessage(currentStreamRef?.current || "");
     }
 
     // stream end
@@ -105,7 +112,7 @@ const MessagesContextProvider = (props: any) => {
         });
         return newConversations;
       });
-      scrollToMessage(currentStreamRef?.current || '');
+      scrollToMessage(currentStreamRef?.current || "");
     }
 
     // streaming data
@@ -125,12 +132,18 @@ const MessagesContextProvider = (props: any) => {
         });
         return newConversations;
       });
-      scrollToMessage(currentStreamRef?.current || '');
+      scrollToMessage(currentStreamRef?.current || "");
     }
   };
 
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
+      let audioUrl = "";
+      if (payload?.input_audio) {
+        const file = new File([payload.input_audio], `gooey-widget-recording-${uuidv4()}.webm`);
+        audioUrl = await uploadFileToGooey(file as File);
+        payload.input_audio = audioUrl;
+      }
       const streamUrl = await getStreamUrlApi(
         payload,
         botId,
@@ -142,7 +155,7 @@ const MessagesContextProvider = (props: any) => {
     } catch (err) {
       console.error("Api Failed!", err);
       setIsSendingMessage(false);
-    } 
+    }
   };
 
   const preLoadData = (data: any) => {
@@ -161,7 +174,7 @@ const MessagesContextProvider = (props: any) => {
   const cancelApiCall = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    if(window?.GooeyEventSource) GooeyEventSource.close();
+    if (window?.GooeyEventSource) GooeyEventSource.close();
     else apiSource?.current.cancel("Operation canceled by the user.");
     // check if state has more than 2 message then remove the last one
     if (messages.size > 2) {
