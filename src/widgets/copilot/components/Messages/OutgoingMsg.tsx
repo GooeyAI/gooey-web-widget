@@ -20,7 +20,6 @@ const OutgoingMsg = (props: any) => {
       )}
       {input_text && (
         <p className="font_20_400 anim-typing gooey-outgoing-Text">
-          {" "}
           {input_text || input_prompt}
         </p>
       )}

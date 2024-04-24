@@ -36,9 +36,10 @@ const Messages = () => {
   return (
     <div
       className={clsx(
-        "flex-1 bg-white overflow-scroll gp-16 br-large-right d-flex flex-col overflow-x-hidden",
+        "flex-1 bg-white gp-16 br-large-right d-flex flex-col",
         isEmpty ? "justify-end" : "justify-start"
       )}
+      style={{ overflowY: "auto" }}
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <Responses queue={Array.from(messages.keys())} data={messages} />
