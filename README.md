@@ -9,12 +9,12 @@
   const config = {
     target: "#gooey-embed",
     payload: {
-      integration_id: "<Your Integration ID>"
+      integration_id: "<Your Integration ID>",
     },
     mode: "popup", // or alternatively, "inline"
     theme: {
       showGooeyBranding: true,
-      showSources: false,
+      showSources: true,
       linkColor: "#FFD700",
     },
     content: {
@@ -29,7 +29,7 @@
       fabLabel: "Help",
       botPhotoUrl: "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
       botWebsiteUrl: "https://digitalgreen.org/",
-    }
+    },
   }
   GooeyWebWidget.mount(config);
 </script>
