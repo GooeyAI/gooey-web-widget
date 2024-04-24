@@ -60,13 +60,14 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       console.log("The mediaDevices.getUserMedia() method is not supported.");
       return;
     }
-    const userMedia =
+    // try to support various browsers
+    navigator.mediaDevices.getUserMedia =
       navigator?.mediaDevices?.getUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.webkitGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.mozGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.msGetUserMedia;
-    if (!userMedia) return console.error("getUserMedia not supported");
-    userMedia(constraints).then(onSuccess, onError);
+    if (!navigator?.mediaDevices?.getUserMedia) return console.error("getUserMedia not supported");
+    navigator.mediaDevices?.getUserMedia(constraints).then(onSuccess, onError);
   }, []);
 
   useEffect(() => {
