@@ -6,7 +6,7 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   const openInWindow = (url: string) => window.open(url, "_blank");
   return (
-    <div style={{ overflowX: "visible" }} className="gmb-8">
+    <div className="gmb-8">
       <div className="d-flex align-center">
         <IconListTimeline size={16} />
         <p className="font_16_400 gml-20">Sources</p>

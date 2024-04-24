@@ -12,3 +12,14 @@
   text-decoration: none;
 }
 
+::-webkit-scrollbar {
+  background: transparent;
+  color: white;
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+}

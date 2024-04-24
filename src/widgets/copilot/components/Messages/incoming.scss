@@ -16,7 +16,11 @@
 
 .sources-listContainer {
   display: flex;
+  min-height: 72px;
   max-width: calc(100% + 16px); // 16px is the padding of the parent container
+  overflow: hidden;
+}
+.sources-listContainer:hover {
   overflow-x: auto;
 }
 
@@ -26,7 +30,7 @@
   cursor: pointer;
   min-width: 160px;
   max-width: 160px;
-  min-height: 64px;
+  height: 64px;
   padding: 8px;
   border: 1px solid transparent;
 };
