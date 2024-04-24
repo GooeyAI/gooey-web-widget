@@ -34,6 +34,17 @@ const getOutputText = (data: any) => {
     return output_text[0];
   }
 };
+
+function linkifyText(text) {
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  // Replace URLs with <a> tags
+  return text.replaceAll(urlRegex, function(url) {
+      return '<a href="' + url + '" target="_blank">' + url + '</a>';
+  });
+}
+
 const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
   const { references = [], output_audio = [], type } = props.data;
@@ -50,7 +61,7 @@ const IncomingMsg = (props: any) => {
           <p
             className="font_16_400 anim-typing gooey-output-text"
             id={props?.id}
-            dangerouslySetInnerHTML={{ __html: output }}
+            dangerouslySetInnerHTML={{ __html: linkifyText(output) }}
           />
           {isStreaming && (
             <CircleBeat
