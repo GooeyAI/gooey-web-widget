@@ -3,8 +3,8 @@
 
 ```html
 <div id="gooey-embed"></div>
-<link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/style.css" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/lib.js"></script>
+<link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.12/dist/style.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.12/dist/lib.js"></script>
 <script>
   const config = {
     target: "#gooey-embed",
