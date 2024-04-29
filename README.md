@@ -1,9 +1,8 @@
 # Widget Setup Guide
 1. Copy below code inside `<body>` in the target html file (where you want to embed the widget)
 ```bash
-<div id="gooey-embed"></div>
-<link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/style.css" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/lib.js"></script>
+<gooey-embed-copilot></gooey-embed-copilot>
+<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@v1.0.20/dist/lib.js"></script>
 <script>
     const config = {
       type: "copilot-fab", // type of widget (copilot-fab / copilot-direct)
@@ -18,7 +17,6 @@
           "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
         creator_link: "https://digitalgreen.org/",
       },
-      target_div_id: "gooey-embed",
       link_color: "#FFD700",
       widget_text: "Help",
       questions: [
