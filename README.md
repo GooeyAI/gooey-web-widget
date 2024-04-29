@@ -2,7 +2,7 @@
 1. Copy below code inside `<body>` in the target html file (where you want to embed the widget)
 ```bash
 <gooey-embed-copilot></gooey-embed-copilot>
-<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@v1.0.20/dist/lib.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@v1.0.22/dist/lib.js"></script>
 <script>
     const config = {
       type: "copilot-fab", // type of widget (copilot-fab / copilot-direct)
