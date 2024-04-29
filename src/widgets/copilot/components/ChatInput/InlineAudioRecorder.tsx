@@ -74,7 +74,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
     // @TODO - Work around - to send without useEffect
     if (!send || !chunks.length) return; // do nothing and set send true on click
     const recordedBlob = new Blob(chunks as Blob[], {
-      type: "audio/webm;codecs=ogg",
+      type: "audio/mp3;codecs=ogg",
     });
     setChunks([]);
     onSend(recordedBlob);
