@@ -6,17 +6,13 @@ export default class GooeyEmbed {
   static el = null;
 
   static mount(initialConfig) {
-    const { target_div_id } = initialConfig;
     const component = <CopilotChatWidget config={initialConfig} />;
 
     function doRender() {
-      if (GooeyEmbed.el) {
-        throw new Error("GooeyEmbed is already mounted, unmount first");
-      }
       if (customElements.get("gooey-embed-copilot") === undefined) {
         const template = document.createElement("template");
         template.innerHTML =`
-        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.19/dist/style.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.20/dist/style.css" rel="stylesheet" />
         <div id="gooey-embed" style="height: 100%;" class="gooey-embed-container"></div>
         `;
         customElements.define(
@@ -30,7 +26,8 @@ export default class GooeyEmbed {
           }
         );
       }
-      const shadowRoot = document.getElementById(target_div_id).shadowRoot;
+      const elements = document.getElementsByTagName('gooey-embed-copilot');
+      const shadowRoot = Array.from(elements)[0].shadowRoot;
       const embed = shadowRoot.getElementById("gooey-embed");
       if (document._getElementById === undefined) {
         document._getElementById = document.getElementById;
@@ -39,13 +36,9 @@ export default class GooeyEmbed {
           return document._getElementById(id);
         };
       }
-      const el = document.getElementById("gooey-embed");
-      if (!el) {
-        console.error(`Cannot find element with id ${target_div_id} in DOM`);
-      }
       shadowRoot.appendChild(embed);
-      ReactDOM.render(component, el);
-      GooeyEmbed.el = el;
+      ReactDOM.render(component, embed);
+      GooeyEmbed.el = embed;
     }
     if (document.readyState === "complete") {
       doRender();
@@ -61,8 +54,6 @@ export default class GooeyEmbed {
       throw new Error("GooeyEmbed is not mounted, mount first");
     }
     ReactDOM.unmountComponentAtNode(GooeyEmbed.el);
-    GooeyEmbed.el.parentNode.removeChild(GooeyEmbed.el);
-    GooeyEmbed.el = null;
   }
 }
 window.GooeyEmbed = GooeyEmbed;
