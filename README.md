@@ -6,7 +6,6 @@
 <script>
     const config = {
       type: "copilot-fab", // type of widget (copilot-fab / copilot-direct)
-      secret_key: "API_SECRET_KEY", // API secret key
       bot_id: "BOT_ID", // Bot ID
       bot_profile: {
         title: "Farmer.CHAT",

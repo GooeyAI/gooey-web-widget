@@ -2,9 +2,8 @@ import axios from "axios";
 
 const BASE_URL_STREAMING = "https://api.gooey.ai/v3/integrations/stream/";
 
-const getHeaders = (secretKey: string) => {
+const getHeaders = () => {
   return {
-    Authorization: "Bearer " + secretKey,
     "Content-Type": "application/json",
   };
 };
@@ -21,10 +20,9 @@ export const STREAM_MESSAGE_TYPES = {
 export const getStreamUrlApi = async (
   body: any,
   botId: string,
-  secretKey: string,
   cancelToken: any
 ) => {
-  const headers = getHeaders(secretKey);
+  const headers = getHeaders();
   const _body = {
     // your integration's ID as shown in the Gooey.AI Integrations tab
     integration_id: botId,
