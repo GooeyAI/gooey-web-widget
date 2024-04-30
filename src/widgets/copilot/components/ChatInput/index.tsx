@@ -104,7 +104,9 @@ const ChatInput = () => {
                 width: "100%",
                 top: 0,
                 height: INPUT_HEIGHT + "px",
+                cursor: "text",
               }}
+              onClick={() => inputRef?.current?.focus()}
               className="d-flex justify-end align-center gpr-4"
             >
               <IconButton onClick={handleRecordClick} variant="text-alt">
