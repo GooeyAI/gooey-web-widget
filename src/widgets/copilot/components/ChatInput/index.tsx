@@ -99,7 +99,7 @@ const ChatInput = () => {
           {/* Record Button */}
           {!value && (
             <IconButton
-              style={{ position: "absolute", right: "8px", bottom: "8.75px" }}
+              style={{ position: "absolute", right: "4px", bottom: "8px" }}
               onClick={handleRecordClick}
               variant="text-alt"
             >
