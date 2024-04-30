@@ -17,7 +17,7 @@ const ChatInput = () => {
     useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<null | HTMLElement>(null);
 
   const resetHeight = () => {
     const ele: HTMLElement | null = inputRef.current;
@@ -85,7 +85,7 @@ const ChatInput = () => {
           {/* Typing area */}
           <textarea
             value={value}
-            ref={inputRef}
+            ref={inputRef as any}
             id={CHAT_INPUT_ID}
             onChange={handleInputChange}
             onKeyDown={handlePressEnter}
