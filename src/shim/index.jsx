@@ -12,7 +12,7 @@ export default class GooeyEmbed {
       if (customElements.get("gooey-embed-copilot") === undefined) {
         const template = document.createElement("template");
         template.innerHTML =`
-        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.20/dist/style.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.23/dist/style.css" rel="stylesheet" />
         <div id="gooey-embed" style="height: 100%;" class="gooey-embed-container"></div>
         `;
         customElements.define(
@@ -29,14 +29,9 @@ export default class GooeyEmbed {
       const elements = document.getElementsByTagName('gooey-embed-copilot');
       const shadowRoot = Array.from(elements)[0].shadowRoot;
       const embed = shadowRoot.getElementById("gooey-embed");
-      if (document._getElementById === undefined) {
-        document._getElementById = document.getElementById;
-        document.getElementById = (id) => {
-          if (id === "gooey-embed") return embed;
-          return document._getElementById(id);
-        };
-      }
-      shadowRoot.appendChild(embed);
+      shadowRoot.appendChild(embed); // Move the element to the shadow root
+
+      // Insert the widget ( component ) here
       ReactDOM.render(component, embed);
       GooeyEmbed.el = embed;
     }

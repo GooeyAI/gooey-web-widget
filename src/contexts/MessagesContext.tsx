@@ -70,7 +70,7 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
-  const scrollToMessage = (id: string) => {
+  const scrollToMessage = () => {
     // scroll to the last message
     setTimeout(() => {
       if (scrollContainerRef.current) {
@@ -95,7 +95,7 @@ const MessagesContextProvider = (props: any) => {
         return newConversations;
       });
       setIsSendingMessage(false);
-      scrollToMessage(currentStreamRef?.current || "");
+      scrollToMessage();
     }
 
     // stream end
@@ -114,7 +114,7 @@ const MessagesContextProvider = (props: any) => {
         });
         return newConversations;
       });
-      scrollToMessage(currentStreamRef?.current || "");
+      scrollToMessage();
     }
 
     // streaming data
@@ -134,7 +134,7 @@ const MessagesContextProvider = (props: any) => {
         });
         return newConversations;
       });
-      scrollToMessage(currentStreamRef?.current || "");
+      scrollToMessage();
     }
   };
 
