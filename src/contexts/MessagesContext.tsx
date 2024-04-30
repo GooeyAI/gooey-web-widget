@@ -37,11 +37,9 @@ const MessagesContextProvider = (props: any) => {
   const apiSource = useRef(axios.CancelToken.source());
 
   const currentStreamRef = useRef<any>(null);
+  const scrollContainerRef = useRef<null | HTMLElement>(null);
 
-  const initializeQuery = (
-    payload: string | Blob,
-    type: string = "text"
-  ) => {
+  const initializeQuery = (payload: string | Blob, type: string = "text") => {
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
     const _messages: any = [
       ...(lastResponse?.output?.final_prompt.slice(1) || []),
@@ -75,8 +73,12 @@ const MessagesContextProvider = (props: any) => {
   const scrollToMessage = (id: string) => {
     // scroll to the last message
     setTimeout(() => {
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: "smooth", block: "end" });
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scroll({
+          top: scrollContainerRef?.current?.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     }, 200);
   };
 
@@ -140,7 +142,10 @@ const MessagesContextProvider = (props: any) => {
     try {
       let audioUrl = "";
       if (payload?.input_audio) {
-        const file = new File([payload.input_audio], `gooey-widget-recording-${uuidv4()}.webm`);
+        const file = new File(
+          [payload.input_audio],
+          `gooey-widget-recording-${uuidv4()}.webm`
+        );
         audioUrl = await uploadFileToGooey(file as File);
         payload.input_audio = audioUrl;
       }
@@ -193,6 +198,7 @@ const MessagesContextProvider = (props: any) => {
     preLoadData,
     flushData,
     cancelApiCall,
+    scrollContainerRef,
   };
 
   return (

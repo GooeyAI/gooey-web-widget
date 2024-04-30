@@ -30,11 +30,12 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending }: any = useMessagesContext();
+  const { messages, isSending, scrollContainerRef }: any = useMessagesContext();
 
   const isEmpty = !messages?.size && !isSending;
   return (
     <div
+      ref={scrollContainerRef}
       className={clsx(
         "flex-1 bg-white gp-16 br-large-right d-flex flex-col",
         isEmpty ? "justify-end" : "justify-start"
