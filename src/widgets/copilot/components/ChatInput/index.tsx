@@ -63,7 +63,7 @@ const ChatInput = () => {
   };
 
   const handleSendRecording = (blob: Blob) => {
-    initializeQuery(blob, 'audio');
+    initializeQuery(blob, "audio");
     setIsRecording(false);
   };
 
@@ -78,7 +78,7 @@ const ChatInput = () => {
       {isRecording ? (
         <InlineAudioRecorder
           onSend={handleSendRecording}
-          onCancel={() => setIsRecording(false)} 
+          onCancel={() => setIsRecording(false)}
         />
       ) : (
         <div className="pos-relative">
@@ -98,13 +98,19 @@ const ChatInput = () => {
 
           {/* Record Button */}
           {!value && (
-            <IconButton
-              style={{ position: "absolute", right: "4px", bottom: "8px" }}
-              onClick={handleRecordClick}
-              variant="text-alt"
+            <div
+              style={{
+                position: "absolute",
+                width: "100%",
+                top: 0,
+                height: INPUT_HEIGHT + "px",
+              }}
+              className="d-flex justify-end align-center gpr-4"
             >
-              <IconMicrophone size={18} />
-            </IconButton>
+              <IconButton onClick={handleRecordClick} variant="text-alt">
+                <IconMicrophone size={18} />
+              </IconButton>
+            </div>
           )}
           {/* Send Actions */}
           {value && (
