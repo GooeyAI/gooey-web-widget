@@ -19,12 +19,12 @@ const BotProfile = () => {
     <div className="d-flex flex-col justify-center align-center text-center">
       <div
         className="bot-avatar gmr-8 gmb-24 bg-primary"
-        style={{ width: "48px", height: "48px", borderRadius: "100%" }}
+        style={{ width: "64px", height: "64px", borderRadius: "100%" }}
       >
         <img
           src={display_picture}
           alt="bot-avatar"
-          style={{ width: "48px", height: "48px", borderRadius: "100%" }}
+          style={{ width: "64px", height: "64px", borderRadius: "100%", objectFit: 'cover' }}
         />
       </div>
       <div>
