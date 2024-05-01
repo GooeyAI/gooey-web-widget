@@ -98,35 +98,34 @@ const ChatInput = () => {
           ></textarea>
 
           {/* Record Button */}
-          {!showStop && config?.audio_message && !value && (
-            <div
-              style={{
-                position: "absolute",
-                width: "100%",
-                top: 0,
-                height: INPUT_HEIGHT + "px",
-                cursor: "text",
-              }}
-              onClick={() => inputRef?.current?.focus()}
-              className="d-flex justify-end align-center gpr-4"
-            >
+          <div
+            style={{
+              position: "absolute",
+              width: "100%",
+              top: 0,
+              height: INPUT_HEIGHT + "px",
+              cursor: "text",
+            }}
+            onClick={() => inputRef?.current?.focus()}
+            className="d-flex justify-end align-center gpr-4"
+          >
+            {!showStop && config?.audio_message && !value && (
               <IconButton onClick={handleRecordClick} variant="text-alt">
                 <IconMicrophone size={18} />
               </IconButton>
-            </div>
-          )}
-          {/* Send Actions */}
-          {(!!value || !config?.audio_message || showStop) && (
-            <IconButton
-              style={{ position: "absolute", right: "8px", bottom: "8.75px" }}
-              disabled={!showStop && !isSending && value.trim().length === 0 }
-              variant="text-alt"
-              className="gp-4"
-              onClick={showStop ? handleCancelSend : handleSendMessage}
-            >
-              {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
-            </IconButton>
-          )}
+            )}
+            {/* Send Actions */}
+            {(!!value || !config?.audio_message || showStop) && (
+              <IconButton
+                disabled={!showStop && !isSending && value.trim().length === 0}
+                variant="text-alt"
+                className="gp-4"
+                onClick={showStop ? handleCancelSend : handleSendMessage}
+              >
+                {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
+              </IconButton>
+            )}
+          </div>
         </div>
       )}
       {/* Gooey Branding */}
