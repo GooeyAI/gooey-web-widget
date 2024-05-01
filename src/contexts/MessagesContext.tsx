@@ -34,6 +34,7 @@ const MessagesContextProvider = (props: any) => {
   const { bot_id: botId }: any = config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
+  const [isReceiving, setIsReceiving] = useState(false);
   const apiSource = useRef(axios.CancelToken.source());
 
   const currentStreamRef = useRef<any>(null);
@@ -95,6 +96,7 @@ const MessagesContextProvider = (props: any) => {
         return newConversations;
       });
       setIsSendingMessage(false);
+      setIsReceiving(true);
       scrollToMessage();
     }
 
@@ -114,6 +116,7 @@ const MessagesContextProvider = (props: any) => {
         });
         return newConversations;
       });
+      setIsReceiving(false);
       scrollToMessage();
     }
 
@@ -187,6 +190,7 @@ const MessagesContextProvider = (props: any) => {
       setMessages(newMessages);
     } else flushData();
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
+    setIsReceiving(false);
     setIsSendingMessage(false);
   };
 
@@ -199,6 +203,7 @@ const MessagesContextProvider = (props: any) => {
     flushData,
     cancelApiCall,
     scrollContainerRef,
+    isReceiving,
   };
 
   return (

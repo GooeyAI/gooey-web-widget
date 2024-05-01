@@ -27,6 +27,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         ],
         show_gooey_branding: true,
         show_sources: true,
+        audio_message: true,
       }}
     />
   </React.StrictMode>

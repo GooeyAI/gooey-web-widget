@@ -13,7 +13,7 @@ export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
 const ChatInput = () => {
   const { config }: any = useSystemContext();
-  const { initializeQuery, isSending, cancelApiCall }: any =
+  const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
     useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -68,6 +68,7 @@ const ChatInput = () => {
   };
 
   const { bot_profile, show_gooey_branding } = config;
+  const showStop = isSending || isReceiving;
   return (
     <div
       className={clsx(
@@ -97,7 +98,7 @@ const ChatInput = () => {
           ></textarea>
 
           {/* Record Button */}
-          {!value && (
+          {!showStop && config?.audio_message && !value && (
             <div
               style={{
                 position: "absolute",
@@ -115,19 +116,15 @@ const ChatInput = () => {
             </div>
           )}
           {/* Send Actions */}
-          {value && (
+          {(!!value || !config?.audio_message || showStop) && (
             <IconButton
               style={{ position: "absolute", right: "8px", bottom: "8.75px" }}
-              disabled={!isSending && value.trim().length === 0}
+              disabled={!showStop && !isSending && value.trim().length === 0 }
               variant="text-alt"
               className="gp-4"
-              onClick={isSending ? handleCancelSend : handleSendMessage}
+              onClick={showStop ? handleCancelSend : handleSendMessage}
             >
-              {isSending && value ? (
-                <CircleStop size={24} />
-              ) : (
-                <CircleUP size={24} />
-              )}
+              {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
             </IconButton>
           )}
         </div>

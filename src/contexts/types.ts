@@ -13,4 +13,5 @@ export interface CopilotConfigType {
   show_gooey_branding: boolean;
   questions: string[];
   show_sources: boolean;
+  audio_message: boolean;
 }
