@@ -12,7 +12,7 @@ export default class GooeyEmbed {
       if (customElements.get("gooey-embed-copilot") === undefined) {
         const template = document.createElement("template");
         template.innerHTML =`
-        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.25/dist/style.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.26/dist/style.css" rel="stylesheet" />
         <div id="gooey-embed" style="height: 100%;" class="gooey-embed-container"></div>
         `;
         customElements.define(
