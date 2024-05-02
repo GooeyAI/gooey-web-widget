@@ -11,7 +11,7 @@ import { CopilotConfigType } from "src/contexts/types";
 
 const CopilotChatWidget = ({ config }: { config: CopilotConfigType }) => {
   return (
-    <div className="gooey-embed-container">
+    <div className="gooey-embed-container" style={{ height: "100%" }}>
       <SystemContextProvider config={config}>
         <MessagesContextProvider>
           <ChatWidget />

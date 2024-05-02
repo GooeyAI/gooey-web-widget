@@ -34,7 +34,7 @@ export default class GooeyEmbed {
         document.gooeyCssCopilotCssCode = undefined;
         const template = document.createElement("template");
         template.innerHTML = `
-          <div id="gooey-embed"></div>
+          <div id="gooey-embed" style="height: 100%"></div>
         `;
         shadowRoot.appendChild(template.content.cloneNode(true));
         shadowRoot.appendChild(elementStyle);

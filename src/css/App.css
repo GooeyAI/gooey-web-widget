@@ -5,6 +5,9 @@
   -webkit-font-smoothing:antialiased;
   -webkit-tap-highlight-color: transparent;
 }
+.gooey-embed-container {
+  height: 100%;
+}
 .gooey-embed-container p {
   color: unset
 }
