@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import { peerDependencies } from "./package.json";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
+import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 const env = loadEnv("dev", process.cwd(), "");
 export default defineConfig({
@@ -19,13 +20,14 @@ export default defineConfig({
       external: [...Object.keys(peerDependencies)], // Defines external dependencies for Rollup bundling.
       preserveEntrySignatures: "strict",
       output: {
+        manualChunks: undefined,
         extend: true,
         globals: {
           react: "React",
         },
         inlineDynamicImports: true,
-        entryFileNames: '[name].js',   // currently does not work for the legacy bundle
-        assetFileNames: '[name].[ext]', // currently does not work for images
+        entryFileNames: "[name].js", // currently does not work for the legacy bundle
+        assetFileNames: "[name].[ext]", // currently does not work for images
       },
     },
     // sourcemap: true, // Generates source maps for debugging.
@@ -39,5 +41,22 @@ export default defineConfig({
       src: resolve(__dirname, "src"),
     },
   },
-  plugins: [react()], // Uses the 'vite-plugin-dts' plugin for generating TypeScript declaration files (d.ts).
+  plugins: [
+    react(),
+    cssInjectedByJsPlugin({
+      injectCodeFunction: function injectCodeCustomRunTimeFunction(
+        cssCode: string,
+        options: InjectCodeOptions
+      ) {
+        try {
+          if (typeof document != "undefined") {
+            document.gooeyCssCopilotCssCode = cssCode;
+            document.gooeyCssCopilotCssOptions = options;
+          }
+        } catch (e) {
+          console.error("vite-plugin-css-injected-by-js", e);
+        }
+      },
+    }),
+  ], // Uses the 'vite-plugin-dts' plugin for generating TypeScript declaration files (d.ts).
 });

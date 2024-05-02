@@ -34,6 +34,7 @@
     "sass": "^1.69.7",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
+    "vite-plugin-css-injected-by-js": "^3.5.1",
     "vite-plugin-dts": "^3.7.0",
     "vite-plugin-require-transform": "^1.0.21"
   }
