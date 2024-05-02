@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import clsx from "clsx";
 import './buttons.scss';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>{
@@ -10,19 +9,16 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const Button = ({
-  size = "medium",
+  // size = "medium",
   variant = "text",
   className = "",
   onClick,
   ...rest
 }: ButtonProps) => {
-  const btnClasses = clsx(
-    `button-${variant?.toLowerCase()}`,
-    className
-  );
+  const variantClasses = `button-${variant?.toLowerCase()}`;
 
   return (
-    <button {...rest} onMouseDown={onClick} className={btnClasses}>
+    <button {...rest} onMouseDown={onClick} className={variantClasses + " " + className}>
       {rest.children}
     </button>
   );

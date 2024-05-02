@@ -11,11 +11,13 @@ import { CopilotConfigType } from "src/contexts/types";
 
 const CopilotChatWidget = ({ config }: { config: CopilotConfigType }) => {
   return (
-    <SystemContextProvider config={config}>
-      <MessagesContextProvider>
-        <ChatWidget />
-      </MessagesContextProvider>
-    </SystemContextProvider>
+    <div className="gooey-embed-container">
+      <SystemContextProvider config={config}>
+        <MessagesContextProvider>
+          <ChatWidget />
+        </MessagesContextProvider>
+      </SystemContextProvider>
+    </div>
   );
 };
 

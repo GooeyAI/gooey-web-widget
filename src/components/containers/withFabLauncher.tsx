@@ -12,8 +12,8 @@ const WithFabLauncher: FC<WithFabLauncherType> = ({ children, open }) => (
     role="reigon"
     className="pos-relative"
     style={{
-      height: "100vh",
-      width: "100vw",
+      height: "100%",
+      width: "100%",
       background: "none",
       overflow: "auto",
       zIndex: 1,

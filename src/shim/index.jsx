@@ -7,33 +7,43 @@ export default class GooeyEmbed {
 
   static mount(initialConfig) {
     const component = <CopilotChatWidget config={initialConfig} />;
-
+    const { target } = initialConfig || {};
     function doRender() {
-      if (customElements.get("gooey-embed-copilot") === undefined) {
+      const targetDiv = document.querySelector(target);
+      if (!targetDiv) return console.error("Target not found");
+      // @TODO - handle if target not found;
+
+      const shadowRoot =
+        targetDiv.shadowRoot || targetDiv.attachShadow({ mode: "open" });
+
+      // check if div with id is already there 
+      //avoid duplicate rendering and also don't inject css again
+      if (!shadowRoot.querySelector("#gooey-embed")) {
+        // grab css from variables (inserted from vite.config.ts) and inject it into the shadow dom
+        const elementStyle = document.createElement("style");
+        const options = document.gooeyCssCopilotCssOptions;
+        const cssCode = document.gooeyCssCopilotCssCode;
+        // SET ALL ATTRIBUTES
+        for (const attribute in options.attributes) {
+          elementStyle.setAttribute(attribute, options.attributes[attribute]);
+        }
+        // inset css into shadow dom
+        elementStyle.appendChild(document.createTextNode(cssCode));
+        // flush the css variables
+        document.gooeyCssCopilotCssOptions = undefined;
+        document.gooeyCssCopilotCssCode = undefined;
         const template = document.createElement("template");
-        template.innerHTML =`
-        <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@1.0.27/dist/style.css" rel="stylesheet" />
-        <div id="gooey-embed" style="height: 100%;" class="gooey-embed-container"></div>
+        template.innerHTML = `
+          <div id="gooey-embed"></div>
         `;
-        customElements.define(
-          "gooey-embed-copilot",
-          class extends HTMLElement {
-            constructor() {
-              super();
-              this.attachShadow({ mode: "open" });
-              this.shadowRoot.appendChild(template.content.cloneNode(true));
-            }
-          }
-        );
+        shadowRoot.appendChild(template.content.cloneNode(true));
+        shadowRoot.appendChild(elementStyle);
       }
-      const elements = document.getElementsByTagName('gooey-embed-copilot');
-      const shadowRoot = Array.from(elements)[0].shadowRoot;
-      const embed = shadowRoot.getElementById("gooey-embed");
-      shadowRoot.appendChild(embed); // Move the element to the shadow root
 
       // Insert the widget ( component ) here
-      ReactDOM.render(component, embed);
-      GooeyEmbed.el = embed;
+      const embedTarget = shadowRoot.querySelector("#gooey-embed");
+      ReactDOM.render(component, embedTarget);
+      GooeyEmbed.el = embedTarget;
     }
     if (document.readyState === "complete") {
       doRender();
