@@ -17,7 +17,7 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
   const isEmpty = !messages?.size;
   const botName = config?.bot_profile?.title;
   return (
-    <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center">
+    <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center pos-relative">
       <div>
         {/* Logo */}
         {!hideClose && (
@@ -30,7 +30,17 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
           </IconButton>
         )}
       </div>
-      <p className="font_16_700">{botName}</p>
+      <p
+        className="font_16_700"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        {botName}
+      </p>
       <div>
         <IconButton
           disabled={isEmpty}
