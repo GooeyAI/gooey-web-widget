@@ -26,13 +26,22 @@ export const BotMessageLayout = () => {
 };
 const getOutputText = (data: any) => {
   const { type = "", status = "", text, detail, output_text = {} } = data;
+  let out = '';
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    if (text) return text;
-    else return detail;
+    if (text){
+      out = text;
+      out = out.replace("🎧 I heard", "🎙️" );
+      return out;
+    }
+    out = detail;
   }
   if (type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && status === "completed") {
-    return output_text[0];
+    out = output_text[0];
   }
+
+  // replace 🎧 I heard from out
+  out = out.replace("🎧 I heard", "🎙️" );
+  return out;
 };
 
 function linkifyText(text: string) {
