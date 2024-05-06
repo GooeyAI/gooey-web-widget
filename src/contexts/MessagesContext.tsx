@@ -1,4 +1,4 @@
-import { createContext, useRef, useState } from "react";
+import { createContext, useCallback, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -56,7 +56,10 @@ const MessagesContextProvider = (props: any) => {
     let newQuery = {};
     if (type === "text") newQuery = createNewQuery(payload, type);
     if (type === "audio")
-      newQuery = createNewQuery((URL || webkitURL).createObjectURL(payload as Blob), type);
+      newQuery = createNewQuery(
+        (URL || webkitURL).createObjectURL(payload as Blob),
+        type
+      );
     sendPrompt({
       [`input_${type}`]: payload,
       messages: _messages,
@@ -71,75 +74,85 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
-  const scrollToMessage = () => {
+  const scrollMessageContainer = useCallback((y: number = 0) => {
+    // scroll to y position
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scroll({
+        top: y,
+        behavior: "smooth",
+      });
+    }
+  }, [scrollContainerRef]);
+
+  const scrollToMessage = useCallback(() => {
     // scroll to the last message
     setTimeout(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: scrollContainerRef?.current?.scrollHeight,
-          behavior: "smooth",
+      scrollMessageContainer(
+        scrollContainerRef?.current?.scrollHeight as number
+      );
+    }, 10);
+  }, [scrollMessageContainer]);
+
+  const updateStreamedMessage = useCallback(
+    (payload: any) => {
+      // stream start
+      if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
+        currentStreamRef.current = payload!.bot_message_id;
+        setMessages((prev: any) => {
+          const newConversations = new Map(prev);
+          newConversations.set(payload!.bot_message_id, {
+            id: currentStreamRef.current,
+            ...payload,
+          });
+          return newConversations;
         });
+        setIsSendingMessage(false);
+        setIsReceiving(true);
+        scrollToMessage();
       }
-    }, 200);
-  };
 
-  const updateStreamedMessage = (payload: any) => {
-    // stream start
-    if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
-      currentStreamRef.current = payload!.bot_message_id;
-      setMessages((prev: any) => {
-        const newConversations = new Map(prev);
-        newConversations.set(payload!.bot_message_id, {
-          id: currentStreamRef.current,
-          ...payload,
+      // stream end
+      if (
+        payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
+        payload?.status === "completed"
+      ) {
+        setMessages((prev: any) => {
+          const newConversations = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
+          const { output, ...restPayload } = payload;
+          newConversations.set(lastResponseId, {
+            id: currentStreamRef.current,
+            ...output,
+            ...restPayload,
+          });
+          return newConversations;
         });
-        return newConversations;
-      });
-      setIsSendingMessage(false);
-      setIsReceiving(true);
-      scrollToMessage();
-    }
+        setIsReceiving(false);
+        scrollToMessage();
+      }
 
-    // stream end
-    if (
-      payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-      payload?.status === "completed"
-    ) {
-      setMessages((prev: any) => {
-        const newConversations = new Map(prev);
-        const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
-        const { output, ...restPayload } = payload;
-        newConversations.set(lastResponseId, {
-          id: currentStreamRef.current,
-          ...output,
-          ...restPayload,
+      // streaming data
+      if (
+        payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
+        payload?.status === "running"
+      ) {
+        setMessages((prev: any) => {
+          const newConversations = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
+          const prevMessage = prev.get(lastResponseId);
+          const text = (prevMessage?.text || "") + (payload.text || "");
+          newConversations.set(lastResponseId, {
+            id: currentStreamRef.current,
+            ...payload,
+            text,
+          });
+          return newConversations;
         });
-        return newConversations;
-      });
-      setIsReceiving(false);
-      scrollToMessage();
-    }
-
-    // streaming data
-    if (
-      payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
-      payload?.status === "running"
-    ) {
-      setMessages((prev: any) => {
-        const newConversations = new Map(prev);
-        const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
-        const prevMessage = prev.get(lastResponseId);
-        const text = (prevMessage?.text || "") + (payload.text || "");
-        newConversations.set(lastResponseId, {
-          id: currentStreamRef.current,
-          ...payload,
-          text,
-        });
-        return newConversations;
-      });
-      scrollToMessage();
-    }
-  };
+        scrollToMessage();
+      }
+    },
+    [scrollToMessage]
+  );
 
   const sendPrompt = async (payload: IncomingMsg) => {
     try {
@@ -202,6 +215,7 @@ const MessagesContextProvider = (props: any) => {
     preLoadData,
     flushData,
     cancelApiCall,
+    scrollMessageContainer,
     scrollContainerRef,
     isReceiving,
   };
