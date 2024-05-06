@@ -56,25 +56,24 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   };
 
   useEffect(() => {
-    if (!navigator.mediaDevices.getUserMedia) {
-      console.log("The mediaDevices.getUserMedia() method is not supported.");
-      return;
-    }
     // try to support various browsers
     navigator.mediaDevices.getUserMedia =
       navigator?.mediaDevices?.getUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.webkitGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.mozGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.msGetUserMedia;
-    if (!navigator?.mediaDevices?.getUserMedia) return console.error("getUserMedia not supported");
-    navigator.mediaDevices?.getUserMedia(constraints).then(onSuccess, onError);
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      console.error("The mediaDevices.getUserMedia() method is not supported.");
+      return;
+    }
+    navigator?.mediaDevices?.getUserMedia(constraints).then(onSuccess, onError);
   }, []);
 
   useEffect(() => {
     // @TODO - Work around - to send without useEffect
     if (!send || !chunks.length) return; // do nothing and set send true on click
     const recordedBlob = new Blob(chunks as Blob[], {
-      type: "audio/mp3;codecs=ogg",
+      type: "audio/mp3;codecs=mpeg",
     });
     setChunks([]);
     onSend(recordedBlob);

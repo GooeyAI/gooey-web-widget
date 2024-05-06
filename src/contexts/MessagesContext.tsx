@@ -56,7 +56,7 @@ const MessagesContextProvider = (props: any) => {
     let newQuery = {};
     if (type === "text") newQuery = createNewQuery(payload, type);
     if (type === "audio")
-      newQuery = createNewQuery(URL.createObjectURL(payload as Blob), type);
+      newQuery = createNewQuery((URL || webkitURL).createObjectURL(payload as Blob), type);
     sendPrompt({
       [`input_${type}`]: payload,
       messages: _messages,
