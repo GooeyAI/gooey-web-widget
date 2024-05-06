@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
 import { BotMessageLayout } from "../Messages/IncomingMsg";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import { useMessagesContext } from "src/contexts/hooks";
 
 const ResponseLoader = (props: any) => {
-  const LoaderRef = useRef(null);
+  const { scrollMessageContainer } : any = useMessagesContext();
+  const LoaderRef = useRef<null | HTMLElement>(null)
   useEffect(() => {
     if (props.show) {
-      const loader: any = LoaderRef.current;
-      loader.scrollIntoView(false, {
-        behavior: "smooth",
-      });
+      const offsetTop = LoaderRef?.current?.offsetTop;
+      scrollMessageContainer(offsetTop);
     }
-  }, [props.show]);
+  }, [props.show, scrollMessageContainer]);
   if (!props.show) return null;
   return (
     <div ref={LoaderRef}>
