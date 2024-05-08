@@ -1,41 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  </head>
-
-  <body style="background-color: #dedede;">
-      <div id="gooey-embed"></div>
-      <link href="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/style.css" rel="stylesheet"/>
-      <script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@latest/dist/lib.js"></script>
-      <script>
-        const config = {
-          type: "copilot-fab", // type of widget (copilot-fab / copilot-direct)
-          secret_key: "API_SECRET_KEY", // API secret key
-          bot_id: "BOT_ID", // Bot ID
-          bot_profile: {
-            title: "Farmer.CHAT",
-            description:
-              "An AI Assistant designed to help farmer extension agents in India.",
-            created_by: "Digital Green",
-            display_picture:
-              "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
-            creator_link: "https://digitalgreen.org/",
-          },
-          target_div_id: "gooey-embed",
-          link_color: "#FFD700",
-          widget_text: "Help",
-          questions: [
-            "When should I plant chili?",
-            "How can I get rid of black ants on my coffee?",
-            "What is the best time to grow pepper in India?",
-          ],
-          show_gooey_branding: true,
-          show_sources: false,
-        }
-        GooeyEmbed.mount(config);
-    </script>
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gooey Embed (dev)</title>
+</head>
+<body>
+<div id="inline" style="height: 500px; width: 500px;"></div>
+<div id="popup"></div>
+<script src="dist/lib.js"></script>
+<script>
+  GooeyEmbed.mount({ target: "#popup", integration_id: "MqL", mode: "popup" });
+  GooeyEmbed.mount({ target: "#inline", integration_id: "MqL", mode: "inline" });
+</script>
+</body>
 </html>

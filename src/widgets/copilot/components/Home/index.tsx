@@ -1,12 +1,18 @@
 import PaperAirplaneIcon from "src/assets/SvgIcons/PaperAirplaneIcon";
-import "./home.css";
 import IconButton from "src/components/shared/Buttons/IconButton";
+
+import { addInlineStyle } from "src/addStyles";
+import style from "./home.scss?inline";
+addInlineStyle(style);
 
 const Home = () => {
   return (
     <div className="gp-16 home-container overflow-scroll h-100">
       {/* Logo Top */}
-      <img src="https://static.wixstatic.com/media/7f7b6d_22aa90a7a4f3458587043b15a0ab369a~mv2.png/v1/crop/x_0,y_1,w_1600,h_710/fill/w_124,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/logo%20black.png" style={{ width: '100px'}} />
+      <img
+        src="https://static.wixstatic.com/media/7f7b6d_22aa90a7a4f3458587043b15a0ab369a~mv2.png/v1/crop/x_0,y_1,w_1600,h_710/fill/w_124,h_55,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/logo%20black.png"
+        style={{ width: "100px" }}
+      />
       <div className="home-content-container">
         {/* Intro Text */}
         <div className="gmb-36 gpl-12">

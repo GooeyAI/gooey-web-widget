@@ -1,5 +1,4 @@
 import IconButton from "src/components/shared/Buttons/IconButton";
-import "./chatInput.scss";
 import { useRef, useState } from "react";
 
 import clsx from "clsx";
@@ -9,10 +8,15 @@ import CircleStop from "src/assets/SvgIcons/CircleStop";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
 import InlineAudioRecorder from "./InlineAudioRecorder";
 
+import { addInlineStyle } from "src/addStyles";
+import style from "./chatInput.scss?inline";
+addInlineStyle(style);
+
 export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
 const ChatInput = () => {
-  const { config }: any = useSystemContext();
+  const { config } = useSystemContext();
+  if (!config) return null;
   const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
     useMessagesContext();
   const [value, setValue] = useState("");
@@ -67,13 +71,12 @@ const ChatInput = () => {
     setIsRecording(false);
   };
 
-  const { bot_profile, show_gooey_branding } = config;
   const showStop = isSending || isReceiving;
   return (
     <div
       className={clsx(
         "gooeyChat-chat-input gpr-8 gpl-8",
-        !show_gooey_branding && "gpb-8"
+        !config.branding.showPoweredByGooey && "gpb-8",
       )}
     >
       {isRecording ? (
@@ -91,10 +94,10 @@ const ChatInput = () => {
             onChange={handleInputChange}
             onKeyDown={handlePressEnter}
             className={clsx(
-              "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-12 flex-1 gm-0"
+              "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-12 flex-1 gm-0",
             )}
             style={{ height: INPUT_HEIGHT + "px" }}
-            placeholder={`Message ${bot_profile.title}`}
+            placeholder={`Message ${config.branding.name || ""}`}
           ></textarea>
 
           {/* Record Button */}
@@ -109,13 +112,13 @@ const ChatInput = () => {
             onClick={() => inputRef?.current?.focus()}
             className="d-flex justify-end align-center gpr-4"
           >
-            {!showStop && config?.audio_message && !value && (
+            {!showStop && config?.enableAudioMessage && !value && (
               <IconButton onClick={handleRecordClick} variant="text-alt">
                 <IconMicrophone size={18} />
               </IconButton>
             )}
             {/* Send Actions */}
-            {(!!value || !config?.audio_message || showStop) && (
+            {(!!value || !config?.enableAudioMessage || showStop) && (
               <IconButton
                 disabled={!showStop && !isSending && value.trim().length === 0}
                 variant="text-alt"
@@ -129,7 +132,7 @@ const ChatInput = () => {
         </div>
       )}
       {/* Gooey Branding */}
-      {!!show_gooey_branding && !isRecording && (
+      {!!config.branding.showPoweredByGooey && !isRecording && (
         <p
           className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
           style={{ fontSize: "8px" }}

@@ -31,7 +31,6 @@ export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
   const { config } = useSystemContext();
-  const { bot_id: botId }: any = config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -58,7 +57,7 @@ const MessagesContextProvider = (props: any) => {
     if (type === "audio")
       newQuery = createNewQuery(
         (URL || webkitURL).createObjectURL(payload as Blob),
-        type
+        type,
       );
     sendPrompt({
       [`input_${type}`]: payload,
@@ -74,21 +73,24 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
-  const scrollMessageContainer = useCallback((y: number = 0) => {
-    // scroll to y position
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scroll({
-        top: y,
-        behavior: "smooth",
-      });
-    }
-  }, [scrollContainerRef]);
+  const scrollMessageContainer = useCallback(
+    (y: number = 0) => {
+      // scroll to y position
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scroll({
+          top: y,
+          behavior: "smooth",
+        });
+      }
+    },
+    [scrollContainerRef],
+  );
 
   const scrollToMessage = useCallback(() => {
     // scroll to the last message
     setTimeout(() => {
       scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number
+        scrollContainerRef?.current?.scrollHeight as number,
       );
     }, 10);
   }, [scrollMessageContainer]);
@@ -151,7 +153,7 @@ const MessagesContextProvider = (props: any) => {
         scrollToMessage();
       }
     },
-    [scrollToMessage]
+    [scrollToMessage],
   );
 
   const sendPrompt = async (payload: IncomingMsg) => {
@@ -160,16 +162,17 @@ const MessagesContextProvider = (props: any) => {
       if (payload?.input_audio) {
         const file = new File(
           [payload.input_audio],
-          `gooey-widget-recording-${uuidv4()}.webm`
+          `gooey-widget-recording-${uuidv4()}.webm`,
         );
         audioUrl = await uploadFileToGooey(file as File);
         payload.input_audio = audioUrl;
       }
-      const streamUrl = await getStreamUrlApi(
-        payload,
-        botId,
-        apiSource.current
-      );
+      payload = {
+        ...config?.payload,
+        integration_id: config?.integration_id,
+        ...payload,
+      };
+      const streamUrl = await getStreamUrlApi(payload, apiSource.current);
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
     } catch (err) {

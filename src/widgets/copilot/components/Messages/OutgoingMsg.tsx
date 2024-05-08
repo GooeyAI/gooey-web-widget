@@ -1,12 +1,11 @@
 import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
-import "./outgoing.scss";
+
+import { addInlineStyle } from "src/addStyles";
+import style from "./outgoing.scss?inline";
+addInlineStyle(style);
 
 const OutgoingMsg = (props: any) => {
-  const {
-    input_text = "",
-    input_prompt = "",
-    input_audio = "",
-  } = props.data;
+  const { input_text = "", input_prompt = "", input_audio = "" } = props.data;
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
       <div className="d-flex align-center gmb-8">

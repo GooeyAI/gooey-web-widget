@@ -35,7 +35,7 @@
   height: 64px;
   padding: 8px;
   border: 1px solid transparent;
-};
+}
 
 .sources-card:hover {
   border: 1px solid $muted;
@@ -71,7 +71,7 @@
   animation: wave-lines 1s infinite ease-out;
 }
 
-.gooey-placeholderMsg-container{
+.gooey-placeholderMsg-container {
   display: grid;
   width: 100%;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

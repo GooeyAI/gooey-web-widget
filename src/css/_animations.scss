@@ -1,76 +1,77 @@
-@keyframes popup{
-  
-  0%{
+@keyframes popup {
+  0% {
     opacity: 0;
-    transform:translateY(1000px);
-  }
-  
-  30%{
-    opacity: 0.6;
-    transform:translateY(100px);  
+    transform: translateY(1000px);
   }
 
-  100%{
-    opacity: 1;
-    transform:translateY(0px);
-    
+  30% {
+    opacity: 0.6;
+    transform: translateY(100px);
   }
-  
+
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 @keyframes loading-skeleton {
-	to { background-position-x: -20% }
+  to {
+    background-position-x: -20%;
+  }
 }
 
 :where([data-skeleton]) {
-	/* These will need to be intents (ie, dark mode), perhaps new global intents */
-	--skeleton-bg: #ededed;
-	--skeleton-shine: white;
-	
-	background-color: var(--skeleton-bg);
-	background-image: linear-gradient(
-	    100deg,
-	    transparent 40%,
-	    color-mix(in srgb, var(--skeleton-shine), transparent 50%) 50%,
-	    transparent 60%
-	  );
-	background-size: 200% 100%;
-	background-position-x: 120%;
+  /* These will need to be intents (ie, dark mode), perhaps new global intents */
+  --skeleton-bg: #ededed;
+  --skeleton-shine: white;
+
+  background-color: var(--skeleton-bg);
+  background-image: linear-gradient(
+    100deg,
+    transparent 40%,
+    color-mix(in srgb, var(--skeleton-shine), transparent 50%) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  background-position-x: 120%;
 }
 
 @keyframes fade-in-A {
-  0%{
+  0% {
     opacity: 0;
     transition: opacity 0.2s ease;
   }
-  
-  100%{
+
+  100% {
     opacity: 1;
   }
 }
 
 .fade-in-A {
-  animation: fade-in-A 0.3s ease 0.5s ;
+  animation: fade-in-A 0.3s ease 0.5s;
 }
 
 .anim-typing {
   line-height: 130% !important;
   opacity: 1;
   width: 100%;
-  animation: typing 0.25s steps(30), blink-border .2s step-end infinite alternate;
+  animation:
+    typing 0.25s steps(30),
+    blink-border 0.2s step-end infinite alternate;
   overflow: hidden;
 }
 
 @keyframes border-blink {
   50% {
-    border-color: transparent
+    border-color: transparent;
   }
 }
 @keyframes blink {
   50% {
     opacity: 0;
   }
-  100%{
+  100% {
     opacity: 1;
   }
 }
@@ -78,7 +79,7 @@
 @keyframes typing {
   from {
     opacity: 0;
-    width: 0
+    width: 0;
   }
   to {
     opacity: 1;

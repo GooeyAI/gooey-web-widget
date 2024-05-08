@@ -1,5 +1,4 @@
 import AppLayout from "src/components/shared/Layout/AppLayout";
-import "./widget.scss";
 import Header from "../Header";
 import Messages from "../Messages";
 import ChatInput, { CHAT_INPUT_ID } from "../ChatInput";
@@ -7,11 +6,16 @@ import { useMessagesContext } from "src/contexts/hooks";
 import { FC, Fragment } from "react";
 import clsx from "clsx";
 
+import { addInlineStyle } from "src/addStyles";
+import style from "./widget.scss?inline";
+
+addInlineStyle(style);
+
 type CopilotWidgetType = {
-  isDirect?: boolean;
+  isInline?: boolean;
 };
 
-const CopilotWidget: FC<CopilotWidgetType> = ({ isDirect }) => {
+const CopilotWidget: FC<CopilotWidgetType> = ({ isInline }) => {
   const { flushData, cancelApiCall }: any = useMessagesContext();
   const handleEditClick = () => {
     cancelApiCall();
@@ -23,12 +27,12 @@ const CopilotWidget: FC<CopilotWidgetType> = ({ isDirect }) => {
   return (
     <Fragment>
       <main
-        id='gooeyChat-container'
+        id="gooeyChat-container"
         className={clsx(
           "bg-white flex-1 d-flex flex-col justify-start overflow-hidden",
-          isDirect
+          isInline
             ? "gooeyChat-widget-container-fullWidth"
-            : "gooeyChat-widget-container"
+            : "gooeyChat-widget-container",
         )}
       >
         <AppLayout>
@@ -36,7 +40,7 @@ const CopilotWidget: FC<CopilotWidgetType> = ({ isDirect }) => {
             className="pos-relative d-flex flex-col flex-1 align-center justify-start overflow-hidden"
             style={{ maxHeight: "100%" }}
           >
-            <Header onEditClick={handleEditClick} hideClose={isDirect} />
+            <Header onEditClick={handleEditClick} hideClose={isInline} />
 
             {/* Limited Width for large devices */}
             <div

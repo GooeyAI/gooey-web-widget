@@ -4,7 +4,7 @@ import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 import { useMessagesContext } from "src/contexts/hooks";
 
 const ResponseLoader = (props: any) => {
-  const { scrollMessageContainer } : any = useMessagesContext();
+  const { scrollMessageContainer }: any = useMessagesContext();
   const LoaderRef = useRef(null);
   useEffect(() => {
     if (props.show) {

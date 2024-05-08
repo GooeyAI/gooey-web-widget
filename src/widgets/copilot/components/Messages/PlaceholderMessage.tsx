@@ -1,8 +1,11 @@
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import "./incoming.scss";
 import Button from "src/components/shared/Buttons/Button";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
 import clsx from "clsx";
+
+import { addInlineStyle } from "src/addStyles";
+import style from "./incoming.scss?inline";
+addInlineStyle(style);
 
 export const DEMO_QUERIES = {
   a: "When should I plant chili?",
@@ -12,35 +15,44 @@ export const DEMO_QUERIES = {
 };
 
 const BotProfile = () => {
-  const { config }: any = useSystemContext();
-  const { title, description, display_picture, created_by, creator_link } =
-    config?.bot_profile;
+  const branding = useSystemContext().config?.branding;
+  if (!branding) return null;
   return (
     <div className="d-flex flex-col justify-center align-center text-center">
-      <div
-        className="bot-avatar gmr-8 gmb-24 bg-primary"
-        style={{ width: "64px", height: "64px", borderRadius: "100%" }}
-      >
-        <img
-          src={display_picture}
-          alt="bot-avatar"
-          style={{ width: "64px", height: "64px", borderRadius: "100%", objectFit: 'cover' }}
-        />
-      </div>
+      {branding.photoUrl && (
+        <div
+          className="bot-avatar gmr-8 gmb-24 bg-primary"
+          style={{ width: "64px", height: "64px", borderRadius: "100%" }}
+        >
+          {" "}
+          <img
+            src={branding.photoUrl}
+            alt="bot-avatar"
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+      )}
       <div>
-        <p className="font_24_500 gmb-16">{title}</p>
+        <p className="font_24_500 gmb-16">{branding.name}</p>
         <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
-          By {created_by}
-          <a
-            href={creator_link || "/"}
-            target="_ablank"
-            style={{ marginBottom: "-5px", color: "#eee" }}
-            className="gml-6"
-          >
-            <IconGlobeNet size={14} />
-          </a>
+          {branding.byLine}
+          {branding.websiteUrl && (
+            <a
+              href={branding.websiteUrl}
+              target="_ablank"
+              style={{ marginBottom: "-5px", color: "#eee" }}
+              className="gml-6"
+            >
+              <IconGlobeNet size={14} />
+            </a>
+          )}
         </p>
-        <p className="font_12_400 gpl-32 gpr-32">{description}</p>
+        <p className="font_12_400 gpl-32 gpr-32">{branding.description}</p>
       </div>
     </div>
   );
@@ -49,18 +61,19 @@ const BotProfile = () => {
 const PlaceholderMessage = () => {
   const { initializeQuery }: any = useMessagesContext();
   const { config } = useSystemContext();
+  let conversationStarters = config?.branding.conversationStarters ?? [];
   return (
     <div className="no-scroll-bar w-100 gpl-16">
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
-        {config?.questions.map((que, idx) => (
+        {conversationStarters?.map((que, idx) => (
           <Button
             key={que}
             variant="outlined"
             onClick={() => initializeQuery(que)}
             className={clsx(
               "text-left font_12_500",
-              idx !== config?.questions.length - 1 && "gmb-8"
+              idx !== conversationStarters?.length - 1 && "gmb-8",
             )}
           >
             {que}

@@ -1,23 +1,21 @@
-@import './_breakpoints.scss';
-@import './_utils.scss';
+@import "./_breakpoints.scss";
+@import "./_utils.scss";
 
-$size-values: (
-  20, 50, 60, 80, 100, 'auto',
-);
+$size-values: (20, 50, 60, 80, 100, "auto");
 
 // margin and padding shorthands
-$size-prefixes : (
-  h  : height,
-  w  : width
+$size-prefixes: (
+  h: height,
+  w: width,
 ) !default;
 
 // Make normal spacing - e.g w-10, h-10, h-10
 @each $attr-short, $attr-long in $size-prefixes {
- @each $value in $size-values {
-   .#{$attr-short}-#{$value} {
-     #{$attr-long}: #{$value}#{'%'} !important;
-   }
- }
+  @each $value in $size-values {
+    .#{$attr-short}-#{$value} {
+      #{$attr-long}: #{$value}#{"%"} !important;
+    }
+  }
 }
 
-@include make-responsive($size-values, $size-prefixes, $grid-breakpoints, '%');
+@include make-responsive($size-values, $size-prefixes, $grid-breakpoints, "%");

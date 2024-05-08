@@ -11,7 +11,6 @@ $grid-breakpoints: (
   lg: $desktop,
 ) !default;
 
-
 // Breakpoint viewport sizes and media queries.
 //
 // Breakpoints are defined as a map of (name: minimum width), order from small to large:
@@ -26,12 +25,20 @@ $grid-breakpoints: (
 //    md
 //    >> breakpoint-next(sm, $breakpoint-names: (xs sm md lg xl xxl))
 //    md
-@function breakpoint-next($name, $breakpoints: $grid-breakpoints, $breakpoint-names: map-keys($breakpoints)) {
+@function breakpoint-next(
+  $name,
+  $breakpoints: $grid-breakpoints,
+  $breakpoint-names: map-keys($breakpoints)
+) {
   $n: index($breakpoint-names, $name);
   @if not $n {
     @error "breakpoint `#{$name}` not found in `#{$breakpoints}`";
   }
-  @return if($n < length($breakpoint-names), nth($breakpoint-names, $n + 1), null);
+  @return if(
+    $n < length($breakpoint-names),
+    nth($breakpoint-names, $n + 1),
+    null
+  );
 }
 
 // Minimum breakpoint width. Null for the smallest (first) breakpoint.
@@ -49,7 +56,7 @@ $grid-breakpoints: (
 //
 @function breakpoint-max($name, $breakpoints: $grid-breakpoints) {
   $max: map-get($breakpoints, $name);
-  @return if($max and $max > 0, $max - .02, null);
+  @return if($max and $max > 0, $max - 0.02, null);
 }
 
 // Returns a blank string if smallest breakpoint, otherwise returns the name with a dash in front.
@@ -86,7 +93,11 @@ $grid-breakpoints: (
 
 // Media that spans multiple breakpoint widths.
 // Makes the @content apply between the min and max breakpoints
-@mixin media-breakpoint-between($lower, $upper, $breakpoints: $grid-breakpoints) {
+@mixin media-breakpoint-between(
+  $lower,
+  $upper,
+  $breakpoints: $grid-breakpoints
+) {
   $min: breakpoint-min($lower, $breakpoints);
   $max: breakpoint-max($upper, $breakpoints);
 
@@ -109,9 +120,9 @@ $grid-breakpoints: (
 // No minimum for the smallest breakpoint, and no maximum for the largest one.
 // Makes the @content apply only to the given breakpoint, not viewports any wider or narrower.
 @mixin media-breakpoint-only($name, $breakpoints: $grid-breakpoints) {
-  $min:  breakpoint-min($name, $breakpoints);
+  $min: breakpoint-min($name, $breakpoints);
   $next: breakpoint-next($name, $breakpoints);
-  $max:  breakpoint-max($next, $breakpoints);
+  $max: breakpoint-max($next, $breakpoints);
 
   @if $min != null and $max != null {
     @media (min-width: $min) and (max-width: $max) {

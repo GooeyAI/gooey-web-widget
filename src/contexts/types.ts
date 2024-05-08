@@ -1,18 +1,18 @@
 export interface CopilotConfigType {
-  type: "copilot-direct" | "copilot-fab";
-  bot_id: string;
-  target?: string;
-  bot_profile: {
-    title: string;
-    description: string;
-    created_by: string;
-    display_picture: string;
-    creator_link?: string;
+  target: string;
+  integration_id: string;
+  mode: "popup" | "inline" | "fullscreen";
+  enableAudioMessage: boolean;
+  showSources: boolean;
+  branding: {
+    name?: string;
+    byLine?: string;
+    description?: string;
+    conversationStarters?: string[];
+    fabLabel?: string;
+    photoUrl?: string;
+    websiteUrl?: string;
+    showPoweredByGooey?: boolean;
   };
-  link_color: string;
-  widget_text: string;
-  show_gooey_branding: boolean;
-  questions: string[];
-  show_sources: boolean;
-  audio_message: boolean;
+  payload?: any;
 }

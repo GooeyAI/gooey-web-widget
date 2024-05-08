@@ -1,7 +1,10 @@
 import clsx from "clsx";
 import { useMemo } from "react";
-import "./appLayout.css";
 import HomeIcon from "src/assets/SvgIcons/HomeIcon";
+
+import { addInlineStyle } from "src/addStyles";
+import style from "./appLayout.css?inline";
+addInlineStyle(style);
 
 type Props = {
   children: JSX.Element | JSX.Element[] | (() => JSX.Element);
@@ -23,10 +26,7 @@ const AppLayout = ({
   return (
     <main className="layout-container h-100 d-flex flex-col">
       <div
-        className={clsx(
-          "pos-absolute w-100 layout-header",
-          headerHeightClass
-        )}
+        className={clsx("pos-absolute w-100 layout-header", headerHeightClass)}
       />
       <>
         <div
@@ -43,7 +43,7 @@ const AppLayout = ({
               onClick={() => onViewChange("home")}
               className={clsx(
                 "d-flex flex-col align-center gpt-12 gpb-12  flex-1 cr-pointer",
-                view === "home" ? "bg-darkGrey text-white" : "hover-bg-primary"
+                view === "home" ? "bg-darkGrey text-white" : "hover-bg-primary",
               )}
             >
               <HomeIcon

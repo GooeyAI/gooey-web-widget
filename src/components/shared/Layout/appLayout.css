@@ -1,4 +1,4 @@
-.layout-container{
+.layout-container {
   z-index: 1;
 }
 
@@ -22,7 +22,6 @@
 .header-height-full {
   height: 100% !important;
 }
-
 
 .nav-footer-container {
   bottom: 0;

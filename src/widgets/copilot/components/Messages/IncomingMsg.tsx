@@ -1,26 +1,30 @@
 import { useSystemContext } from "src/contexts/hooks";
-import "./incoming.scss";
 import Sources from "./Sources";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 import ResponseLoader from "../Loader";
 
+import { addInlineStyle } from "src/addStyles";
+import style from "./incoming.scss?inline";
+addInlineStyle(style);
+
 export const BotMessageLayout = () => {
-  const { config } = useSystemContext();
-  const { display_picture, title }: any = config?.bot_profile;
+  const branding = useSystemContext().config?.branding;
   return (
     <div className="d-flex align-center">
-      <div
-        className="bot-avatar bg-primary gmr-12"
-        style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-      >
-        <img
-          src={display_picture}
-          alt="bot-avatar"
+      {branding?.photoUrl && (
+        <div
+          className="bot-avatar bg-primary gmr-12"
           style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-        />
-      </div>
-      <p className="font_14_600">{title}</p>
+        >
+          <img
+            src={branding?.photoUrl}
+            alt="bot-avatar"
+            style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+          />
+        </div>
+      )}
+      <p className="font_14_600">{branding?.name}</p>
     </div>
   );
 };
@@ -63,7 +67,7 @@ const IncomingMsg = (props: any) => {
   if (!output) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12 gpr-8">
-      {config?.show_sources && <Sources data={references} />}
+      {config?.showSources && <Sources data={references} />}
       <div className="gpl-16">
         <BotMessageLayout />
         <div className="gml-36 gmt-4">

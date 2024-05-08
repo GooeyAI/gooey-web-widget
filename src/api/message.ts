@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const BASE_URL_VIDEO_BOTS =
-  "https://api.gooey.ai/v2/video-bots";
+const BASE_URL_VIDEO_BOTS = "https://api.gooey.ai/v2/video-bots";
 
 const getHeaders = (secretKey: string) => {
   return {
@@ -10,7 +9,12 @@ const getHeaders = (secretKey: string) => {
   };
 };
 
-export const sendMessageApi = (body: any, botId: string, secretKey: string, cancelToken: any) => {
+export const sendMessageApi = (
+  body: any,
+  botId: string,
+  secretKey: string,
+  cancelToken: any,
+) => {
   const headers = getHeaders(secretKey);
   return axios.post(`${BASE_URL_VIDEO_BOTS}/?example_id=${botId}`, body, {
     headers,

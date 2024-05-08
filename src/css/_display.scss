@@ -1,10 +1,7 @@
-@import './breakpoints';
+@import "./breakpoints";
 
 // Generate displays - e.g block, none, flex
-$displays:(
-  flex, block, none, inline-block
-) !default;
-
+$displays: (flex, block, none, inline-block) !default;
 
 // Make normal display - e.g flex, none
 @each $value in $displays {
@@ -13,21 +10,24 @@ $displays:(
   }
 }
 
-// Make responsive display - mob-flex, tab-block, 
+// Make responsive display - mob-flex, tab-block,
 @each $breakpoint in map-keys($grid-breakpoints) {
   @include media-breakpoint-up($breakpoint) {
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
     @each $value in $displays {
-      .#{$infix}-d-#{$value} { display: $value !important; }
+      .#{$infix}-d-#{$value} {
+        display: $value !important;
+      }
     }
   }
 }
 
-
 // Generate positions - e.g pos-relative, pos-absolute, pos-sticky
-$positions:(relative, absolute, sticky, fixed, static, initial, unset);
+$positions: (relative, absolute, sticky, fixed, static, initial, unset);
 
 @each $pos in $positions {
-  .pos-#{$pos} { position: $pos !important; }
+  .pos-#{$pos} {
+    position: $pos !important;
+  }
 }

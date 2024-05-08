@@ -1,6 +1,6 @@
-@import './_breakpoints.scss';
-@import './_mixins.scss';
-@import './colors.module.scss';
+@import "./_breakpoints.scss";
+@import "./_mixins.scss";
+@import "./colors.module.scss";
 
 @each $name, $value in $colors {
   .bg-#{$name} {
@@ -16,10 +16,10 @@
     @include media-breakpoint-up($breakpoint) {
       $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
       .#{$infix}-bg-#{$name} {
-        background-color:$value !important;
+        background-color: $value !important;
       }
       .#{$infix}-text-#{$name} {
-        color:$value !important;
+        color: $value !important;
       }
     }
   }

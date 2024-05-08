@@ -7,10 +7,7 @@ const IconButton = ({
   onClick,
   ...rest
 }: ButtonProps) => {
-  const btnClasses = clsx(
-    `button-${variant?.toLowerCase()}`,
-    className
-  );
+  const btnClasses = clsx(`button-${variant?.toLowerCase()}`, className);
   return (
     <button {...rest} className={btnClasses} onMouseDown={onClick}>
       {rest.children}

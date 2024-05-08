@@ -97,7 +97,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const seconds = Math.floor((time % 6000) / 100);
 
   return (
-    <div className="gpl-8 gpr-8 d-flex align-center gpb-16 gpt-10">
+    <div className="gpl-8 gpr-8 d-flex align-center gpb-25">
       <IconButton
         variant="text"
         className="bg-light gp-8"

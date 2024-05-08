@@ -17,12 +17,7 @@ const Responses = (props: any) => {
         const role = responseData.role;
 
         if (role === "user")
-          return (
-            <OutgoingMsg
-              data={responseData}
-              key={id}
-            />
-          );
+          return <OutgoingMsg data={responseData} key={id} />;
         return <IncomingMsg data={responseData} key={id} id={id} />;
       })}
     </>
@@ -38,7 +33,7 @@ const Messages = () => {
       ref={scrollContainerRef}
       className={clsx(
         "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 br-large-right d-flex flex-col",
-        isEmpty ? "justify-end" : "justify-start"
+        isEmpty ? "justify-end" : "justify-start",
       )}
       style={{ overflowY: "auto" }}
     >

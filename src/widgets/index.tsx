@@ -1,17 +1,37 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
 import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import ChatWidget from "./copilot";
-import "@fontsource/nunito";
-import "@fontsource/nunito/500.css";
-import "@fontsource/nunito/600.css";
-import "@fontsource/nunito/700.css";
-import { CopilotConfigType } from "src/contexts/types";
 
-// Default values fed to the widget to develop without injecting
+import nunitoStyle500 from "@fontsource/nunito/500.css?inline";
+import nunitoStyle600 from "@fontsource/nunito/600.css?inline";
+import nunitoStyle700 from "@fontsource/nunito/700.css?inline";
+import nunitoStyle from "@fontsource/nunito?inline";
+import { addInlineStyle, Styles } from "src/addStyles";
+import rootStyle from "src/css/root.scss?inline";
 
-const CopilotChatWidget = ({ config }: { config: CopilotConfigType }) => {
+addInlineStyle(rootStyle);
+addInlineStyle(nunitoStyle);
+addInlineStyle(nunitoStyle500);
+addInlineStyle(nunitoStyle600);
+addInlineStyle(nunitoStyle700);
+
+export function CopilotChatWidget({ config }: { config?: any }) {
+  config = {
+    mode: "inline",
+    enableAudioMessage: true,
+    showGooeyBranding: true,
+    showSources: true,
+    branding: {},
+    ...config, // Override default config with user provided config
+  };
+  config.branding.name ||= "Gooey";
+  config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
+
   return (
     <div className="gooey-embed-container" style={{ height: "100%" }}>
+      <Styles />
       <SystemContextProvider config={config}>
         <MessagesContextProvider>
           <ChatWidget />
@@ -19,6 +39,15 @@ const CopilotChatWidget = ({ config }: { config: CopilotConfigType }) => {
       </SystemContextProvider>
     </div>
   );
-};
+}
 
-export { CopilotChatWidget };
+export function renderCopilotChatWidget(elem: Element, config?: any) {
+  const shadow = elem.attachShadow({ mode: "open" });
+  const root = ReactDOM.createRoot(shadow);
+  root.render(
+    <React.StrictMode>
+      <CopilotChatWidget config={config} />
+    </React.StrictMode>,
+  );
+  return root;
+}

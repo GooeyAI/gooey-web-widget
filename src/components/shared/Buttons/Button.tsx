@@ -1,7 +1,11 @@
 import { ReactNode } from "react";
-import './buttons.scss';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>{
+import { addInlineStyle } from "src/addStyles";
+import style from "./buttons.scss?inline";
+addInlineStyle(style);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "medium" | "small" | "large";
   children?: ReactNode;
   className?: string;
@@ -18,7 +22,11 @@ const Button = ({
   const variantClasses = `button-${variant?.toLowerCase()}`;
 
   return (
-    <button {...rest} onMouseDown={onClick} className={variantClasses + " " + className}>
+    <button
+      {...rest}
+      onMouseDown={onClick}
+      className={variantClasses + " " + className}
+    >
       {rest.children}
     </button>
   );

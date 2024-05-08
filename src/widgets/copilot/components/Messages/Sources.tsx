@@ -35,7 +35,7 @@ const SourcesCard = (props: any) => {
       <div
         className={clsx(
           "sources-card d-flex flex-col justify-between",
-          index !== data.length - 1 && "gmr-12"
+          index !== data.length - 1 && "gmr-12",
         )}
       >
         <p className="font_10_500">

@@ -1,11 +1,13 @@
 import clsx from "clsx";
-import "./launcher.scss";
 import { useSystemContext } from "src/contexts/hooks";
 
+import { addInlineStyle } from "src/addStyles";
+import style from "./launcher.scss?inline";
+addInlineStyle(style);
+
 const Launcher = () => {
-  const { toggleWidget, config }: any = useSystemContext();
-  const { bot_profile, widget_text } = config;
-  const iconSize = widget_text ? 36 : 56;
+  const { toggleWidget, config } = useSystemContext();
+  const iconSize = config?.branding.fabLabel ? 36 : 56;
   return (
     <div
       style={{
@@ -18,21 +20,25 @@ const Launcher = () => {
         onClick={toggleWidget}
         className={clsx(
           "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
-          widget_text && "gpl-6 gpt-6 gpb-6 "
+          config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 ",
         )}
         style={{ borderRadius: "30px", padding: 0 }}
       >
-        <img
-          src={bot_profile?.display_picture}
-          alt="Copilot logo"
-          style={{
-            objectFit: "contain",
-            borderRadius: "50%",
-            width: iconSize + "px",
-            height: iconSize + "px",
-          }}
-        />
-        {!!widget_text && <p className="font_16_600 gp-8">{widget_text}</p>}
+        {config?.branding.photoUrl && (
+          <img
+            src={config?.branding.photoUrl}
+            alt="Copilot logo"
+            style={{
+              objectFit: "contain",
+              borderRadius: "50%",
+              width: iconSize + "px",
+              height: iconSize + "px",
+            }}
+          />
+        )}
+        {!!config?.branding.fabLabel && (
+          <p className="font_16_600 gp-8">{config?.branding.fabLabel}</p>
+        )}
       </button>
     </div>
   );

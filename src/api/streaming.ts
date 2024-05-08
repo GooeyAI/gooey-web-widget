@@ -17,26 +17,16 @@ export const STREAM_MESSAGE_TYPES = {
   MESSAGE_PART: "message_part",
 };
 
-export const getStreamUrlApi = async (
-  body: any,
-  botId: string,
-  cancelToken: any
-) => {
+export const getStreamUrlApi = async (body: any, cancelToken: any) => {
   const headers = getHeaders();
-  const _body = {
-    // your integration's ID as shown in the Gooey.AI Integrations tab
-    integration_id: botId,
-    // the input text for the bot
-    ...body,
-  };
   const response: any = await axios.post(
     BASE_URL_STREAMING,
-    JSON.stringify(_body),
+    JSON.stringify(body),
     {
       headers,
       responseType: "stream",
       cancelToken: cancelToken.token,
-    }
+    },
   );
   return response.headers.get("Location");
 };

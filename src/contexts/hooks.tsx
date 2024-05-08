@@ -3,4 +3,5 @@ import { MessagesContext } from "./MessagesContext";
 import { SystemContext, SystemContextType } from "./SystemContext";
 
 export const useMessagesContext = () => useContext(MessagesContext);
-export const useSystemContext = (): SystemContextType => useContext(SystemContext);
+export const useSystemContext = (): SystemContextType =>
+  useContext(SystemContext);
