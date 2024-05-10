@@ -8,7 +8,7 @@ const OutgoingMsg = (props: any) => {
     input_audio = "",
   } = props.data;
   return (
-    <div className="gooey-outgoingMsg gmb-12">
+    <div className="gooey-outgoingMsg gmb-12 gpl-16">
       <div className="d-flex align-center gmb-8">
         <IconUserCircle size={24} />
         <p className="font_16_600 gml-12">You</p>

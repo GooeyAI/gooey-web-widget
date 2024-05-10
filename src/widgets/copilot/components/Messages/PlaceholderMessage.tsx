@@ -50,7 +50,7 @@ const PlaceholderMessage = () => {
   const { initializeQuery }: any = useMessagesContext();
   const { config } = useSystemContext();
   return (
-    <div className="no-scroll-bar w-100">
+    <div className="no-scroll-bar w-100 gpl-16">
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
         {config?.questions.map((que, idx) => (

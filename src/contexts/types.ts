@@ -1,6 +1,7 @@
 export interface CopilotConfigType {
   type: "copilot-direct" | "copilot-fab";
   bot_id: string;
+  target?: string;
   bot_profile: {
     title: string;
     description: string;

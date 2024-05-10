@@ -26,11 +26,11 @@ export const BotMessageLayout = () => {
 };
 const getOutputText = (data: any) => {
   const { type = "", status = "", text, detail, output_text = {} } = data;
-  let out = '';
+  let out = "";
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    if (text){
+    if (text) {
       out = text;
-      out = out.replace("🎧 I heard", "🎙️" );
+      out = out.replace("🎧 I heard", "🎙️");
       return out;
     }
     out = detail;
@@ -40,17 +40,17 @@ const getOutputText = (data: any) => {
   }
 
   // replace 🎧 I heard from out
-  out = out.replace("🎧 I heard", "🎙️" );
+  out = out.replace("🎧 I heard", "🎙️");
   return out;
 };
 
 function linkifyText(text: string) {
   // Regular expression to match URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g;
-  
+
   // Replace URLs with <a> tags
-  return text.replace(urlRegex, function(url: string) {
-      return '<a href="' + url + '" target="_blank">' + url + '</a>';
+  return text.replace(urlRegex, function (url: string) {
+    return '<a href="' + url + '" target="_blank">' + url + "</a>";
   });
 }
 
@@ -60,31 +60,33 @@ const IncomingMsg = (props: any) => {
   const audioTrack = output_audio[0];
   const output = getOutputText(props.data);
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-  if(!output) return <ResponseLoader show={true} />;
+  if (!output) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12 gpr-8">
       {config?.show_sources && <Sources data={references} />}
-      <BotMessageLayout />
-      <div className="gml-36 gmt-4">
-        <div>
-          <p
-            className="font_16_400 anim-typing gooey-output-text"
-            id={props?.id}
-            dangerouslySetInnerHTML={{ __html: linkifyText(output) }}
-          />
-          {isStreaming && (
-            <CircleBeat
-              className="anim-blink gml-4"
-              size={16}
-              style={{ display: "inline", marginBottom: '-2px' }}
+      <div className="gpl-16">
+        <BotMessageLayout />
+        <div className="gml-36 gmt-4">
+          <div>
+            <p
+              className="font_16_400 anim-typing gooey-output-text"
+              id={props?.id}
+              dangerouslySetInnerHTML={{ __html: linkifyText(output) }}
             />
+            {isStreaming && (
+              <CircleBeat
+                className="anim-blink gml-4"
+                size={16}
+                style={{ display: "inline", marginBottom: "-2px" }}
+              />
+            )}
+          </div>
+          {audioTrack && (
+            <div className="gmt-16">
+              <audio controls src={audioTrack}></audio>
+            </div>
           )}
         </div>
-        {audioTrack && (
-          <div className="gmt-16">
-            <audio controls src={audioTrack}></audio>
-          </div>
-        )}
       </div>
     </div>
   );
