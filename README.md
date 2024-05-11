@@ -82,12 +82,10 @@ Determines how the Gooey widget is displayed on your site:
 
 ##### `enableAudioMessage: boolean`
 
-A boolean to enable or disable sending audio messages to the bot.
-
-#####  `showGooeyBranding`
-A boolean to control the display of Gooey's branding on the widget.
+A boolean to enable or disable recording and sending audio messages to the bot.
 
 #####  `showSources`
+
 A boolean that dictates whether sources of information (if any) should be shown.
 
 ##### `branding: object`
@@ -101,6 +99,7 @@ Controls visual aspects of the widget and defines the textual content and relate
 - `fabLabel`: The label for the Floating Action Button in popup mode.
 - `photoUrl`: The URL of an image used as the bot's avatar.
 - `websiteUrl`: A URL to the bot's or company's homepage, which can be accessed for more information.
+- `showPoweredByGooey`: A boolean to show or hide the "Powered by Gooey" attribution in the widget.
 
 ##### `payload: object`
 
