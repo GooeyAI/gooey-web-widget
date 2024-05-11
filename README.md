@@ -1,4 +1,12 @@
-## Usage
+# Gooey Web Widget
+
+A chat widget for embedding Gooey AI bots on your website.
+
+
+## Raw Library Usage
+
+If you're new, you should probably head over to [gooey.ai/copilot](https://gooey.ai/copilot/integrations/), create and test your integration there. This guide is for advanced users.
+
 1. Copy the following code into the `<body>` section of your target HTML file where you want the widget to appear:
 
 ```html
@@ -7,6 +15,12 @@
 <script>
     GooeyEmbed.mount({ target: "#gooey-embed", integration_id: "<Your Integration ID>" });
 </script>
+```
+
+If you use the lib.js provided from gooey.ai, the config will be automatically provided based on your settings.
+
+```html
+<script src="https://gooey.ai/chat/<Name>-<Integration ID>/lib.js"></script>
 ```
 
 2. Replace `"<Your Integration ID>"` with your Integration's ID, as it appears on the Integration tab.
@@ -124,6 +138,13 @@ Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Inte
    ```
 2. The output will be available in the `dist/` directory.
 3. Test the widget opening `test.html` in your browser.
+4. To test inside other projects, run a python web server:
+   ```bash
+   python -m http.server 9000
+   ```
+   and open [localhost:9000/test.html](http://localhost:9000/test.html) in your browser.
+
+   (For the gooey server, set `WEB_WIDGET_LIB=http://localhost:9000/dist/lib.js` )
 
 ## **Notes**
 
