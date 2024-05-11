@@ -18,13 +18,16 @@ addInlineStyle(nunitoStyle600);
 addInlineStyle(nunitoStyle700);
 
 export function CopilotChatWidget({ config }: { config?: any }) {
+  // apply defaults to the user-provided config
   config = {
     mode: "inline",
     enableAudioMessage: true,
-    showGooeyBranding: true,
     showSources: true,
-    branding: {},
-    ...config, // Override default config with user provided config
+    ...config,
+    branding: {
+      showPoweredByGooey: true,
+      ...config?.branding,
+    },
   };
   config.branding.name ||= "Gooey";
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";

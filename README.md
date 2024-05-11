@@ -145,6 +145,21 @@ Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Inte
 
    (For the gooey server, set `WEB_WIDGET_LIB=http://localhost:9000/dist/lib.js` )
 
+## Publishing
+
+1. Commit your changes
+2. Tag the commit with the new version number:
+   ```bash
+   git tag -a 2.x.x
+   ```
+3. Push the commit with tags:
+    ```bash
+    git push origin main --tags
+    ```
+4. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
+5. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
+   
+
 ## **Notes**
 
 - `src/widgets/*`: List of embeddable React components.
