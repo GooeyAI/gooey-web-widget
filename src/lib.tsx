@@ -23,7 +23,7 @@ class GooeyEmbedFactory {
       );
     }
     let innerDiv = document.createElement("div");
-    innerDiv.style.height = "100%";
+    innerDiv.style.display = "contents";
     targetElem.appendChild(innerDiv);
     let root = renderCopilotChatWidget(innerDiv, config);
     this._mounted.push({ innerDiv, root });
