@@ -66,14 +66,13 @@ const PlaceholderMessage = () => {
     <div className="no-scroll-bar w-100 gpl-16">
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
-        {conversationStarters?.map((que, idx) => (
+        {conversationStarters?.map((que) => (
           <Button
             key={que}
             variant="outlined"
             onClick={() => initializeQuery(que)}
             className={clsx(
               "text-left font_12_500",
-              idx !== conversationStarters?.length - 1 && "gmb-8",
             )}
           >
             {que}
