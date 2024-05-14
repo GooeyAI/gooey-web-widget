@@ -19,7 +19,7 @@ const ICONS_DICT = {
 
 const SourcesCard = (props: any) => {
   const { data, index, onClick } = props;
-  const [title] = (data?.title || "").split(",");
+  const [title, pageNum] = (data?.title || "").split(",");
 
   if (!data) return null;
   const hasFormat = title?.includes(".");
@@ -41,7 +41,15 @@ const SourcesCard = (props: any) => {
         <p className="font_10_500">
           {hasFormat ? title.slice(0, title.length - 4) : title}
         </p>
-        {!!Icon && <Icon />}
+        <div className="d-flex ">
+          {!!Icon && <Icon />}
+          {!!pageNum && (
+            <p className="font_10_500 gml-4">
+              {pageNum}
+              {pageNum ? "⋅" : ""}[{index + 1}]
+            </p>
+          )}
+        </div>
       </div>
     </button>
   );
@@ -85,7 +93,7 @@ const Sources = ({ data }: any) => {
                   onClick={() => openInWindow(source?.url)}
                   style={{ height: "64px" }}
                   className={clsx(
-                    "sources-card d-flex flex-col justify-between pos-relative",
+                    "sources-card d-flex flex-col justify-between align-start pos-relative text-left",
                     index === 0 && "gml-48",
                     index !== data.length - 1 && "gmr-12"
                   )}
