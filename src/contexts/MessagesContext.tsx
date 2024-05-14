@@ -12,7 +12,7 @@ import { uploadFileToGooey } from "src/api/file-upload";
 interface IncomingMsg {
   input_text?: string;
   input_audio?: string;
-  messages: [];
+  conversation_id: string;
   citation_style: "symbol" | "number";
 }
 
@@ -41,27 +41,18 @@ const MessagesContextProvider = (props: any) => {
 
   const initializeQuery = (payload: string | Blob, type: string = "text") => {
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
-    const _messages: any = [
-      ...(lastResponse?.output?.final_prompt.slice(1) || []),
-    ];
-    if (messages.size) {
-      // add the latest output_text
-      _messages.push({
-        role: "assistant",
-        content: lastResponse?.output_text[0] || "",
-      });
-    }
+    const conversationId = lastResponse?.conversation_id;
     setIsSendingMessage(true);
     let newQuery = {};
     if (type === "text") newQuery = createNewQuery(payload, type);
     if (type === "audio")
       newQuery = createNewQuery(
         (URL || webkitURL).createObjectURL(payload as Blob),
-        type,
+        type
       );
     sendPrompt({
       [`input_${type}`]: payload,
-      messages: _messages,
+      conversation_id: conversationId,
       citation_style: CITATION_STYLE,
     });
     addResponse(newQuery);
@@ -90,7 +81,7 @@ const MessagesContextProvider = (props: any) => {
     // scroll to the last message
     setTimeout(() => {
       scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number,
+        scrollContainerRef?.current?.scrollHeight as number
       );
     }, 10);
   }, [scrollMessageContainer]);
@@ -121,8 +112,10 @@ const MessagesContextProvider = (props: any) => {
         setMessages((prev: any) => {
           const newConversations = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
+          const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
           newConversations.set(lastResponseId, {
+            conversation_id: prevMessage?.conversation_id, // keep the conversation id
             id: currentStreamRef.current,
             ...output,
             ...restPayload,
@@ -144,8 +137,9 @@ const MessagesContextProvider = (props: any) => {
           const prevMessage = prev.get(lastResponseId);
           const text = (prevMessage?.text || "") + (payload.text || "");
           newConversations.set(lastResponseId, {
-            id: currentStreamRef.current,
+            ...prevMessage,
             ...payload,
+            id: currentStreamRef.current,
             text,
           });
           return newConversations;
@@ -153,7 +147,7 @@ const MessagesContextProvider = (props: any) => {
         scrollToMessage();
       }
     },
-    [scrollToMessage],
+    [scrollToMessage]
   );
 
   const sendPrompt = async (payload: IncomingMsg) => {
@@ -162,7 +156,7 @@ const MessagesContextProvider = (props: any) => {
       if (payload?.input_audio) {
         const file = new File(
           [payload.input_audio],
-          `gooey-widget-recording-${uuidv4()}.webm`,
+          `gooey-widget-recording-${uuidv4()}.webm`
         );
         audioUrl = await uploadFileToGooey(file as File);
         payload.input_audio = audioUrl;
