@@ -18,7 +18,7 @@ const ICONS_DICT = {
 };
 
 const SourcesCard = (props: any) => {
-  const { data, index, onClick } = props;
+  const { data, index, onClick, loading } = props;
   const [title, pageNum] = (data?.title || "").split(",");
 
   if (!data) return null;
@@ -42,7 +42,7 @@ const SourcesCard = (props: any) => {
           {hasFormat ? title.slice(0, title.length - 4) : title}
         </p>
         <div className="d-flex ">
-          {!!Icon && <Icon />}
+          {!!Icon && !loading && <Icon />}
           {!!pageNum && (
             <p className="font_10_500 gml-4">
               {pageNum}
@@ -76,47 +76,15 @@ const Sources = ({ data }: any) => {
         <p className="font_16_400 gml-20">Sources</p>
       </div>
       <div className="gmt-8 sources-listContainer">
-        {!loading
-          ? sourcesData.map((source: any, index: number) => (
-              <SourcesCard
-                key={source?.title + index}
-                data={source}
-                index={index}
-                onClick={openInWindow.bind(null, source?.url)}
-              />
-            ))
-          : data?.map((source: any, index: number) => {
-              const [title, pageNum] = (source?.title || "").split(",");
-              const hasFormat = title?.includes(".");
-              return (
-                <button
-                  onClick={() => openInWindow(source?.url)}
-                  style={{ height: "64px" }}
-                  className={clsx(
-                    "sources-card d-flex flex-col justify-between align-start pos-relative text-left",
-                    index === 0 && "gml-48",
-                    index !== data.length - 1 && "gmr-12"
-                  )}
-                >
-                  <p className="font_10_500">
-                    {hasFormat ? title.slice(0, title.length - 4) : title}
-                  </p>
-                  <p className="font_10_500">
-                    {pageNum}
-                    {pageNum ? "⋅" : ""}[{index + 1}]
-                  </p>
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "6px",
-                      right: "8px",
-                    }}
-                  >
-                    <IconExternalLink size={8} />
-                  </div>
-                </button>
-              );
-            })}
+        {(loading ? data : sourcesData).map((source: any, index: number) => (
+          <SourcesCard
+            key={source?.title + index}
+            data={source}
+            index={index}
+            onClick={openInWindow.bind(null, source?.url)}
+            loading={loading}
+          />
+        ))}
       </div>
     </div>
   );
