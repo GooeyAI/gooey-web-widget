@@ -14,7 +14,7 @@ const ICONS_DICT = {
   sheets: IconSheets,
   docs: IconGoogleDocs,
   pdf: () => <IconPDF style={{ fill: "#F40F02" }} size={12} />,
-  default: () =>  <IconExternalLink size={10}  />,
+  default: () => <IconExternalLink size={10} />,
 };
 
 const SourcesCard = (props: any) => {
@@ -35,7 +35,7 @@ const SourcesCard = (props: any) => {
       <div
         className={clsx(
           "sources-card d-flex flex-col justify-between",
-          index !== data.length - 1 && "gmr-12",
+          index !== data.length - 1 && "gmr-12"
         )}
       >
         <p className="font_10_500">
@@ -47,37 +47,6 @@ const SourcesCard = (props: any) => {
   );
 };
 
-const SourcesLoader = () => {
-  return (
-    <>
-      <div
-        className="sources-card sources-card-disabled d-flex flex-col pos-relative gmr-12 gml-48"
-        style={{ height: "64px" }}
-      >
-        <div className="sources-skeleton d-flex flex-col justify-between flex-1">
-          <div>
-            <div className="line" style={{ height: "6px", width: "70%" }} />
-            <div className="line" style={{ height: "6px", width: "40%" }} />
-          </div>
-          <div className="line" style={{ height: "6px", width: "40%" }} />
-        </div>
-      </div>
-      <div
-        className="sources-card sources-card-disabled  d-flex flex-col pos-relative gmr-12"
-        style={{ height: "64px" }}
-      >
-        <div className="sources-skeleton d-flex flex-col justify-between flex-1">
-          <div>
-            <div className="line" style={{ height: "6px", width: "70%" }} />
-            <div className="line" style={{ height: "6px", width: "40%" }} />
-          </div>
-          <div className="line" style={{ height: "6px", width: "40%" }} />
-        </div>
-      </div>
-    </>
-  );
-};
-
 const Sources = ({ data }: any) => {
   const openInWindow = (url: string) => window.open(url, "_blank");
   const [sourcesData, setSourcesData] = useState<any>([]);
@@ -85,12 +54,12 @@ const Sources = ({ data }: any) => {
 
   useEffect(() => {
     if (!data || !data.length) return;
-    setLoading(true);
     fetchSourcesData(data).then((sourcesData) => {
       setSourcesData(sourcesData);
       setLoading(false);
     });
   }, [data]);
+
   if (!data || !data.length) return null;
   return (
     <div className="gmb-8">
@@ -99,18 +68,47 @@ const Sources = ({ data }: any) => {
         <p className="font_16_400 gml-20">Sources</p>
       </div>
       <div className="gmt-8 sources-listContainer">
-        {!loading ? (
-          sourcesData.map((source: any, index: number) => (
-            <SourcesCard
-              key={source?.title + index}
-              data={source}
-              index={index}
-              onClick={openInWindow.bind(null, source?.url)}
-            />
-          ))
-        ) : (
-          <SourcesLoader />
-        )}
+        {!loading
+          ? sourcesData.map((source: any, index: number) => (
+              <SourcesCard
+                key={source?.title + index}
+                data={source}
+                index={index}
+                onClick={openInWindow.bind(null, source?.url)}
+              />
+            ))
+          : data?.map((source: any, index: number) => {
+              const [title, pageNum] = (source?.title || "").split(",");
+              const hasFormat = title?.includes(".");
+              return (
+                <button
+                  onClick={() => openInWindow(source?.url)}
+                  style={{ height: "64px" }}
+                  className={clsx(
+                    "sources-card d-flex flex-col justify-between pos-relative",
+                    index === 0 && "gml-48",
+                    index !== data.length - 1 && "gmr-12"
+                  )}
+                >
+                  <p className="font_10_500">
+                    {hasFormat ? title.slice(0, title.length - 4) : title}
+                  </p>
+                  <p className="font_10_500">
+                    {pageNum}
+                    {pageNum ? "⋅" : ""}[{index + 1}]
+                  </p>
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "6px",
+                      right: "8px",
+                    }}
+                  >
+                    <IconExternalLink size={8} />
+                  </div>
+                </button>
+              );
+            })}
       </div>
     </div>
   );
