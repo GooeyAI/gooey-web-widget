@@ -147,18 +147,26 @@ Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Inte
 
 ## Publishing
 
-1. Commit your changes
-2. Tag the commit with the new version number:
+1. Build the library:
+   ```bash
+   npm run build
+   ``` 
+3. Commit your changes
+4. Tag the commit with the new version number:
    ```bash
    git tag -a 2.x.x
    ```
-3. Push the commit with tags:
+5. Push the commit with tags:
     ```bash
-    git push origin main --tags
+    git push origin master --tags
     ```
-4. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
-5. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
-   
+6. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
+
+   If you want to ensure your clients get the latest version of the lib (ahead of the cache), please specify the version in the URL like so: `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2.x.x/dist/lib.js`
+
+   For Gooey Server, update the `WEB_WIDGET_LIB` environment variable.
+7. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
+
 
 ## **Notes**
 
