@@ -16,7 +16,6 @@ export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
 const ChatInput = () => {
   const { config } = useSystemContext();
-  if (!config) return null;
   const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
     useMessagesContext();
   const [value, setValue] = useState("");
@@ -36,7 +35,7 @@ const ChatInput = () => {
 
   const handlePressEnter = (e: any) => {
     if (e.keyCode === 13 && !e.shiftKey) {
-      if (isSending) return;
+      if (isSending || isReceiving) return;
       e.preventDefault();
       handleSendMessage();
     } else if (e.keyCode === 13 && e.shiftKey) {
@@ -71,12 +70,13 @@ const ChatInput = () => {
     setIsRecording(false);
   };
 
+  if (!config) return null;
   const showStop = isSending || isReceiving;
   return (
     <div
       className={clsx(
         "gooeyChat-chat-input gpr-8 gpl-8",
-        !config.branding.showPoweredByGooey && "gpb-8",
+        !config.branding.showPoweredByGooey && "gpb-8"
       )}
     >
       {isRecording ? (
@@ -94,7 +94,7 @@ const ChatInput = () => {
             onChange={handleInputChange}
             onKeyDown={handlePressEnter}
             className={clsx(
-              "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-12 flex-1 gm-0",
+              "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-12 flex-1 gm-0"
             )}
             style={{ height: INPUT_HEIGHT + "px" }}
             placeholder={`Message ${config.branding.name || ""}`}
