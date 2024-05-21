@@ -23,9 +23,11 @@
 .gooey-embed-container {
   height: 100%;
 }
+
 .gooey-embed-container p {
-  color: unset;
+  color: default;
 }
+
 .gooey-embed-container a {
   text-decoration: none;
 }
@@ -40,4 +42,41 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 0;
+}
+
+code,
+code[class*="language-"] {
+  font-size: 0.9rem;
+  color: inherit;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  /*margin: inherit;*/
+  /*padding: inherit;*/
+}
+
+pre,
+pre[class*="language-"] {
+  /*max-width: fit-content;*/
+  background: #f5f2f0;
+  max-height: 20rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 0.8rem;
+  margin: 0 0 0.9rem;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: black;
+  backdrop-filter: blur(3px);
+  box-shadow: inherit;
+  border-radius: inherit;
+  padding: 0.5rem;
+}
+
+div.code-toolbar > .toolbar {
+  font-size: 1.1rem;
+  top: 0.4rem;
+  right: 0.4rem;
 }
