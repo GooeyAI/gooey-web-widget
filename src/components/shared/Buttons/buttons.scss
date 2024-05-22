@@ -40,12 +40,16 @@ button:disabled {
 .button-text:disabled:hover {
   border: 1px solid transparent;
 }
+
 .button-text:hover {
   border: 1px solid #eee;
 }
+
 .button-text:active {
   background-color: #eee;
+  color: #0d0d0d !important;
 }
+
 .button-text:active:disabled {
   background-color: unset;
 }

@@ -15,7 +15,6 @@ const Responses = (props: any) => {
       {que.map((id: string) => {
         const responseData = msgs.get(id);
         const role = responseData.role;
-
         if (role === "user")
           return <OutgoingMsg data={responseData} key={id} />;
         return <IncomingMsg data={responseData} key={id} id={id} />;

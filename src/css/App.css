@@ -19,13 +19,18 @@
     "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
+
 .gooey-embed-container {
   height: 100%;
 }
 
 .gooey-embed-container p {
   color: default;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .gooey-embed-container a {
@@ -56,14 +61,13 @@ code[class*="language-"] {
 
 pre,
 pre[class*="language-"] {
-  /*max-width: fit-content;*/
   background: #f5f2f0;
-  max-height: 20rem;
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
   padding: 0.8rem;
   margin: 0 0 0.9rem;
+  border-radius: 0 0 8px 8px;
 }
 
 div.code-toolbar > .toolbar > .toolbar-item > button {

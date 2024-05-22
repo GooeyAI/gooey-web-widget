@@ -1,33 +1,8 @@
 import axios from "axios";
 import { marked } from "marked";
-import parse, { attributesToProps, domToReact } from "html-react-parser";
+import parse, { HTMLReactParserOptions } from "html-react-parser";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import RenderedPrismCode from "src/components/shared/RenderedPrismCode";
-/**
- * Read the first n characters of a response body as text
- */
-export async function textResponseHead({
-  response,
-  n = 10240,
-}: {
-  response: Response;
-  n?: number;
-}) {
-  const reader = response.body?.getReader();
-  if (!reader) return "";
-  let text = "";
-  const utf8Decoder = new TextDecoder("utf-8");
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    text += utf8Decoder.decode(value, { stream: true });
-    if (text.length > n) {
-      await reader.cancel();
-      break;
-    }
-  }
-  return text;
-}
+import CodeBlock from "src/components/shared/CodeBlock";
 
 const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
   try {
@@ -96,7 +71,9 @@ export const reactParserOptions: HTMLReactParserOptions = {
     lowerCaseTags: false,
     lowerCaseAttributeNames: false,
   },
-  replace: function (domNode) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  replace: function (domNode : { attribs: any, children: any }){
     if (!domNode.attribs) return;
     if (
       domNode.children.length &&
@@ -104,7 +81,7 @@ export const reactParserOptions: HTMLReactParserOptions = {
       domNode.children[0].attribs?.class?.includes("language-")
     ) {
       return (
-        <RenderedPrismCode
+        <CodeBlock
           domNode={domNode.children[0]}
           options={reactParserOptions}
         />
@@ -120,6 +97,8 @@ export const formatTextResponse = (data: any) => {
   if (!body) return "";
   const rawHtml = marked.parse(linkifyText(body), {
     gfm: true,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-expect-error
     headerIds: false,
     mangle: false,
     breaks: true,
