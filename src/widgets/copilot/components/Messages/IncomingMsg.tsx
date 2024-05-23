@@ -1,12 +1,12 @@
 import { useSystemContext } from "src/contexts/hooks";
 import Sources from "./Sources";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 import ResponseLoader from "../Loader";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
 import { formatTextResponse } from "./helpers";
+import clsx from "clsx";
 addInlineStyle(style);
 
 export const BotMessageLayout = () => {
@@ -42,19 +42,14 @@ const IncomingMsg = (props: any) => {
       {config?.showSources && <Sources data={references} />}
       <div className="gpl-16">
         <BotMessageLayout />
-        <div className="gml-36 gmt-4">
-          <span
-            style={{ maxWidth: "calc(100% - 36px)" }}
-            className="font_16_400 anim-typing gooey-output-text pos-relative"
-            id={props?.id}
-          >
-            {parsedElements}
-          </span>
-          {isStreaming && (
-            <span style={{ display: "inline", marginBottom: "-2px" }}>
-              <CircleBeat className="anim-blink gml-4" size={16} />
-            </span>
+        <div
+          className={clsx(
+            "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown",
+            isStreaming && "response-streaming"
           )}
+          id={props?.id}
+        >
+          {parsedElements}
         </div>
         {audioTrack && (
           <div className="gmt-16">

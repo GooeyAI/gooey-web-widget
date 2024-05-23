@@ -65,7 +65,9 @@ function CodeBlock({
       <CodeHeader body={body} language={language} />
       <code
         {...attributesToProps(domNode.attribs)}
-        style={{ borderRadius: "4px" }}
+        style={{
+          borderRadius: "4px",
+        }}
       >
         <Highlight theme={themes.vsDark} code={body} language={language}>
           {({ className, style, tokens, getLineProps, getTokenProps }) => (

@@ -1,26 +1,15 @@
-.gooey-embed-container * {
+.gooey-embed-container * :not(code *) {
   margin: 0;
   box-sizing: border-box;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Ubuntu,
-    Cantarell,
-    "Noto Sans",
-    sans-serif,
-    "Helvetica Neue",
-    Arial,
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol",
-    "Noto Color Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Ubuntu, Cantarell, "Noto Sans", sans-serif, "Helvetica Neue", Arial,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
-  margin-block-start: 0;
-  margin-block-end: 0;
+}
+
+blockquote,dd,dl,fieldset,figure,h1,h2,h3,h4,h5,h6,hr,p,pre,ul,ol,li {
+  margin: 0
 }
 
 .gooey-embed-container {
@@ -29,8 +18,6 @@
 
 .gooey-embed-container p {
   color: default;
-  margin-block-start: 0;
-  margin-block-end: 0;
 }
 
 .gooey-embed-container a {
@@ -51,36 +38,22 @@
 
 code,
 code[class*="language-"] {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace !important;
   font-size: 0.9rem;
   color: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
-  /*margin: inherit;*/
-  /*padding: inherit;*/
 }
 
 pre,
 pre[class*="language-"] {
-  background: #f5f2f0;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace !important;
   overflow: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
   padding: 0.8rem;
   margin: 0 0 0.9rem;
   border-radius: 0 0 8px 8px;
-}
-
-div.code-toolbar > .toolbar > .toolbar-item > button {
-  background-color: rgba(0, 0, 0, 0.2);
-  color: black;
-  backdrop-filter: blur(3px);
-  box-shadow: inherit;
-  border-radius: inherit;
-  padding: 0.5rem;
-}
-
-div.code-toolbar > .toolbar {
-  font-size: 1.1rem;
-  top: 0.4rem;
-  right: 0.4rem;
 }
