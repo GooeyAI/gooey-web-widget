@@ -1,5 +1,4 @@
 .gooey-embed-container * :not(code *) {
-  margin: 0;
   box-sizing: border-box;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Ubuntu, Cantarell, "Noto Sans", sans-serif, "Helvetica Neue", Arial,
@@ -8,7 +7,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-blockquote,dd,dl,fieldset,figure,h1,h2,h3,h4,h5,h6,hr,p,pre,ul,ol,li {
+blockquote,dd,dl,fieldset,figure,h1,h2,h3,h4,h5,h6,hr,p,pre,ul,ol,li,p {
   margin: 0
 }
 

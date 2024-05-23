@@ -17,7 +17,7 @@ export const STREAM_MESSAGE_TYPES = {
   MESSAGE_PART: "message_part",
 };
 
-export const getStreamUrlApi = async (body: any, cancelToken: any) => {
+export const createStreamApi = async (body: any, cancelToken: any) => {
   const headers = getHeaders();
   const response: any = await axios.post(
     BASE_URL_STREAMING,

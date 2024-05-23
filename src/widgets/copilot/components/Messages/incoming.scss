@@ -9,10 +9,6 @@
   height: 40px;
 }
 
-.gooey-output-text {
-  white-space: break-spaces;
-}
-
 .sources-listContainer {
   display: flex;
   min-height: 72px;
@@ -94,6 +90,7 @@
 
 .markdown {
   max-width: none;
+  font-size: 16px !important;
 }
 
 .markdown h1 {
@@ -102,6 +99,10 @@
 
 .markdown h1:first-child {
   margin-top: 0;
+}
+
+.markdown p {
+  margin-bottom: 12px;
 }
 
 .markdown h2 {
@@ -136,6 +137,10 @@
 
 .markdown h5 {
   font-weight: 600;
+}
+
+.markdown li {
+  margin-bottom: 12px;
 }
 
 .markdown h5:first-child {

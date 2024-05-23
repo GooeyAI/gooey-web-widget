@@ -41,7 +41,7 @@ const CodeHeader = ({ body = "", language = "" }) => {
       className="bg-darkGrey text-white d-flex align-center justify-between gp-4"
       style={{ borderRadius: "8px 8px 0 0" }}
     >
-      <p className="font_12_500 gml-4">{language}</p>
+      <p className="font_12_500 gml-4" style={{ margin: 0 }}>{language}</p>
       <Button
         onClick={handleCopy}
         className="font_12_500 text-white gp-4"

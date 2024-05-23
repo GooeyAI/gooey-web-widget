@@ -5,7 +5,7 @@ import axios from "axios";
 import {
   STREAM_MESSAGE_TYPES,
   getDataFromStream,
-  getStreamUrlApi,
+  createStreamApi,
 } from "src/api/streaming";
 import { uploadFileToGooey } from "src/api/file-upload";
 
@@ -74,7 +74,7 @@ const MessagesContextProvider = (props: any) => {
         });
       }
     },
-    [scrollContainerRef],
+    [scrollContainerRef]
   );
 
   const scrollToMessage = useCallback(() => {
@@ -115,6 +115,7 @@ const MessagesContextProvider = (props: any) => {
           const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
           newConversations.set(lastResponseId, {
+            ...prevMessage,
             conversation_id: prevMessage?.conversation_id, // keep the conversation id
             id: currentStreamRef.current,
             ...output,
@@ -127,10 +128,7 @@ const MessagesContextProvider = (props: any) => {
       }
 
       // streaming data
-      if (
-        payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
-        payload?.status === "running"
-      ) {
+      if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
         setMessages((prev: any) => {
           const newConversations = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
@@ -166,7 +164,7 @@ const MessagesContextProvider = (props: any) => {
         integration_id: config?.integration_id,
         ...payload,
       };
-      const streamUrl = await getStreamUrlApi(payload, apiSource.current);
+      const streamUrl = await createStreamApi(payload, apiSource.current);
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
     } catch (err) {
@@ -204,6 +202,35 @@ const MessagesContextProvider = (props: any) => {
     setIsSendingMessage(false);
   };
 
+  const handleFeedbackClick = (button_id: string, context_msg_id: string) => {
+    createStreamApi(
+      {
+        button_pressed: {
+          button_id,
+          context_msg_id,
+        },
+        integration_id: config?.integration_id,
+      },
+      apiSource.current
+    );
+    setMessages((prev: any) => {
+      const newConversations = new Map(prev);
+      const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
+      const prevMessage = prev.get(lastResponseId);
+      const newButtons = prevMessage.buttons.map((button: any) => {
+        if (button.id === button_id) {
+          return { ...button, isPressed: true };
+        }
+        return undefined; // hide the other buttons
+      });
+      newConversations.set(lastResponseId, {
+        ...prevMessage,
+        buttons: newButtons
+      });
+      return newConversations;
+    });
+  };
+
   const valueMessages = {
     sendPrompt,
     messages,
@@ -215,6 +242,7 @@ const MessagesContextProvider = (props: any) => {
     scrollMessageContainer,
     scrollContainerRef,
     isReceiving,
+    handleFeedbackClick,
   };
 
   return (

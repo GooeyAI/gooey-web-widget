@@ -3,6 +3,10 @@ import { marked } from "marked";
 import parse, { HTMLReactParserOptions } from "html-react-parser";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import CodeBlock from "src/components/shared/CodeBlock";
+import IconThumbsUp from "src/assets/SvgIcons/IconThumbsUp";
+import IconThumbsUpFilled from "src/assets/SvgIcons/IconThumbsUpFilled";
+import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
+import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
 
 const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
   try {
@@ -65,7 +69,6 @@ function linkifyText(text: string) {
   });
 }
 
-
 export const reactParserOptions: HTMLReactParserOptions = {
   htmlparser2: {
     lowerCaseTags: false,
@@ -73,7 +76,7 @@ export const reactParserOptions: HTMLReactParserOptions = {
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-expect-error
-  replace: function (domNode : { attribs: any, children: any }){
+  replace: function (domNode: { attribs: any; children: any }) {
     if (!domNode.attribs) return;
     if (
       domNode.children.length &&
@@ -81,10 +84,7 @@ export const reactParserOptions: HTMLReactParserOptions = {
       domNode.children[0].attribs?.class?.includes("language-")
     ) {
       return (
-        <CodeBlock
-          domNode={domNode.children[0]}
-          options={reactParserOptions}
-        />
+        <CodeBlock domNode={domNode.children[0]} options={reactParserOptions} />
       );
     }
 
@@ -105,4 +105,15 @@ export const formatTextResponse = (data: any) => {
   });
   const parsedElements = parse(rawHtml as string, reactParserOptions);
   return parsedElements;
+};
+
+export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
+  switch (title) {
+    case "FEEDBACK_THUMBS_UP":
+      return isFilled ? <IconThumbsUpFilled className='text-muted' /> : <IconThumbsUp className='text-muted' />;
+    case "FEEDBACK_THUMBS_DOWN":
+      return isFilled ? <IconThumbsDownFilled className='text-muted' /> : <IconThumbsDown className='text-muted' />;
+    default:
+      return null;
+  }
 };
