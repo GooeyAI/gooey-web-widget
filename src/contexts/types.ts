@@ -13,6 +13,10 @@ export interface CopilotConfigType {
     photoUrl?: string;
     websiteUrl?: string;
     showPoweredByGooey?: boolean;
+    colors?: {
+      primary: string;
+      secondary: string;
+    };
   };
   payload?: any;
 }

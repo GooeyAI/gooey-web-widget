@@ -1,12 +1,14 @@
 import axios from "axios";
 import { marked } from "marked";
-import parse, { HTMLReactParserOptions } from "html-react-parser";
+import parse, { HTMLReactParserOptions, domToReact } from "html-react-parser";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import CodeBlock from "src/components/shared/CodeBlock";
 import IconThumbsUp from "src/assets/SvgIcons/IconThumbsUp";
 import IconThumbsUpFilled from "src/assets/SvgIcons/IconThumbsUpFilled";
 import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
 import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
+import Link from "src/components/shared/Link";
+import { CopilotConfigType } from "src/contexts/types";
 
 const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
   try {
@@ -59,24 +61,16 @@ const getOutputText = (data: any) => {
   return out;
 };
 
-function linkifyText(text: string) {
-  // Regular expression to match URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-  // Replace URLs with <a> tags
-  return text.replace(urlRegex, function (url: string) {
-    return '<a href="' + url + '" target="_blank">' + url + "</a>";
-  });
-}
-
-export const reactParserOptions: HTMLReactParserOptions = {
+export const getReactParserOptions = (
+  config: CopilotConfigType
+): HTMLReactParserOptions => ({
   htmlparser2: {
     lowerCaseTags: false,
     lowerCaseAttributeNames: false,
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-expect-error
-  replace: function (domNode: { attribs: any; children: any }) {
+  replace: function (domNode: { attribs: any; children: any; name: string }) {
     if (!domNode.attribs) return;
     if (
       domNode.children.length &&
@@ -84,35 +78,67 @@ export const reactParserOptions: HTMLReactParserOptions = {
       domNode.children[0].attribs?.class?.includes("language-")
     ) {
       return (
-        <CodeBlock domNode={domNode.children[0]} options={reactParserOptions} />
+        <CodeBlock
+          domNode={domNode.children[0]}
+          options={getReactParserOptions(config)}
+        />
       );
     }
 
-    // TODO - Replace <a> tags with <Link> components
+    // Replace <a> tags with <Link> component
+    if (
+      domNode.children.length &&
+      (domNode?.name === "a" || domNode.children[0].name === "a")
+    ) {
+      const href = domNode.attribs.href;
+      delete domNode.attribs.href;
+      return (
+        <Link
+          to={href}
+          configColor={config?.branding?.colors?.primary || "default"}
+        >
+          {domToReact(domNode.children, getReactParserOptions(config))}
+        </Link>
+      );
+    }
   },
-};
+});
 
-export const formatTextResponse = (data: any) => {
+export const formatTextResponse = (data: any, config: CopilotConfigType) => {
   const body = getOutputText(data);
   if (!body) return "";
-  const rawHtml = marked.parse(linkifyText(body), {
+  const rawHtml = marked.parse(body, {
+    async: false,
+    breaks: false,
+    extensions: null,
     gfm: true,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-expect-error
-    headerIds: false,
-    mangle: false,
-    breaks: true,
+    hooks: null,
+    pedantic: false,
+    silent: false,
+    tokenizer: null,
+    walkTokens: null,
   });
-  const parsedElements = parse(rawHtml as string, reactParserOptions);
+  const parsedElements = parse(
+    rawHtml as string,
+    getReactParserOptions(config)
+  );
   return parsedElements;
 };
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
-      return isFilled ? <IconThumbsUpFilled className='text-muted' /> : <IconThumbsUp className='text-muted' />;
+      return isFilled ? (
+        <IconThumbsUpFilled className="text-muted" />
+      ) : (
+        <IconThumbsUp className="text-muted" />
+      );
     case "FEEDBACK_THUMBS_DOWN":
-      return isFilled ? <IconThumbsDownFilled className='text-muted' /> : <IconThumbsDown className='text-muted' />;
+      return isFilled ? (
+        <IconThumbsDownFilled className="text-muted" />
+      ) : (
+        <IconThumbsDown className="text-muted" />
+      );
     default:
       return null;
   }

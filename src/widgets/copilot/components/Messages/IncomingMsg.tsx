@@ -8,6 +8,7 @@ import style from "./incoming.scss?inline";
 import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
+import { CopilotConfigType } from "src/contexts/types";
 addInlineStyle(style);
 
 export const BotMessageLayout = () => {
@@ -43,7 +44,10 @@ const IncomingMsg = (props: any) => {
   } = props.data;
   const audioTrack = output_audio[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-  const parsedElements = formatTextResponse(props.data);
+  const parsedElements = formatTextResponse(
+    props.data,
+    config as CopilotConfigType
+  );
   if (!parsedElements) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12 gpr-8">
@@ -72,7 +76,7 @@ const IncomingMsg = (props: any) => {
                   !!button && (
                     <Button
                       key={button.id}
-                      className="gmr-4"
+                      className="gmr-4 text-muted"
                       variant="text"
                       onClick={() =>
                         !button.isPressed &&
