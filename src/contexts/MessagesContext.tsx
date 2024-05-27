@@ -194,7 +194,11 @@ const MessagesContextProvider = (props: any) => {
     // check if state has more than 2 message then remove the last one
     if (messages.size > 2) {
       const newMessages = new Map(messages);
-      newMessages.delete(Array.from(messages.keys()).pop());
+      const idsArray = Array.from(messages.keys());
+      // delete user message
+      newMessages.delete(idsArray[idsArray.length - 2]);
+      // delete server message
+      newMessages.delete(idsArray.pop());
       setMessages(newMessages);
     } else flushData();
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
@@ -225,7 +229,7 @@ const MessagesContextProvider = (props: any) => {
       });
       newConversations.set(lastResponseId, {
         ...prevMessage,
-        buttons: newButtons
+        buttons: newButtons,
       });
       return newConversations;
     });
