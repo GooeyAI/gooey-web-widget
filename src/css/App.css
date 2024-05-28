@@ -50,7 +50,6 @@ pre[class*="language-"] {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace !important;
   overflow: auto;
-  white-space: pre-wrap;
   word-wrap: break-word;
   padding: 0.8rem;
   margin: 0 0 0.9rem;
