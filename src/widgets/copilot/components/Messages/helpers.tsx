@@ -12,9 +12,7 @@ import { CopilotConfigType } from "src/contexts/types";
 
 const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
   try {
-    const response: any = await axios.get(url, {
-      headers: { "cors-origin": "*" },
-    });
+    const response: any = await axios.get(url);
     const contentType =
       response?.headers.get("content-type") || "url/undefined";
     if (contentType.includes("pdf" || title.includes("pdf"))) return "pdf";
@@ -28,7 +26,7 @@ const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
   }
 };
 
-export const fetchSourcesData = async (sources: any) => {
+export const fetchSourcesMeta = async (sources: any) => {
   const sourcesData = await Promise.all(
     sources.map(async (source: any) => {
       const iconType: "pdf" | "sheets" | "docs" | "default" =
@@ -143,3 +141,21 @@ export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
       return null;
   }
 };
+
+export function truncateMiddle(str: string, charLimit: number) {
+  // Early return if the string length is within the limit
+  if (str.length <= charLimit) {
+    return str;
+  }
+
+  const ellipsis = "...";
+  const ellipsisLength = ellipsis.length;
+  const charsToShow = charLimit - ellipsisLength;
+
+  // Calculate the number of characters to show from the start and end
+  const frontChars = Math.ceil(charsToShow / 2);
+  const backChars = Math.floor(charsToShow / 2);
+
+  // Return the truncated string
+  return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
+}

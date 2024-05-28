@@ -7,7 +7,7 @@ import IconSheets from "src/assets/SvgIcons/IconSheets";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 
 import { useEffect, useState } from "react";
-import { fetchSourcesData } from "./helpers";
+import { fetchSourcesMeta, truncateMiddle } from "./helpers";
 
 const ICONS_DICT = {
   youtube: IconYoutube,
@@ -22,7 +22,6 @@ const SourcesCard = (props: any) => {
   const [title, pageNum] = (data?.title || "").split(",");
 
   if (!data) return null;
-  const hasFormat = title?.includes(".");
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   const Icon = ICONS_DICT[data?.iconType || "default"];
@@ -39,7 +38,7 @@ const SourcesCard = (props: any) => {
         )}
       >
         <p className="font_10_500">
-          {hasFormat ? title.slice(0, title.length - 4) : title}
+          {truncateMiddle(title, 50)}
         </p>
         <div className="d-flex ">
           {!!Icon && !loading && <Icon />}
@@ -62,7 +61,7 @@ const Sources = ({ data }: any) => {
 
   useEffect(() => {
     if (!data || !data.length) return;
-    fetchSourcesData(data).then((sourcesData) => {
+    fetchSourcesMeta(data).then((sourcesData) => {
       setSourcesData(sourcesData);
       setLoading(false);
     });
