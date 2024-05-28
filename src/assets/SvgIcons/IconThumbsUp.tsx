@@ -9,6 +9,7 @@ const IconThumbsUp = (props: any) => {
         viewBox="0 0 512 512"
         height={size}
         width={size}
+        style={{ fill: "currentColor" }}
       >
         // --!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com
         License - https://fontawesome.com/license/free Copyright 2024 Fonticons,
