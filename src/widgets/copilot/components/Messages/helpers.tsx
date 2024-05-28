@@ -127,15 +127,15 @@ export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
       return isFilled ? (
-        <IconThumbsUpFilled className="text-muted" />
+        <IconThumbsUpFilled size={12} className="text-muted" />
       ) : (
-        <IconThumbsUp className="text-muted" />
+        <IconThumbsUp size={12} className="text-muted" />
       );
     case "FEEDBACK_THUMBS_DOWN":
       return isFilled ? (
-        <IconThumbsDownFilled className="text-muted" />
+        <IconThumbsDownFilled size={12} className="text-muted" />
       ) : (
-        <IconThumbsDown className="text-muted" />
+        <IconThumbsDown size={12} className="text-muted" />
       );
     default:
       return null;

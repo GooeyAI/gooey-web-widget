@@ -15,7 +15,7 @@ import Button from "src/components/shared/Buttons/Button";
 import { CopilotConfigType } from "src/contexts/types";
 addInlineStyle(style);
 
-export const BotMessageLayout = () => {
+export const BotMessageLayout = (props: any) => {
   const branding = useSystemContext().config?.branding;
   return (
     <div className="d-flex align-center">
@@ -31,20 +31,40 @@ export const BotMessageLayout = () => {
           />
         </div>
       )}
-      <p className="font_14_600">{branding?.name}</p>
+      <p className="font_16_600">{branding?.name}</p>
+      {!!props?.message && <FeedbackButtons data={props?.message} />}
     </div>
   );
 };
 
+const FeedbackButtons = ({ data }: any) => {
+  const { buttons, bot_message_id } = data;
+  const { handleFeedbackClick }: any = useMessagesContext();
+  if(!buttons) return null;
+  return (
+    <div className="d-flex gml-12">
+      {buttons.map(
+        (button: any) =>
+          !!button && (
+            <Button
+              key={button.id}
+              className="gmr-4 text-muted"
+              variant="text"
+              onClick={() =>
+                !button.isPressed &&
+                handleFeedbackClick(button.id, bot_message_id)
+              }
+            >
+              {getFeedbackButtonIcon(button.id, button.isPressed)}
+            </Button>
+          )
+      )}
+    </div>
+  );
+};
 const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
-  const { handleFeedbackClick }: any = useMessagesContext();
-  const {
-    output_audio = [],
-    type,
-    buttons,
-    bot_message_id,
-  } = props.data;
+  const { output_audio = [], type } = props.data;
   const audioTrack = output_audio[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
   const parsedElements = formatTextResponse(
@@ -56,7 +76,7 @@ const IncomingMsg = (props: any) => {
     <div className="gooey-incomingMsg gpb-12 gpr-8">
       {config?.showSources && <Sources data={sanitizeReferences(props.data)} />}
       <div className="gpl-16">
-        <BotMessageLayout />
+        <BotMessageLayout message={props?.data} />
         <div
           className={clsx(
             "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown",
@@ -69,28 +89,6 @@ const IncomingMsg = (props: any) => {
         {audioTrack && (
           <div className="gmt-16">
             <audio controls src={audioTrack}></audio>
-          </div>
-        )}
-        {!!buttons && (
-          <div className="gml-36 d-flex">
-            <div className="d-flex">
-              {buttons.map(
-                (button: any) =>
-                  !!button && (
-                    <Button
-                      key={button.id}
-                      className="gmr-4 text-muted"
-                      variant="text"
-                      onClick={() =>
-                        !button.isPressed &&
-                        handleFeedbackClick(button.id, bot_message_id)
-                      }
-                    >
-                      {getFeedbackButtonIcon(button.id, button.isPressed)}
-                    </Button>
-                  )
-              )}
-            </div>
           </div>
         )}
       </div>

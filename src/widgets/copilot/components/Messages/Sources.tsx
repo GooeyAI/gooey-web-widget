@@ -72,7 +72,7 @@ const Sources = ({ data }: any) => {
     <div className="gmb-8">
       <div className="d-flex align-center gpl-16">
         <IconListTimeline size={16} />
-        <p className="font_16_400 gml-20">Sources</p>
+        <p className="font_16_600 gml-20">Sources</p>
       </div>
       <div className="gmt-8 sources-listContainer">
         {(loading ? data : sourcesData).map((source: any, index: number) => (
