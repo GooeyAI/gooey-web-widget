@@ -159,3 +159,16 @@ export function truncateMiddle(str: string, charLimit: number) {
   // Return the truncated string
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
+
+export const sanitizeReferences = (data: any) => {
+  // remove items from references which are not in output_text
+  const { output_text = [], references = [] } = data;
+  const outputText = output_text[0] || "";
+  const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
+  const urlsInResponse = [...new Set(outputText.match(urlPattern))];
+  if (!urlsInResponse.length) return [];
+  return references.filter(({ url }: any) => {
+    if (url.endsWith("/")) url = url.slice(0, -1);
+    return urlsInResponse.indexOf(url) !== -1;
+  });
+};

@@ -5,7 +5,11 @@ import ResponseLoader from "../Loader";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
-import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
+import {
+  formatTextResponse,
+  getFeedbackButtonIcon,
+  sanitizeReferences,
+} from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
 import { CopilotConfigType } from "src/contexts/types";
@@ -36,7 +40,6 @@ const IncomingMsg = (props: any) => {
   const { config } = useSystemContext();
   const { handleFeedbackClick }: any = useMessagesContext();
   const {
-    references = [],
     output_audio = [],
     type,
     buttons,
@@ -51,7 +54,7 @@ const IncomingMsg = (props: any) => {
   if (!parsedElements) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12 gpr-8">
-      {config?.showSources && <Sources data={references} />}
+      {config?.showSources && <Sources data={sanitizeReferences(props.data)} />}
       <div className="gpl-16">
         <BotMessageLayout />
         <div
