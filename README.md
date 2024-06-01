@@ -1,11 +1,11 @@
 # Gooey Web Widget
 
-A chat widget for embedding Gooey AI bots on your website.
+A chat widget for embedding Gooey.AI bots on your website.
 
 
 ## Raw Library Usage
 
-If you're new, you should probably head over to [gooey.ai/copilot](https://gooey.ai/copilot/integrations/), create and test your integration there. This guide is for advanced users.
+If you're new, you should probably head over to [gooey.ai/copilot](https://gooey.ai/copilot/integrations/), create and test your integration there. This guide is for **advanced users**.
 
 1. Copy the following code into the `<body>` section of your target HTML file where you want the widget to appear:
 
@@ -72,13 +72,16 @@ Determines how the Gooey widget is displayed on your site:
 
 - `popup`: This mode renders a Floating Action Button that, when clicked, opens the widget in a pop-up overlay. Ideal for adding support chat without altering your page layout.
 
-  <img width="400" alt="Screenshot 2024-04-11 at 4 43 31 PM" src="https://github.com/GooeyAI/gooey-web-widget/assets/65861855/677fc8b5-340c-426b-a140-81aefa4c88b8">
+![popup](https://github.com/GooeyAI/gooey-web-widget/assets/10388784/f04df2d3-c811-4950-8cff-1a13c80b9def)
 
 - `inline`: This mode embeds the widget directly within the page content at the location specified by the `target`. Suitable for integrating the widget as a part of your webpage like a contact form.
 
-  <img width="400" alt="Screenshot 2024-04-11 at 4 39 57 PM" src="https://github.com/GooeyAI/gooey-web-widget/assets/65861855/33fd3a35-4bf0-4700-be48-dc0d169d6ed3">
+<img alt="inline" src="https://github.com/GooeyAI/gooey-web-widget/assets/10388784/f334ae8d-5dae-4737-85d2-6301a1e70f59">
 
 - `fullscreen`: This mode renders the widget in fullscreen mode, covering the entire page. Ideal for creating a dedicated chat page.
+
+<img alt="Screenshot 2024-05-25 at 11 33 17 AM" src="https://github.com/GooeyAI/gooey-web-widget/assets/10388784/826dda8d-876e-4d0a-baf6-6bca6f6af75f">
+
 
 ##### `enableAudioMessage: boolean`
 
