@@ -1,7 +1,12 @@
 import clsx from "clsx";
 import IconListTimeline from "src/assets/SvgIcons/IconListTimeline";
 import { useEffect, useState } from "react";
-import { extractMainDomain, fetchUrlMeta, findSourceIcon, truncateMiddle } from "./helpers";
+import {
+  extractMainDomain,
+  fetchUrlMeta,
+  findSourceIcon,
+  truncateMiddle,
+} from "./helpers";
 
 const SourcesCard = (props: any) => {
   const { data, index, onClick } = props;
@@ -24,7 +29,7 @@ const SourcesCard = (props: any) => {
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url
   );
-  const domainNameText = domainName + "⋅";
+  const domainNameText = domainName + (data?.refNumber || pageNum ? " ⋅" : "");
   if (!data) return null;
   return (
     <button
@@ -88,7 +93,7 @@ const SourcesCard = (props: any) => {
           >
             {domainNameText}
             {pageNum && !domainNameText ? pageNum : ""}
-            {pageNum && !domainNameText ? "⋅" : ""}[{index + 1}]
+            {data?.refNumber ? `${pageNum ? "⋅ " : ''}[${data?.refNumber}]` : ""}
           </p>
         </div>
       </div>

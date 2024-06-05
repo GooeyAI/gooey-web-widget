@@ -38,7 +38,7 @@ const CodeHeader = ({ body = "", language = "" }) => {
 
   return (
     <div
-      className="bg-darkGrey text-white d-flex align-center justify-between gp-4"
+      className="bg-darkGrey text-white d-flex align-center justify-between gp-4 gmt-6"
       style={{ borderRadius: "8px 8px 0 0" }}
     >
       <p className="font_12_500 gml-4" style={{ margin: 0 }}>{language}</p>

@@ -16,9 +16,12 @@ import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
 
-const GOOEY_META_SCRAPPER_API =  "http://localhost:8090";
+const GOOEY_META_SCRAPPER_API = "http://localhost:8090";
 
-export const findSourceIcon = (contentType: string, url: string): JSX.ElementType | null => {
+export const findSourceIcon = (
+  contentType: string,
+  url: string
+): JSX.ElementType | null => {
   const urlLower = url.toLowerCase();
   // try to guess from url first
   if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) {
@@ -218,15 +221,64 @@ export function truncateMiddle(str: string, charLimit: number) {
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
 
+function detectNumberReference(str: string) {
+  /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
+  const regex = /\[\d+(,\s*\d+)*\]/g;
+
+  // Use the regex to find matches
+  const matches = str.match(regex);
+
+  // If no matches found, return an empty array
+  if (!matches) {
+    return [];
+  }
+
+  // Extract numbers from each match
+  const numbers = matches.map((match) => {
+    // Remove the square brackets and split by comma
+    return match
+      .slice(1, -1)
+      .split(",")
+      .map((num) => parseInt(num.trim(), 10));
+  });
+
+  // Flatten the array of arrays into a single array
+  return numbers.flat();
+}
+
 export const sanitizeReferences = (data: any) => {
   // remove items from references which are not in output_text
   const { output_text = [], references = [] } = data;
   const outputText = output_text[0] || "";
+  const numberReferences = detectNumberReference(outputText).sort();
   const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
   const urlsInResponse = [...new Set(outputText.match(urlPattern))];
-  if (!urlsInResponse.length) return [];
-  return references.filter(({ url }: any) => {
+  if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
+  const indices = numberReferences.map((num) => num - 1);
+
+  // check ref numbers and remove the ones which are not in output_text by index
+  let rejectedReferences: any = [];
+  const newSources = references
+    .map((_: any, index: number) => {
+      if (indices.includes(index))
+        return {
+          ..._,
+          refNumber: numberReferences[index - rejectedReferences.length],
+        };
+      else {
+        rejectedReferences.push(_);
+        return undefined;
+      }
+    })
+    .filter((source: any) => source !== undefined);
+
+  // removed all the un-indexed references
+  if (!urlsInResponse.length) return newSources;
+
+  // check urls in response and add them to sources
+  rejectedReferences = rejectedReferences.filter(({ url }: any) => {
     if (url.endsWith("/")) url = url.slice(0, -1);
     return urlsInResponse.indexOf(url) !== -1;
   });
+  return [...newSources, ...rejectedReferences];
 };
