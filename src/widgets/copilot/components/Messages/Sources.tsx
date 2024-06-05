@@ -29,7 +29,7 @@ const SourcesCard = (props: any) => {
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url
   );
-  const domainNameText = domainName + (data?.refNumber || pageNum ? " ⋅" : "");
+  const domainNameText = domainName + (data?.refNumber || pageNum ? "⋅" : "");
   if (!data) return null;
   return (
     <button
@@ -93,7 +93,7 @@ const SourcesCard = (props: any) => {
           >
             {domainNameText}
             {pageNum && !domainNameText ? pageNum : ""}
-            {data?.refNumber ? `${pageNum ? "⋅ " : ''}[${data?.refNumber}]` : ""}
+            {data?.refNumber ? `[${data?.refNumber}]` : ""}
           </p>
         </div>
       </div>
