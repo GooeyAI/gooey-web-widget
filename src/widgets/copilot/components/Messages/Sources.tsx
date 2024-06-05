@@ -12,10 +12,9 @@ import {
 const SourcesCard = (props: any) => {
   const { data, index, onClick } = props;
   const [metaData, setMetaData] = useState<any>(null);
-  const { mainString, extension } = extractFileDetails(data?.title);
+  const { mainString } = extractFileDetails(data?.title);
   const [title, pageNum] = (mainString || "").split(",");
 
-  console.log("mainString", mainString, extension);
   useEffect(() => {
     if (!data || metaData) return;
     try {
