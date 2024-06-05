@@ -3,9 +3,10 @@ import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import PlaceholderMessage from "./PlaceholderMessage";
-import { useMessagesContext } from "src/contexts/hooks";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 
 const Responses = (props: any) => {
+  const { config } = useSystemContext();
   const que = props.queue;
   const msgs = props.data;
 
@@ -17,7 +18,7 @@ const Responses = (props: any) => {
         const role = responseData.role;
         if (role === "user")
           return <OutgoingMsg data={responseData} key={id} />;
-        return <IncomingMsg data={responseData} key={id} id={id} />;
+        return <IncomingMsg data={responseData} key={id} id={id} config={config} />;
       })}
     </>
   );

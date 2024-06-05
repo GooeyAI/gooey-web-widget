@@ -55,3 +55,7 @@ pre[class*="language-"] {
   margin: 0 0 0.9rem;
   border-radius: 0 0 8px 8px;
 }
+
+svg {
+  fill: currentColor;
+}

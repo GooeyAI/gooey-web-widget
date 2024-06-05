@@ -1,7 +1,7 @@
 import SvgIcon from "src/components/shared/SvgIcon";
 
 const IconGoogleDocs = (props: any) => {
-  const size = props?.size || 10;
+  const size = props?.size || 12;
   return (
     <SvgIcon>
       <svg

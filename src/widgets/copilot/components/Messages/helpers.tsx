@@ -9,33 +9,91 @@ import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
 import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
 import Link from "src/components/shared/Link";
 import { CopilotConfigType } from "src/contexts/types";
+import IconSheets from "src/assets/SvgIcons/IconSheets";
+import IconGoogleDocs from "src/assets/SvgIcons/IconGoogleDocs";
+import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
+import IconPDF from "src/assets/SvgIcons/IconPDF";
+import IconYoutube from "src/assets/SvgIcons/IconYoutube";
+import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
 
-const fetchUrlMeta = async (url: string, title: string): Promise<any> => {
-  try {
-    const response: any = await axios.get(url);
-    const contentType =
-      response?.headers.get("content-type") || "url/undefined";
-    if (contentType.includes("pdf" || title.includes("pdf"))) return "pdf";
-    if (contentType.includes("csv")) return "sheets";
-    return "default";
-  } catch (err) {
-    console.error(err);
-    if (title.includes("pdf")) return "pdf";
-    if (title.includes("csv")) return "csv";
-    return "default";
+const GOOEY_META_SCRAPPER_API =  "http://localhost:8090";
+
+export const findSourceIcon = (contentType: string, url: string): JSX.ElementType | null => {
+  const urlLower = url.toLowerCase();
+  // try to guess from url first
+  if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) {
+    return () => <IconYoutube />;
+  }
+  if (urlLower.endsWith(".pdf")) {
+    return () => <IconPDF style={{ fill: "#F40F02" }} size={12} />;
+  } else if (
+    urlLower.endsWith(".xls") ||
+    urlLower.endsWith(".xlsx") ||
+    urlLower.includes("sheets.google")
+  ) {
+    return () => <IconSheets />;
+  } else if (urlLower.endsWith(".docx") || urlLower.includes("docs.google")) {
+    return () => <IconGoogleDocs />;
+  } else if (urlLower.endsWith(".pptx") || urlLower.includes("/presentation")) {
+    return () => <IconGoogleSlides />;
+  } else if (urlLower.endsWith(".txt")) {
+    return () => <IconGoogleDocs />;
+  } else if (urlLower.endsWith(".html")) {
+    return null;
+  }
+
+  // check for content type now
+  contentType = contentType?.toLowerCase().split(";")[0];
+  switch (contentType) {
+    case "video":
+      return () => <IconYoutube />;
+    case "application/pdf":
+      return () => <IconPDF style={{ fill: "#F40F02" }} size={12} />;
+    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      "application/vnd.oasis.opendocument.spreadsheet":
+      return () => <IconSheets />;
+    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      return () => <IconGoogleDocs />;
+    case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+      return () => <IconGoogleSlides />;
+    case "text/plain":
+      return () => <IconGoogleDocs />;
+    case "text/html":
+      return null;
+    default:
+      return () => <IconGlobeNet size={12} />;
   }
 };
 
-export const fetchSourcesMeta = async (sources: any) => {
-  const sourcesData = await Promise.all(
-    sources.map(async (source: any) => {
-      const iconType: "pdf" | "sheets" | "docs" | "default" =
-        await fetchUrlMeta(source.url, source?.title);
+export function extractMainDomain(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    const hostName = parsedUrl.hostname;
+    const hostnameParts = hostName.split(".");
 
-      return { ...source, iconType };
-    })
-  );
-  return sourcesData;
+    if (hostnameParts.length >= 2) {
+      const siteName = hostnameParts.slice(-2, -1)[0];
+      const ext = hostnameParts.slice(-1)[0];
+      if (hostName.includes("google"))
+        return [hostnameParts.slice(-3, -1).join("."), hostName];
+      // The main domain is the second last part of the hostname
+      return [siteName, siteName + "." + ext];
+    }
+  } catch (e) {
+    console.error("Invalid URL:", e);
+    return null;
+  }
+}
+
+export const fetchUrlMeta = async (url: string): Promise<any> => {
+  try {
+    const response: any = await axios.get(
+      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`
+    );
+    return response?.data;
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // Text Rendering Logic

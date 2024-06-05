@@ -1,53 +1,95 @@
 import clsx from "clsx";
-import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
-import IconGoogleDocs from "src/assets/SvgIcons/IconGoogleDocs";
 import IconListTimeline from "src/assets/SvgIcons/IconListTimeline";
-import IconPDF from "src/assets/SvgIcons/IconPDF";
-import IconSheets from "src/assets/SvgIcons/IconSheets";
-import IconYoutube from "src/assets/SvgIcons/IconYoutube";
-
 import { useEffect, useState } from "react";
-import { fetchSourcesMeta, truncateMiddle } from "./helpers";
-
-const ICONS_DICT = {
-  youtube: IconYoutube,
-  sheets: IconSheets,
-  docs: IconGoogleDocs,
-  pdf: () => <IconPDF style={{ fill: "#F40F02" }} size={12} />,
-  default: () => <IconExternalLink size={10} />,
-};
+import { extractMainDomain, fetchUrlMeta, findSourceIcon, truncateMiddle } from "./helpers";
 
 const SourcesCard = (props: any) => {
-  const { data, index, onClick, loading } = props;
+  const { data, index, onClick } = props;
+  const [metaData, setMetaData] = useState<any>(null);
   const [title, pageNum] = (data?.title || "").split(",");
 
+  useEffect(() => {
+    if (!data || metaData) return;
+    try {
+      fetchUrlMeta(data.url).then((meta) => {
+        if (Object.keys(meta).length) setMetaData(meta);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }, [data, metaData]);
+
+  const [domainName]: any = extractMainDomain(data?.url);
+  const ExtensionIcon: any = findSourceIcon(
+    metaData?.content_type,
+    metaData?.redirect_urls[0] || data?.url
+  );
+  const domainNameText = domainName + "⋅";
   if (!data) return null;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const Icon = ICONS_DICT[data?.iconType || "default"];
   return (
     <button
       onClick={onClick}
-      className={clsx("gp-0 gm-0 text-left", index === 0 && "gml-48")}
+      className={clsx(
+        "pos-relative sources-card gp-0 gm-0 text-left overflow-hidden",
+        index === 0 && "gml-48",
+        index !== data.length - 1 && "gmr-12"
+      )}
       style={{ height: "64px" }}
     >
+      {metaData?.image && (
+        <div
+          style={{
+            position: "absolute",
+            height: "100%",
+            width: "100%",
+            left: 0,
+            top: 0,
+            background: `url(${metaData?.image})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            zIndex: 0,
+            filter: "brightness(0.4)",
+            transition: "all 1s ease-in-out",
+          }}
+        />
+      )}
       <div
-        className={clsx(
-          "sources-card d-flex flex-col justify-between",
-          index !== data.length - 1 && "gmr-12"
-        )}
+        className="d-flex flex-col justify-between gp-6"
+        style={{ zIndex: 1, height: "100%" }}
       >
-        <p className="font_10_500">
-          {truncateMiddle(title, 50)}
+        <p className={clsx("font_10_600", metaData?.image ? "text-white" : "")}>
+          {truncateMiddle(metaData?.title || title, 50)}
         </p>
-        <div className="d-flex ">
-          {!!Icon && !loading && <Icon />}
-          {!!pageNum && (
-            <p className="font_10_500 gml-4">
-              {pageNum}
-              {pageNum ? "⋅" : ""}[{index + 1}]
-            </p>
+        <div
+          className={clsx(
+            "d-flex align-center font_10_600",
+            metaData?.image ? "text-white" : "text-muted"
           )}
+        >
+          {ExtensionIcon || !metaData?.logo ? (
+            <ExtensionIcon />
+          ) : (
+            <img
+              src={metaData?.logo}
+              alt={data?.title}
+              style={{
+                width: "14px",
+                height: "14px",
+                borderRadius: "100px",
+                objectFit: "contain",
+              }}
+            />
+          )}
+          <p
+            className={clsx(
+              "font_10_500 gml-4",
+              metaData?.image ? "text-white" : "text-muted"
+            )}
+          >
+            {domainNameText}
+            {pageNum && !domainNameText ? pageNum : ""}
+            {pageNum && !domainNameText ? "⋅" : ""}[{index + 1}]
+          </p>
         </div>
       </div>
     </button>
@@ -56,16 +98,6 @@ const SourcesCard = (props: any) => {
 
 const Sources = ({ data }: any) => {
   const openInWindow = (url: string) => window.open(url, "_blank");
-  const [sourcesData, setSourcesData] = useState<any>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!data || !data.length) return;
-    fetchSourcesMeta(data).then((sourcesData) => {
-      setSourcesData(sourcesData);
-      setLoading(false);
-    });
-  }, [data]);
 
   if (!data || !data.length) return null;
   return (
@@ -75,13 +107,12 @@ const Sources = ({ data }: any) => {
         <p className="font_16_600 gml-20">Sources</p>
       </div>
       <div className="gmt-8 sources-listContainer">
-        {(loading ? data : sourcesData).map((source: any, index: number) => (
+        {data.map((source: any, index: number) => (
           <SourcesCard
             key={source?.title + index}
             data={source}
             index={index}
             onClick={openInWindow.bind(null, source?.url)}
-            loading={loading}
           />
         ))}
       </div>
