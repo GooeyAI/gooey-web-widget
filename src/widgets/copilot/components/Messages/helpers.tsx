@@ -68,6 +68,31 @@ export const findSourceIcon = (
   }
 };
 
+function extractLastPathSegment(str: string) {
+  // Extract the last segment of the path
+  const parts = str.split('/');
+  return parts[parts.length - 1];
+}
+
+export function extractFileDetails(str: string) {
+  // Extract the last path segment
+  const lastSegment = extractLastPathSegment(str);
+
+  // Regular expression to match the last file extension after the final dot
+  const fileFormatRegex = /\.([a-zA-Z0-9]+)(\?.*)?$/;
+  const match = lastSegment.match(fileFormatRegex);
+
+  if (match) {
+      // Extract the extension and the main string without the extension
+      const extension = '.' + match[1];
+      const mainString = lastSegment.slice(0, -extension.length);
+      return { mainString, extension };
+  } else {
+      // No extension found
+      return { mainString: lastSegment, extension: null };
+  }
+}
+
 export function extractMainDomain(url: string) {
   try {
     const parsedUrl = new URL(url);

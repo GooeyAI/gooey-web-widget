@@ -2,6 +2,7 @@ import clsx from "clsx";
 import IconListTimeline from "src/assets/SvgIcons/IconListTimeline";
 import { useEffect, useState } from "react";
 import {
+  extractFileDetails,
   extractMainDomain,
   fetchUrlMeta,
   findSourceIcon,
@@ -11,8 +12,10 @@ import {
 const SourcesCard = (props: any) => {
   const { data, index, onClick } = props;
   const [metaData, setMetaData] = useState<any>(null);
-  const [title, pageNum] = (data?.title || "").split(",");
+  const { mainString, extension } = extractFileDetails(data?.title);
+  const [title, pageNum] = (mainString || "").split(",");
 
+  console.log("mainString", mainString, extension);
   useEffect(() => {
     if (!data || metaData) return;
     try {
@@ -24,7 +27,9 @@ const SourcesCard = (props: any) => {
     }
   }, [data, metaData]);
 
-  const [domainName]: any = extractMainDomain(data?.url);
+  const redirectedUrl =
+    metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
+  const [domainName]: any = extractMainDomain(redirectedUrl || data?.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url
@@ -91,9 +96,11 @@ const SourcesCard = (props: any) => {
               metaData?.image ? "text-white" : "text-muted"
             )}
           >
-            {domainNameText}
-            {pageNum && !domainNameText ? pageNum : ""}
-            {data?.refNumber ? `[${data?.refNumber}]` : ""}
+            {domainNameText +
+              (pageNum ? pageNum.trim() : "") +
+              (data?.refNumber
+                ? `${pageNum ? "⋅" : ""}[${data?.refNumber}]`
+                : "")}
           </p>
         </div>
       </div>
