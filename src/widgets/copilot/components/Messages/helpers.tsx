@@ -16,7 +16,7 @@ import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
 
-const GOOEY_META_SCRAPPER_API = "http://localhost:8090";
+const GOOEY_META_SCRAPPER_API = "https://gooey-url-meta-scrapper.us-1.gooey.ai";
 
 export const findSourceIcon = (
   contentType: string,
