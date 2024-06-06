@@ -177,7 +177,7 @@ export const getReactParserOptions = (
       delete domNode.attribs.href;
       return (
         <Link to={href} configColor={linkColor || "default"}>
-          {domToReact(domNode.children[0], getReactParserOptions(linkColor))}
+          {domToReact(domNode.children, getReactParserOptions(linkColor))}
         </Link>
       );
     }
