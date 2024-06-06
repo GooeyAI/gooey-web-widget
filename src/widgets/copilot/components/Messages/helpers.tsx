@@ -8,7 +8,6 @@ import IconThumbsUpFilled from "src/assets/SvgIcons/IconThumbsUpFilled";
 import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
 import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
 import Link from "src/components/shared/Link";
-import { CopilotConfigType } from "src/contexts/types";
 import IconSheets from "src/assets/SvgIcons/IconSheets";
 import IconGoogleDocs from "src/assets/SvgIcons/IconGoogleDocs";
 import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
@@ -70,7 +69,7 @@ export const findSourceIcon = (
 
 function extractLastPathSegment(str: string) {
   // Extract the last segment of the path
-  const parts = str.split('/');
+  const parts = str.split("/");
   return parts[parts.length - 1];
 }
 
@@ -83,13 +82,13 @@ export function extractFileDetails(str: string) {
   const match = lastSegment.match(fileFormatRegex);
 
   if (match) {
-      // Extract the extension and the main string without the extension
-      const extension = '.' + match[1];
-      const mainString = lastSegment.slice(0, -extension.length);
-      return { mainString, extension };
+    // Extract the extension and the main string without the extension
+    const extension = "." + match[1];
+    const mainString = lastSegment.slice(0, -extension.length);
+    return { mainString, extension };
   } else {
-      // No extension found
-      return { mainString: lastSegment, extension: null };
+    // No extension found
+    return { mainString: lastSegment, extension: null };
   }
 }
 
@@ -146,7 +145,7 @@ const getOutputText = (data: any) => {
 };
 
 export const getReactParserOptions = (
-  config: CopilotConfigType
+  linkColor: string
 ): HTMLReactParserOptions => ({
   htmlparser2: {
     lowerCaseTags: false,
@@ -164,7 +163,7 @@ export const getReactParserOptions = (
       return (
         <CodeBlock
           domNode={domNode.children[0]}
-          options={getReactParserOptions(config)}
+          options={getReactParserOptions(linkColor)}
         />
       );
     }
@@ -177,18 +176,15 @@ export const getReactParserOptions = (
       const href = domNode.attribs.href;
       delete domNode.attribs.href;
       return (
-        <Link
-          to={href}
-          configColor={config?.branding?.colors?.primary || "default"}
-        >
-          {domToReact(domNode.children, getReactParserOptions(config))}
+        <Link to={href} configColor={linkColor || "default"}>
+          {domToReact(domNode.children[0], getReactParserOptions(linkColor))}
         </Link>
       );
     }
   },
 });
 
-export const formatTextResponse = (data: any, config: CopilotConfigType) => {
+export const formatTextResponse = (data: any, linkColor: string) => {
   const body = getOutputText(data);
   if (!body) return "";
   const rawHtml = marked.parse(body, {
@@ -204,7 +200,7 @@ export const formatTextResponse = (data: any, config: CopilotConfigType) => {
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions(config)
+    getReactParserOptions(linkColor)
   );
   return parsedElements;
 };

@@ -5,10 +5,13 @@ import ResponseLoader from "../Loader";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
-import { formatTextResponse, getFeedbackButtonIcon, sanitizeReferences } from "./helpers";
+import {
+  formatTextResponse,
+  getFeedbackButtonIcon,
+  sanitizeReferences,
+} from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
-import { CopilotConfigType } from "src/contexts/types";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: any) => {
@@ -60,18 +63,14 @@ const FeedbackButtons = ({ data }: any) => {
 };
 
 const IncomingMsg = (props: any) => {
-  const config = props?.config;
   const { output_audio = [], type } = props.data;
   const audioTrack = output_audio[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-  const parsedElements = formatTextResponse(
-    props.data,
-    config as CopilotConfigType
-  );
+  const parsedElements = formatTextResponse(props.data, props?.linkColor);
   if (!parsedElements) return <ResponseLoader show={true} />;
   return (
-    <div className="gooey-incomingMsg gpb-12 gpr-8">
-      {config?.showSources && props?.data?.references && (
+    <div className="gooey-incomingMsg gpb-12">
+      {props?.showSources && props?.data?.references && (
         <Sources data={sanitizeReferences(props?.data) || []} />
       )}
       <div className="gpl-16">

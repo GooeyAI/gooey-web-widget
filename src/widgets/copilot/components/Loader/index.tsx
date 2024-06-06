@@ -16,7 +16,7 @@ const ResponseLoader = (props: any) => {
   }, [props.show, scrollMessageContainer]);
   if (!props.show) return null;
   return (
-    <div ref={LoaderRef} className="gpl-16">
+    <div ref={LoaderRef} className="gpl-12">
       <BotMessageLayout />
       <CircleBeat className="anim-blink gml-36 gmt-4" size={12} />
     </div>

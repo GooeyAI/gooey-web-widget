@@ -112,10 +112,10 @@ const Sources = ({ data }: any) => {
 
   if (!data || !data.length) return null;
   return (
-    <div className="gmb-8">
+    <div className="gmb-4">
       <div className="d-flex align-center gpl-16">
-        <IconListTimeline size={16} />
-        <p className="font_16_600 gml-20">Sources</p>
+        <IconListTimeline size={20} />
+        <p className="font_16_600 gml-16">Sources</p>
       </div>
       <div className="gmt-8 sources-listContainer">
         {data.map((source: any, index: number) => (
