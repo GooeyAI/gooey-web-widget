@@ -4,10 +4,12 @@ import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import PlaceholderMessage from "./PlaceholderMessage";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import { useMemo } from "react";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const que = props.queue;
+  const { handleFeedbackClick }: any = useMessagesContext();
+  const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
   if (!que) return null;
@@ -25,6 +27,7 @@ const Responses = (props: any) => {
             id={id}
             showSources={config?.showSources}
             linkColor={config?.branding?.colors?.primary}
+            onFeedbackClick={handleFeedbackClick}
           />
         );
       })}

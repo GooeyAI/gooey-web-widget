@@ -1,4 +1,4 @@
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import { useSystemContext } from "src/contexts/hooks";
 import Sources from "./Sources";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import ResponseLoader from "../Loader";
@@ -12,6 +12,7 @@ import {
 } from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
+import { memo } from "react";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: any) => {
@@ -31,14 +32,18 @@ export const BotMessageLayout = (props: any) => {
         </div>
       )}
       <p className="font_16_600">{branding?.name}</p>
-      {!!props?.message && <FeedbackButtons data={props?.message} />}
+      {!!props?.message && (
+        <FeedbackButtons
+          data={props?.message}
+          onFeedbackClick={props?.onFeedbackClick}
+        />
+      )}
     </div>
   );
 };
 
-const FeedbackButtons = ({ data }: any) => {
+const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
   const { buttons, bot_message_id } = data;
-  const { handleFeedbackClick }: any = useMessagesContext();
   if (!buttons) return null;
   return (
     <div className="d-flex gml-12">
@@ -51,7 +56,7 @@ const FeedbackButtons = ({ data }: any) => {
               variant="text"
               onClick={() =>
                 !button.isPressed &&
-                handleFeedbackClick(button.id, bot_message_id)
+                onFeedbackClick(button.id, bot_message_id)
               }
             >
               {getFeedbackButtonIcon(button.id, button.isPressed)}
@@ -62,7 +67,7 @@ const FeedbackButtons = ({ data }: any) => {
   );
 };
 
-const IncomingMsg = (props: any) => {
+const IncomingMsg = memo((props: any) => {
   const { output_audio = [], type } = props.data;
   const audioTrack = output_audio[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
@@ -74,7 +79,10 @@ const IncomingMsg = (props: any) => {
         <Sources data={sanitizeReferences(props?.data) || []} />
       )}
       <div className="gpl-16">
-        <BotMessageLayout message={props?.data} />
+        <BotMessageLayout
+          message={props?.data}
+          onFeedbackClick={props?.onFeedbackClick}
+        />
         <div
           className={clsx(
             "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
@@ -92,6 +100,6 @@ const IncomingMsg = (props: any) => {
       </div>
     </div>
   );
-};
+});
 
 export default IncomingMsg;

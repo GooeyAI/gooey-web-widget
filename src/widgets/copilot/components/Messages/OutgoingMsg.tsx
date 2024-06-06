@@ -1,10 +1,10 @@
-import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
-
 import { addInlineStyle } from "src/addStyles";
 import style from "./outgoing.scss?inline";
+import { memo } from "react";
+import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
 addInlineStyle(style);
 
-const OutgoingMsg = (props: any) => {
+const OutgoingMsg = memo((props: any) => {
   const { input_text = "", input_prompt = "", input_audio = "" } = props.data;
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
@@ -24,6 +24,6 @@ const OutgoingMsg = (props: any) => {
       )}
     </div>
   );
-};
+});
 
 export default OutgoingMsg;

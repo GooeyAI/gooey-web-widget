@@ -112,7 +112,7 @@ const Sources = ({ data }: any) => {
 
   if (!data || !data.length) return null;
   return (
-    <div className="gmb-4">
+    <div className="gmb-4 text-reveal-container">
       <div className="d-flex align-center gpl-16">
         <IconListTimeline size={20} />
         <p className="font_16_600 gml-16">Sources</p>

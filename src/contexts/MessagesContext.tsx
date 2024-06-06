@@ -88,28 +88,25 @@ const MessagesContextProvider = (props: any) => {
 
   const updateStreamedMessage = useCallback(
     (payload: any) => {
-      // stream start
-      if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
-        currentStreamRef.current = payload!.bot_message_id;
-        setMessages((prev: any) => {
+      setMessages((prev: any) => {
+        // stream start
+        if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
+          setIsSendingMessage(false);
+          setIsReceiving(true);
+          currentStreamRef.current = payload!.bot_message_id;
           const newConversations = new Map(prev);
           newConversations.set(payload!.bot_message_id, {
             id: currentStreamRef.current,
             ...payload,
           });
           return newConversations;
-        });
-        setIsSendingMessage(false);
-        setIsReceiving(true);
-        scrollToMessage();
-      }
+        }
 
-      // stream end
-      if (
-        payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-        payload?.status === "completed"
-      ) {
-        setMessages((prev: any) => {
+        // stream end
+        if (
+          payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
+          payload?.status === "completed"
+        ) {
           const newConversations = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
@@ -121,15 +118,12 @@ const MessagesContextProvider = (props: any) => {
             ...output,
             ...restPayload,
           });
+          setIsReceiving(false);
           return newConversations;
-        });
-        setIsReceiving(false);
-        scrollToMessage();
-      }
+        }
 
-      // streaming data
-      if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-        setMessages((prev: any) => {
+        // streaming data
+        if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
           const newConversations = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
           const prevMessage = prev.get(lastResponseId);
@@ -141,9 +135,10 @@ const MessagesContextProvider = (props: any) => {
             text,
           });
           return newConversations;
-        });
-        scrollToMessage();
-      }
+        }
+        return prev;
+      });
+      scrollToMessage();
     },
     [scrollToMessage]
   );
@@ -219,15 +214,14 @@ const MessagesContextProvider = (props: any) => {
     );
     setMessages((prev: any) => {
       const newConversations = new Map(prev);
-      const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
-      const prevMessage = prev.get(lastResponseId);
+      const prevMessage = prev.get(context_msg_id);
       const newButtons = prevMessage.buttons.map((button: any) => {
         if (button.id === button_id) {
           return { ...button, isPressed: true };
         }
         return undefined; // hide the other buttons
       });
-      newConversations.set(lastResponseId, {
+      newConversations.set(context_msg_id, {
         ...prevMessage,
         buttons: newButtons,
       });
