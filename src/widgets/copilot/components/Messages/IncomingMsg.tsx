@@ -77,7 +77,7 @@ const IncomingMsg = (props: any) => {
         <BotMessageLayout message={props?.data} />
         <div
           className={clsx(
-            "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown",
+            "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
             isStreaming && "response-streaming"
           )}
           id={props?.id}

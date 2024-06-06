@@ -56,10 +56,23 @@
   line-height: 130% !important;
   opacity: 1;
   width: 100%;
-  animation:
-    typing 0.25s steps(30),
+  animation: typing 0.25s steps(30),
     blink-border 0.2s step-end infinite alternate;
   overflow: hidden;
+}
+
+.text-reveal-container *:not(code, div, pre, ol, ul){
+  opacity: 1;
+  animation: anim-textReveal 0.4s cubic-bezier(.43,.02,.06,.62) 0s forwards 1;
+}
+
+@keyframes anim-textReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes border-blink {
