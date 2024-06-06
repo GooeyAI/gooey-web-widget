@@ -59,32 +59,20 @@
   animation: typing 0.25s steps(30),
     blink-border 0.2s step-end infinite alternate;
   overflow: hidden;
+  white-space: inherit;
 }
 
-.text-reveal-container *:not(code, div, pre, ol, ul){
+.text-reveal-container *:not(code, div, pre, ol, ul) {
   opacity: 1;
-  animation: anim-textReveal 0.4s cubic-bezier(.43,.02,.06,.62) 0s forwards 1;
+  animation: anim-textReveal 0.35s cubic-bezier(0.43, 0.02, 0.06, 0.62) 0s
+    forwards 1;
 }
 
 @keyframes anim-textReveal {
-  0% {
+  from {
     opacity: 0;
   }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes border-blink {
-  50% {
-    border-color: transparent;
-  }
-}
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-  100% {
+  to {
     opacity: 1;
   }
 }
@@ -93,9 +81,11 @@
   from {
     opacity: 0;
     width: 0;
+    white-space: nowrap;
   }
   to {
     opacity: 1;
+    white-space: nowrap;
   }
 }
 .anim-blink-self {
@@ -107,10 +97,10 @@
 }
 
 @keyframes border-blink {
-  0% {
+  from {
     opacity: 0;
   }
-  100% {
+  to {
     opacity: 1;
   }
 }
