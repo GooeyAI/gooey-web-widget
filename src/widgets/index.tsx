@@ -37,7 +37,7 @@ export function CopilotChatWidget({ config }: { config?: any }) {
 }
 
 export function renderCopilotChatWidget(elem: Element, config?: any) {
-  const shadow = elem.attachShadow({ mode: "open" });
+  const shadow = elem.attachShadow({ mode: "open", delegatesFocus: true});
   const root = ReactDOM.createRoot(shadow);
   root.render(
     <React.StrictMode>
