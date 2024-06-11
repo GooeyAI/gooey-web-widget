@@ -33,7 +33,9 @@ const SourcesCard = (props: any) => {
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url
   );
-  const domainNameText = domainName + (data?.refNumber || pageNum ? "⋅" : "");
+  const domainNameText = domainName.includes("googleapis")
+    ? ""
+    : domainName + (data?.refNumber || pageNum ? "⋅" : "");
   if (!data) return null;
   return (
     <button
