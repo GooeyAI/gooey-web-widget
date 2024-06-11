@@ -20,7 +20,7 @@ export const STREAM_MESSAGE_TYPES = {
 export const createStreamApi = async (body: any, cancelToken: any) => {
   const headers = getHeaders();
   const finalBody = {
-    citation_style: "numbers",
+    citation_style: "number",
     use_url_shortener: false,
     ...body,
   }; // force number citation style
