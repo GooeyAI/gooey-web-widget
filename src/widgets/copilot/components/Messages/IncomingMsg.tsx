@@ -27,7 +27,7 @@ export const BotMessageLayout = (props: any) => {
           <img
             src={branding?.photoUrl}
             alt="bot-avatar"
-            style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+            style={{ width: "24px", height: "24px", borderRadius: "100%", objectFit: 'cover' }}
           />
         </div>
       )}
