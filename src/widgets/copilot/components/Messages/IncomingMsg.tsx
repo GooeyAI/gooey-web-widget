@@ -27,17 +27,16 @@ export const BotMessageLayout = (props: any) => {
           <img
             src={branding?.photoUrl}
             alt="bot-avatar"
-            style={{ width: "24px", height: "24px", borderRadius: "100%", objectFit: 'cover' }}
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "100%",
+              objectFit: "cover",
+            }}
           />
         </div>
       )}
       <p className="font_16_600">{branding?.name}</p>
-      {!!props?.message && (
-        <FeedbackButtons
-          data={props?.message}
-          onFeedbackClick={props?.onFeedbackClick}
-        />
-      )}
     </div>
   );
 };
@@ -46,7 +45,7 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
   const { buttons, bot_message_id } = data;
   if (!buttons) return null;
   return (
-    <div className="d-flex gml-12">
+    <div className="d-flex gml-36">
       {buttons.map(
         (button: any) =>
           !!button && (
@@ -55,8 +54,7 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
               className="gmr-4 text-muted"
               variant="text"
               onClick={() =>
-                !button.isPressed &&
-                onFeedbackClick(button.id, bot_message_id)
+                !button.isPressed && onFeedbackClick(button.id, bot_message_id)
               }
             >
               {getFeedbackButtonIcon(button.id, button.isPressed)}
@@ -79,10 +77,7 @@ const IncomingMsg = memo((props: any) => {
         <Sources data={sanitizeReferences(props?.data) || []} />
       )}
       <div className="gpl-16">
-        <BotMessageLayout
-          message={props?.data}
-          onFeedbackClick={props?.onFeedbackClick}
-        />
+        <BotMessageLayout message={props?.data} />
         <div
           className={clsx(
             "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
@@ -96,6 +91,12 @@ const IncomingMsg = memo((props: any) => {
           <div className="gmt-16">
             <audio controls src={audioTrack}></audio>
           </div>
+        )}
+        {props?.data?.buttons && (
+          <FeedbackButtons
+            onFeedbackClick={props?.onFeedbackClick}
+            data={props?.data}
+          />
         )}
       </div>
     </div>
