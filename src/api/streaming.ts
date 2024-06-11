@@ -19,14 +19,19 @@ export const STREAM_MESSAGE_TYPES = {
 
 export const createStreamApi = async (body: any, cancelToken: any) => {
   const headers = getHeaders();
+  const finalBody = {
+    citation_style: "numbers",
+    use_url_shortener: false,
+    ...body,
+  }; // force number citation style
   const response: any = await axios.post(
     BASE_URL_STREAMING,
-    JSON.stringify(body),
+    JSON.stringify(finalBody),
     {
       headers,
       responseType: "stream",
       cancelToken: cancelToken.token,
-    },
+    }
   );
   return response.headers.get("Location");
 };
