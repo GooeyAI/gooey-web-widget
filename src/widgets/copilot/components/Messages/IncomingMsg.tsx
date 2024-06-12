@@ -64,7 +64,11 @@ const IncomingMsg = memo((props: any) => {
   const { output_audio = [], type } = props.data;
   const audioTrack = output_audio[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-  const parsedElements = formatTextResponse(props.data, props?.linkColor);
+  const parsedElements = formatTextResponse(
+    props.data,
+    props?.linkColor,
+    props?.showSources
+  );
   if (!parsedElements) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12">

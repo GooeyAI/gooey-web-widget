@@ -4,6 +4,7 @@ export interface CopilotConfigType {
   mode: "popup" | "inline" | "fullscreen";
   enableAudioMessage: boolean;
   showSources: boolean;
+  expandedSources: boolean;
   branding: {
     name?: string;
     byLine?: string;

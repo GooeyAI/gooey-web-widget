@@ -19,6 +19,7 @@ import Sources from "./Sources";
 import React from "react";
 
 const GOOEY_META_SCRAPPER_API = "https://gooey-url-meta-scrapper.us-1.gooey.ai";
+const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
   contentType: string,
@@ -147,10 +148,7 @@ const getOutputText = (data: any) => {
   return out;
 };
 
-export const getReactParserOptions = (
-  linkColor: string,
-  data: any
-): HTMLReactParserOptions => ({
+export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
   htmlparser2: {
     lowerCaseTags: false,
     lowerCaseAttributeNames: false,
@@ -167,19 +165,18 @@ export const getReactParserOptions = (
       return (
         <CodeBlock
           domNode={domNode.children[0]}
-          options={getReactParserOptions(linkColor, data)}
+          options={getReactParserOptions(data)}
         />
       );
     }
   },
   transform(reactNode, domNode) {
-    if (domNode.type === "text") {
+    if (domNode.type === "text" && data.showSources) {
       return customizedReferences(reactNode, domNode, data);
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    if (domNode?.name === "a")
-      return customizedLinks(reactNode, domNode, { ...data, linkColor });
+    if (domNode?.name === "a") return customizedLinks(reactNode, domNode, data);
     else return reactNode;
   },
 });
@@ -207,10 +204,7 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
   return (
     <React.Fragment>
       <Link to={href} configColor={data?.linkColor || "default"}>
-        {domToReact(
-          domNode.children,
-          getReactParserOptions(data?.linkColor, data)
-        )}
+        {domToReact(domNode.children, getReactParserOptions(data))}
       </Link>{" "}
       {!hideSource && (
         <CollapsibleButton>
@@ -223,38 +217,48 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
 
 const customizedReferences = (reactNode: any, domNode: any, data: any) => {
   if (!domNode) return domNode;
-  const text = domNode.data;
-  const parts: any = [];
-  const CUSTOM_REGEX = /\[\d+(,\s*\d+)*\]/g;
+  let text = domNode.data || "";
+
   // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
   // and add the text before and after the match to parts final render array
-  if (!text || !text.match(CUSTOM_REGEX)) return reactNode; // return the text as it is if no match found
-  text.replace(CUSTOM_REGEX, (match: any) => {
-    const [preString, postString] = text.split(match);
-    const numbers = detectNumberReference(match);
-    const { references = [] }: any = data;
-    const sources = [...references].splice(
-      numbers[0] - 1,
-      numbers[numbers.length - 1]
-    );
-    parts.push(
-      <span>
-        {preString}
-        {postString}
-      </span>
-    );
-    parts.push(
-      <React.Fragment>
-        <CollapsibleButton>
-          <Sources data={sources} />
-        </CollapsibleButton>
-      </React.Fragment>
-    );
-  });
-  return <>{parts}</>;
+  const matches: any = Array.from(
+    new Set(
+      (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
+        parseInt(match.slice(1, -1), 10)
+      )
+    )
+  );
+
+  // return the text as it is if no match found
+  if (!matches || !matches.length) return reactNode;
+
+  const { references = [] }: any = data;
+  const sources = [...references].splice(
+    matches[0] - 1,
+    matches[matches.length - 1]
+  );
+
+  text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
+  // remove trailing dot and space
+  if (text[text.length - 1] === "." && text[text.length - 2] === " ") {
+    text = text.slice(0, -2) + ".";
+  }
+  return (
+    <React.Fragment>
+      {text}{" "}
+      <CollapsibleButton>
+        <Sources data={sources} />
+      </CollapsibleButton>
+      <br />
+    </React.Fragment>
+  );
 };
 
-export const formatTextResponse = (data: any, linkColor: string) => {
+export const formatTextResponse = (
+  data: any,
+  linkColor: string,
+  showSources: boolean
+) => {
   const body = getOutputText(data);
   if (!body) return "";
   const rawHtml = marked.parse(body, {
@@ -270,7 +274,7 @@ export const formatTextResponse = (data: any, linkColor: string) => {
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions(linkColor, data)
+    getReactParserOptions({ ...data, showSources, linkColor })
   );
   return parsedElements;
 };
@@ -312,30 +316,30 @@ export function truncateMiddle(str: string, charLimit: number) {
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
 
-function detectNumberReference(str: string) {
-  /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
-  const regex = /\[\d+(,\s*\d+)*\]/g;
+// function detectNumberReference(str: string) {
+//   /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
+//   const regex = /\[\d+(,\s*\d+)*\]/g;
 
-  // Use the regex to find matches
-  const matches = str.match(regex);
+//   // Use the regex to find matches
+//   const matches = str.match(regex);
 
-  // If no matches found, return an empty array
-  if (!matches) {
-    return [];
-  }
+//   // If no matches found, return an empty array
+//   if (!matches) {
+//     return [];
+//   }
 
-  // Extract numbers from each match
-  const numbers = matches.map((match) => {
-    // Remove the square brackets and split by comma
-    return match
-      .slice(1, -1)
-      .split(",")
-      .map((num) => parseInt(num.trim(), 10));
-  });
+//   // Extract numbers from each match
+//   const numbers = matches.map((match) => {
+//     // Remove the square brackets and split by comma
+//     return match
+//       .slice(1, -1)
+//       .split(",")
+//       .map((num) => parseInt(num.trim(), 10));
+//   });
 
-  // Flatten the array of arrays into a single array
-  return numbers.flat().sort();
-}
+//   // Flatten the array of arrays into a single array
+//   return numbers.flat().sort();
+// }
 
 // export const sanitizeReferences = (data: any) => {
 //   // remove items from references which are not in output_text
