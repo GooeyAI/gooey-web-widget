@@ -36,7 +36,7 @@ const CollapsibleButton = ({ children, ...restProps }: any) => {
       >
         <IconCaretUp size={12} />
       </IconButton>
-      {isExpanded && (
+      {(isExpanded && !restProps?.disabled) && (
         <div
           className={clsx(
             "collapsed-area",

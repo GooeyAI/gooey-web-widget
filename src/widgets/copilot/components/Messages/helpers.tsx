@@ -246,7 +246,7 @@ const customizedReferences = (reactNode: any, domNode: any, data: any) => {
   return (
     <React.Fragment>
       {text}{" "}
-      <CollapsibleButton>
+      <CollapsibleButton disabled={!references.length}>
         <Sources data={sources} />
       </CollapsibleButton>
       <br />
