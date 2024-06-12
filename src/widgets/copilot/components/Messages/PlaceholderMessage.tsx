@@ -40,16 +40,17 @@ const BotProfile = () => {
       <div>
         <p className="font_24_500 gmb-16">{branding.name}</p>
         <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
-          {branding.byLine}
+          {branding.byLine} 
           {branding.websiteUrl && (
-            <a
-              href={branding.websiteUrl}
-              target="_ablank"
-              style={{ marginBottom: "-5px", color: "#eee" }}
-              className="gml-6"
-            >
-              <IconGlobeNet size={14} />
-            </a>
+            <span className="gml-4" style={{ marginBottom: '-2px'}}>
+              <a
+                href={branding.websiteUrl}
+                target="_ablank"
+                className="text-muted font_12_500"
+              >
+                <IconGlobeNet />
+              </a>
+            </span>
           )}
         </p>
         <p className="font_12_400 gpl-32 gpr-32">{branding.description}</p>
@@ -71,9 +72,7 @@ const PlaceholderMessage = () => {
             key={que}
             variant="outlined"
             onClick={() => initializeQuery(que)}
-            className={clsx(
-              "text-left font_12_500",
-            )}
+            className={clsx("text-left font_12_500")}
           >
             {que}
           </Button>
