@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import IconListTimeline from "src/assets/SvgIcons/IconListTimeline";
 import { useEffect, useState } from "react";
 import {
   extractFileDetails,
@@ -42,7 +41,7 @@ const SourcesCard = (props: any) => {
       onClick={onClick}
       className={clsx(
         "pos-relative sources-card gp-0 gm-0 text-left overflow-hidden",
-        index === 0 && "gml-48",
+        // index === 0 && "gml-48",
         index !== data.length - 1 && "gmr-12"
       )}
       style={{ height: "64px" }}
@@ -68,7 +67,10 @@ const SourcesCard = (props: any) => {
         className="d-flex flex-col justify-between gp-6"
         style={{ zIndex: 1, height: "100%" }}
       >
-        <p className={clsx("font_10_600", metaData?.image ? "text-white" : "")}>
+        <p
+          className={clsx("font_10_600", metaData?.image ? "text-white" : "")}
+          style={{ margin: 0 }}
+        >
           {truncateMiddle(metaData?.title || title, 50)}
         </p>
         <div
@@ -96,6 +98,7 @@ const SourcesCard = (props: any) => {
               "font_10_500 gml-4",
               metaData?.image ? "text-white" : "text-muted"
             )}
+            style={{ margin: 0 }}
           >
             {domainNameText +
               (pageNum ? pageNum.trim() : "") +
@@ -111,14 +114,13 @@ const SourcesCard = (props: any) => {
 
 const Sources = ({ data }: any) => {
   const openInWindow = (url: string) => window.open(url, "_blank");
-
   if (!data || !data.length) return null;
   return (
     <div className="gmb-4 text-reveal-container">
-      <div className="d-flex align-center gpl-16">
+      {/* <div className="d-flex align-center">
         <IconListTimeline size={20} />
-        <p className="font_16_600 gml-16">Sources</p>
-      </div>
+        <p className="font_16_600">Sources</p>
+      </div> */}
       <div className="gmt-8 sources-listContainer">
         {data.map((source: any, index: number) => (
           <SourcesCard

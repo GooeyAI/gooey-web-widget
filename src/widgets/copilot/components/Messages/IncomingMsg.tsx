@@ -1,21 +1,16 @@
 import { useSystemContext } from "src/contexts/hooks";
-import Sources from "./Sources";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import ResponseLoader from "../Loader";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
-import {
-  formatTextResponse,
-  getFeedbackButtonIcon,
-  sanitizeReferences,
-} from "./helpers";
+import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
 import { memo } from "react";
 addInlineStyle(style);
 
-export const BotMessageLayout = (props: any) => {
+export const BotMessageLayout = () => {
   const branding = useSystemContext().config?.branding;
   return (
     <div className="d-flex align-center">
@@ -73,11 +68,8 @@ const IncomingMsg = memo((props: any) => {
   if (!parsedElements) return <ResponseLoader show={true} />;
   return (
     <div className="gooey-incomingMsg gpb-12">
-      {props?.showSources && props?.data?.references && (
-        <Sources data={sanitizeReferences(props?.data) || []} />
-      )}
       <div className="gpl-16">
-        <BotMessageLayout message={props?.data} />
+        <BotMessageLayout />
         <div
           className={clsx(
             "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",

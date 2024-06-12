@@ -14,6 +14,9 @@ import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
+import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
+import Sources from "./Sources";
+import React from "react";
 
 const GOOEY_META_SCRAPPER_API = "https://gooey-url-meta-scrapper.us-1.gooey.ai";
 
@@ -145,7 +148,8 @@ const getOutputText = (data: any) => {
 };
 
 export const getReactParserOptions = (
-  linkColor: string
+  linkColor: string,
+  data: any
 ): HTMLReactParserOptions => ({
   htmlparser2: {
     lowerCaseTags: false,
@@ -163,26 +167,92 @@ export const getReactParserOptions = (
       return (
         <CodeBlock
           domNode={domNode.children[0]}
-          options={getReactParserOptions(linkColor)}
+          options={getReactParserOptions(linkColor, data)}
         />
       );
     }
-
-    // Replace <a> tags with <Link> component
-    if (
-      domNode.children.length &&
-      (domNode?.name === "a" || domNode.children[0].name === "a")
-    ) {
-      const href = domNode.attribs.href;
-      delete domNode.attribs.href;
-      return (
-        <Link to={href} configColor={linkColor || "default"}>
-          {domToReact(domNode.children, getReactParserOptions(linkColor))}
-        </Link>
-      );
+  },
+  transform(reactNode, domNode) {
+    if (domNode.type === "text") {
+      return customizedReferences(reactNode, domNode, data);
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (domNode?.name === "a")
+      return customizedLinks(reactNode, domNode, { ...data, linkColor });
+    else return reactNode;
   },
 });
+
+const checkLinkInSources = (url: string, data: any): any => {
+  const references = data?.references || [];
+  const matches = references.filter((reference: any) => reference.url === url);
+  matches.length ? matches[0] : null;
+};
+
+const customizedLinks = (reactNode: any, domNode: any, data: any) => {
+  if (!reactNode) return reactNode;
+  const href = domNode.attribs.href;
+  delete domNode.attribs.href;
+  let source: any = checkLinkInSources(href, data);
+  if (!source) {
+    source = {
+      title: domNode?.children[0].data || extractLastPathSegment(href),
+      url: href,
+    };
+  }
+
+  // hide source if mailto;
+  const hideSource = href.startsWith("mailto:");
+  return (
+    <React.Fragment>
+      <Link to={href} configColor={data?.linkColor || "default"}>
+        {domToReact(
+          domNode.children,
+          getReactParserOptions(data?.linkColor, data)
+        )}
+      </Link>{" "}
+      {!hideSource && (
+        <CollapsibleButton>
+          <Sources data={[source]} />
+        </CollapsibleButton>
+      )}
+    </React.Fragment>
+  );
+};
+
+const customizedReferences = (reactNode: any, domNode: any, data: any) => {
+  if (!domNode) return domNode;
+  const text = domNode.data;
+  const parts: any = [];
+  const CUSTOM_REGEX = /\[\d+(,\s*\d+)*\]/g;
+  // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
+  // and add the text before and after the match to parts final render array
+  if (!text || !text.match(CUSTOM_REGEX)) return reactNode; // return the text as it is if no match found
+  text.replace(CUSTOM_REGEX, (match: any) => {
+    const [preString, postString] = text.split(match);
+    const numbers = detectNumberReference(match);
+    const { references = [] }: any = data;
+    const sources = [...references].splice(
+      numbers[0] - 1,
+      numbers[numbers.length - 1]
+    );
+    parts.push(
+      <span>
+        {preString}
+        {postString}
+      </span>
+    );
+    parts.push(
+      <React.Fragment>
+        <CollapsibleButton>
+          <Sources data={sources} />
+        </CollapsibleButton>
+      </React.Fragment>
+    );
+  });
+  return <>{parts}</>;
+};
 
 export const formatTextResponse = (data: any, linkColor: string) => {
   const body = getOutputText(data);
@@ -200,7 +270,7 @@ export const formatTextResponse = (data: any, linkColor: string) => {
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions(linkColor)
+    getReactParserOptions(linkColor, data)
   );
   return parsedElements;
 };
@@ -264,42 +334,42 @@ function detectNumberReference(str: string) {
   });
 
   // Flatten the array of arrays into a single array
-  return numbers.flat();
+  return numbers.flat().sort();
 }
 
-export const sanitizeReferences = (data: any) => {
-  // remove items from references which are not in output_text
-  const { output_text = [], references = [] } = data;
-  const outputText = output_text[0] || "";
-  const numberReferences = detectNumberReference(outputText).sort();
-  const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
-  const urlsInResponse = [...new Set(outputText.match(urlPattern))];
-  if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
-  const indices = numberReferences.map((num) => num - 1);
+// export const sanitizeReferences = (data: any) => {
+//   // remove items from references which are not in output_text
+//   const { output_text = [], references = [] } = data;
+//   const outputText = output_text[0] || "";
+//   const numberReferences = detectNumberReference(outputText);
+//   const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
+//   const urlsInResponse = [...new Set(outputText.match(urlPattern))];
+//   if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
+//   const indices = numberReferences.map((num) => num - 1);
 
-  // check ref numbers and remove the ones which are not in output_text by index
-  let rejectedReferences: any = [];
-  const newSources = references
-    .map((_: any, index: number) => {
-      if (indices.includes(index))
-        return {
-          ..._,
-          refNumber: numberReferences[index - rejectedReferences.length],
-        };
-      else {
-        rejectedReferences.push(_);
-        return undefined;
-      }
-    })
-    .filter((source: any) => source !== undefined);
+//   // check ref numbers and remove the ones which are not in output_text by index
+//   let rejectedReferences: any = [];
+//   const newSources = references
+//     .map((_: any, index: number) => {
+//       if (indices.includes(index))
+//         return {
+//           ..._,
+//           refNumber: numberReferences[index - rejectedReferences.length],
+//         };
+//       else {
+//         rejectedReferences.push(_);
+//         return undefined;
+//       }
+//     })
+//     .filter((source: any) => source !== undefined);
 
-  // removed all the un-indexed references
-  if (!urlsInResponse.length) return newSources;
+//   // removed all the un-indexed references
+//   if (!urlsInResponse.length) return newSources;
 
-  // check urls in response and add them to sources
-  rejectedReferences = rejectedReferences.filter(({ url }: any) => {
-    if (url.endsWith("/")) url = url.slice(0, -1);
-    return urlsInResponse.indexOf(url) !== -1;
-  });
-  return [...newSources, ...rejectedReferences];
-};
+//   // check urls in response and add them to sources
+//   rejectedReferences = rejectedReferences.filter(({ url }: any) => {
+//     if (url.endsWith("/")) url = url.slice(0, -1);
+//     return urlsInResponse.indexOf(url) !== -1;
+//   });
+//   return [...newSources, ...rejectedReferences];
+// };
