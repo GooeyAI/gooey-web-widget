@@ -61,8 +61,9 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
 };
 
 const IncomingMsg = memo((props: any) => {
-  const { output_audio = [], type } = props.data;
+  const { output_audio = [], type, output_video = [] } = props.data;
   const audioTrack = output_audio[0];
+  const videoTrack = output_video[0];
   const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
   const parsedElements = formatTextResponse(
     props.data,
@@ -83,12 +84,17 @@ const IncomingMsg = memo((props: any) => {
         >
           {parsedElements}
         </div>
-        {audioTrack && (
+        {!isStreaming && !videoTrack && audioTrack && (
           <div className="gmt-16">
-            <audio controls src={audioTrack}></audio>
+            <audio autoPlay controls src={audioTrack}></audio>
           </div>
         )}
-        {props?.data?.buttons && (
+        {!isStreaming && videoTrack && (
+          <div className="gmt-16 gml-36">
+            <video autoPlay controls src={videoTrack}></video>
+          </div>
+        )}
+        {!isStreaming && props?.data?.buttons && (
           <FeedbackButtons
             onFeedbackClick={props?.onFeedbackClick}
             data={props?.data}
