@@ -61,7 +61,7 @@ const BotProfile = () => {
 const PlaceholderMessage = () => {
   const { initializeQuery }: any = useMessagesContext();
   const { config } = useSystemContext();
-  let conversationStarters = config?.branding.conversationStarters ?? [];
+  const conversationStarters = config?.branding.conversationStarters ?? [];
   return (
     <div className="no-scroll-bar w-100 gpl-16">
       <BotProfile />
@@ -70,10 +70,8 @@ const PlaceholderMessage = () => {
           <Button
             key={que}
             variant="outlined"
-            onClick={() => initializeQuery(que)}
-            className={clsx(
-              "text-left font_12_500",
-            )}
+            onClick={() => initializeQuery({ input_prompt: que })}
+            className={clsx("text-left font_12_500")}
           >
             {que}
           </Button>
