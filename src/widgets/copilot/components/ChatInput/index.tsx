@@ -149,7 +149,7 @@ const ChatInput = () => {
   return (
     <React.Fragment>
       {files && files.length > 0 && (
-        <div className="gp-12 b-1 br-large gmb-12">
+        <div className="gp-12 b-1 br-large gmb-12 gm-12">
           <FilePreview files={files} />
         </div>
       )}
