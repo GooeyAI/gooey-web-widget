@@ -9,3 +9,12 @@
 .gooey-outgoing-Text {
   white-space: break-spaces;
 }
+
+.outgoingMsg-image {
+  max-width: 200px;
+  min-width: 200px;
+  background-color: #eee;
+  animation: fade-in-A 0.4s;
+  height: 100px;
+  object-fit: cover;
+}
