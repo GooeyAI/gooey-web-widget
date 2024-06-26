@@ -2,14 +2,11 @@ import { addInlineStyle } from "src/addStyles";
 import style from "./outgoing.scss?inline";
 import { memo } from "react";
 import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
+import clsx from "clsx";
 addInlineStyle(style);
 
 const OutgoingMsg = memo((props: any) => {
-  const {
-    input_prompt = "",
-    input_audio = "",
-    input_images = [],
-  } = props.data;
+  const { input_prompt = "", input_audio = "", input_images = [] } = props.data;
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
       <div className="d-flex align-center gmb-8">
@@ -22,7 +19,10 @@ const OutgoingMsg = memo((props: any) => {
             <img
               src={url}
               alt={url}
-              className="outgoingMsg-image b-1 br-large gmt-8"
+              className={clsx(
+                "outgoingMsg-image b-1 br-large",
+                input_prompt && "gmb-4"
+              )}
             />
           </a>
         ))}
