@@ -8,6 +8,7 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadFileToGooey } from "src/api/file-upload";
+import { CopilotConfigType } from "./types";
 
 interface IncomingMsg {
   input_text?: string;
@@ -29,7 +30,7 @@ const createNewQuery = (payload: any) => {
 export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
-  const { config } = useSystemContext();
+  const config: CopilotConfigType | null = useSystemContext()?.config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -153,7 +154,11 @@ const MessagesContextProvider = (props: any) => {
         integration_id: config?.integration_id,
         ...payload,
       };
-      const streamUrl = await createStreamApi(payload, apiSource.current);
+      const streamUrl = await createStreamApi(
+        payload,
+        apiSource.current,
+        config?.apiUrl
+      );
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
     } catch (err) {

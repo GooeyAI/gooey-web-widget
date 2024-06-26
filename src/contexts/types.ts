@@ -5,6 +5,7 @@ export interface CopilotConfigType {
   enableAudioMessage: boolean;
   showSources: boolean;
   expandedSources: boolean;
+  apiUrl?: string;
   branding: {
     name?: string;
     byLine?: string;
