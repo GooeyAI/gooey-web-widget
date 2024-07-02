@@ -22,15 +22,15 @@ const BotProfile = () => {
       {branding.photoUrl && (
         <div
           className="bot-avatar gmr-8 gmb-24 bg-primary"
-          style={{ width: "64px", height: "64px", borderRadius: "100%" }}
+          style={{ width: "128px", height: "128px", borderRadius: "100%" }}
         >
           {" "}
           <img
             src={branding.photoUrl}
             alt="bot-avatar"
             style={{
-              width: "64px",
-              height: "64px",
+              width: "128px",
+              height: "128px",
               borderRadius: "100%",
               objectFit: "cover",
             }}
@@ -40,9 +40,9 @@ const BotProfile = () => {
       <div>
         <p className="font_24_500 gmb-16">{branding.name}</p>
         <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
-          {branding.byLine} 
+          {branding.byLine}
           {branding.websiteUrl && (
-            <span className="gml-4" style={{ marginBottom: '-2px'}}>
+            <span className="gml-4" style={{ marginBottom: "-2px" }}>
               <a
                 href={branding.websiteUrl}
                 target="_ablank"
