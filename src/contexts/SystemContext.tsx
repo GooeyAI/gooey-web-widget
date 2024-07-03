@@ -39,6 +39,7 @@ const SystemContextProvider = ({
     open: false,
     isInitialized: false,
   });
+  const [tempStore, setTempStore] = useState<any>(new Map());
 
   const mode = getMode(widgetState);
   const handleWidgetToggle = () => {
@@ -51,16 +52,32 @@ const SystemContextProvider = ({
     return setWidgetState((prev) => ({ ...prev, open: false }));
   };
 
+  const setTempStoreValue = (key: string, value: any) => {
+    setTempStore((prev: any) => {
+      const newStore = new Map(prev);
+      newStore.set(key, value);
+      return newStore;
+    });
+  };
+
+  const getTempStoreValue = (key: string) => {
+    return tempStore.get(key);
+  };
+
   const value: {
     open: boolean;
     mode: string;
     toggleWidget: () => void;
     config: CopilotConfigType;
+    setTempStoreValue: (key: string, value: any) => void;
+    getTempStoreValue: (key: string) => any;
   } = {
     open: widgetState.open,
     mode,
     toggleWidget: handleWidgetToggle,
     config: config,
+    setTempStoreValue,
+    getTempStoreValue,
   };
   return (
     <SystemContext.Provider value={value}>{children}</SystemContext.Provider>

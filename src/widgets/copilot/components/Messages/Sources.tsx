@@ -7,23 +7,30 @@ import {
   findSourceIcon,
   truncateMiddle,
 } from "./helpers";
+import { useSystemContext } from "src/contexts/hooks";
 
 const SourcesCard = (props: any) => {
   const { data, index, onClick } = props;
-  const [metaData, setMetaData] = useState<any>(null);
+  const { getTempStoreValue, setTempStoreValue }: any = useSystemContext();
+  const [metaData, setMetaData] = useState<any>(
+    getTempStoreValue(data.url) || null
+  );
   const { mainString } = extractFileDetails(data?.title);
   const [title, pageNum] = (mainString || "").split(",");
 
   useEffect(() => {
-    if (!data || metaData) return;
+    if (!data || metaData || getTempStoreValue[data.url]) return;
     try {
       fetchUrlMeta(data.url).then((meta) => {
-        if (Object.keys(meta).length) setMetaData(meta);
+        if (Object.keys(meta).length) {
+          setMetaData(meta);
+          setTempStoreValue(data.url, meta);
+        }
       });
     } catch (e) {
       console.error(e);
     }
-  }, [data, metaData]);
+  }, [data, getTempStoreValue, metaData, setTempStoreValue]);
 
   const redirectedUrl =
     metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
