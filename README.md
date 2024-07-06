@@ -1,6 +1,6 @@
 # Gooey Web Widget
 
-A chat widget for embedding Gooey.AI bots on your website.
+A clean, self-hostable web widget for Gooey.AI Copilots, with streaming support with every major LLM, speech-reco, and Text-to-Speech covering 1000+ languages, photo uploads, feedback, and analytics  Fork for customized branding and functionality (or use our hosted version available under Copilot Integrations). 
 
 
 ## Raw Library Usage
