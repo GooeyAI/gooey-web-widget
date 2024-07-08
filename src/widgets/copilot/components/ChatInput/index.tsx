@@ -1,5 +1,5 @@
 import IconButton from "src/components/shared/Buttons/IconButton";
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 import clsx from "clsx";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
@@ -109,7 +109,7 @@ const ChatInput = () => {
           const toUpload = new File([blob as Blob], file.name);
           uploadFileToGooey(toUpload).then((url) => {
             setFiles((prev: any) => {
-              if(!prev[index]) return prev; // if photo removed before upload completed
+              if (!prev[index]) return prev; // if photo removed before upload completed
               prev[index].isUploading = false;
               prev[index].gooeyUrl = url;
               return [...prev];
@@ -147,6 +147,10 @@ const ChatInput = () => {
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
     files?.some((file) => file.isUploading);
+  const isLeftButtons = useMemo(
+    () => config?.enablePhotoUpload,
+    [config?.enablePhotoUpload]
+  );
   return (
     <React.Fragment>
       {files && files.length > 0 && (
@@ -175,17 +179,19 @@ const ChatInput = () => {
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
               className={clsx(
-                "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 gpl-40 flex-1 gm-0"
+                "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0", isLeftButtons ? "gpl-32" : "gpl-12"
               )}
               placeholder={`Message ${config.branding.name || ""}`}
             ></textarea>
 
             {/* Left icons */}
-            <div className="input-left-buttons">
-              <IconButton onClick={handleFileUpload} variant="text-alt">
-                <IconPaperClip size={18} />
-              </IconButton>
-            </div>
+            {isLeftButtons && (
+              <div className="input-left-buttons">
+                <IconButton onClick={handleFileUpload} variant="text-alt" className="gp-4">
+                  <IconPaperClip size={18} />
+                </IconButton>
+              </div>
+            )}
 
             {/* Right icons */}
             <div className="input-right-buttons">
