@@ -8,7 +8,9 @@ export default function ChatWidget() {
     case "popup":
       return (
         <WithFabLauncher open={open || false}>
-          <CopilotWidget />
+          <div id='gooey-popup-container'>
+            <CopilotWidget />
+          </div>
         </WithFabLauncher>
       );
     case "inline":

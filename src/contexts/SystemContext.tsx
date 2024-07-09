@@ -3,17 +3,16 @@ import { CopilotConfigType } from "./types";
 
 export type SystemContextType = {
   open: boolean;
-  mode: string;
-  toggleWidget: () => void;
-  config: null | CopilotConfigType;
+  mode?: string;
+  config?: CopilotConfigType;
+  isExpanded?: boolean;
+  toggleWidget?: () => void;
+  setTempStoreValue?: (key: string, value: any) => void;
+  getTempStoreValue?: (key: string) => any;
+  expandWidget?: () => void;
 };
 
-export const SystemContext = createContext<SystemContextType>({
-  open: false,
-  mode: "off",
-  toggleWidget: () => {},
-  config: null,
-});
+export const SystemContext = createContext<SystemContextType>({ open: false });
 
 interface SystemContextState {
   open: boolean;
@@ -39,9 +38,9 @@ const SystemContextProvider = ({
     open: false,
     isInitialized: false,
   });
+  const [isExpanded, setIsExpanded] = useState(false);
   const [tempStore, setTempStore] = useState<any>(new Map());
 
-  const mode = getMode(widgetState);
   const handleWidgetToggle = () => {
     if (!widgetState.open)
       return setWidgetState((prev) => ({
@@ -49,6 +48,7 @@ const SystemContextProvider = ({
         open: true,
         isInitialized: true,
       }));
+    setIsExpanded(false);
     return setWidgetState((prev) => ({ ...prev, open: false }));
   };
 
@@ -64,21 +64,26 @@ const SystemContextProvider = ({
     return tempStore.get(key);
   };
 
-  const value: {
-    open: boolean;
-    mode: string;
-    toggleWidget: () => void;
-    config: CopilotConfigType;
-    setTempStoreValue: (key: string, value: any) => void;
-    getTempStoreValue: (key: string) => any;
-  } = {
+  const expandWidget = () => {
+    const shadowRoot = document.querySelector((config?.target || "") as string)
+      ?.firstElementChild?.shadowRoot;
+    const ele = shadowRoot?.getElementById("gooey-popup-container");
+    if (!isExpanded) ele?.classList.add("gooey-expanded-popup");
+    else ele?.classList.remove("gooey-expanded-popup");
+    setIsExpanded((prev) => !prev);
+  };
+
+  const value: SystemContextType = {
     open: widgetState.open,
-    mode,
+    mode: getMode(widgetState),
     toggleWidget: handleWidgetToggle,
     config: config,
     setTempStoreValue,
     getTempStoreValue,
+    isExpanded,
+    expandWidget,
   };
+
   return (
     <SystemContext.Provider value={value}>{children}</SystemContext.Provider>
   );

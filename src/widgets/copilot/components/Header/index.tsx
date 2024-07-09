@@ -7,9 +7,10 @@ import { SystemContextType } from "src/contexts/SystemContext";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./header.scss?inline";
-import { useState } from "react";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
+import useDeviceWidth from "src/hooks/useDeviceWidth";
+import { MOBILE_WIDTH } from "src/utils/constants";
 addInlineStyle(style);
 
 type HeaderProps = {
@@ -18,24 +19,22 @@ type HeaderProps = {
 };
 
 const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
-  const { toggleWidget, config }: SystemContextType = useSystemContext();
+  const {
+    toggleWidget = () => null,
+    config,
+    expandWidget = () => null,
+    isExpanded,
+  }: SystemContextType = useSystemContext();
+  const width = useDeviceWidth();
   const { messages }: any = useMessagesContext();
-  const [isExpanded, setIsExpanded] = useState(false);
   const isEmpty = !messages?.size;
   const botName = config?.branding?.name;
-  const expandWidget = () => {
-    const shadowRoot = document.querySelector((config?.target || "") as string)
-      ?.firstElementChild?.shadowRoot;
-    const ele = shadowRoot?.getElementById("gooeyChat-container");
-    if (!isExpanded) ele?.classList.add("gooey-fullscreen");
-    else ele?.classList.remove("gooey-fullscreen");
-    setIsExpanded((prev) => !prev);
-  };
+  const isMobile = width < MOBILE_WIDTH;
   return (
     <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center pos-relative">
       <div className="d-flex">
         {/* Logo */}
-        {config?.mode === "popup" && (
+        {config?.mode === "popup" && !isMobile && (
           <IconButton
             variant="text"
             className="cr-pointer flex-1 gmr-8"
