@@ -11,7 +11,7 @@ class GooeyEmbedFactory {
 
   mount(config: any) {
     config = { ...this.defaultConfig, ...config } as CopilotEmbedConfig;
-    let targetElem = document.querySelector(config.target);
+    const targetElem = document.querySelector(config.target);
     if (!targetElem) {
       throw new Error(
         `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`,
@@ -22,15 +22,15 @@ class GooeyEmbedFactory {
         `Integration ID is required. Please provide an "integration_id" in the config object.`,
       );
     }
-    let innerDiv = document.createElement("div");
+    const innerDiv = document.createElement("div");
     innerDiv.style.display = "contents";
     targetElem.appendChild(innerDiv);
-    let root = renderCopilotChatWidget(innerDiv, config);
+    const root = renderCopilotChatWidget(innerDiv, config);
     this._mounted.push({ innerDiv, root });
   }
 
   unmount() {
-    for (let { innerDiv, root } of this._mounted) {
+    for (const { innerDiv, root } of this._mounted) {
       root.unmount();
       innerDiv.remove();
     }
