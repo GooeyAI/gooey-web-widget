@@ -18,7 +18,7 @@ import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
 import Sources from "./Sources";
 import React from "react";
 
-const GOOEY_META_SCRAPPER_API = "https://gooey-url-meta-scrapper.us-1.gooey.ai";
+const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
 const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
