@@ -24,13 +24,14 @@ class GooeyEmbedFactory {
     }
     const innerDiv = document.createElement("div");
     innerDiv.style.display = "contents";
+    if(targetElem.children.length > 0) targetElem.removeChild(targetElem.children[0]);
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config);
     this._mounted.push({ innerDiv, root });
   }
 
   unmount() {
-    for (const { innerDiv, root } of this._mounted) {
+    for (const  { innerDiv, root } of this._mounted) {
       root.unmount();
       innerDiv.remove();
     }
