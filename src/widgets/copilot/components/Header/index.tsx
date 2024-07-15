@@ -33,7 +33,17 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
   return (
     <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center pos-relative">
       <div className="d-flex">
-        {/* Logo */}
+        {/* Close / minimize button */}
+        {!hideClose && (
+          <IconButton
+            variant="text"
+            className="gp-4 cr-pointer flex-1"
+            onClick={() => toggleWidget()}
+          >
+            <IconClose size={24} />
+          </IconButton>
+        )}
+        {/* Expand button */}
         {config?.mode === "popup" && !isMobile && (
           <IconButton
             variant="text"
@@ -42,15 +52,6 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
             style={{ transform: "rotate(90deg)" }}
           >
             {isExpanded ? <IconCollapse size={16} /> : <IconExpand size={16} />}
-          </IconButton>
-        )}
-        {!hideClose && (
-          <IconButton
-            variant="text"
-            className="gp-4 cr-pointer flex-1"
-            onClick={() => toggleWidget()}
-          >
-            <IconClose size={24} />
           </IconButton>
         )}
       </div>
