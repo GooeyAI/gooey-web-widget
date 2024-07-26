@@ -8,23 +8,16 @@ export default function ChatWidget() {
     case "popup":
       return (
         <WithFabLauncher open={open || false}>
-          <CopilotWidget />
+          <div id='gooey-popup-container'>
+            <CopilotWidget />
+          </div>
         </WithFabLauncher>
       );
     case "inline":
       return <CopilotWidget isInline />;
     case "fullscreen":
       return (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 9999,
-          }}
-        >
+        <div className="gooey-fullscreen">
           <CopilotWidget isInline />
         </div>
       );

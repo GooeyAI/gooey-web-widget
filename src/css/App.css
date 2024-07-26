@@ -7,8 +7,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-blockquote,dd,dl,fieldset,figure,h1,h2,h3,h4,h5,h6,hr,p,pre,ul,ol,li,p {
-  margin: 0
+blockquote,
+dd,
+dl,
+fieldset,
+figure,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+p,
+pre,
+ul,
+ol,
+li,
+p {
+  margin: 0;
 }
 
 .gooey-embed-container {

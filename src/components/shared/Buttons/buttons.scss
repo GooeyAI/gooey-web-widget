@@ -54,6 +54,32 @@ button:disabled {
   background-color: unset;
 }
 
+#expand-collapse-button svg {
+  transform: rotate(180deg);
+}
+
+.collapsible-button-expanded #expand-collapse-button > svg {
+  transform: rotate(0);
+  transition: transform 0.3s ease;
+}
+
 .button-text-alt:hover {
   border: 1px solid transparent;
+}
+
+.collapsed-area {
+  height: 0px;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+.collapsed-area-expanded {
+  transition: all 0.3s ease;
+  height: 100%;
+  opacity: 1;
+}
+
+#expand-collapse-button {
+  display: inline-flex;
+  padding: 1px !important;
+  max-height: 16px;
 }

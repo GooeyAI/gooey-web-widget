@@ -10,10 +10,33 @@
   width: 100%;
   outline: none;
   max-height: 200px;
+  height: 44px;
   resize: none;
   position: relative;
 }
 
 .gooeyChat-chat-input textarea:focus {
   outline: 1px solid $light;
+}
+
+.input-left-buttons {
+  position: absolute;
+  left: 4px;
+  top: 7px;
+}
+
+.input-right-buttons {
+  position: absolute;
+  right: 4px;
+  top: 3px;
+}
+
+.file-preview-box img {
+  height: 80px;
+  max-width: 100px;
+  object-fit: cover;
+}
+
+.uploading-box {
+  filter: brightness(0.2);
 }

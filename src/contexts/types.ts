@@ -3,7 +3,11 @@ export interface CopilotConfigType {
   integration_id: string;
   mode: "popup" | "inline" | "fullscreen";
   enableAudioMessage: boolean;
+  enablePhotoUpload: boolean;
+  enableLipsyncVideo: boolean;
   showSources: boolean;
+  expandedSources: boolean;
+  apiUrl?: string;
   branding: {
     name?: string;
     byLine?: string;

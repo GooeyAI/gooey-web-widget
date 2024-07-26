@@ -17,16 +17,25 @@ export const STREAM_MESSAGE_TYPES = {
   MESSAGE_PART: "message_part",
 };
 
-export const createStreamApi = async (body: any, cancelToken: any) => {
+export const createStreamApi = async (
+  body: any,
+  cancelToken: any,
+  apiUrl: string = ""
+) => {
   const headers = getHeaders();
+  const finalBody = {
+    citation_style: "number",
+    use_url_shortener: false,
+    ...body,
+  }; // force number citation style
   const response: any = await axios.post(
-    BASE_URL_STREAMING,
-    JSON.stringify(body),
+    apiUrl || BASE_URL_STREAMING,
+    JSON.stringify(finalBody),
     {
       headers,
       responseType: "stream",
       cancelToken: cancelToken.token,
-    },
+    }
   );
   return response.headers.get("Location");
 };

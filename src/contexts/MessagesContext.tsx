@@ -18,19 +18,18 @@ interface IncomingMsg {
 
 const CITATION_STYLE = "number";
 
-const createNewQuery = (query: string | Blob, type: string) => {
+const createNewQuery = (payload: any) => {
   return {
+    ...payload,
     id: uuidv4(),
-    [`input_${type}`]: query,
     role: "user",
-    type: [type],
   };
 };
 
 export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
-  const { config } = useSystemContext();
+  const config = useSystemContext()?.config;
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -39,19 +38,13 @@ const MessagesContextProvider = (props: any) => {
   const currentStreamRef = useRef<any>(null);
   const scrollContainerRef = useRef<null | HTMLElement>(null);
 
-  const initializeQuery = (payload: string | Blob, type: string = "text") => {
+  const initializeQuery = (payload: any) => {
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
     const conversationId = lastResponse?.conversation_id;
     setIsSendingMessage(true);
-    let newQuery = {};
-    if (type === "text") newQuery = createNewQuery(payload, type);
-    if (type === "audio")
-      newQuery = createNewQuery(
-        (URL || webkitURL).createObjectURL(payload as Blob),
-        type
-      );
+    const newQuery = createNewQuery(payload);
     sendPrompt({
-      [`input_${type}`]: payload,
+      ...payload,
       conversation_id: conversationId,
       citation_style: CITATION_STYLE,
     });
@@ -147,6 +140,7 @@ const MessagesContextProvider = (props: any) => {
     try {
       let audioUrl = "";
       if (payload?.input_audio) {
+        // upload audio file to gooey
         const file = new File(
           [payload.input_audio],
           `gooey-widget-recording-${uuidv4()}.webm`
@@ -159,7 +153,11 @@ const MessagesContextProvider = (props: any) => {
         integration_id: config?.integration_id,
         ...payload,
       };
-      const streamUrl = await createStreamApi(payload, apiSource.current);
+      const streamUrl = await createStreamApi(
+        payload,
+        apiSource.current,
+        config?.apiUrl
+      );
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
     } catch (err) {

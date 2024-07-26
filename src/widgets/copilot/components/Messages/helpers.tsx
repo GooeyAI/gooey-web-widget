@@ -14,8 +14,12 @@ import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
+import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
+import Sources from "./Sources";
+import React from "react";
 
-const GOOEY_META_SCRAPPER_API = "https://gooey-url-meta-scrapper.us-1.gooey.ai";
+const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
+const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
   contentType: string,
@@ -144,9 +148,7 @@ const getOutputText = (data: any) => {
   return out;
 };
 
-export const getReactParserOptions = (
-  linkColor: string
-): HTMLReactParserOptions => ({
+export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
   htmlparser2: {
     lowerCaseTags: false,
     lowerCaseAttributeNames: false,
@@ -163,28 +165,100 @@ export const getReactParserOptions = (
       return (
         <CodeBlock
           domNode={domNode.children[0]}
-          options={getReactParserOptions(linkColor)}
+          options={getReactParserOptions(data)}
         />
       );
     }
-
-    // Replace <a> tags with <Link> component
-    if (
-      domNode.children.length &&
-      (domNode?.name === "a" || domNode.children[0].name === "a")
-    ) {
-      const href = domNode.attribs.href;
-      delete domNode.attribs.href;
-      return (
-        <Link to={href} configColor={linkColor || "default"}>
-          {domToReact(domNode.children, getReactParserOptions(linkColor))}
-        </Link>
-      );
+  },
+  transform(reactNode, domNode) {
+    if (domNode.type === "text" && data.showSources) {
+      return customizedReferences(reactNode, domNode, data);
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (domNode?.name === "a") return customizedLinks(reactNode, domNode, data);
+    else return reactNode;
   },
 });
 
-export const formatTextResponse = (data: any, linkColor: string) => {
+const checkLinkInSources = (url: string, data: any): any => {
+  const references = data?.references || [];
+  const matches = references.filter((reference: any) => reference.url === url);
+  matches.length ? matches[0] : null;
+};
+
+const customizedLinks = (reactNode: any, domNode: any, data: any) => {
+  if (!reactNode) return reactNode;
+  const href = domNode.attribs.href;
+  delete domNode.attribs.href;
+  let source: any = checkLinkInSources(href, data);
+  if (!source) {
+    source = {
+      title: domNode?.children[0].data || extractLastPathSegment(href),
+      url: href,
+    };
+  }
+
+  // hide source if mailto;
+  const hideSource = href.startsWith("mailto:");
+  return (
+    <React.Fragment>
+      <Link to={href} configColor={data?.linkColor || "default"}>
+        {domToReact(domNode.children, getReactParserOptions(data))}
+      </Link>{" "}
+      {!hideSource && (
+        <CollapsibleButton>
+          <Sources data={[source]} />
+        </CollapsibleButton>
+      )}
+    </React.Fragment>
+  );
+};
+
+const customizedReferences = (reactNode: any, domNode: any, data: any) => {
+  if (!domNode) return domNode;
+  let text = domNode.data || "";
+
+  // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
+  // and add the text before and after the match to parts final render array
+  const matches: any = Array.from(
+    new Set(
+      (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
+        parseInt(match.slice(1, -1), 10)
+      )
+    )
+  );
+
+  // return the text as it is if no match found
+  if (!matches || !matches.length) return reactNode;
+
+  const { references = [] }: any = data;
+  const sources = [...references].splice(
+    matches[0] - 1,
+    matches[matches.length - 1]
+  );
+
+  text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
+  // remove trailing dot and space
+  if (text[text.length - 1] === "." && text[text.length - 2] === " ") {
+    text = text.slice(0, -2) + ".";
+  }
+  return (
+    <React.Fragment>
+      {text}{" "}
+      <CollapsibleButton disabled={!references.length}>
+        <Sources data={sources} />
+      </CollapsibleButton>
+      <br />
+    </React.Fragment>
+  );
+};
+
+export const formatTextResponse = (
+  data: any,
+  linkColor: string,
+  showSources: boolean
+) => {
   const body = getOutputText(data);
   if (!body) return "";
   const rawHtml = marked.parse(body, {
@@ -200,7 +274,7 @@ export const formatTextResponse = (data: any, linkColor: string) => {
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions(linkColor)
+    getReactParserOptions({ ...data, showSources, linkColor })
   );
   return parsedElements;
 };
@@ -242,64 +316,64 @@ export function truncateMiddle(str: string, charLimit: number) {
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
 
-function detectNumberReference(str: string) {
-  /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
-  const regex = /\[\d+(,\s*\d+)*\]/g;
+// function detectNumberReference(str: string) {
+//   /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
+//   const regex = /\[\d+(,\s*\d+)*\]/g;
 
-  // Use the regex to find matches
-  const matches = str.match(regex);
+//   // Use the regex to find matches
+//   const matches = str.match(regex);
 
-  // If no matches found, return an empty array
-  if (!matches) {
-    return [];
-  }
+//   // If no matches found, return an empty array
+//   if (!matches) {
+//     return [];
+//   }
 
-  // Extract numbers from each match
-  const numbers = matches.map((match) => {
-    // Remove the square brackets and split by comma
-    return match
-      .slice(1, -1)
-      .split(",")
-      .map((num) => parseInt(num.trim(), 10));
-  });
+//   // Extract numbers from each match
+//   const numbers = matches.map((match) => {
+//     // Remove the square brackets and split by comma
+//     return match
+//       .slice(1, -1)
+//       .split(",")
+//       .map((num) => parseInt(num.trim(), 10));
+//   });
 
-  // Flatten the array of arrays into a single array
-  return numbers.flat();
-}
+//   // Flatten the array of arrays into a single array
+//   return numbers.flat().sort();
+// }
 
-export const sanitizeReferences = (data: any) => {
-  // remove items from references which are not in output_text
-  const { output_text = [], references = [] } = data;
-  const outputText = output_text[0] || "";
-  const numberReferences = detectNumberReference(outputText).sort();
-  const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
-  const urlsInResponse = [...new Set(outputText.match(urlPattern))];
-  if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
-  const indices = numberReferences.map((num) => num - 1);
+// export const sanitizeReferences = (data: any) => {
+//   // remove items from references which are not in output_text
+//   const { output_text = [], references = [] } = data;
+//   const outputText = output_text[0] || "";
+//   const numberReferences = detectNumberReference(outputText);
+//   const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
+//   const urlsInResponse = [...new Set(outputText.match(urlPattern))];
+//   if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
+//   const indices = numberReferences.map((num) => num - 1);
 
-  // check ref numbers and remove the ones which are not in output_text by index
-  let rejectedReferences: any = [];
-  const newSources = references
-    .map((_: any, index: number) => {
-      if (indices.includes(index))
-        return {
-          ..._,
-          refNumber: numberReferences[index - rejectedReferences.length],
-        };
-      else {
-        rejectedReferences.push(_);
-        return undefined;
-      }
-    })
-    .filter((source: any) => source !== undefined);
+//   // check ref numbers and remove the ones which are not in output_text by index
+//   let rejectedReferences: any = [];
+//   const newSources = references
+//     .map((_: any, index: number) => {
+//       if (indices.includes(index))
+//         return {
+//           ..._,
+//           refNumber: numberReferences[index - rejectedReferences.length],
+//         };
+//       else {
+//         rejectedReferences.push(_);
+//         return undefined;
+//       }
+//     })
+//     .filter((source: any) => source !== undefined);
 
-  // removed all the un-indexed references
-  if (!urlsInResponse.length) return newSources;
+//   // removed all the un-indexed references
+//   if (!urlsInResponse.length) return newSources;
 
-  // check urls in response and add them to sources
-  rejectedReferences = rejectedReferences.filter(({ url }: any) => {
-    if (url.endsWith("/")) url = url.slice(0, -1);
-    return urlsInResponse.indexOf(url) !== -1;
-  });
-  return [...newSources, ...rejectedReferences];
-};
+//   // check urls in response and add them to sources
+//   rejectedReferences = rejectedReferences.filter(({ url }: any) => {
+//     if (url.endsWith("/")) url = url.slice(0, -1);
+//     return urlsInResponse.indexOf(url) !== -1;
+//   });
+//   return [...newSources, ...rejectedReferences];
+// };
