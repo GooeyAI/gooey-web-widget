@@ -68,7 +68,6 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
       </p>
       <div>
         <IconButton
-          disabled={isEmpty}
           variant="text"
           className={clsx("gp-4 cr-pointer flex-1")}
           onClick={() => onEditClick()}
