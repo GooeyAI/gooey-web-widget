@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL_STREAMING = "https://api.gooey.ai/v3/integrations/stream/";
+const GOOEY_SERVER = process.env.REACT_APP_GOOEY_SERVER;
+const BASE_URL_STREAMING = `${GOOEY_SERVER}/v3/integrations/stream/`;
 
 const getHeaders = () => {
   return {

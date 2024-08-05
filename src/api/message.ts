@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const BASE_URL_VIDEO_BOTS = "https://api.gooey.ai/v2/video-bots";
+const GOOEY_SERVER = process.env.REACT_APP_GOOEY_SERVER;
+const BASE_URL_VIDEO_BOTS = `${GOOEY_SERVER}/v2/video-bots`;
+
 
 const getHeaders = (secretKey: string) => {
   return {

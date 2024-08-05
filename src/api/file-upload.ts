@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const GOOEY_FILE_API_URL = "https://gooey.ai/__/file-upload/";
+const GOOEY_SERVER = process.env.REACT_APP_GOOEY_SERVER;
+const GOOEY_FILE_API_URL = `${GOOEY_SERVER}/__/file-upload/`;
+
+
 export const uploadFileToGooey = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
