@@ -60,49 +60,60 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
   );
 };
 
-const IncomingMsg = memo((props: any) => {
-  const { output_audio = [], type, output_video = [], autoPlay = true } = props.data;
-  const audioTrack = output_audio[0];
-  const videoTrack = output_video[0];
-  const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-  const parsedElements = formatTextResponse(
-    props.data,
-    props?.linkColor,
-    props?.showSources
-  );
-  if (!parsedElements) return <ResponseLoader show={true} />;
-  return (
-    <div className="gooey-incomingMsg gpb-12">
-      <div className="gpl-16">
-        <BotMessageLayout />
-        <div
-          className={clsx(
-            "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
-            isStreaming && "response-streaming"
+const IncomingMsg = memo(
+  (props: {
+    data: any;
+    id: string;
+    showSources: boolean;
+    linkColor: string;
+    autoPlay: boolean;
+    onFeedbackClick: (buttonId: string, botMessageId: string) => void;
+  }) => {
+    const { output_audio = [], type, output_video = [] } = props.data;
+    const isAutoPlay = props?.autoPlay === false ? false : true;
+    const audioTrack = output_audio[0];
+    const videoTrack = output_video[0];
+    const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const parsedElements = formatTextResponse(
+      props.data,
+      props?.linkColor,
+      props?.showSources
+    );
+
+    if (!parsedElements) return <ResponseLoader show={true} />;
+    return (
+      <div className="gooey-incomingMsg gpb-12">
+        <div className="gpl-16">
+          <BotMessageLayout />
+          <div
+            className={clsx(
+              "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
+              isStreaming && "response-streaming"
+            )}
+            id={props?.id}
+          >
+            {parsedElements}
+          </div>
+          {!isStreaming && !videoTrack && audioTrack && (
+            <div className="gmt-16">
+              <audio autoPlay={isAutoPlay} playsInline={true} controls src={audioTrack}></audio>
+            </div>
           )}
-          id={props?.id}
-        >
-          {parsedElements}
+          {!isStreaming && videoTrack && (
+            <div className="gmt-16 gml-36">
+              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack}></video>
+            </div>
+          )}
+          {!isStreaming && props?.data?.buttons && (
+            <FeedbackButtons
+              onFeedbackClick={props?.onFeedbackClick}
+              data={props?.data}
+            />
+          )}
         </div>
-        {!isStreaming && !videoTrack && audioTrack && (
-          <div className="gmt-16">
-            <audio autoPlay={autoPlay} controls src={audioTrack}></audio>
-          </div>
-        )}
-        {!isStreaming && videoTrack && (
-          <div className="gmt-16 gml-36">
-            <video autoPlay={autoPlay} controls src={videoTrack}></video>
-          </div>
-        )}
-        {!isStreaming && props?.data?.buttons && (
-          <FeedbackButtons
-            onFeedbackClick={props?.onFeedbackClick}
-            data={props?.data}
-          />
-        )}
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default IncomingMsg;

@@ -25,10 +25,10 @@ const Responses = (props: any) => {
             data={responseData}
             key={id}
             id={id}
-            showSources={config?.showSources}
-            linkColor={config?.branding?.colors?.primary}
+            showSources={config?.showSources || true}
+            linkColor={config?.branding?.colors?.primary || 'initial'}
             onFeedbackClick={handleFeedbackClick}
-            autoPlay={config?.autoPlayResponses}
+            autoPlay={config?.autoPlayResponses || false}
           />
         );
       })}
