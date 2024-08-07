@@ -22,7 +22,7 @@ const CopilotWidget: FC<CopilotWidgetType> = ({ isInline }) => {
   const handleEditClick = () => {
     cancelApiCall();
     flushData();
-    const shadowRoot = document.getElementById(isInline ? "inline" : "popup")?.firstElementChild?.shadowRoot;
+    const shadowRoot = document.getElementById(isInline ? "inline" : "popup")?.getElementsByClassName("inner-div")[0]?.shadowRoot;
     const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
     ele?.focus();
   };
