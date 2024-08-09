@@ -10,7 +10,7 @@ const AppLayout = ({
   children,
 }: Props) => {
   return (
-    <main className="layout-container h-100 d-flex flex-col">
+    <main className="h-100 d-flex flex-col">
       <div
         className={clsx("pos-absolute w-100")}
       />

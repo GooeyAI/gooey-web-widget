@@ -33,7 +33,7 @@ p {
 }
 
 .gooey-embed-container p {
-  color: default;
+  color: unset;
 }
 
 .gooey-embed-container a {

@@ -35,7 +35,7 @@ const OutgoingMsg = memo((props: any) => {
         </div>
       )}
       {input_prompt && (
-        <p className="font_20_400 anim-typing gooey-outgoing-Text">
+        <p className="font_20_400 anim-typing gooey-outgoing-text">
           {input_prompt}
         </p>
       )}
