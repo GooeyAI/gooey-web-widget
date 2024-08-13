@@ -66,11 +66,11 @@ const IncomingMsg = memo(
     id: string;
     showSources: boolean;
     linkColor: string;
-    autoPlay: boolean;
+    autoPlay: boolean | undefined;
     onFeedbackClick: (buttonId: string, botMessageId: string) => void;
   }) => {
     const { output_audio = [], type, output_video = [] } = props.data;
-    const isAutoPlay = props?.autoPlay === false ? false : true;
+    const isAutoPlay = props.autoPlay === false ? false : true;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;

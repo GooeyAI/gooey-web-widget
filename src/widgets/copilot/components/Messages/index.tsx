@@ -28,7 +28,7 @@ const Responses = (props: any) => {
             showSources={config?.showSources || true}
             linkColor={config?.branding?.colors?.primary || 'initial'}
             onFeedbackClick={handleFeedbackClick}
-            autoPlay={config?.autoPlayResponses || false}
+            autoPlay={config?.autoPlayResponses}
           />
         );
       })}
