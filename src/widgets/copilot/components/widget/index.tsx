@@ -17,12 +17,13 @@ type CopilotWidgetType = {
 };
 
 const CopilotWidget: FC<CopilotWidgetType> = ({ isInline }) => {
-  const { isExpanded }: SystemContextType = useSystemContext();
+  const { isExpanded, config }: SystemContextType = useSystemContext();
   const { flushData, cancelApiCall }: any = useMessagesContext();
   const handleEditClick = () => {
     cancelApiCall();
     flushData();
-    const shadowRoot = document.getElementById(isInline ? "inline" : "popup")?.getElementsByClassName("inner-div")[0]?.shadowRoot;
+    const shadowRoot = document.querySelector((config?.target || "") as string)
+      ?.firstElementChild?.shadowRoot;
     const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
     ele?.focus();
   };
