@@ -24,7 +24,6 @@ class GooeyEmbedFactory {
     }
     const innerDiv = document.createElement("div");
     innerDiv.style.display = "contents";
-    innerDiv.className = "inner-div";
     if(targetElem.children.length > 0) targetElem.removeChild(targetElem.children[0]);
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config);

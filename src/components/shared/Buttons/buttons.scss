@@ -45,7 +45,7 @@ button:disabled {
   border: 1px solid #eee;
 }
 
-.button-text:active {
+.button-text:active:not(:disabled) {
   background-color: #eee;
   color: #0d0d0d !important;
 }
