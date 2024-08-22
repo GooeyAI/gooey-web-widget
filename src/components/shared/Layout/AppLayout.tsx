@@ -5,6 +5,7 @@ import Header from "src/widgets/copilot/components/Header";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./appLayout.scss?inline";
+import SideNavbar from "./SideNavbar";
 
 addInlineStyle(style);
 
@@ -55,15 +56,19 @@ const AppLayout = ({ children, isInline = true }: Props) => {
         )
       )}
     >
-      <main className="pos-relative d-flex flex-col align-center overflow-hidden h-100 bg-white">
-        <Header onEditClick={handleEditClick} hideClose={isInline} />
-        <div
-          style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
-          className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"
-        >
-          <>{children}</>
-        </div>
-      </main>
+      <div className="d-flex h-100">
+        <SideNavbar />
+        <i className="fa-solid fa-magnifying-glass"></i>
+        <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
+          <Header onEditClick={handleEditClick} hideClose={isInline} />
+          <div
+            style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
+            className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"
+          >
+            <>{children}</>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

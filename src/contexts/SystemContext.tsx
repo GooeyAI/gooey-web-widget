@@ -12,7 +12,7 @@ type LayoutStateType = {
   isFocusMode: boolean;
   isInline: boolean;
 
-  showSidebar: boolean;
+  isSidebarOpen: boolean;
   showCloseButton: boolean;
   showSidebarButton: boolean;
   showFocusModeButton: boolean;
@@ -39,7 +39,7 @@ const SystemContextProvider = ({
     isOpen: isInline || false,
     isFocusMode: false,
     isInline,
-    showSidebar: true,
+    isSidebarOpen: false,
     showCloseButton: !isInline || false,
     showSidebarButton: true,
     showFocusModeButton: !isInline || false,
@@ -62,7 +62,7 @@ const SystemContextProvider = ({
       setLayoutState((prev) => ({ ...prev, isOpen: !prev.isOpen, isFocusMode: false }));
     },
     toggleSidebar: () => {
-      setLayoutState((prev) => ({ ...prev, showSidebar: !prev.showSidebar }));
+      setLayoutState((prev) => ({ ...prev, isSidebarOpen: !prev.isSidebarOpen }));
     },
     toggleFocusMode: () => {
       setLayoutState((prev) => ({ ...prev, isFocusMode: !prev.isFocusMode }));

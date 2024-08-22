@@ -9,6 +9,7 @@ import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
 import { MOBILE_WIDTH } from "src/utils/constants";
+import IconSidebar from "src/assets/SvgIcons/IconSideBar";
 
 type HeaderProps = {
   onEditClick: () => void;
@@ -19,13 +20,23 @@ const Header = ({ onEditClick }: HeaderProps) => {
   const width = useDeviceWidth();
   const { messages }: any = useMessagesContext();
   const { layoutController, config }: SystemContextType = useSystemContext();
-  
+
   const isEmpty = !messages?.size;
   const botName = config?.branding?.name;
   const isMobile = width < MOBILE_WIDTH;
   return (
     <div className="bg-white b-btm-1 b-top-1 gp-8 d-flex justify-between align-center pos-sticky w-100">
       <div className="d-flex">
+        {/* Close / minimize button */}
+        {!layoutController?.isSidebarOpen && (
+          <IconButton
+            variant="text"
+            className="gp-4 cr-pointer flex-1"
+            onClick={layoutController?.toggleSidebar}
+          >
+            <IconSidebar size={20} />
+          </IconButton>
+        )}
         {/* Close / minimize button */}
         {layoutController?.showCloseButton && (
           <IconButton

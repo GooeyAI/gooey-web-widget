@@ -25,7 +25,7 @@ export function CopilotChatWidget({ config }: { config?: any }) {
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
 
   return (
-    <div className="gooey-embed-container">
+    <div className="gooey-embed-container" tabIndex={-1}>
       <Styles />
       <SystemContextProvider config={config}>
         <MessagesContextProvider>

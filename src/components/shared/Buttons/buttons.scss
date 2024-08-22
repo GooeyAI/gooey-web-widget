@@ -13,6 +13,7 @@ button {
   border-radius: 8px;
   padding: 8px;
   color: $almost-black;
+  width: fit-content;
 }
 button:disabled {
   color: $muted !important;
