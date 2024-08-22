@@ -44,7 +44,7 @@ const Messages = () => {
     <div
       ref={scrollContainerRef}
       className={clsx(
-        "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 br-large-right d-flex flex-col",
+        "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 d-flex flex-col",
         isEmpty ? "justify-end" : "justify-start"
       )}
       style={{ overflowY: "auto" }}

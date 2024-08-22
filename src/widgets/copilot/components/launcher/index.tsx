@@ -6,7 +6,7 @@ import style from "./launcher.scss?inline";
 addInlineStyle(style);
 
 const Launcher = () => {
-  const { toggleWidget, config } = useSystemContext();
+  const { config, layoutController } = useSystemContext();
   const iconSize = config?.branding.fabLabel ? 36 : 56;
   return (
     <div
@@ -17,7 +17,7 @@ const Launcher = () => {
       className="pos-fixed gpb-16 gpr-16"
     >
       <button
-        onClick={toggleWidget}
+        onClick={layoutController?.toggleOpenClose}
         className={clsx(
           "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
           config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 ",

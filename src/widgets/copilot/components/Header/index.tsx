@@ -5,53 +5,50 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 import clsx from "clsx";
 import { SystemContextType } from "src/contexts/SystemContext";
 
-import { addInlineStyle } from "src/addStyles";
-import style from "./header.scss?inline";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
 import { MOBILE_WIDTH } from "src/utils/constants";
-addInlineStyle(style);
 
 type HeaderProps = {
   onEditClick: () => void;
   hideClose?: boolean;
 };
 
-const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
-  const {
-    toggleWidget = () => null,
-    config,
-    expandWidget = () => null,
-    isExpanded,
-  }: SystemContextType = useSystemContext();
+const Header = ({ onEditClick }: HeaderProps) => {
   const width = useDeviceWidth();
   const { messages }: any = useMessagesContext();
+  const { layoutController, config }: SystemContextType = useSystemContext();
+  
   const isEmpty = !messages?.size;
   const botName = config?.branding?.name;
   const isMobile = width < MOBILE_WIDTH;
   return (
-    <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center pos-relative">
+    <div className="bg-white b-btm-1 b-top-1 gp-8 d-flex justify-between align-center pos-sticky w-100">
       <div className="d-flex">
         {/* Close / minimize button */}
-        {!hideClose && (
+        {layoutController?.showCloseButton && (
           <IconButton
             variant="text"
             className="gp-4 cr-pointer flex-1"
-            onClick={() => toggleWidget()}
+            onClick={layoutController?.toggleOpenClose}
           >
             <IconClose size={24} />
           </IconButton>
         )}
         {/* Expand button */}
-        {config?.mode === "popup" && !isMobile && (
+        {layoutController?.showFocusModeButton && !isMobile && (
           <IconButton
             variant="text"
             className="cr-pointer flex-1 gmr-8"
-            onClick={() => expandWidget()}
+            onClick={layoutController?.toggleFocusMode}
             style={{ transform: "rotate(90deg)" }}
           >
-            {isExpanded ? <IconCollapse size={16} /> : <IconExpand size={16} />}
+            {layoutController.isFocusMode ? (
+              <IconCollapse size={16} />
+            ) : (
+              <IconExpand size={16} />
+            )}
           </IconButton>
         )}
       </div>

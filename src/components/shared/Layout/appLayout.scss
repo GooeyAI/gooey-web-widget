@@ -1,19 +1,18 @@
+
 .gooeyChat-widget-container {
+  width: 100%;
+  height: 100%;
+}
+
+.gooey-popup {
   animation: popup 0.1s;
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 100%;
-  height: 100%;
-}
-.gooeyChat-widget-container-expanded {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
+  z-index: 9999;
 }
 
-.gooeyChat-widget-container-fullWidth {
+.gooey-inline {
   position: relative;
   width: 100%;
   height: 100%;
@@ -28,31 +27,28 @@
   z-index: 9999;
 }
 
-.gooey-expanded-popup {
-  animation: popup 0.1s;
+.gooey-focused-popup {
+  transform: translateY(0px);
+  // animation: popup 0.1s !important;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
 }
 
 @media (min-width: 560px) {
-
-  .gooey-expanded-popup {
-    padding: 40px 10vw 0px 10vw;
-    transition: background-color 0.3s;
-    background-color: rgba(0, 0, 0, 0.2) !important;
-    z-index: 9999;
-  }
-
-  .gooeyChat-widget-container {
+  .gooey-popup {
     width: 460px;
     height: min(704px, 100% - 114px);
     border-left: 1px solid #eee;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
+  }
+
+  .gooey-focused-popup {
+    padding: 40px 10vw 0px 10vw;
+    transition: background-color 0.3s;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    z-index: 9999;
   }
 
 }
