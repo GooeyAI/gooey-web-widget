@@ -33,11 +33,10 @@ const generateParentContainerClass = (
 
 const AppLayout = ({ children, isInline = true }: Props) => {
   const { config, layoutController } = useSystemContext();
-  const { flushData, cancelApiCall }: any = useMessagesContext();
+  const { handleNewConversation }: any = useMessagesContext();
 
   const handleEditClick = () => {
-    cancelApiCall();
-    flushData();
+    handleNewConversation();
     const shadowRoot = document.querySelector((config?.target || "") as string)
       ?.firstElementChild?.shadowRoot;
     const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);

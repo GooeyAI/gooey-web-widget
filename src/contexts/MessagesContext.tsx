@@ -8,6 +8,7 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadFileToGooey } from "src/api/file-upload";
+import useConversations, { Conversation, updateLocalUser } from "./ConversationLayer";
 
 interface IncomingMsg {
   input_text?: string;
@@ -30,6 +31,11 @@ export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
   const config = useSystemContext()?.config;
+  const { conversations, handleAddConversation } = useConversations(
+    "ConversationsDB",
+    localStorage.getItem("user_id") || ""
+  );
+
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
@@ -37,8 +43,18 @@ const MessagesContextProvider = (props: any) => {
 
   const currentStreamRef = useRef<any>(null);
   const scrollContainerRef = useRef<null | HTMLElement>(null);
+  const currentConversation = useRef<Conversation | null>(null);
+
+  const updateCurrentConversation = (conversation: Conversation) => {
+    // called 2 times - updateStreamedMessage & addResponse
+    currentConversation.current = {
+      ...currentConversation.current,
+      ...conversation,
+    };
+  };
 
   const initializeQuery = (payload: any) => {
+    // calls the server and updates the state with user message
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
     const conversationId = lastResponse?.conversation_id;
     setIsSendingMessage(true);
@@ -53,7 +69,8 @@ const MessagesContextProvider = (props: any) => {
 
   const addResponse = (response: any) => {
     setMessages((prev: any) => {
-      return new Map(prev.set(response.id, response));
+      const newMessages = new Map(prev.set(response.id, response));
+      return newMessages;
     });
   };
 
@@ -92,6 +109,7 @@ const MessagesContextProvider = (props: any) => {
             id: currentStreamRef.current,
             ...payload,
           });
+          updateLocalUser(payload?.user_id);
           return newConversations;
         }
 
@@ -100,11 +118,11 @@ const MessagesContextProvider = (props: any) => {
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
           payload?.status === "completed"
         ) {
-          const newConversations = new Map(prev);
+          const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
-          newConversations.set(lastResponseId, {
+          newMessages.set(lastResponseId, {
             ...prevMessage,
             conversation_id: prevMessage?.conversation_id, // keep the conversation id
             id: currentStreamRef.current,
@@ -112,7 +130,15 @@ const MessagesContextProvider = (props: any) => {
             ...restPayload,
           });
           setIsReceiving(false);
-          return newConversations;
+          // update current conversation for every time the stream ends
+          updateCurrentConversation({
+            id: prevMessage?.conversation_id,
+            user_id: prevMessage?.user_id,
+            messages: Array.from(newMessages.values()),
+            title: payload?.title,
+            timestamp: payload?.created_at,
+          });
+          return newMessages;
         }
 
         // streaming data
@@ -174,9 +200,17 @@ const MessagesContextProvider = (props: any) => {
     setMessages(newMap);
   };
 
-  const flushData = () => {
-    setMessages(new Map());
+  const handleNewConversation = () => {
+    handleAddConversation(Object.assign({}, currentConversation.current));
+    if (isReceiving || isSending) cancelApiCall();
+    setIsReceiving(false);
     setIsSendingMessage(false);
+    purgeMessages();
+  };
+
+  const purgeMessages = () => {
+    setMessages(new Map());
+    currentConversation.current = {};
   };
 
   const cancelApiCall = () => {
@@ -184,8 +218,8 @@ const MessagesContextProvider = (props: any) => {
     // @ts-expect-error
     if (window?.GooeyEventSource) GooeyEventSource.close();
     else apiSource?.current.cancel("Operation canceled by the user.");
-    // check if state has more than 2 message then remove the last one
-    if (messages.size > 2) {
+    // check if state is loading then remove the last one
+    if (isReceiving || isSending) {
       const newMessages = new Map(messages);
       const idsArray = Array.from(messages.keys());
       // delete user message
@@ -193,7 +227,7 @@ const MessagesContextProvider = (props: any) => {
       // delete server message
       newMessages.delete(idsArray.pop());
       setMessages(newMessages);
-    } else flushData();
+    } else purgeMessages();
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsReceiving(false);
     setIsSendingMessage(false);
@@ -227,18 +261,26 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
+  const setActiveConversation = (conversation: Conversation) => {
+    currentConversation.current = conversation;
+    preLoadData(conversation.messages);
+  };
+
   const valueMessages = {
     sendPrompt,
     messages,
     isSending,
     initializeQuery,
     preLoadData,
-    flushData,
+    handleNewConversation,
     cancelApiCall,
     scrollMessageContainer,
     scrollContainerRef,
     isReceiving,
     handleFeedbackClick,
+    conversations,
+    setActiveConversation,
+    currentConversationId: currentConversation.current?.id || null,
   };
 
   return (
