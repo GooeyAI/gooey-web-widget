@@ -8,7 +8,10 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadFileToGooey } from "src/api/file-upload";
-import useConversations, { Conversation, updateLocalUser } from "./ConversationLayer";
+import useConversations, {
+  Conversation,
+  updateLocalUser,
+} from "./ConversationLayer";
 
 interface IncomingMsg {
   input_text?: string;
@@ -30,10 +33,11 @@ const createNewQuery = (payload: any) => {
 export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
+  const currentUserId = localStorage.getItem("user_id") || "";
   const config = useSystemContext()?.config;
   const { conversations, handleAddConversation } = useConversations(
     "ConversationsDB",
-    localStorage.getItem("user_id") || ""
+    currentUserId
   );
 
   const [messages, setMessages] = useState(new Map());
@@ -177,6 +181,7 @@ const MessagesContextProvider = (props: any) => {
       payload = {
         ...config?.payload,
         integration_id: config?.integration_id,
+        user_id: currentUserId,
         ...payload,
       };
       const streamUrl = await createStreamApi(
