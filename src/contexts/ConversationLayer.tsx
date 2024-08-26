@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-// Define the conversation schema
 export interface Conversation {
   id?: number;
   title?: string;
@@ -9,18 +8,20 @@ export interface Conversation {
   messages?: any[]; // Array of messages
 }
 
+export const USER_ID_LS_KEY = "user_id";
+
 export const updateLocalUser = (userId: string) => {
   const ls = window.localStorage || null;
   if (!ls) return console.error("Local Storage not available");
-  if (!localStorage.getItem("userId")) {
-    localStorage.setItem("userId", userId);
+  const currentUser = localStorage.getItem("user_id");
+  if (!currentUser) {
+    localStorage.setItem(USER_ID_LS_KEY, userId);
   }
 };
 
-// Function to initialize IndexedDB
-const initDB = (dbName: string): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = window.indexedDB.open(dbName, 1);
+const initDB = (dbName: string) => {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(dbName, 1);
 
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -40,70 +41,64 @@ const initDB = (dbName: string): Promise<IDBDatabase> => {
   });
 };
 
+const fetchAllConversations = (db: IDBDatabase, user_id: string) => {
+  return new Promise<Conversation[]>((resolve, reject) => {
+    const transaction = db.transaction(["conversations"], "readonly");
+    const objectStore = transaction.objectStore("conversations");
+    const request = objectStore.getAll();
+
+    request.onsuccess = () => {
+      const userConversations = request.result.filter(
+        (conversation: Conversation) => conversation.user_id === user_id
+      );
+      resolve(userConversations);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+};
+
+const addConversation = (db: IDBDatabase, conversation: Conversation) => {
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(["conversations"], "readwrite");
+    const objectStore = transaction.objectStore("conversations");
+    const request = objectStore.put(conversation);
+
+    request.onsuccess = () => {
+      resolve();
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+};
+
 export const useConversations = (
   dbName: string = "ConversationsDB",
   user_id: string
 ) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const dbRef = useRef<IDBDatabase | null>(null);
 
   useEffect(() => {
-    const initializeDB = async () => {
-      const database = await initDB(dbName);
-      dbRef.current = database;
-      await fetchConversations(); // Load existing conversations from DB
+    const loadConversations = async () => {
+      const db = await initDB(dbName);
+      const userConversations = await fetchAllConversations(db, user_id);
+      setConversations(userConversations);
     };
-    initializeDB();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // only run once
-  }, []);
 
-  const fetchConversations = async () => {
-    if (dbRef.current) {
-      const transaction = dbRef.current.transaction(
-        ["conversations"],
-        "readonly"
-      );
-      const objectStore = transaction.objectStore("conversations");
-      const request = objectStore.getAll();
-
-      request.onsuccess = () => {
-        const userConversations = request.result;
-        // const userConversations = request.result.filter(
-        //   (c: Conversation) => c.user_id === user_id
-        // );
-        setConversations(userConversations);
-      };
-
-      request.onerror = () => {
-        console.error("Failed to fetch conversations:", request.error);
-      };
-    }
-  };
+    loadConversations();
+  }, [dbName, user_id]);
 
   const handleAddConversation = async (c: Conversation | null) => {
-    if (!c) return;
-    const conversationId = c.id;
-    console.log("Adding conversation:", c);
-    if (dbRef.current) {
-      const transaction = dbRef.current.transaction(
-        ["conversations"],
-        "readwrite"
-      );
-      const objectStore = transaction.objectStore("conversations");
-      const request = objectStore.get(conversationId as number);
+    if (!c || !c.messages?.length) return;
 
-      request.onsuccess = async () => {
-        const conversation = request.result || {};
-        objectStore.put({ ...conversation, ...c } as Conversation); // Update the conversation in the database
-        fetchConversations(); // Refresh the state from the database
-      };
-
-      request.onerror = (event) => {
-        console.log(event);
-        console.error("Failed to add conversation:", request.error);
-      };
-    }
+    const db = await initDB(dbName);
+    await addConversation(db, c);
+    const updatedConversations = await fetchAllConversations(db, user_id);
+    setConversations(updatedConversations);
   };
 
   return { conversations, handleAddConversation };

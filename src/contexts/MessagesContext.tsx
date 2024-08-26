@@ -11,6 +11,7 @@ import { uploadFileToGooey } from "src/api/file-upload";
 import useConversations, {
   Conversation,
   updateLocalUser,
+  USER_ID_LS_KEY,
 } from "./ConversationLayer";
 
 interface IncomingMsg {
@@ -33,7 +34,7 @@ const createNewQuery = (payload: any) => {
 export const MessagesContext: any = createContext({});
 
 const MessagesContextProvider = (props: any) => {
-  const currentUserId = localStorage.getItem("user_id") || "";
+  const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const config = useSystemContext()?.config;
   const { conversations, handleAddConversation } = useConversations(
     "ConversationsDB",
@@ -50,7 +51,6 @@ const MessagesContextProvider = (props: any) => {
   const currentConversation = useRef<Conversation | null>(null);
 
   const updateCurrentConversation = (conversation: Conversation) => {
-    // called 2 times - updateStreamedMessage & addResponse
     currentConversation.current = {
       ...currentConversation.current,
       ...conversation,
@@ -206,7 +206,12 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const handleNewConversation = () => {
-    handleAddConversation(Object.assign({}, currentConversation.current));
+    if (!isReceiving && !isSending) {
+      handleAddConversation(Object.assign({}, currentConversation.current));
+    } else {
+      cancelApiCall();
+      handleAddConversation(Object.assign({}, currentConversation.current));
+    }
     if (isReceiving || isSending) cancelApiCall();
     setIsReceiving(false);
     setIsSendingMessage(false);
@@ -223,16 +228,29 @@ const MessagesContextProvider = (props: any) => {
     // @ts-expect-error
     if (window?.GooeyEventSource) GooeyEventSource.close();
     else apiSource?.current.cancel("Operation canceled by the user.");
+
+    if (!isReceiving && !isSending) {
+      apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
+    }
+    // delete last message from the state
+    const newMessages = new Map(messages);
+    const idsArray = Array.from(messages.keys());
     // check if state is loading then remove the last one
-    if (isReceiving || isSending) {
-      const newMessages = new Map(messages);
-      const idsArray = Array.from(messages.keys());
-      // delete user message
-      newMessages.delete(idsArray[idsArray.length - 2]);
-      // delete server message
+    if (isSending) {
       newMessages.delete(idsArray.pop());
       setMessages(newMessages);
-    } else purgeMessages();
+    }
+
+    if (isReceiving) {
+      newMessages.delete(idsArray.pop()); // delete server message
+      newMessages.delete(idsArray.pop()); // delete user message
+      setMessages(newMessages);
+    }
+
+    updateCurrentConversation({
+      messages: Array.from(newMessages.values()),
+    });
+
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsReceiving(false);
     setIsSendingMessage(false);
