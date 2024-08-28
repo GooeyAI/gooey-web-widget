@@ -31,23 +31,12 @@ const Header = ({ onEditClick }: HeaderProps) => {
             <IconClose size={24} />
           </IconButton>
         )}
-        {/* Close / minimize button */}
-        {layoutController?.showSidebarButton && (
-          <IconButton
-            id="sidebar-toggle-icon-header"
-            variant="text"
-            className="cr-pointer gp-10"
-            onClick={layoutController?.toggleSidebar}
-          >
-            <IconSidebar size={20} />
-          </IconButton>
-        )}
 
-        {/* Expand button */}
+        {/* Focus mode button */}
         {layoutController?.showFocusModeButton && (
           <IconButton
             variant="text"
-            className="cr-pointer flex-1 gmr-8"
+            className="cr-pointer flex-1"
             onClick={layoutController?.toggleFocusMode}
             style={{ transform: "rotate(90deg)" }}
           >
@@ -56,6 +45,17 @@ const Header = ({ onEditClick }: HeaderProps) => {
             ) : (
               <IconExpand size={16} />
             )}
+          </IconButton>
+        )}
+        {/* Sidebar button */}
+        {layoutController?.showSidebarButton && (
+          <IconButton
+            id="sidebar-toggle-icon-header"
+            variant="text"
+            className="cr-pointer"
+            onClick={layoutController?.toggleSidebar}
+          >
+            <IconSidebar size={20} />
           </IconButton>
         )}
       </div>

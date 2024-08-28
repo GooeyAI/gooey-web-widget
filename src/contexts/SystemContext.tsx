@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 import { CopilotConfigType } from "./types";
-import useMediaQuery from "src/hooks/useMediaQuery";
+import useDeviceWidth from "src/hooks/useDeviceWidth";
+import { toggleSidebarStyles } from "src/components/shared/Layout/SideNavbar";
 
 interface LayoutController extends LayoutStateType {
   toggleOpenClose: () => void;
@@ -30,6 +31,7 @@ export type SystemContextType = {
 };
 
 export const SystemContext = createContext<SystemContextType>({});
+
 const SystemContextProvider = ({
   config,
   children,
@@ -45,11 +47,13 @@ const SystemContextProvider = ({
     isInline,
     isSidebarOpen: false,
     showCloseButton: !isInline || false,
-    showSidebarButton: true,
+    showSidebarButton: false,
     showFocusModeButton: !isInline || false,
     isMobile: false,
   });
-  const isMobile = useMediaQuery("mobile", [layoutState?.isOpen]);
+  const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
+    layoutState?.isOpen,
+  ]);
 
   const setTempStoreValue = (key: string, value: any) => {
     setTempStore((prev: Map<string, any>) => {
@@ -69,9 +73,12 @@ const SystemContextProvider = ({
       ...prev,
       isSidebarOpen: !isMobile,
       showSidebarButton: isMobile,
+      showFocusModeButton: isInline
+        ? false
+        : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
     }));
-  }, [isMobile]);
+  }, [isInline, isMobile, isMobileWindow]);
 
   const LayoutController: LayoutController = {
     toggleOpenClose: () => {
@@ -86,15 +93,7 @@ const SystemContextProvider = ({
     },
     toggleSidebar: () => {
       setLayoutState((prev: any) => {
-        const sideBarElement: HTMLElement | null | undefined =
-          gooeyShadowRoot?.querySelector("#gooey-side-navbar");
-        if (!sideBarElement) return;
-        // set width to 0px if sidebar is closed
-        if (!prev.isSidebarOpen) {
-          sideBarElement.style.width = "260px";
-        } else {
-          sideBarElement.style.width = "0px";
-        }
+        toggleSidebarStyles(prev.isSidebarOpen);
         return {
           ...prev,
           isSidebarOpen: !prev.isSidebarOpen,
@@ -103,11 +102,30 @@ const SystemContextProvider = ({
       });
     },
     toggleFocusMode: () => {
-      setLayoutState((prev) => ({
-        ...prev,
-        isFocusMode: !prev.isFocusMode,
-        isSidebarOpen: true,
-      }));
+      setLayoutState((prev) => {
+        const sideBarElement: HTMLElement | null | undefined =
+          gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+        if (!sideBarElement) throw new Error("Sidebar element not found");
+        if (!prev?.isFocusMode) {
+          // turning on focus mode open sidebar
+          if (!prev?.isSidebarOpen) sideBarElement.style.width = "260px";
+          return {
+            ...prev,
+            isFocusMode: true,
+            isSidebarOpen: true,
+            showSidebarButton: prev.isSidebarOpen,
+          };
+        } else {
+          // turning off focus mode
+          if (prev?.isSidebarOpen) sideBarElement.style.width = "0px";
+          return {
+            ...prev,
+            isFocusMode: false,
+            isSidebarOpen: false,
+            showSidebarButton: prev.isSidebarOpen,
+          };
+        }
+      });
     },
     setState: (state: any) => {
       setLayoutState((prev) => ({

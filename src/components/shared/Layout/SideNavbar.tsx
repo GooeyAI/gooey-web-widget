@@ -6,6 +6,22 @@ import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
 import React, { useEffect } from "react";
 import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
+import IconClose from "src/assets/SvgIcons/IconClose";
+import IconCollapse from "src/assets/SvgIcons/IconCollapse";
+import IconExpand from "src/assets/SvgIcons/IconExpand";
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const toggleSidebarStyles = (isSidebarOpen: boolean) => {
+  const sideBarElement: HTMLElement | null | undefined =
+    gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+  if (!sideBarElement) return;
+  // set width to 0px if sidebar is closed
+  if (!isSidebarOpen) {
+    sideBarElement.style.width = "260px";
+  } else {
+    sideBarElement.style.width = "0px";
+  }
+};
 
 const SideNavbar = () => {
   const {
@@ -111,8 +127,10 @@ const SideNavbar = () => {
     <nav
       id="gooey-side-navbar"
       style={{
-        width: 0,
-        transition: "width ease-in-out 0.2s",
+        transition: layoutController?.isMobile
+          ? "none"
+          : "width ease-in-out 0.2s",
+        width: layoutController?.isMobile ? "0px" : "260px",
         zIndex: 10,
       }}
       className={clsx(
@@ -120,9 +138,39 @@ const SideNavbar = () => {
         layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
-      <div className="pos-relative" style={{ width: "260px", height: "100%" }}>
+      <div
+        className="pos-relative overflow-hidden"
+        style={{ width: "260px", height: "100%" }}
+      >
         {/* Header */}
-        <div className="gp-8 b-btm-1 pos-sticky h-header">
+        <div className="gp-8 b-btm-1 pos-sticky h-header d-flex">
+          {/* Close / minimize button */}
+          {layoutController?.showCloseButton && layoutController?.isMobile && (
+            <IconButton
+              variant="text"
+              className="gp-4 cr-pointer"
+              onClick={layoutController?.toggleOpenClose}
+            >
+              <IconClose size={24} />
+            </IconButton>
+          )}
+          {/* Focus mode button */}
+          {layoutController?.showFocusModeButton &&
+            layoutController?.isMobile && (
+              <IconButton
+                variant="text"
+                onClick={layoutController?.toggleFocusMode}
+                style={{ transform: "rotate(90deg)" }}
+              >
+                {layoutController?.isFocusMode ? (
+                  <IconCollapse size={16} />
+                ) : (
+                  <IconExpand size={16} />
+                )}
+              </IconButton>
+            )}
+
+          {/* Sidebar button */}
           <IconButton
             variant="text"
             className="gp-10 cr-pointer"
