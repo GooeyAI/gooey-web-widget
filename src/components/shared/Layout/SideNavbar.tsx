@@ -39,11 +39,14 @@ const SideNavbar = () => {
     const now = new Date().getTime();
     const today = new Date().setHours(0, 0, 0, 0);
     const endToday = new Date().setHours(23, 59, 59, 999);
+    const yesterday = new Date(today - 1).setHours(0, 0, 0, 0);
+    const endYesterday = new Date(today - 1).setHours(23, 59, 59, 999);
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
 
     const grouped: any = {
       Today: [],
+      Yesterday: [],
       "Previous 7 Days": [],
       "Previous 30 Days": [],
       Months: {},
@@ -57,6 +60,10 @@ const SideNavbar = () => {
 
       if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
         subheading = "Today";
+      } else if (
+        lastMessageTimestamp >= yesterday && lastMessageTimestamp <= endYesterday
+      ) {
+        subheading = "Yesterday";
       } else if (
         lastMessageTimestamp > endToday - sevenDaysInMs &&
         lastMessageTimestamp <= endToday
@@ -91,6 +98,7 @@ const SideNavbar = () => {
     // Combine all groups into a single array
     return [
       { subheading: "Today", conversations: grouped.Today },
+      { subheading: "Yesterday", conversations: grouped.Yesterday },
       {
         subheading: "Previous 7 Days",
         conversations: grouped["Previous 7 Days"],
@@ -102,6 +110,7 @@ const SideNavbar = () => {
       ...monthEntries,
     ].filter((group) => group?.conversations?.length > 0);
   }, [conversations]);
+
   if (config?.disableConversations) return null;
   return (
     <nav
