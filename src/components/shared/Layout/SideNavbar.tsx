@@ -18,8 +18,10 @@ export const toggleSidebarStyles = (isSidebarOpen: boolean) => {
   // set width to 0px if sidebar is closed
   if (!isSidebarOpen) {
     sideBarElement.style.width = "260px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
   } else {
     sideBarElement.style.width = "0px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
   }
 };
 

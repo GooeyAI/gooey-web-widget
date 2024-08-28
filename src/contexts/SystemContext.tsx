@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useEffect, useMemo, useState } from "react";
 import { CopilotConfigType } from "./types";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
 import { toggleSidebarStyles } from "src/components/shared/Layout/SideNavbar";
@@ -68,6 +68,65 @@ const SystemContextProvider = ({
   const getTempStoreValue = (key: string) => {
     return tempStore.get(key);
   };
+  const LayoutController: LayoutController = useMemo(
+    () => ({
+      toggleOpenClose: () => {
+        // open/close in pop-up mode
+        setLayoutState((prev) => ({
+          ...prev,
+          isOpen: !prev.isOpen,
+          isFocusMode: false,
+          isSidebarOpen: false,
+          showSidebarButton: forceHideSidebar ? false : true,
+        }));
+      },
+      toggleSidebar: () => {
+        if (forceHideSidebar) return;
+        setLayoutState((prev: any) => {
+          toggleSidebarStyles(prev.isSidebarOpen);
+          return {
+            ...prev,
+            isSidebarOpen: !prev.isSidebarOpen,
+            showSidebarButton: prev.isSidebarOpen,
+          };
+        });
+      },
+      toggleFocusMode: () => {
+        setLayoutState((prev) => {
+          const sideBarElement: HTMLElement | null | undefined =
+            gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+          if (!sideBarElement) return { ...prev, isFocusMode: !prev.isFocusMode };
+          if (!prev?.isFocusMode) {
+            // turning on focus mode open sidebar
+            if (!prev?.isSidebarOpen) sideBarElement.style.width = "260px";
+            return {
+              ...prev,
+              isFocusMode: true,
+              isSidebarOpen: forceHideSidebar ? false : true,
+              showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
+            };
+          } else {
+            // turning off focus mode
+            if (prev?.isSidebarOpen) sideBarElement.style.width = "0px";
+            return {
+              ...prev,
+              isFocusMode: false,
+              isSidebarOpen: forceHideSidebar ? false : false,
+              showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
+            };
+          }
+        });
+      },
+      setState: (state: any) => {
+        setLayoutState((prev) => ({
+          ...prev,
+          ...state,
+        }));
+      },
+      ...layoutState,
+    }),
+    [setLayoutState, forceHideSidebar, layoutState]
+  );
 
   useEffect(() => {
     // set initial state based on isMobile and isInline
@@ -79,65 +138,10 @@ const SystemContextProvider = ({
         ? false
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
+      isMobileWindow,
     }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
-
-  const LayoutController: LayoutController = {
-    toggleOpenClose: () => {
-      // open/close in pop-up mode
-      setLayoutState((prev) => ({
-        ...prev,
-        isOpen: !prev.isOpen,
-        isFocusMode: false,
-        isSidebarOpen: false,
-        showSidebarButton: forceHideSidebar ? false : true,
-      }));
-    },
-    toggleSidebar: () => {
-      if(forceHideSidebar) return;
-      setLayoutState((prev: any) => {
-        toggleSidebarStyles(prev.isSidebarOpen);
-        return {
-          ...prev,
-          isSidebarOpen: !prev.isSidebarOpen,
-          showSidebarButton: prev.isSidebarOpen,
-        };
-      });
-    },
-    toggleFocusMode: () => {
-      setLayoutState((prev) => {
-        const sideBarElement: HTMLElement | null | undefined =
-          gooeyShadowRoot?.querySelector("#gooey-side-navbar");
-        if (!sideBarElement) throw new Error("Sidebar element not found");
-        if (!prev?.isFocusMode) {
-          // turning on focus mode open sidebar
-          if (!prev?.isSidebarOpen) sideBarElement.style.width = "260px";
-          return {
-            ...prev,
-            isFocusMode: true,
-            isSidebarOpen: forceHideSidebar ? false : true,
-            showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
-          };
-        } else {
-          // turning off focus mode
-          if (prev?.isSidebarOpen) sideBarElement.style.width = "0px";
-          return {
-            ...prev,
-            isFocusMode: false,
-            isSidebarOpen: forceHideSidebar ? false : false,
-            showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
-          };
-        }
-      });
-    },
-    setState: (state: any) => {
-      setLayoutState((prev) => ({
-        ...prev,
-        ...state,
-      }));
-    },
-    ...layoutState,
-  };
 
   const value: SystemContextType = {
     config: config,
