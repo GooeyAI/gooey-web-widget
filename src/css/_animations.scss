@@ -17,12 +17,6 @@
   }
 }
 
-@keyframes loading-skeleton {
-  to {
-    background-position-x: -20%;
-  }
-}
-
 @keyframes fade-in-A {
   0% {
     opacity: 0;
@@ -52,36 +46,6 @@
   opacity: 1;
   animation: anim-textReveal 0.35s cubic-bezier(0.43, 0.02, 0.06, 0.62) 0s
     forwards 1;
-}
-
-.circular-loader {
-	position: relative;
-	margin: auto;
-	width: 5rem;
-	border-radius: 100vmin;
-	overflow: hidden;
-	padding: 1.25rem;
-  &::before {
-    content: "";
-	  display: block;
-	  padding-top: 100%;
-  }
-}
-
-.circular-loader .circular {
-	position: absolute;
-	inset: 0;
-	margin: auto;
-	transform-origin: center center;
-	animation: 2s linear 0s infinite rotate;
-}
-
-.circular-loader .path {
-  stroke: $border-color;
-	stroke-dasharray: 1,200;
-	stroke-dashoffset: 0;
-	stroke-linecap: round; 
-	animation: 1.5s ease-in-out 0s infinite dash;
 }
 
 @keyframes anim-textReveal {
@@ -121,25 +85,11 @@
   }
 }
 
-@keyframes dash {
-	0%{
-		stroke-dasharray: 1,200;
-		stroke-dashoffset: 0;
-		
-	}
-	50% {
-		stroke-dasharray: 89,200;
-		stroke-dashoffset: -35px;
-		stroke: $border-color;;
-	}
-	100% {
-		stroke-dasharray: 89,200;
-		stroke-dashoffset: -124px;
-	}
-}
-
 @keyframes rotate {
-	to {
-		transform:rotate(1turn);
-	}
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

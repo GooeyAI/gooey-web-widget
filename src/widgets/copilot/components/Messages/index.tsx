@@ -5,6 +5,7 @@ import OutgoingMsg from "./OutgoingMsg";
 import PlaceholderMessage from "./PlaceholderMessage";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
+import SpinLoader from "src/components/shared/SpinLoader";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
@@ -37,8 +38,16 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef }: any = useMessagesContext();
-
+  const { messages, isSending, scrollContainerRef, isMessagesLoading }: any = useMessagesContext();
+  
+  if(isMessagesLoading){
+    return (
+      <div className="d-flex h-100 w-100 align-center justify-center">
+        <SpinLoader />
+      </div>
+    )
+  }
+  
   const isEmpty = !messages?.size && !isSending;
   return (
     <div

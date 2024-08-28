@@ -1,4 +1,4 @@
-import { createContext, useCallback, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -36,14 +36,13 @@ export const MessagesContext: any = createContext({});
 const MessagesContextProvider = (props: any) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const config = useSystemContext()?.config;
-  const { conversations, handleAddConversation } = useConversations(
-    "ConversationsDB",
-    currentUserId
-  );
+  const { conversations, handleAddConversation } =
+    useConversations(currentUserId);
 
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
+  const [isMessagesLoading, setMessagesLoading] = useState(true);
   const apiSource = useRef(axios.CancelToken.source());
 
   const currentStreamRef = useRef<any>(null);
@@ -108,13 +107,13 @@ const MessagesContextProvider = (props: any) => {
           setIsSendingMessage(false);
           setIsReceiving(true);
           currentStreamRef.current = payload!.bot_message_id;
-          const newConversations = new Map(prev);
-          newConversations.set(payload!.bot_message_id, {
+          const newMessages = new Map(prev);
+          newMessages.set(payload!.bot_message_id, {
             id: currentStreamRef.current,
             ...payload,
           });
           updateLocalUser(payload?.user_id);
-          return newConversations;
+          return newMessages;
         }
 
         // stream end
@@ -135,13 +134,22 @@ const MessagesContextProvider = (props: any) => {
           });
           setIsReceiving(false);
           // update current conversation for every time the stream ends
-          updateCurrentConversation({
+          const conversationData = {
             id: prevMessage?.conversation_id,
             user_id: prevMessage?.user_id,
-            messages: Array.from(newMessages.values()),
             title: payload?.title,
             timestamp: payload?.created_at,
-          });
+          };
+          updateCurrentConversation(conversationData);
+          handleAddConversation(
+            Object.assign(
+              {},
+              {
+                ...conversationData,
+                messages: Array.from(newMessages.values()),
+              }
+            )
+          );
           return newMessages;
         }
 
@@ -163,7 +171,7 @@ const MessagesContextProvider = (props: any) => {
       });
       scrollToMessage();
     },
-    [scrollToMessage]
+    [handleAddConversation, scrollToMessage]
   );
 
   const sendPrompt = async (payload: IncomingMsg) => {
@@ -284,17 +292,36 @@ const MessagesContextProvider = (props: any) => {
     });
   };
 
-  const setActiveConversation = (conversation: Conversation) => {
-    currentConversation.current = conversation;
-    preLoadData(conversation.messages);
-  };
+  const setActiveConversation = useCallback(
+    async (conversation: Conversation) => {
+      if (
+        !conversation ||
+        !conversation.getMessages ||
+        currentConversation.current?.id === conversation.id
+      )
+        return setMessagesLoading(false);
+      setMessagesLoading(true);
+      const messages = await conversation.getMessages();
+      preLoadData(messages);
+      updateCurrentConversation(conversation);
+      setMessagesLoading(false);
+      return messages;
+    },
+    []
+  );
+
+  useEffect(() => {
+    // Load the latest conversation from DB
+    if (config?.disableConversations && conversations.length)
+      setActiveConversation(conversations[0]);
+    else setMessagesLoading(false);
+  }, [config, conversations, setActiveConversation]);
 
   const valueMessages = {
     sendPrompt,
     messages,
     isSending,
     initializeQuery,
-    preLoadData,
     handleNewConversation,
     cancelApiCall,
     scrollMessageContainer,
@@ -304,6 +331,7 @@ const MessagesContextProvider = (props: any) => {
     conversations,
     setActiveConversation,
     currentConversationId: currentConversation.current?.id || null,
+    isMessagesLoading,
   };
 
   return (

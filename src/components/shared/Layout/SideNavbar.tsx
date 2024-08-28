@@ -4,7 +4,7 @@ import IconSidebar from "src/assets/SvgIcons/IconSideBar";
 import Button from "../Buttons/Button";
 import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
-import React, { useEffect } from "react";
+import React from "react";
 import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
@@ -47,41 +47,36 @@ const SideNavbar = () => {
       Months: {},
     };
 
-    conversations
-      .sort(
-        (a: Conversation, b: Conversation) =>
-          new Date(a.timestamp as string).getTime() -
-          new Date(b.timestamp as string).getTime()
-      )
-      .forEach((conversation: Conversation) => {
-        const lastMessageTimestamp = new Date(
-          conversation.timestamp as string
-        ).getTime();
-        let subheading: string;
+    conversations.forEach((conversation: Conversation) => {
+      const lastMessageTimestamp = new Date(
+        conversation.timestamp as string
+      ).getTime();
+      let subheading: string;
 
-        if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
-          subheading = "Today";
-        } else if (
-          lastMessageTimestamp > endToday - sevenDaysInMs &&
-          lastMessageTimestamp <= endToday
-        ) {
-          subheading = "Previous 7 Days";
-        } else if (now - lastMessageTimestamp <= thirtyDaysInMs) {
-          subheading = "Previous 30 Days";
-        } else {
-          const monthName: string = new Date(
-            lastMessageTimestamp
-          ).toLocaleString("default", {
+      if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
+        subheading = "Today";
+      } else if (
+        lastMessageTimestamp > endToday - sevenDaysInMs &&
+        lastMessageTimestamp <= endToday
+      ) {
+        subheading = "Previous 7 Days";
+      } else if (now - lastMessageTimestamp <= thirtyDaysInMs) {
+        subheading = "Previous 30 Days";
+      } else {
+        const monthName: string = new Date(lastMessageTimestamp).toLocaleString(
+          "default",
+          {
             month: "long",
-          });
-          if (!grouped.Months[monthName]) {
-            grouped.Months[monthName] = [];
           }
-          grouped.Months[monthName].push(conversation);
-          return; // Skip adding to other groups
+        );
+        if (!grouped.Months[monthName]) {
+          grouped.Months[monthName] = [];
         }
-        grouped[subheading].unshift(conversation);
-      });
+        grouped.Months[monthName].push(conversation);
+        return; // Skip adding to other groups
+      }
+      grouped[subheading].unshift(conversation);
+    });
 
     // Convert Months object to array
     const monthEntries = Object.entries(grouped.Months).map(
@@ -105,24 +100,7 @@ const SideNavbar = () => {
       ...monthEntries,
     ].filter((group) => group?.conversations?.length > 0);
   }, [conversations]);
-
-  useEffect(() => {
-    const ele =
-      layoutController?.widgetRootElement?.querySelector("#side-navbar");
-    if (!ele) return;
-    if (!layoutController?.isSidebarOpen)
-      ele.setAttribute(
-        "style",
-        "width: 0px; transition: width ease-in-out 0.2s; z-index: 10;"
-      );
-    else {
-      ele.setAttribute(
-        "style",
-        "width: 260px; transition: width ease-in-out 0.2s; z-index: 10;"
-      );
-    }
-  }, [layoutController?.isSidebarOpen, layoutController?.widgetRootElement]);
-
+  if (config?.disableConversations) return null;
   return (
     <nav
       id="gooey-side-navbar"
@@ -219,17 +197,25 @@ const SideNavbar = () => {
                   <h5 className="gpl-8 text-muted">{group.subheading}</h5>
                 </div>
                 <ol>
-                  {group.conversations.map((conversation: Conversation) => {
-                    return (
-                      <li key={conversation.id}>
-                        <ConversationButton
-                          conversation={conversation}
-                          isActive={currentConversationId === conversation?.id}
-                          onClick={() => setActiveConversation(conversation)}
-                        />
-                      </li>
-                    );
-                  })}
+                  {group.conversations
+                    .sort(
+                      (a: Conversation, b: Conversation) =>
+                        new Date(b.timestamp as string).getTime() -
+                        new Date(a.timestamp as string).getTime()
+                    )
+                    .map((conversation: Conversation) => {
+                      return (
+                        <li key={conversation.id}>
+                          <ConversationButton
+                            conversation={conversation}
+                            isActive={
+                              currentConversationId === conversation?.id
+                            }
+                            onClick={() => setActiveConversation(conversation)}
+                          />
+                        </li>
+                      );
+                    })}
                 </ol>
               </div>
             ))}

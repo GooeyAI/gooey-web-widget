@@ -71,14 +71,16 @@ const Header = ({ onEditClick }: HeaderProps) => {
         {botName}
       </p>
       <div>
-        <IconButton
-          disabled={isEmpty}
-          variant="text"
-          className={clsx("gp-8 cr-pointer flex-1")}
-          onClick={() => onEditClick()}
-        >
-          <IconPencilEdit size={24} />
-        </IconButton>
+        {layoutController?.showNewConversationButton && (
+          <IconButton
+            disabled={isEmpty}
+            variant="text"
+            className={clsx("gp-8 cr-pointer flex-1")}
+            onClick={() => onEditClick()}
+          >
+            <IconPencilEdit size={24} />
+          </IconButton>
+        )}
       </div>
     </div>
   );

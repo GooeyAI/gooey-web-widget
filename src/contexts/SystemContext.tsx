@@ -20,7 +20,7 @@ type LayoutStateType = {
   showCloseButton: boolean;
   showSidebarButton: boolean;
   showFocusModeButton: boolean;
-  widgetRootElement?: HTMLElement;
+  showNewConversationButton?: boolean;
 };
 
 export type SystemContextType = {
@@ -49,8 +49,10 @@ const SystemContextProvider = ({
     showCloseButton: !isInline || false,
     showSidebarButton: false,
     showFocusModeButton: !isInline || false,
+    showNewConversationButton: !config?.disableConversations,
     isMobile: false,
   });
+  const forceHideSidebar = !!config?.disableConversations;
   const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
     layoutState?.isOpen,
   ]);
@@ -72,13 +74,13 @@ const SystemContextProvider = ({
     setLayoutState((prev) => ({
       ...prev,
       isSidebarOpen: !isMobile,
-      showSidebarButton: isMobile,
+      showSidebarButton: forceHideSidebar ? false : isMobile,
       showFocusModeButton: isInline
         ? false
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
     }));
-  }, [isInline, isMobile, isMobileWindow]);
+  }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
 
   const LayoutController: LayoutController = {
     toggleOpenClose: () => {
@@ -88,10 +90,11 @@ const SystemContextProvider = ({
         isOpen: !prev.isOpen,
         isFocusMode: false,
         isSidebarOpen: false,
-        showSidebarButton: true,
+        showSidebarButton: forceHideSidebar ? false : true,
       }));
     },
     toggleSidebar: () => {
+      if(forceHideSidebar) return;
       setLayoutState((prev: any) => {
         toggleSidebarStyles(prev.isSidebarOpen);
         return {
@@ -112,8 +115,8 @@ const SystemContextProvider = ({
           return {
             ...prev,
             isFocusMode: true,
-            isSidebarOpen: true,
-            showSidebarButton: prev.isSidebarOpen,
+            isSidebarOpen: forceHideSidebar ? false : true,
+            showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
           };
         } else {
           // turning off focus mode
@@ -121,8 +124,8 @@ const SystemContextProvider = ({
           return {
             ...prev,
             isFocusMode: false,
-            isSidebarOpen: false,
-            showSidebarButton: prev.isSidebarOpen,
+            isSidebarOpen: forceHideSidebar ? false : false,
+            showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
           };
         }
       });
