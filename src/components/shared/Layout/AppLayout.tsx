@@ -31,15 +31,13 @@ const generateParentContainerClass = (
   return "gooey-inline-container";
 };
 
-const AppLayout = ({ children, isInline = true }: Props) => {
+const AppLayout = ({ children }: Props) => {
   const { config, layoutController } = useSystemContext();
   const { handleNewConversation }: any = useMessagesContext();
 
   const handleEditClick = () => {
     handleNewConversation();
-    const shadowRoot = document.querySelector((config?.target || "") as string)
-      ?.firstElementChild?.shadowRoot;
-    const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
+    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
     ele?.focus();
   };
 
@@ -55,11 +53,11 @@ const AppLayout = ({ children, isInline = true }: Props) => {
         )
       )}
     >
-      <div className="d-flex h-100">
+      <div className="d-flex h-100 pos-relative">
         <SideNavbar />
         <i className="fa-solid fa-magnifying-glass"></i>
         <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
-          <Header onEditClick={handleEditClick} hideClose={isInline} />
+          <Header onEditClick={handleEditClick} />
           <div
             style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
             className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"

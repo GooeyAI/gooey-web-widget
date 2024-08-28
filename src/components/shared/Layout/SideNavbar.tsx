@@ -3,10 +3,8 @@ import IconButton from "../Buttons/IconButton";
 import IconSidebar from "src/assets/SvgIcons/IconSideBar";
 import Button from "../Buttons/Button";
 import clsx from "clsx";
-import useDeviceWidth from "src/hooks/useDeviceWidth";
-import { MOBILE_WIDTH } from "src/utils/constants";
 import { Conversation } from "src/contexts/ConversationLayer";
-import React from "react";
+import React, { useEffect } from "react";
 import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
 
 const SideNavbar = () => {
@@ -17,158 +15,178 @@ const SideNavbar = () => {
     handleNewConversation,
   }: any = useMessagesContext();
   const { layoutController, config } = useSystemContext();
-  const width = useDeviceWidth();
-  const isMobile = width < MOBILE_WIDTH;
-  const isOpen = layoutController?.isSidebarOpen;
   const branding = config?.branding;
+  const conversationsList = React.useMemo(() => {
+    if (!conversations || conversations.length === 0) return [];
+    const now = new Date().getTime();
+    const today = new Date().setHours(0, 0, 0, 0);
+    const endToday = new Date().setHours(23, 59, 59, 999);
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
+    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
 
-  // Function to render conversation subheadings based on date
-  const renderConversationSubheading = (timestamp: number) => {
-    const today = new Date();
-    const yesterday = new Date(today.getTime() - 86400000); // 86400000 milliseconds in a day
-    const date = new Date(timestamp);
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return "Today";
-    } else if (
-      date.getDate() === yesterday.getDate() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getFullYear() === yesterday.getFullYear()
-    ) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    }
-  };
+    const grouped: any = {
+      Today: [],
+      "Previous 7 Days": [],
+      "Previous 30 Days": [],
+      Months: {},
+    };
 
-  // Sort conversations by the latest timestamp of their messages
-  // Group conversations by date
-  const groupedConversations = React.useMemo(() => {
-    const sortedConversations = conversations.sort(
-      (a: Conversation, b: Conversation) => {
-        const lastMessageA = a.messages?.[a.messages.length - 1];
-        const lastMessageB = b.messages?.[b.messages.length - 1];
-        const timestampA = lastMessageA
-          ? new Date(lastMessageA.timestamp).getTime()
-          : 0;
-        const timestampB = lastMessageB
-          ? new Date(lastMessageB.timestamp).getTime()
-          : 0;
-        return timestampB - timestampA; // Sort in descending order
-      }
-    );
-
-    // Function to render subheading for each group
-    return sortedConversations.reduce(
-      (acc: any, conversation: Conversation) => {
+    conversations
+      .sort(
+        (a: Conversation, b: Conversation) =>
+          new Date(a.timestamp as string).getTime() -
+          new Date(b.timestamp as string).getTime()
+      )
+      .forEach((conversation: Conversation) => {
         const lastMessageTimestamp = new Date(
-          conversation!.timestamp as string
+          conversation.timestamp as string
         ).getTime();
-        const subheading = renderConversationSubheading(lastMessageTimestamp);
+        let subheading: string;
 
-        // Find the index of the subheading in the accumulator array
-        const subheadingIndex = acc.findIndex(
-          (item: any) => item.subheading === subheading
-        );
-
-        if (subheadingIndex === -1) {
-          // If the subheading doesn't exist, add a new entry
-          acc.push({
-            subheading,
-            conversations: [conversation],
-          });
+        if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
+          subheading = "Today";
+        } else if (
+          lastMessageTimestamp > endToday - sevenDaysInMs &&
+          lastMessageTimestamp <= endToday
+        ) {
+          subheading = "Previous 7 Days";
+        } else if (now - lastMessageTimestamp <= thirtyDaysInMs) {
+          subheading = "Previous 30 Days";
         } else {
-          // If the subheading exists, add the conversation to the existing entry
-          acc[subheadingIndex].conversations.push(conversation);
+          const monthName: string = new Date(
+            lastMessageTimestamp
+          ).toLocaleString("default", {
+            month: "long",
+          });
+          if (!grouped.Months[monthName]) {
+            grouped.Months[monthName] = [];
+          }
+          grouped.Months[monthName].push(conversation);
+          return; // Skip adding to other groups
         }
+        grouped[subheading].unshift(conversation);
+      });
 
-        return acc;
-      },
-      []
+    // Convert Months object to array
+    const monthEntries = Object.entries(grouped.Months).map(
+      ([monthName, conversations]) => ({
+        subheading: monthName,
+        conversations,
+      })
     );
+
+    // Combine all groups into a single array
+    return [
+      { subheading: "Today", conversations: grouped.Today },
+      {
+        subheading: "Previous 7 Days",
+        conversations: grouped["Previous 7 Days"],
+      },
+      {
+        subheading: "Previous 30 Days",
+        conversations: grouped["Previous 30 Days"],
+      },
+      ...monthEntries,
+    ].filter((group) => group?.conversations?.length > 0);
   }, [conversations]);
+
+  useEffect(() => {
+    const ele =
+      layoutController?.widgetRootElement?.querySelector("#side-navbar");
+    if (!ele) return;
+    if (!layoutController?.isSidebarOpen)
+      ele.setAttribute(
+        "style",
+        "width: 0px; transition: width ease-in-out 0.2s; z-index: 10;"
+      );
+    else {
+      ele.setAttribute(
+        "style",
+        "width: 260px; transition: width ease-in-out 0.2s; z-index: 10;"
+      );
+    }
+  }, [layoutController?.isSidebarOpen, layoutController?.widgetRootElement]);
 
   return (
     <nav
+      id="gooey-side-navbar"
       style={{
-        overflowX: "hidden",
-        width: isOpen ? "260px" : "0px",
+        width: 0,
         transition: "width ease-in-out 0.2s",
-        top: 0,
-        left: 0,
-        height: "100%",
         zIndex: 10,
       }}
       className={clsx(
-        "b-1 bg-white h-100 overflow-x-hidden ",
-        isMobile ? "pos-absolute" : "pos-relative"
+        "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey",
+        layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
-      {/* Header */}
-      <div className="gp-8 d-flex b-btm-1 flex-col pos-sticky">
-        <IconButton
-          variant="text"
-          className="gp-6 cr-pointer"
-          onClick={layoutController?.toggleSidebar}
-        >
-          <IconSidebar size={20} />
-        </IconButton>
-      </div>
-
-      <div className="d-flex flex-col gp-8">
-        <Button
-          className="w-100 d-flex"
-          onClick={() => {
-            handleNewConversation();
-            const shadowRoot = document.querySelector(
-              (config?.target || "") as string
-            )?.firstElementChild?.shadowRoot;
-            const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
-            ele?.focus();
-          }}
-        >
-          <div
-            className="bot-avatar bg-primary gmr-12"
-            style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+      <div className="pos-relative" style={{ width: "260px", height: "100%" }}>
+        {/* Header */}
+        <div className="gp-8 b-btm-1 pos-sticky h-header">
+          <IconButton
+            variant="text"
+            className="gp-10 cr-pointer"
+            onClick={layoutController?.toggleSidebar}
           >
-            <img
-              src={branding?.photoUrl}
-              alt="bot-avatar"
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "100%",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-          <p className="font_16_600">{branding?.name}</p>
-        </Button>
-      </div>
+            <IconSidebar size={20} />
+          </IconButton>
+        </div>
 
-      <div className="gpl-20 gmt-20 gpr-20">
-        {groupedConversations.map((group: any) => (
-          <React.Fragment key={group.subheading}>
-            <h5 className="gmb-12 text-muted">{group.subheading}</h5>
-            {group.conversations.map((conversation: Conversation) => {
-              return (
-                <ConversationButton
-                  key={conversation.id}
-                  conversation={conversation}
-                  isActive={currentConversationId === conversation?.id}
-                  onClick={() => setActiveConversation(conversation)}
+        <div className="overflow-y-auto pos-relative h-100">
+          <div className="d-flex flex-col gp-8">
+            <Button
+              className="w-100 d-flex"
+              onClick={() => {
+                handleNewConversation();
+                const shadowRoot = document.querySelector(
+                  (config?.target || "") as string
+                )?.firstElementChild?.shadowRoot;
+                const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
+                ele?.focus();
+              }}
+            >
+              <div
+                className="bot-avatar bg-primary gmr-12"
+                style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+              >
+                <img
+                  src={branding?.photoUrl}
+                  alt="bot-avatar"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "100%",
+                    objectFit: "cover",
+                  }}
                 />
-              );
-            })}
-          </React.Fragment>
-        ))}
+              </div>
+              <p className="font_16_600">{branding?.name}</p>
+            </Button>
+          </div>
+
+          <div className="gp-8">
+            {conversationsList.map((group: any) => (
+              <div key={group.subheading} className="gmb-30">
+                <div className="pos-sticky top-0 gpt-8 gpb-8 bg-grey">
+                  <h5 className="gpl-8 text-muted">{group.subheading}</h5>
+                </div>
+                <ol>
+                  {group.conversations.map((conversation: Conversation) => {
+                    return (
+                      <li key={conversation.id}>
+                        <ConversationButton
+                          conversation={conversation}
+                          isActive={currentConversationId === conversation?.id}
+                          onClick={() => setActiveConversation(conversation)}
+                        />
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </nav>
   );
@@ -182,17 +200,20 @@ const ConversationButton: React.FC<{
 }> = React.memo(({ conversation, isActive, onClick }) => {
   const lastMessage =
     conversation?.messages?.[conversation.messages.length - 1];
-  // Use first 8 words of the last message as title
-  const tempTitle: string = lastMessage
-    ? (lastMessage?.output_text[0] || lastMessage?.input_prompt || "").slice(
-        0,
-        8
-      )
-    : "New Message";
+  // use timestamp in day, time format for title if no message is present
+  const tempTitle = lastMessage?.title
+    ? lastMessage.title
+    : new Date(conversation.timestamp as string).toLocaleString("default", {
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
   return (
     <Button
-      className="w-100 d-flex gp-8 gmb-12"
-      variant={isActive ? "filled" : "text"}
+      className="w-100 d-flex gp-8 gmb-6"
+      variant={isActive ? "filled" : "text-alt"}
       onClick={onClick}
     >
       <p className="font_14_400">{tempTitle}</p>

@@ -1,21 +1,25 @@
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from "react";
 import { CopilotConfigType } from "./types";
+import useMediaQuery from "src/hooks/useMediaQuery";
 
 interface LayoutController extends LayoutStateType {
   toggleOpenClose: () => void;
   toggleSidebar: () => void;
   toggleFocusMode: () => void;
+  setState: (state: any) => void;
 }
 
 type LayoutStateType = {
   isOpen: boolean;
   isFocusMode: boolean;
   isInline: boolean;
+  isMobile: boolean;
 
   isSidebarOpen: boolean;
   showCloseButton: boolean;
   showSidebarButton: boolean;
   showFocusModeButton: boolean;
+  widgetRootElement?: HTMLElement;
 };
 
 export type SystemContextType = {
@@ -43,7 +47,9 @@ const SystemContextProvider = ({
     showCloseButton: !isInline || false,
     showSidebarButton: true,
     showFocusModeButton: !isInline || false,
+    isMobile: false,
   });
+  const isMobile = useMediaQuery("mobile", [layoutState?.isOpen]);
 
   const setTempStoreValue = (key: string, value: any) => {
     setTempStore((prev: Map<string, any>) => {
@@ -57,15 +63,57 @@ const SystemContextProvider = ({
     return tempStore.get(key);
   };
 
+  useEffect(() => {
+    // set initial state based on isMobile and isInline
+    setLayoutState((prev) => ({
+      ...prev,
+      isSidebarOpen: !isMobile,
+      showSidebarButton: isMobile,
+      isMobile,
+    }));
+  }, [isMobile]);
+
   const LayoutController: LayoutController = {
     toggleOpenClose: () => {
-      setLayoutState((prev) => ({ ...prev, isOpen: !prev.isOpen, isFocusMode: false }));
+      // open/close in pop-up mode
+      setLayoutState((prev) => ({
+        ...prev,
+        isOpen: !prev.isOpen,
+        isFocusMode: false,
+        isSidebarOpen: false,
+        showSidebarButton: true,
+      }));
     },
     toggleSidebar: () => {
-      setLayoutState((prev) => ({ ...prev, isSidebarOpen: !prev.isSidebarOpen }));
+      setLayoutState((prev: any) => {
+        const sideBarElement: HTMLElement | null | undefined =
+          gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+        if (!sideBarElement) return;
+        // set width to 0px if sidebar is closed
+        if (!prev.isSidebarOpen) {
+          sideBarElement.style.width = "260px";
+        } else {
+          sideBarElement.style.width = "0px";
+        }
+        return {
+          ...prev,
+          isSidebarOpen: !prev.isSidebarOpen,
+          showSidebarButton: prev.isSidebarOpen,
+        };
+      });
     },
     toggleFocusMode: () => {
-      setLayoutState((prev) => ({ ...prev, isFocusMode: !prev.isFocusMode }));
+      setLayoutState((prev) => ({
+        ...prev,
+        isFocusMode: !prev.isFocusMode,
+        isSidebarOpen: true,
+      }));
+    },
+    setState: (state: any) => {
+      setLayoutState((prev) => ({
+        ...prev,
+        ...state,
+      }));
     },
     ...layoutState,
   };
