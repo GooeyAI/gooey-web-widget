@@ -223,7 +223,11 @@ const SideNavbar = () => {
                             isActive={
                               currentConversationId === conversation?.id
                             }
-                            onClick={() => setActiveConversation(conversation)}
+                            onClick={() => {
+                              setActiveConversation(conversation);
+                              if (layoutController?.isMobile)
+                                layoutController?.toggleSidebar();
+                            }}
                           />
                         </li>
                       );
