@@ -49,10 +49,13 @@ const SystemContextProvider = ({
     showCloseButton: !isInline || false,
     showSidebarButton: false,
     showFocusModeButton: !isInline || false,
-    showNewConversationButton: !config?.disableConversations,
+    showNewConversationButton:
+      config?.enableConversations === undefined
+        ? true
+        : config?.enableConversations,
     isMobile: false,
   });
-  const forceHideSidebar = !!config?.disableConversations;
+  const forceHideSidebar = !layoutState?.showNewConversationButton;
   const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
     layoutState?.isOpen,
   ]);
@@ -95,7 +98,8 @@ const SystemContextProvider = ({
         setLayoutState((prev) => {
           const sideBarElement: HTMLElement | null | undefined =
             gooeyShadowRoot?.querySelector("#gooey-side-navbar");
-          if (!sideBarElement) return { ...prev, isFocusMode: !prev.isFocusMode };
+          if (!sideBarElement)
+            return { ...prev, isFocusMode: !prev.isFocusMode };
           if (!prev?.isFocusMode) {
             // turning on focus mode open sidebar
             if (!prev?.isSidebarOpen) sideBarElement.style.width = "260px";

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export interface Conversation {
   id?: string;
+  bot_id?: string;
   title?: string;
   timestamp?: string;
   user_id?: string;
@@ -58,7 +59,11 @@ const fetchConversation = (db: IDBDatabase, conversationId: string) => {
   });
 };
 
-const fetchAllConversations = (db: IDBDatabase, user_id: string) => {
+const fetchAllConversations = (
+  db: IDBDatabase,
+  user_id: string,
+  bot_id: string
+) => {
   return new Promise<Conversation[]>((resolve, reject) => {
     const transaction = db.transaction(["conversations"], "readonly");
     const objectStore = transaction.objectStore("conversations");
@@ -66,6 +71,9 @@ const fetchAllConversations = (db: IDBDatabase, user_id: string) => {
 
     request.onsuccess = () => {
       const userConversations = request.result
+        .filter(
+          (c: Conversation) => c.user_id === user_id && c.bot_id === bot_id
+        )
         .map((conversation: Conversation) => {
           const conversationCopy = Object.assign({}, conversation);
           delete conversationCopy.messages; // reduce memory usage
@@ -74,10 +82,8 @@ const fetchAllConversations = (db: IDBDatabase, user_id: string) => {
             return _c.messages || [];
           };
           return conversationCopy;
-        })
-        .filter(
-          (conversation: Conversation) => conversation.user_id === user_id
-        );
+        });
+
       resolve(userConversations);
     };
 
@@ -104,15 +110,17 @@ const addConversation = (db: IDBDatabase, conversation: Conversation) => {
 };
 
 const DB_NAME = "GOOEY_COPILOT_CONVERSATIONS_DB";
-export const useConversations = (
-  user_id: string
-) => {
+export const useConversations = (user_id: string, bot_id: string) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
     const loadConversations = async () => {
       const db = await initDB(DB_NAME);
-      const userConversations = await fetchAllConversations(db, user_id);
+      const userConversations = await fetchAllConversations(
+        db,
+        user_id,
+        bot_id
+      );
       setConversations(
         userConversations.sort(
           (a: Conversation, b: Conversation) =>
@@ -123,14 +131,14 @@ export const useConversations = (
     };
 
     loadConversations();
-  }, [user_id]);
+  }, [bot_id, user_id]);
 
   const handleAddConversation = async (c: Conversation | null) => {
     if (!c || !c.messages?.length) return;
 
     const db = await initDB(DB_NAME);
     await addConversation(db, c);
-    const updatedConversations = await fetchAllConversations(db, user_id);
+    const updatedConversations = await fetchAllConversations(db, user_id, bot_id);
     setConversations(updatedConversations);
   };
 

@@ -36,15 +36,18 @@ export const MessagesContext: any = createContext({});
 const MessagesContextProvider = (props: any) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const config = useSystemContext()?.config;
-  const { conversations, handleAddConversation } =
-    useConversations(currentUserId);
+  const { conversations, handleAddConversation } = useConversations(
+    currentUserId,
+    config?.integration_id as string
+  );
 
   const [messages, setMessages] = useState(new Map());
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [isMessagesLoading, setMessagesLoading] = useState(true);
-  const apiSource = useRef(axios.CancelToken.source());
+  const [preventAutoplay, setPreventAutoplay] = useState(true);
 
+  const apiSource = useRef(axios.CancelToken.source());
   const currentStreamRef = useRef<any>(null);
   const scrollContainerRef = useRef<null | HTMLElement>(null);
   const currentConversation = useRef<Conversation | null>(null);
@@ -57,6 +60,7 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const initializeQuery = (payload: any) => {
+    setPreventAutoplay(false);
     // calls the server and updates the state with user message
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
     const conversationId = lastResponse?.conversation_id;
@@ -139,6 +143,7 @@ const MessagesContextProvider = (props: any) => {
             user_id: prevMessage?.user_id,
             title: payload?.title,
             timestamp: payload?.created_at,
+            bot_id: config?.integration_id,
           };
           updateCurrentConversation(conversationData);
           handleAddConversation(
@@ -171,7 +176,7 @@ const MessagesContextProvider = (props: any) => {
       });
       scrollToMessage();
     },
-    [handleAddConversation, scrollToMessage]
+    [config?.integration_id, handleAddConversation, scrollToMessage]
   );
 
   const sendPrompt = async (payload: IncomingMsg) => {
@@ -300,11 +305,13 @@ const MessagesContextProvider = (props: any) => {
         currentConversation.current?.id === conversation.id
       )
         return setMessagesLoading(false);
+      setPreventAutoplay(true)
       setMessagesLoading(true);
       const messages = await conversation.getMessages();
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
+
       return messages;
     },
     []
@@ -312,9 +319,13 @@ const MessagesContextProvider = (props: any) => {
 
   useEffect(() => {
     // Load the latest conversation from DB
-    if (config?.disableConversations && conversations.length)
+    setPreventAutoplay(true)
+    if (!config?.enableConversations && conversations.length)
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
+    setTimeout(() => {
+      setPreventAutoplay(false);
+    }, 3000);
   }, [config, conversations, setActiveConversation]);
 
   const valueMessages = {
@@ -332,6 +343,7 @@ const MessagesContextProvider = (props: any) => {
     setActiveConversation,
     currentConversationId: currentConversation.current?.id || null,
     isMessagesLoading,
+    preventAutoplay,
   };
 
   return (

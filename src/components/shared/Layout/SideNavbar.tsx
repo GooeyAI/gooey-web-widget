@@ -61,7 +61,8 @@ const SideNavbar = () => {
       if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
         subheading = "Today";
       } else if (
-        lastMessageTimestamp >= yesterday && lastMessageTimestamp <= endYesterday
+        lastMessageTimestamp >= yesterday &&
+        lastMessageTimestamp <= endYesterday
       ) {
         subheading = "Yesterday";
       } else if (
@@ -111,7 +112,7 @@ const SideNavbar = () => {
     ].filter((group) => group?.conversations?.length > 0);
   }, [conversations]);
 
-  if (config?.disableConversations) return null;
+  if (!layoutController?.showNewConversationButton) return null;
   return (
     <nav
       id="gooey-side-navbar"

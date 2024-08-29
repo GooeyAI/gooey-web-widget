@@ -9,7 +9,7 @@ import SpinLoader from "src/components/shared/SpinLoader";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const { handleFeedbackClick }: any = useMessagesContext();
+  const { handleFeedbackClick, preventAutoplay }: any = useMessagesContext();
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
@@ -20,16 +20,22 @@ const Responses = (props: any) => {
         const responseData = msgs.get(id);
         const role = responseData.role;
         if (role === "user")
-          return <OutgoingMsg data={responseData} key={id} />;
+          return (
+            <OutgoingMsg
+              data={responseData}
+              key={id}
+              preventAutoplay={preventAutoplay}
+            />
+          );
         return (
           <IncomingMsg
             data={responseData}
             key={id}
             id={id}
             showSources={config?.showSources || true}
-            linkColor={config?.branding?.colors?.primary || 'initial'}
+            linkColor={config?.branding?.colors?.primary || "initial"}
             onFeedbackClick={handleFeedbackClick}
-            autoPlay={config?.autoPlayResponses}
+            autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
           />
         );
       })}
@@ -38,16 +44,17 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading }: any = useMessagesContext();
-  
-  if(isMessagesLoading){
+  const { messages, isSending, scrollContainerRef, isMessagesLoading }: any =
+    useMessagesContext();
+
+  if (isMessagesLoading) {
     return (
       <div className="d-flex h-100 w-100 align-center justify-center">
         <SpinLoader />
       </div>
-    )
+    );
   }
-  
+
   const isEmpty = !messages?.size && !isSending;
   return (
     <div
