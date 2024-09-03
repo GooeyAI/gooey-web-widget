@@ -13,6 +13,7 @@ import useConversations, {
   updateLocalUser,
   USER_ID_LS_KEY,
 } from "./ConversationLayer";
+import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
 
 interface IncomingMsg {
   input_text?: string;
@@ -36,6 +37,7 @@ export const MessagesContext: any = createContext({});
 const MessagesContextProvider = (props: any) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const config = useSystemContext()?.config;
+  const layoutController = useSystemContext()?.layoutController;
   const { conversations, handleAddConversation } = useConversations(
     currentUserId,
     config?.integration_id as string
@@ -226,6 +228,10 @@ const MessagesContextProvider = (props: any) => {
       handleAddConversation(Object.assign({}, currentConversation.current));
     }
     if (isReceiving || isSending) cancelApiCall();
+    if (layoutController?.isMobile && layoutController?.isSidebarOpen)
+      layoutController?.toggleSidebar();
+    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
+    ele?.focus();
     setIsReceiving(false);
     setIsSendingMessage(false);
     purgeMessages();
@@ -305,7 +311,7 @@ const MessagesContextProvider = (props: any) => {
         currentConversation.current?.id === conversation.id
       )
         return setMessagesLoading(false);
-      setPreventAutoplay(true)
+      setPreventAutoplay(true);
       setMessagesLoading(true);
       const messages = await conversation.getMessages();
       preLoadData(messages);
@@ -319,7 +325,7 @@ const MessagesContextProvider = (props: any) => {
 
   useEffect(() => {
     // Load the latest conversation from DB
-    setPreventAutoplay(true)
+    setPreventAutoplay(true);
     if (!config?.enableConversations && conversations.length)
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);

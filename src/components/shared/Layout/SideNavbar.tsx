@@ -5,10 +5,10 @@ import Button from "../Buttons/Button";
 import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
 import React from "react";
-import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const toggleSidebarStyles = (isSidebarOpen: boolean) => {
@@ -173,15 +173,10 @@ const SideNavbar = () => {
         <div className="overflow-y-auto pos-relative h-100">
           <div className="d-flex flex-col gp-8">
             <Button
-              className="w-100 d-flex"
-              onClick={() => {
-                handleNewConversation();
-                const shadowRoot = document.querySelector(
-                  (config?.target || "") as string
-                )?.firstElementChild?.shadowRoot;
-                const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
-                ele?.focus();
-              }}
+              className="w-100 d-flex pos-relative"
+              onClick={handleNewConversation}
+              RightIconComponent={IconPencilEdit}
+              showIconOnHover
             >
               <div
                 className="bot-avatar bg-primary gmr-12"
@@ -198,7 +193,7 @@ const SideNavbar = () => {
                   }}
                 />
               </div>
-              <p className="font_16_600">{branding?.name}</p>
+              <p className="font_16_600 text-left">{branding?.name}</p>
             </Button>
           </div>
 

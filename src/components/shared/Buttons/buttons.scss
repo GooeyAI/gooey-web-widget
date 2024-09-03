@@ -15,10 +15,17 @@ button {
   color: $almost-black;
   width: fit-content;
 }
+
 button:disabled {
   color: $muted !important;
   fill: $light;
   cursor: unset;
+}
+button .icon-hover {
+  opacity: 0;
+}
+button:hover .icon-hover {
+  opacity: 1;
 }
 
 // Variant - FILED
