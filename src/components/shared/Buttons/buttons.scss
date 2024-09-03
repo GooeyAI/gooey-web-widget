@@ -21,14 +21,30 @@ button:disabled {
   fill: $light;
   cursor: unset;
 }
+
+button .btn-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  z-index: 2;
+}
+
 button .icon-hover {
   opacity: 0;
 }
+
+button .btn-hide-overflow p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 button:hover .icon-hover {
   opacity: 1;
 }
 
-// Variant - FILED
+// Variant - FILLED
 .button-filled {
   background-color: #eee;
 }

@@ -173,27 +173,32 @@ const SideNavbar = () => {
         <div className="overflow-y-auto pos-relative h-100">
           <div className="d-flex flex-col gp-8">
             <Button
-              className="w-100 d-flex pos-relative"
+              className="w-100 pos-relative"
               onClick={handleNewConversation}
               RightIconComponent={IconPencilEdit}
-              showIconOnHover
             >
-              <div
-                className="bot-avatar bg-primary gmr-12"
-                style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-              >
-                <img
-                  src={branding?.photoUrl}
-                  alt="bot-avatar"
+              <div className="d-flex align-center">
+                <div
+                  className="bot-avatar bg-primary gmr-12"
                   style={{
                     width: "24px",
                     height: "24px",
                     borderRadius: "100%",
-                    objectFit: "cover",
                   }}
-                />
+                >
+                  <img
+                    src={branding?.photoUrl}
+                    alt="bot-avatar"
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+                <p className="font_16_600 text-left">{branding?.name}</p>
               </div>
-              <p className="font_16_600 text-left">{branding?.name}</p>
             </Button>
           </div>
 
@@ -243,23 +248,22 @@ const ConversationButton: React.FC<{
   isActive: boolean;
   onClick: () => void;
 }> = React.memo(({ conversation, isActive, onClick }) => {
-  const lastMessage =
-    conversation?.messages?.[conversation.messages.length - 1];
   // use timestamp in day, time format for title if no message is present
-  const tempTitle = lastMessage?.title
-    ? lastMessage.title
-    : new Date(conversation.timestamp as string).toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      });
+  const tempTitle =
+    conversation?.title ||
+    new Date(conversation.timestamp as string).toLocaleString("default", {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
   return (
     <Button
-      className="w-100 d-flex gp-8 gmb-6"
+      className="w-100 gp-8 gmb-6 text-left"
       variant={isActive ? "filled" : "text-alt"}
       onClick={onClick}
+      hideOverflow
     >
       <p className="font_14_400">{tempTitle}</p>
     </Button>

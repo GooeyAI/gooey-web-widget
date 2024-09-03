@@ -14,6 +14,7 @@ export interface ButtonProps
   variant?: "filled" | "contained" | "outlined" | "text" | "text-alt";
   RightIconComponent?: React.FC<{ size: number }>;
   showIconOnHover?: boolean;
+  hideOverflow?: boolean;
 }
 
 const Button = ({
@@ -23,6 +24,7 @@ const Button = ({
   onClick,
   RightIconComponent,
   showIconOnHover,
+  hideOverflow,
   ...rest
 }: ButtonProps) => {
   const variantClasses = `button-${variant?.toLowerCase()}`;
@@ -31,23 +33,29 @@ const Button = ({
     <button
       {...rest}
       onMouseDown={onClick}
-      className={variantClasses + " pos-relative " + className}
+      className={variantClasses + " " + className}
     >
-      {rest.children}
-      {RightIconComponent && (
-        <div
-          className={clsx("pos-absolute", showIconOnHover && "icon-hover")}
-          style={{
-            top: "50%",
-            right: 0,
-            transform: "translateY(-50%)",
-          }}
-        >
-          <IconButton className="text-muted" disabled>
-            <RightIconComponent size={18} />
-          </IconButton>
-        </div>
-      )}
+      <div
+        className={clsx(
+          "pos-relative w-100 h-100",
+          hideOverflow && "btn-hide-overflow"
+        )}
+      >
+        {rest.children}
+        {RightIconComponent && (
+          <div
+            className={clsx(
+              "btn-icon right-icon",
+              showIconOnHover && "icon-hover"
+            )}
+          >
+            <IconButton className="text-muted gp-4" disabled>
+              <RightIconComponent size={18} />
+            </IconButton>
+          </div>
+        )}
+        {hideOverflow && <div className="button-right-blur" />}
+      </div>
     </button>
   );
 };

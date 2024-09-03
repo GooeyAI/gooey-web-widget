@@ -21,6 +21,11 @@ export const updateLocalUser = (userId: string) => {
   }
 };
 
+const getConversationTitle = (conversation: Conversation) => {
+  console.log(conversation?.messages?.[0]?.input_prompt);
+  return conversation?.messages?.[0]?.input_prompt;
+};
+
 const initDB = (dbName: string) => {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
@@ -76,6 +81,7 @@ const fetchAllConversations = (
         )
         .map((conversation: Conversation) => {
           const conversationCopy = Object.assign({}, conversation);
+          conversationCopy.title = getConversationTitle(conversation);
           delete conversationCopy.messages; // reduce memory usage
           conversationCopy.getMessages = async () => {
             const _c = await fetchConversation(db, conversation.id as string);
@@ -138,7 +144,11 @@ export const useConversations = (user_id: string, bot_id: string) => {
 
     const db = await initDB(DB_NAME);
     await addConversation(db, c);
-    const updatedConversations = await fetchAllConversations(db, user_id, bot_id);
+    const updatedConversations = await fetchAllConversations(
+      db,
+      user_id,
+      bot_id
+    );
     setConversations(updatedConversations);
   };
 
