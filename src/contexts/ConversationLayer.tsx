@@ -63,7 +63,7 @@ const fetchConversation = (db: IDBDatabase, conversationId: string) => {
   });
 };
 
-const formatConversation = (conversation: Conversation) => {
+const formatConversation = (conversation: Conversation, db: IDBDatabase) => {
   const conversationCopy = Object.assign({}, conversation);
   conversationCopy.title = getConversationTitle(conversation);
   delete conversationCopy.messages; // reduce memory usage
@@ -88,7 +88,7 @@ const fetchAllConversations = (
         .filter(
           (c: Conversation) => c.user_id === user_id && c.bot_id === bot_id
         )
-        .map(formatConversation);
+        .map((c) => formatConversation(c, db));
 
       resolve(userConversations);
     };
@@ -115,7 +115,7 @@ const addConversation = (db: IDBDatabase, conversation: Conversation) => {
                 c.user_id === conversation.user_id &&
                 c.bot_id === conversation.bot_id
             )
-            .map(formatConversation)
+            .map((c) => formatConversation(c, db))
         );
       };
       allObjectsReq.onerror = () => {
