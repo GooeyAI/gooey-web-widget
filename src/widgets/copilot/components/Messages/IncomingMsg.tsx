@@ -95,7 +95,7 @@ const IncomingMsg = memo(
             {parsedElements}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-16">
+            <div className="gmt-16 gml-36">
               <audio autoPlay={isAutoPlay} playsInline={true} controls src={audioTrack}></audio>
             </div>
           )}

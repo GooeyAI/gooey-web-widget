@@ -124,7 +124,7 @@ const SideNavbar = () => {
         zIndex: 10,
       }}
       className={clsx(
-        "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey",
+        "b-rt-1 b-top-1 h-100 overflow-x-hidden top-0 left-0 bg-grey",
         layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
@@ -163,7 +163,8 @@ const SideNavbar = () => {
           {/* Sidebar button */}
           <IconButton
             variant="text"
-            className="gp-10 cr-pointer"
+            className="cr-pointer"
+            style={{ height: "38px" }}
             onClick={layoutController?.toggleSidebar}
           >
             <IconSidebar size={20} />
