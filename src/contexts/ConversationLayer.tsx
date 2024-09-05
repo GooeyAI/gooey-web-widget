@@ -63,6 +63,16 @@ const fetchConversation = (db: IDBDatabase, conversationId: string) => {
   });
 };
 
+const formatConversation = (conversation: Conversation) => {
+  const conversationCopy = Object.assign({}, conversation);
+  conversationCopy.title = getConversationTitle(conversation);
+  delete conversationCopy.messages; // reduce memory usage
+  conversationCopy.getMessages = async () => {
+    const _c = await fetchConversation(db, conversation.id as string);
+    return _c.messages || [];
+  };
+  return conversationCopy;
+};
 const fetchAllConversations = (
   db: IDBDatabase,
   user_id: string,
@@ -78,16 +88,7 @@ const fetchAllConversations = (
         .filter(
           (c: Conversation) => c.user_id === user_id && c.bot_id === bot_id
         )
-        .map((conversation: Conversation) => {
-          const conversationCopy = Object.assign({}, conversation);
-          conversationCopy.title = getConversationTitle(conversation);
-          delete conversationCopy.messages; // reduce memory usage
-          conversationCopy.getMessages = async () => {
-            const _c = await fetchConversation(db, conversation.id as string);
-            return _c.messages || [];
-          };
-          return conversationCopy;
-        });
+        .map(formatConversation);
 
       resolve(userConversations);
     };
@@ -99,13 +100,27 @@ const fetchAllConversations = (
 };
 
 const addConversation = (db: IDBDatabase, conversation: Conversation) => {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<Conversation[]>((resolve, reject) => {
     const transaction = db.transaction(["conversations"], "readwrite");
     const objectStore = transaction.objectStore("conversations");
     const request = objectStore.put(conversation);
 
     request.onsuccess = () => {
-      resolve();
+      const allObjectsReq = objectStore.getAll();
+      allObjectsReq.onsuccess = () => {
+        resolve(
+          allObjectsReq.result
+            .filter(
+              (c: Conversation) =>
+                c.user_id === conversation.user_id &&
+                c.bot_id === conversation.bot_id
+            )
+            .map(formatConversation)
+        );
+      };
+      allObjectsReq.onerror = () => {
+        reject(allObjectsReq.error);
+      };
     };
 
     request.onerror = () => {
@@ -142,12 +157,7 @@ export const useConversations = (user_id: string, bot_id: string) => {
     if (!c || !c.messages?.length) return;
 
     const db = await initDB(DB_NAME);
-    await addConversation(db, c);
-    const updatedConversations = await fetchAllConversations(
-      db,
-      user_id,
-      bot_id
-    );
+    const updatedConversations = await addConversation(db, c);
     setConversations(updatedConversations);
   };
 
