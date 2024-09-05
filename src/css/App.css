@@ -46,6 +46,10 @@ ul {
   text-decoration: none;
 }
 
+div:focus-visible {
+  outline: none;
+}
+
 ::-webkit-scrollbar {
   background: transparent;
   color: white;
