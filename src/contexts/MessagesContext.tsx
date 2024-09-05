@@ -324,15 +324,20 @@ const MessagesContextProvider = (props: any) => {
   );
 
   useEffect(() => {
-    // Load the latest conversation from DB
     setPreventAutoplay(true);
-    if (!config?.enableConversations && conversations.length)
+    if (!layoutController?.showNewConversationButton && conversations.length)
+      // Load the latest conversation from DB
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
     setTimeout(() => {
       setPreventAutoplay(false);
     }, 3000);
-  }, [config, conversations, setActiveConversation]);
+  }, [
+    config,
+    conversations,
+    layoutController?.showNewConversationButton,
+    setActiveConversation,
+  ]);
 
   const valueMessages = {
     sendPrompt,

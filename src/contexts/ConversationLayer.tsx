@@ -22,7 +22,6 @@ export const updateLocalUser = (userId: string) => {
 };
 
 const getConversationTitle = (conversation: Conversation) => {
-  console.log(conversation?.messages?.[0]?.input_prompt);
   return conversation?.messages?.[0]?.input_prompt;
 };
 
