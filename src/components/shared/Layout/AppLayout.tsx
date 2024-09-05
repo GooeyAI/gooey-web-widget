@@ -31,6 +31,24 @@ const generateParentContainerClass = (
   return "gooey-inline-container";
 };
 
+const ClickAwayListener = ({ onClick, children }: any) => {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        height: "100%",
+        width: "100%",
+        zIndex: 1,
+        background: "rgba(0,0,0,0.1)",
+        backdropFilter: "blur(0.2px)",
+      }}
+      className="pos-absolute top-0 cr-pointer"
+    >
+      {children}
+    </div>
+  );
+};
+
 const AppLayout = ({ children }: Props) => {
   const { config, layoutController } = useSystemContext();
   const { handleNewConversation }: any = useMessagesContext();
@@ -55,6 +73,9 @@ const AppLayout = ({ children }: Props) => {
     >
       <div className="d-flex h-100 pos-relative">
         <SideNavbar />
+        {layoutController?.isSidebarOpen && layoutController?.isMobile && (
+          <ClickAwayListener onClick={layoutController?.toggleSidebar} />
+        )}
         <i className="fa-solid fa-magnifying-glass"></i>
         <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
           <Header onEditClick={handleEditClick} />
