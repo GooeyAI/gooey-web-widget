@@ -242,7 +242,7 @@ const MessagesContextProvider = (props: any) => {
     currentConversation.current = {};
   };
 
-  const cancelApiCall = () => {
+  const cancelApiCall = useCallback(() => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     if (window?.GooeyEventSource) GooeyEventSource.close();
@@ -273,7 +273,7 @@ const MessagesContextProvider = (props: any) => {
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsReceiving(false);
     setIsSendingMessage(false);
-  };
+  }, [isReceiving, isSending, messages]);
 
   const handleFeedbackClick = (button_id: string, context_msg_id: string) => {
     createStreamApi(
@@ -305,6 +305,7 @@ const MessagesContextProvider = (props: any) => {
 
   const setActiveConversation = useCallback(
     async (conversation: Conversation) => {
+      if (isSending || isReceiving) cancelApiCall();
       if (
         !conversation ||
         !conversation.getMessages ||
@@ -320,7 +321,7 @@ const MessagesContextProvider = (props: any) => {
 
       return messages;
     },
-    []
+    [cancelApiCall, isReceiving, isSending]
   );
 
   useEffect(() => {
