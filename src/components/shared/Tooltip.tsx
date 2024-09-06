@@ -67,7 +67,6 @@ const GooeyTooltip = ({
   const [showModal, setShowModal] = useState(false);
   const timerRef = useRef<any>(null);
   const arrowStyles = getArrowStyles(direction);
-  if (disabled) return children;
   return (
     <GooeyPopper
       ModalContent={() => (
@@ -102,10 +101,12 @@ const GooeyTooltip = ({
         // prevent click/touch event from triggering the tooltip
         e.preventDefault();
         e.stopPropagation();
+        e.persist();
         if (timerRef.current) clearTimeout(timerRef.current);
         setShowModal(false);
       }}
       onMouseEnter={() => {
+        if (disabled) return;
         timerRef.current = setTimeout(() => {
           setShowModal(true);
           timerRef.current = null;
