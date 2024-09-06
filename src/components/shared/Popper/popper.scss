@@ -1,0 +1,18 @@
+.clipping-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal {
+  transition: all 0.3s;
+  position: fixed;
+  width: max-content;
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 99999;
+  font-weight: lighter;
+  line-height: normal;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  inset: 0px auto auto 0px;
+}

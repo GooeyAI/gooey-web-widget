@@ -9,6 +9,7 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import GooeyTooltip from "../Tooltip";
 
 const SideNavbar = () => {
   const {
@@ -146,46 +147,54 @@ const SideNavbar = () => {
             )}
 
           {/* Sidebar button */}
-          <IconButton
-            variant="text"
-            className="cr-pointer"
-            style={{ height: "38px" }}
-            onClick={layoutController?.toggleSidebar}
-          >
-            <IconSidebar size={20} />
-          </IconButton>
+          <GooeyTooltip text="Close sidebar" direction="right">
+            <IconButton
+              variant="text"
+              className="cr-pointer"
+              style={{ height: "38px" }}
+              onClick={layoutController?.toggleSidebar}
+            >
+              <IconSidebar size={20} />
+            </IconButton>
+          </GooeyTooltip>
         </div>
 
         <div className="pos-relative d-flex flex-col h-100 flex-1 overflow-y-auto">
           <div className="gp-8">
-            <Button
-              className="w-100 pos-relative text-muted"
-              onClick={handleNewConversation}
-              RightIconComponent={() => <IconPencilEdit size={18} className='text-muted' />}
-            >
-              <div className="d-flex align-center">
-                <div
-                  className="bot-avatar bg-primary gmr-12"
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "100%",
-                  }}
-                >
-                  <img
-                    src={branding?.photoUrl}
-                    alt="bot-avatar"
+            <GooeyTooltip text="New Chat" direction="right">
+              <Button
+                className="w-100 pos-relative text-muted"
+                onClick={handleNewConversation}
+                RightIconComponent={() => (
+                  <IconPencilEdit size={18} className="text-muted" />
+                )}
+              >
+                <div className="d-flex align-center">
+                  <div
+                    className="bot-avatar bg-primary gmr-12"
                     style={{
                       width: "24px",
                       height: "24px",
                       borderRadius: "100%",
-                      objectFit: "cover",
                     }}
-                  />
+                  >
+                    <img
+                      src={branding?.photoUrl}
+                      alt="bot-avatar"
+                      style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                  <p className="font_16_600 text-left text-almostBlack">
+                    {branding?.name}
+                  </p>
                 </div>
-                <p className="font_16_600 text-left text-almostBlack">{branding?.name}</p>
-              </div>
-            </Button>
+              </Button>
+            </GooeyTooltip>
           </div>
 
           <div className="gp-8 flex-1 h-100">
