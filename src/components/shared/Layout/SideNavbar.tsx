@@ -161,7 +161,9 @@ const SideNavbar = () => {
             <Button
               className="w-100 pos-relative text-muted"
               onClick={handleNewConversation}
-              RightIconComponent={() => <IconPencilEdit size={18} className='text-muted' />}
+              RightIconComponent={() => (
+                <IconPencilEdit size={18} className="text-muted" />
+              )}
             >
               <div className="d-flex align-center">
                 <div
@@ -183,48 +185,59 @@ const SideNavbar = () => {
                     }}
                   />
                 </div>
-                <p className="font_16_600 text-left text-almostBlack">{branding?.name}</p>
+                <p className="font_16_600 text-left text-almostBlack">
+                  {branding?.name}
+                </p>
               </div>
             </Button>
           </div>
 
-          <div className="gp-8 flex-1 h-100">
-            {conversationsList.map((group: any) => (
-              <div key={group.subheading} className="gmb-30">
-                <div
-                  className="top-0 gpt-8 gpb-8 bg-grey pos-sticky"
-                  style={{ zIndex: 1 }}
-                >
-                  <h5 className="gpl-8 text-muted">{group.subheading}</h5>
+          {/* Conversations list */}
+          {conversationsList.length === 0 ? (
+            <div className="h-100 gpb-30 d-flex align-center justify-center">
+              <p className="gmb-30 text-muted text-center font_14_400">
+                No conversations yet
+              </p>
+            </div>
+          ) : (
+            <div className="gp-8 flex-1 h-100">
+              {conversationsList.map((group: any) => (
+                <div key={group.subheading} className="gmb-30">
+                  <div
+                    className="top-0 gpt-8 gpb-8 bg-grey pos-sticky"
+                    style={{ zIndex: 1 }}
+                  >
+                    <h5 className="gpl-8 text-muted">{group.subheading}</h5>
+                  </div>
+                  <ol>
+                    {group.conversations
+                      .sort(
+                        (a: Conversation, b: Conversation) =>
+                          new Date(b.timestamp as string).getTime() -
+                          new Date(a.timestamp as string).getTime()
+                      )
+                      .map((conversation: Conversation) => {
+                        return (
+                          <li key={conversation.id}>
+                            <ConversationButton
+                              conversation={conversation}
+                              isActive={
+                                currentConversationId === conversation?.id
+                              }
+                              onClick={() => {
+                                setActiveConversation(conversation);
+                                if (layoutController?.isMobile)
+                                  layoutController?.toggleSidebar();
+                              }}
+                            />
+                          </li>
+                        );
+                      })}
+                  </ol>
                 </div>
-                <ol>
-                  {group.conversations
-                    .sort(
-                      (a: Conversation, b: Conversation) =>
-                        new Date(b.timestamp as string).getTime() -
-                        new Date(a.timestamp as string).getTime()
-                    )
-                    .map((conversation: Conversation) => {
-                      return (
-                        <li key={conversation.id}>
-                          <ConversationButton
-                            conversation={conversation}
-                            isActive={
-                              currentConversationId === conversation?.id
-                            }
-                            onClick={() => {
-                              setActiveConversation(conversation);
-                              if (layoutController?.isMobile)
-                                layoutController?.toggleSidebar();
-                            }}
-                          />
-                        </li>
-                      );
-                    })}
-                </ol>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </nav>

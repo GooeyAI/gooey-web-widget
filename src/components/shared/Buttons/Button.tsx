@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./buttons.scss?inline";
-import IconButton from "./IconButton";
 import clsx from "clsx";
 addInlineStyle(style);
 
