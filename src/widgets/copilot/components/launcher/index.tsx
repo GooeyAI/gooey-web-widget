@@ -3,6 +3,7 @@ import { useSystemContext } from "src/contexts/hooks";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./launcher.scss?inline";
+
 addInlineStyle(style);
 
 const Launcher = () => {
@@ -20,7 +21,7 @@ const Launcher = () => {
         onClick={layoutController?.toggleOpenClose}
         className={clsx(
           "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
-          config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 ",
+          config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 "
         )}
         style={{ borderRadius: "30px", padding: 0 }}
       >

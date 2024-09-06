@@ -17,7 +17,7 @@ const SideNavbar = () => {
     setActiveConversation,
     currentConversationId,
     handleNewConversation,
-    messages
+    messages,
   }: any = useMessagesContext();
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
@@ -112,7 +112,7 @@ const SideNavbar = () => {
         zIndex: 10,
       }}
       className={clsx(
-        "b-rt-1 b-top-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
+        "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
         layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
@@ -121,31 +121,43 @@ const SideNavbar = () => {
         style={{ width: "260px" }}
       >
         {/* Header */}
-        <div className="gp-8 b-btm-1 h-header d-flex">
+        <div className="gp-8 b-btm-1 h-header d-flex align-center">
           {/* Close / minimize button */}
           {layoutController?.showCloseButton && layoutController?.isMobile && (
-            <IconButton
-              variant="text"
-              className="gp-4 cr-pointer"
-              onClick={layoutController?.toggleOpenClose}
-            >
-              <IconClose size={24} />
-            </IconButton>
+            <GooeyTooltip text="Close" direction="bottom">
+              <IconButton
+                variant="text"
+                className="gp-4 cr-pointer"
+                onClick={layoutController?.toggleOpenClose}
+              >
+                <IconClose size={24} />
+              </IconButton>
+            </GooeyTooltip>
           )}
           {/* Focus mode button */}
           {layoutController?.showFocusModeButton &&
             layoutController?.isMobile && (
-              <IconButton
-                variant="text"
-                onClick={layoutController?.toggleFocusMode}
-                style={{ transform: "rotate(90deg)" }}
+              <GooeyTooltip
+                text={
+                  layoutController?.isFocusMode
+                    ? "Disable Focus"
+                    : "Enable Focus"
+                }
+                direction="bottom"
               >
-                {layoutController?.isFocusMode ? (
-                  <IconCollapse size={16} />
-                ) : (
-                  <IconExpand size={16} />
-                )}
-              </IconButton>
+                <IconButton
+                  variant="text"
+                  className="gp-8"
+                  onClick={layoutController?.toggleFocusMode}
+                  style={{ transform: "rotate(90deg)", height: "38px" }}
+                >
+                  {layoutController?.isFocusMode ? (
+                    <IconCollapse size={16} />
+                  ) : (
+                    <IconExpand size={16} />
+                  )}
+                </IconButton>
+              </GooeyTooltip>
             )}
 
           {/* Sidebar button */}
@@ -153,7 +165,6 @@ const SideNavbar = () => {
             <IconButton
               variant="text"
               className="cr-pointer"
-              style={{ height: "38px" }}
               onClick={layoutController?.toggleSidebar}
             >
               <IconSidebar size={20} />
@@ -163,7 +174,7 @@ const SideNavbar = () => {
 
         <div className="pos-relative d-flex flex-col h-100 flex-1 overflow-y-auto">
           <div className="gp-8">
-            <GooeyTooltip text="New Chat" direction="right">
+            <GooeyTooltip text="New Chat" direction="right" disabled={isEmpty}>
               <Button
                 className="w-100 pos-relative text-muted"
                 disabled={isEmpty}

@@ -20,37 +20,46 @@ const Header = ({ onEditClick }: HeaderProps) => {
   const isEmpty = !messages?.size;
   const botName = config?.branding?.name;
   return (
-    <div className="bg-white b-btm-1 b-top-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
-      <div className="d-flex">
+    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
+      <div className="d-flex align-center">
         {/* Close / minimize button */}
         {layoutController?.showCloseButton && (
-          <IconButton
-            variant="text"
-            className="gp-4 cr-pointer flex-1"
-            onClick={layoutController?.toggleOpenClose}
-          >
-            <IconClose size={24} />
-          </IconButton>
+          <GooeyTooltip text="Close" direction="bottom">
+            <IconButton
+              variant="text"
+              className="gp-4 cr-pointer flex-1"
+              onClick={layoutController?.toggleOpenClose}
+            >
+              <IconClose size={24} />
+            </IconButton>
+          </GooeyTooltip>
         )}
 
         {/* Focus mode button */}
         {layoutController?.showFocusModeButton && (
-          <IconButton
-            variant="text"
-            className="cr-pointer flex-1"
-            onClick={layoutController?.toggleFocusMode}
-            style={{ transform: "rotate(90deg)" }}
+          <GooeyTooltip
+            text={
+              layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
+            }
+            direction="bottom"
           >
-            {layoutController.isFocusMode ? (
-              <IconCollapse size={16} />
-            ) : (
-              <IconExpand size={16} />
-            )}
-          </IconButton>
+            <IconButton
+              variant="text"
+              className="cr-pointer"
+              onClick={layoutController?.toggleFocusMode}
+              style={{ transform: "rotate(90deg)" }}
+            >
+              {layoutController.isFocusMode ? (
+                <IconCollapse size={16} />
+              ) : (
+                <IconExpand size={16} />
+              )}
+            </IconButton>
+          </GooeyTooltip>
         )}
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
-          <GooeyTooltip text="Open sidebar" direction="right">
+          <GooeyTooltip text="Open sidebar" direction="bottom">
             <IconButton
               id="sidebar-toggle-icon-header"
               variant="text"
