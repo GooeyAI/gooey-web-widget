@@ -8,6 +8,7 @@ import { SystemContextType } from "src/contexts/SystemContext";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconSidebar from "src/assets/SvgIcons/IconSideBar";
+import GooeyTooltip from "src/components/shared/Tooltip";
 
 type HeaderProps = {
   onEditClick: () => void;
@@ -49,14 +50,16 @@ const Header = ({ onEditClick }: HeaderProps) => {
         )}
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
-          <IconButton
-            id="sidebar-toggle-icon-header"
-            variant="text"
-            className="cr-pointer"
-            onClick={layoutController?.toggleSidebar}
-          >
-            <IconSidebar size={20} />
-          </IconButton>
+          <GooeyTooltip text="Open sidebar" direction="right">
+            <IconButton
+              id="sidebar-toggle-icon-header"
+              variant="text"
+              className="cr-pointer"
+              onClick={layoutController?.toggleSidebar}
+            >
+              <IconSidebar size={20} />
+            </IconButton>
+          </GooeyTooltip>
         )}
       </div>
       <p
@@ -72,14 +75,16 @@ const Header = ({ onEditClick }: HeaderProps) => {
       </p>
       <div>
         {layoutController?.showNewConversationButton && (
-          <IconButton
-            disabled={isEmpty}
-            variant="text"
-            className={clsx("gp-8 cr-pointer flex-1")}
-            onClick={() => onEditClick()}
-          >
-            <IconPencilEdit size={24} />
-          </IconButton>
+          <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+            <IconButton
+              disabled={isEmpty}
+              variant="text"
+              className={clsx("gp-8 cr-pointer flex-1")}
+              onClick={() => onEditClick()}
+            >
+              <IconPencilEdit size={24} />
+            </IconButton>
+          </GooeyTooltip>
         )}
       </div>
     </div>
