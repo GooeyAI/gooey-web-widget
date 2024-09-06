@@ -10,21 +10,6 @@ import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const toggleSidebarStyles = (isSidebarOpen: boolean) => {
-  const sideBarElement: HTMLElement | null | undefined =
-    gooeyShadowRoot?.querySelector("#gooey-side-navbar");
-  if (!sideBarElement) return;
-  // set width to 0px if sidebar is closed
-  if (!isSidebarOpen) {
-    sideBarElement.style.width = "260px";
-    sideBarElement.style.transition = "width ease-in-out 0.2s";
-  } else {
-    sideBarElement.style.width = "0px";
-    sideBarElement.style.transition = "width ease-in-out 0.2s";
-  }
-};
-
 const SideNavbar = () => {
   const {
     conversations,
@@ -124,16 +109,13 @@ const SideNavbar = () => {
         zIndex: 10,
       }}
       className={clsx(
-        "b-rt-1 b-top-1 h-100 overflow-x-hidden top-0 left-0 bg-grey",
+        "b-rt-1 b-top-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
         layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
-      <div
-        className="pos-relative overflow-hidden"
-        style={{ width: "260px", height: "100%" }}
-      >
+      <div className="pos-relative d-flex flex-col h-100" style={{ width: "260px" }}>
         {/* Header */}
-        <div className="gp-8 b-btm-1 pos-sticky h-header d-flex">
+        <div className="gp-8 b-btm-1 h-header d-flex">
           {/* Close / minimize button */}
           {layoutController?.showCloseButton && layoutController?.isMobile && (
             <IconButton
@@ -171,8 +153,8 @@ const SideNavbar = () => {
           </IconButton>
         </div>
 
-        <div className="overflow-y-auto pos-relative h-100">
-          <div className="d-flex flex-col gp-8">
+        <div className="pos-relative d-flex flex-col h-100 flex-1 overflow-y-auto">
+          <div className="gp-8">
             <Button
               className="w-100 pos-relative"
               onClick={handleNewConversation}
@@ -203,10 +185,13 @@ const SideNavbar = () => {
             </Button>
           </div>
 
-          <div className="gp-8">
+          <div className="gp-8 flex-1 h-100">
             {conversationsList.map((group: any) => (
               <div key={group.subheading} className="gmb-30">
-                <div className="pos-sticky top-0 gpt-8 gpb-8 bg-grey">
+                <div
+                  className="top-0 gpt-8 gpb-8 bg-grey pos-sticky"
+                  style={{ zIndex: 1 }}
+                >
                   <h5 className="gpl-8 text-muted">{group.subheading}</h5>
                 </div>
                 <ol>

@@ -76,7 +76,6 @@ const AppLayout = ({ children }: Props) => {
         {layoutController?.isSidebarOpen && layoutController?.isMobile && (
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
-        <i className="fa-solid fa-magnifying-glass"></i>
         <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
           <Header onEditClick={handleEditClick} />
           <div

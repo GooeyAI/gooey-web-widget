@@ -1,7 +1,21 @@
 import { ReactNode, createContext, useEffect, useMemo, useState } from "react";
 import { CopilotConfigType } from "./types";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
-import { toggleSidebarStyles } from "src/components/shared/Layout/SideNavbar";
+
+// eslint-disable-next-line react-refresh/only-export-components
+const toggleSidebarStyles = (isSidebarOpen: boolean) => {
+  const sideBarElement: HTMLElement | null | undefined =
+    gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+  if (!sideBarElement) return;
+  // set width to 0px if sidebar is closed
+  if (!isSidebarOpen) {
+    sideBarElement.style.width = "260px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
+  } else {
+    sideBarElement.style.width = "0px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
+  }
+};
 
 interface LayoutController extends LayoutStateType {
   toggleOpenClose: () => void;
