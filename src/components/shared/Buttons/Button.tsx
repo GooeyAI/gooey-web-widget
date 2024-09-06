@@ -12,7 +12,7 @@ export interface ButtonProps
   children?: ReactNode;
   className?: string;
   variant?: "filled" | "contained" | "outlined" | "text" | "text-alt";
-  RightIconComponent?: React.FC<{ size: number }>;
+  RightIconComponent?: React.FC<any>;
   showIconOnHover?: boolean;
   hideOverflow?: boolean;
 }
@@ -49,9 +49,7 @@ const Button = ({
               showIconOnHover && "icon-hover"
             )}
           >
-            <IconButton className="text-muted gp-4" disabled>
-              <RightIconComponent size={18} />
-            </IconButton>
+            <RightIconComponent />
           </div>
         )}
         {hideOverflow && <div className="button-right-blur" />}

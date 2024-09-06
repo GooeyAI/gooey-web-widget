@@ -113,7 +113,10 @@ const SideNavbar = () => {
         layoutController?.isMobile ? "pos-absolute" : "pos-relative"
       )}
     >
-      <div className="pos-relative d-flex flex-col h-100" style={{ width: "260px" }}>
+      <div
+        className="pos-relative d-flex flex-col h-100"
+        style={{ width: "260px" }}
+      >
         {/* Header */}
         <div className="gp-8 b-btm-1 h-header d-flex">
           {/* Close / minimize button */}
@@ -156,9 +159,9 @@ const SideNavbar = () => {
         <div className="pos-relative d-flex flex-col h-100 flex-1 overflow-y-auto">
           <div className="gp-8">
             <Button
-              className="w-100 pos-relative"
+              className="w-100 pos-relative text-muted"
               onClick={handleNewConversation}
-              RightIconComponent={IconPencilEdit}
+              RightIconComponent={() => <IconPencilEdit size={18} className='text-muted' />}
             >
               <div className="d-flex align-center">
                 <div
@@ -180,7 +183,7 @@ const SideNavbar = () => {
                     }}
                   />
                 </div>
-                <p className="font_16_600 text-left">{branding?.name}</p>
+                <p className="font_16_600 text-left text-almostBlack">{branding?.name}</p>
               </div>
             </Button>
           </div>
