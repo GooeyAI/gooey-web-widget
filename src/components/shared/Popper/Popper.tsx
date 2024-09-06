@@ -92,7 +92,7 @@ const Modal = ({
   if (!ModalContent) return null;
   return (
     <div
-      className={(className += " modal")}
+      className={(className += " gooey-modal")}
       style={{
         ...style,
         ...modalCoordinates,
@@ -119,7 +119,11 @@ const GooeyPopper = (props: PopperProps) => {
 
   const [refContainer, setRefContainer] = useState<HTMLElement | null>(null);
   return (
-    <div className="clipping-container" ref={setRefContainer} {...restProps}>
+    <div
+      className="gooey-clipping-container"
+      ref={setRefContainer}
+      {...restProps}
+    >
       {children}
       {showModal &&
         createPortal(
