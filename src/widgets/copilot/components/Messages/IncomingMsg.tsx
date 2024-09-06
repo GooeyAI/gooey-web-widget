@@ -101,7 +101,7 @@ const IncomingMsg = memo(
           )}
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gml-36">
-              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack}></video>
+              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack} style={{ backgroundColor: '#000'}}></video>
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (
