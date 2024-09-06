@@ -16,6 +16,7 @@ const SideNavbar = () => {
     setActiveConversation,
     currentConversationId,
     handleNewConversation,
+    messages
   }: any = useMessagesContext();
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
@@ -98,6 +99,7 @@ const SideNavbar = () => {
   }, [conversations]);
 
   if (!layoutController?.showNewConversationButton) return null;
+  const isEmpty = !messages?.size;
   return (
     <nav
       id="gooey-side-navbar"
@@ -161,6 +163,7 @@ const SideNavbar = () => {
             <Button
               className="w-100 pos-relative text-muted"
               onClick={handleNewConversation}
+              disabled={isEmpty}
               RightIconComponent={() => (
                 <IconPencilEdit size={18} className="text-muted" />
               )}
