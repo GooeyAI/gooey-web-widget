@@ -59,7 +59,7 @@ const Header = ({ onEditClick }: HeaderProps) => {
         )}
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
-          <GooeyTooltip text="Open sidebar" direction="bottom">
+          <GooeyTooltip text="Open sidebar" direction="right">
             <IconButton
               id="sidebar-toggle-icon-header"
               variant="text"
