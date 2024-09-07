@@ -67,6 +67,25 @@ const GooeyTooltip = ({
   const [showModal, setShowModal] = useState(false);
   const timerRef = useRef<any>(null);
   const arrowStyles = getArrowStyles(direction);
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const eventHandlers = isTouchDevice
+  ? {
+      onTouchStart: () => null,
+      onTouchEnd: () => null,
+    }
+  : {
+      onMouseEnter: () => {
+        if (disabled) return;
+        timerRef.current = setTimeout(() => {
+          setShowModal(true);
+          timerRef.current = null;
+        }, 300);
+      },
+      onMouseLeave: () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setShowModal(false);
+      },
+    };
   return (
     <GooeyPopper
       ModalContent={() => (
@@ -105,17 +124,7 @@ const GooeyTooltip = ({
         if (timerRef.current) clearTimeout(timerRef.current);
         setShowModal(false);
       }}
-      onMouseEnter={() => {
-        if (disabled) return;
-        timerRef.current = setTimeout(() => {
-          setShowModal(true);
-          timerRef.current = null;
-        }, 300);
-      }}
-      onMouseLeave={() => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        setShowModal(false);
-      }}
+      {...eventHandlers}
       aria-label={text}
     >
       {children}
