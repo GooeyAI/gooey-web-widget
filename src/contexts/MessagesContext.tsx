@@ -72,6 +72,7 @@ const MessagesContextProvider = (props: any) => {
       ...payload,
       conversation_id: conversationId,
       citation_style: CITATION_STYLE,
+      user_id: currentUserId,
     });
     addResponse(newQuery);
   };
@@ -283,6 +284,7 @@ const MessagesContextProvider = (props: any) => {
           context_msg_id,
         },
         integration_id: config?.integration_id,
+        user_id: currentUserId,
       },
       apiSource.current
     );
