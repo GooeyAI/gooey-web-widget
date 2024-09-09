@@ -1,0 +1,56 @@
+.gooeyChat-widget-container {
+  width: 100%;
+  height: 100%;
+  transition-duration: 0.15s;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gooey-popup {
+  animation: popup 0.1s;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.gooey-inline {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.gooey-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+
+.gooey-focused-popup {
+  transform: translateY(0px);
+  // animation: popup 0.1s !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+@media (min-width: 640px) {
+  .gooey-popup {
+    width: 460px;
+    height: min(704px, 100% - 114px);
+    border-left: 1px solid #eee;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+
+  .gooey-focused-popup {
+    padding: 40px 10vw 0px 10vw;
+    transition: background-color 0.3s;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    z-index: 9999;
+  }
+}

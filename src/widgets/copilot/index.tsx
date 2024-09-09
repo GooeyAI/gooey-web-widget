@@ -3,14 +3,12 @@ import CopilotWidget from "./components/widget";
 import WithFabLauncher from "src/components/containers/withFabLauncher";
 
 export default function ChatWidget() {
-  const { config, open } = useSystemContext();
+  const { config, layoutController } = useSystemContext();
   switch (config?.mode) {
     case "popup":
       return (
-        <WithFabLauncher open={open || false}>
-          <div id='gooey-popup-container'>
-            <CopilotWidget />
-          </div>
+        <WithFabLauncher open={layoutController?.isOpen || false}>
+          <CopilotWidget />
         </WithFabLauncher>
       );
     case "inline":

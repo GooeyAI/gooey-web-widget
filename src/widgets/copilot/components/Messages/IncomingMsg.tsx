@@ -95,13 +95,13 @@ const IncomingMsg = memo(
             {parsedElements}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-16">
+            <div className="gmt-16 gml-36">
               <audio autoPlay={isAutoPlay} playsInline={true} controls src={audioTrack}></audio>
             </div>
           )}
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gml-36">
-              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack}></video>
+              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack} style={{ backgroundColor: '#000'}}></video>
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (

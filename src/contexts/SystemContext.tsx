@@ -1,31 +1,50 @@
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useEffect, useMemo, useState } from "react";
 import { CopilotConfigType } from "./types";
+import useDeviceWidth from "src/hooks/useDeviceWidth";
 
-export type SystemContextType = {
-  open: boolean;
-  mode?: string;
-  config?: CopilotConfigType;
-  isExpanded?: boolean;
-  toggleWidget?: () => void;
-  setTempStoreValue?: (key: string, value: any) => void;
-  getTempStoreValue?: (key: string) => any;
-  expandWidget?: () => void;
+// eslint-disable-next-line react-refresh/only-export-components
+const toggleSidebarStyles = (isSidebarOpen: boolean) => {
+  const sideBarElement: HTMLElement | null | undefined =
+    gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+  if (!sideBarElement) return;
+  // set width to 0px if sidebar is closed
+  if (!isSidebarOpen) {
+    sideBarElement.style.width = "260px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
+  } else {
+    sideBarElement.style.width = "0px";
+    sideBarElement.style.transition = "width ease-in-out 0.2s";
+  }
 };
 
-export const SystemContext = createContext<SystemContextType>({ open: false });
-
-interface SystemContextState {
-  open: boolean;
-  isInitialized: boolean;
-  config?: CopilotConfigType;
+interface LayoutController extends LayoutStateType {
+  toggleOpenClose: () => void;
+  toggleSidebar: () => void;
+  toggleFocusMode: () => void;
+  setState: (state: any) => void;
 }
 
-const getMode = (state: SystemContextState) => {
-  if (!state.isInitialized && !state.open) return "off";
-  if (state.isInitialized && !state.open) return "standby";
-  if (state.isInitialized && state.open) return "on";
-  return "unknown";
+type LayoutStateType = {
+  isOpen: boolean;
+  isFocusMode: boolean;
+  isInline: boolean;
+  isMobile: boolean;
+
+  isSidebarOpen: boolean;
+  showCloseButton: boolean;
+  showSidebarButton: boolean;
+  showFocusModeButton: boolean;
+  showNewConversationButton?: boolean;
 };
+
+export type SystemContextType = {
+  config?: CopilotConfigType;
+  setTempStoreValue?: (key: string, value: any) => void;
+  getTempStoreValue?: (key: string) => any;
+  layoutController?: LayoutController;
+};
+
+export const SystemContext = createContext<SystemContextType>({});
 
 const SystemContextProvider = ({
   config,
@@ -34,26 +53,29 @@ const SystemContextProvider = ({
   config: CopilotConfigType;
   children: ReactNode;
 }) => {
-  const [widgetState, setWidgetState] = useState<SystemContextState>({
-    open: false,
-    isInitialized: false,
+  const isInline = config?.mode === "inline" || config?.mode === "fullscreen";
+  const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
+  const [layoutState, setLayoutState] = useState<LayoutStateType>({
+    isOpen: isInline || false,
+    isFocusMode: false,
+    isInline,
+    isSidebarOpen: false,
+    showCloseButton: !isInline || false,
+    showSidebarButton: false,
+    showFocusModeButton: !isInline || false,
+    showNewConversationButton:
+      config?.enableConversations === undefined
+        ? true
+        : config?.enableConversations,
+    isMobile: false,
   });
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [tempStore, setTempStore] = useState<any>(new Map());
-
-  const handleWidgetToggle = () => {
-    if (!widgetState.open)
-      return setWidgetState((prev) => ({
-        ...prev,
-        open: true,
-        isInitialized: true,
-      }));
-    setIsExpanded(false);
-    return setWidgetState((prev) => ({ ...prev, open: false }));
-  };
+  const forceHideSidebar = !layoutState?.showNewConversationButton;
+  const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
+    layoutState?.isOpen,
+  ]);
 
   const setTempStoreValue = (key: string, value: any) => {
-    setTempStore((prev: any) => {
+    setTempStore((prev: Map<string, any>) => {
       const newStore = new Map(prev);
       newStore.set(key, value);
       return newStore;
@@ -63,25 +85,87 @@ const SystemContextProvider = ({
   const getTempStoreValue = (key: string) => {
     return tempStore.get(key);
   };
+  const LayoutController: LayoutController = useMemo(
+    () => ({
+      toggleOpenClose: () => {
+        // open/close in pop-up mode
+        setLayoutState((prev) => ({
+          ...prev,
+          isOpen: !prev.isOpen,
+          isFocusMode: false,
+          isSidebarOpen: false,
+          showSidebarButton: forceHideSidebar ? false : true,
+        }));
+      },
+      toggleSidebar: () => {
+        if (forceHideSidebar) return;
+        setLayoutState((prev: any) => {
+          toggleSidebarStyles(prev.isSidebarOpen);
+          return {
+            ...prev,
+            isSidebarOpen: !prev.isSidebarOpen,
+            showSidebarButton: prev.isSidebarOpen,
+          };
+        });
+      },
+      toggleFocusMode: () => {
+        setLayoutState((prev) => {
+          const sideBarElement: HTMLElement | null | undefined =
+            gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+          if (!sideBarElement)
+            return { ...prev, isFocusMode: !prev.isFocusMode };
+          if (!prev?.isFocusMode) {
+            // turning on focus mode open sidebar
+            if (!prev?.isSidebarOpen) sideBarElement.style.width = "260px";
+            return {
+              ...prev,
+              isFocusMode: true,
+              isSidebarOpen: forceHideSidebar ? false : true,
+              showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
+            };
+          } else {
+            // turning off focus mode
+            if (prev?.isSidebarOpen) sideBarElement.style.width = "0px";
+            return {
+              ...prev,
+              isFocusMode: false,
+              isSidebarOpen: forceHideSidebar ? false : false,
+              showSidebarButton: forceHideSidebar ? false : prev.isSidebarOpen,
+            };
+          }
+        });
+      },
+      setState: (state: any) => {
+        setLayoutState((prev) => ({
+          ...prev,
+          ...state,
+        }));
+      },
+      ...layoutState,
+    }),
+    [setLayoutState, forceHideSidebar, layoutState]
+  );
 
-  const expandWidget = () => {
-    const shadowRoot = document.querySelector((config?.target || "") as string)
-      ?.firstElementChild?.shadowRoot;
-    const ele = shadowRoot?.getElementById("gooey-popup-container");
-    if (!isExpanded) ele?.classList.add("gooey-expanded-popup");
-    else ele?.classList.remove("gooey-expanded-popup");
-    setIsExpanded((prev) => !prev);
-  };
+  useEffect(() => {
+    // set initial state based on isMobile and isInline
+    setLayoutState((prev) => ({
+      ...prev,
+      isSidebarOpen: !isMobile,
+      showSidebarButton: forceHideSidebar ? false : isMobile,
+      showFocusModeButton: isInline
+        ? false
+        : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
+      isMobile,
+      isMobileWindow,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
 
   const value: SystemContextType = {
-    open: widgetState.open,
-    mode: getMode(widgetState),
-    toggleWidget: handleWidgetToggle,
     config: config,
     setTempStoreValue,
     getTempStoreValue,
-    isExpanded,
-    expandWidget,
+    layoutController: LayoutController,
   };
 
   return (

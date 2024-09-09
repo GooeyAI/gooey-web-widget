@@ -116,7 +116,9 @@
 .b-top-1 {
   border-top: 1px solid $border-color;
 }
-
+.b-rt-1 {
+  border-right: 1px solid $border-color;
+}
 .b-none {
   border: none !important;
 }
@@ -125,8 +127,16 @@
   overflow: hidden;
 }
 
+.overflow-x-hidden {
+  overflow: hidden;
+}
+
 .overflow-scroll {
   overflow: scroll;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
 }
 
 .overflow-x-clip {
@@ -155,7 +165,15 @@
 .stroke-white {
   stroke: white !important;
 }
-
+.top-0 {
+  top: 0;
+}
+.left-0 {
+  left: 0;
+}
+.h-header {
+  height: 56px;
+}
 @media (max-width: 1100px) {
   .xs-text-center {
     text-align: center;

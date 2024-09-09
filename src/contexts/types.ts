@@ -5,6 +5,7 @@ export interface CopilotConfigType {
   enableAudioMessage: boolean;
   enablePhotoUpload: boolean;
   enableLipsyncVideo: boolean;
+  enableConversations: boolean;
   autoPlayResponses: boolean;
   showSources: boolean;
   expandedSources: boolean;

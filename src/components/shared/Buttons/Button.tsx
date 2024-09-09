@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./buttons.scss?inline";
+import clsx from "clsx";
 addInlineStyle(style);
 
 export interface ButtonProps
@@ -10,6 +11,9 @@ export interface ButtonProps
   children?: ReactNode;
   className?: string;
   variant?: "filled" | "contained" | "outlined" | "text" | "text-alt";
+  RightIconComponent?: React.FC<any>;
+  showIconOnHover?: boolean;
+  hideOverflow?: boolean;
 }
 
 const Button = ({
@@ -17,6 +21,9 @@ const Button = ({
   variant = "text",
   className = "",
   onClick,
+  RightIconComponent,
+  showIconOnHover,
+  hideOverflow,
   ...rest
 }: ButtonProps) => {
   const variantClasses = `button-${variant?.toLowerCase()}`;
@@ -27,7 +34,25 @@ const Button = ({
       onMouseDown={onClick}
       className={variantClasses + " " + className}
     >
-      {rest.children}
+      <div
+        className={clsx(
+          "pos-relative w-100 h-100",
+          hideOverflow && "btn-hide-overflow"
+        )}
+      >
+        {rest.children}
+        {RightIconComponent && (
+          <div
+            className={clsx(
+              "btn-icon right-icon",
+              showIconOnHover && "icon-hover"
+            )}
+          >
+            <RightIconComponent />
+          </div>
+        )}
+        {hideOverflow && <div className="button-right-blur" />}
+      </div>
     </button>
   );
 };

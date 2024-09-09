@@ -13,14 +13,38 @@ button {
   border-radius: 8px;
   padding: 8px;
   color: $almost-black;
+  width: fit-content;
 }
+
 button:disabled {
   color: $muted !important;
   fill: $light;
   cursor: unset;
 }
 
-// Variant - FILED
+button .btn-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  z-index: 2;
+}
+
+button .icon-hover {
+  opacity: 0;
+}
+
+button .btn-hide-overflow p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button:hover .icon-hover {
+  opacity: 1;
+}
+
+// Variant - FILLED
 .button-filled {
   background-color: #eee;
 }
@@ -64,7 +88,7 @@ button:disabled {
 }
 
 .button-text-alt:hover {
-  border: 1px solid transparent;
+  background-color: $light;
 }
 
 .collapsed-area {

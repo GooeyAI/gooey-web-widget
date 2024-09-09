@@ -1,21 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
-const useDeviceWidth = () => {
-  const [width, setWidth] = useState<number>(window.innerWidth);
+const deviceWidths: Record<string, number> = {
+  mobile: 640,
+};
+const checkMediaQuery = (width: number, windowWidth: number, query: string) => {
+  return [width <= deviceWidths[query], windowWidth <= deviceWidths[query]];
+};
+
+const useDeviceWidth = (
+  query: "mobile" = "mobile",
+  deps: any[] = []
+): boolean[] => {
+  const [isWidgetMatches, setIsWidgetMatches] = useState(false);
+  const [isWindowMatches, setIsWindowMatches] = useState(false);
+  const depTrigger = deps?.some((dep) => !dep);
 
   useEffect(() => {
-    const handleResize = () => {
-      setWidth(window.innerWidth);
-    };
+    const rootDiv = gooeyShadowRoot?.querySelector("#gooeyChat-container");
+    if (!rootDiv) return;
 
-    window.addEventListener('resize', handleResize);
+    // set initial value
+    const [widgetMatches, windowMatches] = checkMediaQuery(
+      rootDiv.clientWidth,
+      window.innerWidth,
+      query
+    );
+    setIsWidgetMatches(widgetMatches);
+    setIsWindowMatches(windowMatches);
+
+    const resizeObserver = new ResizeObserver(() => {
+      // set initial value
+      const [widgetMatches, windowMatches] = checkMediaQuery(
+        rootDiv.clientWidth,
+        window.innerWidth,
+        query
+      );
+      setIsWidgetMatches(widgetMatches);
+      setIsWindowMatches(windowMatches);
+    });
+    resizeObserver.observe(rootDiv);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
     };
-  }, []);
+  }, [query, depTrigger]);
 
-  return width;
+  return [isWidgetMatches, isWindowMatches];
 };
 
 export default useDeviceWidth;

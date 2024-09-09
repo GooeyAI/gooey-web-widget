@@ -5,6 +5,10 @@ interface CopilotEmbedConfig extends CopilotConfigType {
   target: string;
 }
 
+declare global {
+  var gooeyShadowRoot: ShadowRoot | null;
+}
+
 class GooeyEmbedFactory {
   defaultConfig = {};
   _mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
@@ -14,24 +18,28 @@ class GooeyEmbedFactory {
     const targetElem = document.querySelector(config.target);
     if (!targetElem) {
       throw new Error(
-        `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`,
+        `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`
       );
     }
     if (!config.integration_id) {
       throw new Error(
-        `Integration ID is required. Please provide an "integration_id" in the config object.`,
+        `Integration ID is required. Please provide an "integration_id" in the config object.`
       );
     }
     const innerDiv = document.createElement("div");
     innerDiv.style.display = "contents";
-    if(targetElem.children.length > 0) targetElem.removeChild(targetElem.children[0]);
+    if (targetElem.children.length > 0)
+      targetElem.removeChild(targetElem.children[0]);
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config);
     this._mounted.push({ innerDiv, root });
+
+    // Global reference to the inner document
+    globalThis.gooeyShadowRoot = innerDiv?.shadowRoot;
   }
 
   unmount() {
-    for (const  { innerDiv, root } of this._mounted) {
+    for (const { innerDiv, root } of this._mounted) {
       root.unmount();
       innerDiv.remove();
     }

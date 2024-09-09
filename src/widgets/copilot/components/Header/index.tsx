@@ -5,54 +5,70 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 import clsx from "clsx";
 import { SystemContextType } from "src/contexts/SystemContext";
 
-import { addInlineStyle } from "src/addStyles";
-import style from "./header.scss?inline";
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
-import useDeviceWidth from "src/hooks/useDeviceWidth";
-import { MOBILE_WIDTH } from "src/utils/constants";
-addInlineStyle(style);
+import IconSidebar from "src/assets/SvgIcons/IconSideBar";
+import GooeyTooltip from "src/components/shared/Tooltip";
 
 type HeaderProps = {
   onEditClick: () => void;
-  hideClose?: boolean;
 };
 
-const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
-  const {
-    toggleWidget = () => null,
-    config,
-    expandWidget = () => null,
-    isExpanded,
-  }: SystemContextType = useSystemContext();
-  const width = useDeviceWidth();
+const Header = ({ onEditClick }: HeaderProps) => {
   const { messages }: any = useMessagesContext();
+  const { layoutController, config }: SystemContextType = useSystemContext();
   const isEmpty = !messages?.size;
   const botName = config?.branding?.name;
-  const isMobile = width < MOBILE_WIDTH;
   return (
-    <div className="gp-8 bg-white gooeyChat-widget-headerContainer d-flex justify-between align-center pos-relative">
-      <div className="d-flex">
+    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
+      <div className="d-flex align-center">
         {/* Close / minimize button */}
-        {!hideClose && (
-          <IconButton
-            variant="text"
-            className="gp-4 cr-pointer flex-1"
-            onClick={() => toggleWidget()}
-          >
-            <IconClose size={24} />
-          </IconButton>
+        {layoutController?.showCloseButton && (
+          <GooeyTooltip text="Close" direction="bottom">
+            <IconButton
+              variant="text"
+              className="gp-4 cr-pointer flex-1"
+              onClick={layoutController?.toggleOpenClose}
+            >
+              <IconClose size={24} />
+            </IconButton>
+          </GooeyTooltip>
         )}
-        {/* Expand button */}
-        {config?.mode === "popup" && !isMobile && (
-          <IconButton
-            variant="text"
-            className="cr-pointer flex-1 gmr-8"
-            onClick={() => expandWidget()}
-            style={{ transform: "rotate(90deg)" }}
+
+        {/* Focus mode button */}
+        {layoutController?.showFocusModeButton && (
+          <GooeyTooltip
+            text={
+              layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
+            }
+            direction="bottom"
           >
-            {isExpanded ? <IconCollapse size={16} /> : <IconExpand size={16} />}
-          </IconButton>
+            <IconButton
+              variant="text"
+              className="cr-pointer"
+              onClick={layoutController?.toggleFocusMode}
+              style={{ transform: "rotate(90deg)" }}
+            >
+              {layoutController.isFocusMode ? (
+                <IconCollapse size={16} />
+              ) : (
+                <IconExpand size={16} />
+              )}
+            </IconButton>
+          </GooeyTooltip>
+        )}
+        {/* Sidebar button */}
+        {layoutController?.showSidebarButton && (
+          <GooeyTooltip text="Open sidebar" direction="right">
+            <IconButton
+              id="sidebar-toggle-icon-header"
+              variant="text"
+              className="cr-pointer"
+              onClick={layoutController?.toggleSidebar}
+            >
+              <IconSidebar size={20} />
+            </IconButton>
+          </GooeyTooltip>
         )}
       </div>
       <p
@@ -67,14 +83,18 @@ const Header = ({ onEditClick, hideClose = false }: HeaderProps) => {
         {botName}
       </p>
       <div>
-        <IconButton
-          disabled={isEmpty}
-          variant="text"
-          className={clsx("gp-4 cr-pointer flex-1")}
-          onClick={() => onEditClick()}
-        >
-          <IconPencilEdit size={24} />
-        </IconButton>
+        {layoutController?.showNewConversationButton && (
+          <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+            <IconButton
+              disabled={isEmpty}
+              variant="text"
+              className={clsx("gp-8 cr-pointer flex-1")}
+              onClick={() => onEditClick()}
+            >
+              <IconPencilEdit size={24} />
+            </IconButton>
+          </GooeyTooltip>
+        )}
       </div>
     </div>
   );

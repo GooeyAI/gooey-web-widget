@@ -72,7 +72,7 @@ const PlaceholderMessage = () => {
             key={que}
             variant="outlined"
             onClick={() => initializeQuery({ input_prompt: que })}
-            className={clsx("text-left font_12_500")}
+            className={clsx("text-left font_12_500 w-100")}
           >
             {que}
           </Button>
