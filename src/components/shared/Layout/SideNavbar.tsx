@@ -179,6 +179,7 @@ const SideNavbar = () => {
                 className="w-100 pos-relative text-muted"
                 disabled={isEmpty}
                 onClick={handleNewConversation}
+                hideOverflow
                 RightIconComponent={() => (
                   <IconPencilEdit size={18} className="text-muted" />
                 )}
@@ -203,7 +204,15 @@ const SideNavbar = () => {
                       }}
                     />
                   </div>
-                  <p className="font_16_600 text-left text-almostBlack">
+                  <p
+                    className="font_16_600 text-left text-almostBlack"
+                    style={{
+                      maxWidth: "70%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {branding?.name}
                   </p>
                 </div>
