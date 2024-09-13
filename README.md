@@ -39,6 +39,8 @@ const config = {
   mode: "popup" | "inline" | "fullscreen",
   enableAudioMessage: true,
   showSources: true,
+  enablePhotoUpload: true,
+  enableConversations: true,
   branding: {
     name: "Farmer.CHAT",
     byLine: "By Digital Green",
@@ -88,6 +90,18 @@ Determines how the Gooey widget is displayed on your site:
 ##### `enableAudioMessage: boolean`
 
 A boolean to enable or disable recording and sending audio messages to the bot.
+
+##### `enableConversations: boolean`
+
+A boolean to enable or disable the user's conversation history.
+
+- When enabled a "New Chat" button will be shown in top-right corner and in a left drawer, which will also list all the previous conversations.
+
+- When disabled, a single conversation is maintained in the database for every session and all the messages will be pre-loaded in the state
+
+##### `enablePhotoUpload: boolean;`
+
+A boolean to enable or disable the photo upload button.
 
 #####  `showSources`
 
