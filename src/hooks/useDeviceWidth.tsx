@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const deviceWidths: Record<string, number> = {
-  mobile: 640,
+  mobile: 768,
 };
 const checkMediaQuery = (width: number, windowWidth: number, query: string) => {
   return [width <= deviceWidths[query], windowWidth <= deviceWidths[query]];
