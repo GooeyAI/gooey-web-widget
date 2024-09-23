@@ -55,8 +55,8 @@ export const findSourceIcon = (
       return () => <IconYoutube />;
     case "application/pdf":
       return () => <IconPDF style={{ fill: "#F40F02" }} size={12} />;
-    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-      "application/vnd.oasis.opendocument.spreadsheet":
+    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+    case "application/vnd.oasis.opendocument.spreadsheet":
       return () => <IconSheets />;
     case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
       return () => <IconGoogleDocs />;
