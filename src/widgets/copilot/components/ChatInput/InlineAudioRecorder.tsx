@@ -4,6 +4,7 @@ import CircleUP from "src/assets/SvgIcons/CircleUP";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import SpinLoader from "src/components/shared/SpinLoader";
 
 interface InlineAudioRecorderProps {
   onCancel: () => void;
@@ -21,6 +22,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const [send, setSend] = useState<boolean>(false);
   const [chunks, setChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     // timer logic
@@ -42,6 +44,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
     mediaRecorder.ondataavailable = function (e) {
       setChunks((prev) => [...prev, e.data]);
     };
+    setLoading(false);
     setIsRunning(true);
   };
 
@@ -56,6 +59,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   };
 
   useEffect(() => {
+    setLoading(true);
     // try to support various browsers
     navigator.mediaDevices.getUserMedia =
       navigator?.mediaDevices?.getUserMedia || // @ts-expect-error
@@ -96,6 +100,13 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   // Seconds calculation
   const seconds = Math.floor((time % 6000) / 100);
 
+  if (isLoading) {
+    return (
+      <div className="gpl-8 gpr-8 d-flex align-center justify-center gpb-25 w-100">
+        <SpinLoader size={44} />
+      </div>
+    );
+  }
   return (
     <div className="gpl-8 gpr-8 d-flex align-center gpb-25">
       <IconButton
