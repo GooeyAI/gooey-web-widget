@@ -1,9 +1,7 @@
-import React from "react";
-
-const SpinLoader: React.FC = () => {
+const SpinLoader = ({ size = 50 }: { size?: number }) => {
   const spinnerStyle = {
-    width: "50px",
-    height: "50px",
+    width: size + "px",
+    height: size + "px",
     border: "2px solid #ccc",
     borderTopColor: "transparent",
     borderRadius: "50%",
