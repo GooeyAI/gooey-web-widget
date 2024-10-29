@@ -10,10 +10,10 @@ import Button from "src/components/shared/Buttons/Button";
 import { memo } from "react";
 addInlineStyle(style);
 
-export const BotMessageLayout = () => {
+export const BotMessageLayout = (props: Record<string, any>) => {
   const branding = useSystemContext().config?.branding;
   return (
-    <div className="d-flex align-center">
+    <div className="d-flex align-start">
       {branding?.photoUrl && (
         <div
           className="bot-avatar bg-primary gmr-12"
@@ -31,7 +31,7 @@ export const BotMessageLayout = () => {
           />
         </div>
       )}
-      <p className="font_16_600">{branding?.name}</p>
+      <div className="gmt-2">{props.children}</div>
     </div>
   );
 };
@@ -54,7 +54,7 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
             >
               {getFeedbackButtonIcon(button.id, button.isPressed)}
             </Button>
-          )
+          ),
       )}
     </div>
   );
@@ -77,31 +77,43 @@ const IncomingMsg = memo(
     const parsedElements = formatTextResponse(
       props.data,
       props?.linkColor,
-      props?.showSources
+      props?.showSources,
     );
 
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12">
         <div className="gpl-16">
-          <BotMessageLayout />
-          <div
-            className={clsx(
-              "gml-36 gmt-4 font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
-              isStreaming && "response-streaming"
-            )}
-            id={props?.id}
-          >
-            {parsedElements}
-          </div>
+          <BotMessageLayout>
+            <div
+              className={clsx(
+                "font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
+                isStreaming && "response-streaming",
+              )}
+              id={props?.id}
+            >
+              {parsedElements}
+            </div>
+          </BotMessageLayout>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-16 gml-36">
-              <audio autoPlay={isAutoPlay} playsInline={true} controls src={audioTrack}></audio>
+              <audio
+                autoPlay={isAutoPlay}
+                playsInline={true}
+                controls
+                src={audioTrack}
+              ></audio>
             </div>
           )}
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gml-36">
-              <video autoPlay={isAutoPlay} playsInline={true} controls src={videoTrack} style={{ backgroundColor: '#000'}}></video>
+              <video
+                autoPlay={isAutoPlay}
+                playsInline={true}
+                controls
+                src={videoTrack}
+                style={{ backgroundColor: "#000" }}
+              ></video>
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (
@@ -113,7 +125,7 @@ const IncomingMsg = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default IncomingMsg;

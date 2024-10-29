@@ -37,7 +37,7 @@ const Button = ({
       <div
         className={clsx(
           "pos-relative w-100 h-100",
-          hideOverflow && "btn-hide-overflow"
+          hideOverflow && "btn-hide-overflow",
         )}
       >
         {rest.children}
@@ -45,7 +45,8 @@ const Button = ({
           <div
             className={clsx(
               "btn-icon right-icon",
-              showIconOnHover && "icon-hover"
+              "flex items-center justify-center",
+              showIconOnHover && "icon-hover",
             )}
           >
             <RightIconComponent />

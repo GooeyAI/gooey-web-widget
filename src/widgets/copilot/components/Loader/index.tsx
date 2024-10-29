@@ -17,8 +17,9 @@ const ResponseLoader = (props: any) => {
   if (!props.show) return null;
   return (
     <div ref={LoaderRef} className="gpl-16">
-      <BotMessageLayout />
-      <CircleBeat className="anim-blink gml-36 gmt-4" size={12} />
+      <BotMessageLayout>
+        <CircleBeat className="anim-blink gml-4" size={12} />
+      </BotMessageLayout>
     </div>
   );
 };

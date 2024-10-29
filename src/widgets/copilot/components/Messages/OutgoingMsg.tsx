@@ -9,10 +9,6 @@ const OutgoingMsg = memo((props: any) => {
   const { input_prompt = "", input_audio = "", input_images = [] } = props.data;
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
-      <div className="d-flex align-center gmb-8">
-        <IconUserCircle size={24} />
-        <p className="font_16_600 gml-12">You</p>
-      </div>
       {input_images.length > 0 &&
         input_images.map((url: string) => (
           <a href={url} target="_blank">
@@ -21,7 +17,7 @@ const OutgoingMsg = memo((props: any) => {
               alt={url}
               className={clsx(
                 "outgoingMsg-image b-1 br-large",
-                input_prompt && "gmb-4"
+                input_prompt && "gmb-4",
               )}
             />
           </a>

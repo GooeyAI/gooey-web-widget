@@ -176,13 +176,11 @@ const SideNavbar = () => {
           <div className="gp-8">
             <GooeyTooltip text="New Chat" direction="right" disabled={isEmpty}>
               <Button
-                className="w-100 pos-relative text-muted"
+                className="w-100 pos-relative text-dark"
                 disabled={isEmpty}
                 onClick={handleNewConversation}
                 hideOverflow
-                RightIconComponent={() => (
-                  <IconPencilEdit size={18} className="text-muted" />
-                )}
+                RightIconComponent={() => <IconPencilEdit size={18} />}
               >
                 <div className="d-flex align-center">
                   <div
