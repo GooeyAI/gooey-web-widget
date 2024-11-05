@@ -18,8 +18,18 @@ const FullSourcePreview = (props: any) => {
   return (
     <>
       <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
-        <div className="d-flex align-center">
-          <p className="font_16_500">{data?.title}</p>
+        <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
+          <p
+            className="font_16_500 m-0 flex-1"
+            style={{
+              maxWidth: "85%",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {data?.title}
+          </p>
           <IconButton
             onClick={() => window.open(data?.url, "_ablank")}
             variant="text-alt"
