@@ -5,6 +5,7 @@ import {
   extractMainDomain,
   fetchUrlMeta,
   findSourceIcon,
+  getEmbedUrl,
   truncateMiddle,
 } from "./helpers";
 import { useSystemContext } from "src/contexts/hooks";
@@ -15,6 +16,7 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 const FullSourcePreview = (props: any) => {
   const { data, layoutController } = props;
   if (!data || !data?.url) return null;
+  const embedUrl = getEmbedUrl(data.url);
   return (
     <>
       <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
@@ -47,7 +49,7 @@ const FullSourcePreview = (props: any) => {
         </IconButton>
       </div>
       <iframe
-        src={data?.url}
+        src={embedUrl}
         style={{ height: "100%", width: "100%", border: 0 }}
       />
     </>
@@ -103,11 +105,8 @@ const SourcesCard = (props: { data: Data; index: number }) => {
     ));
   }, [data, layoutController]);
 
-  const isHtml =
-    (metaData?.content_type?.includes("html") &&
-      !metaData?.url?.includes("docs.google")) ||
-    metaData?.content_type?.includes("csv");
-  const onClick = isHtml ? openInWindow : openInSidebar;
+  const isCsv = metaData?.content_type?.includes("csv");
+  const onClick = isCsv ? openInWindow : openInSidebar;
 
   if (!data) return null;
   return (
