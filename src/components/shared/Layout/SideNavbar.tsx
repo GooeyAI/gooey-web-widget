@@ -113,7 +113,7 @@ const SideNavbar = () => {
       }}
       className={clsx(
         "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
-        layoutController?.isMobile ? "pos-absolute" : "pos-relative"
+        layoutController?.isMobile ? "pos-absolute" : "pos-relative",
       )}
     >
       <div
@@ -240,7 +240,7 @@ const SideNavbar = () => {
                       .sort(
                         (a: Conversation, b: Conversation) =>
                           new Date(b.timestamp as string).getTime() -
-                          new Date(a.timestamp as string).getTime()
+                          new Date(a.timestamp as string).getTime(),
                       )
                       .map((conversation: Conversation) => {
                         return (
@@ -254,6 +254,8 @@ const SideNavbar = () => {
                                 setActiveConversation(conversation);
                                 if (layoutController?.isMobile)
                                   layoutController?.toggleSidebar();
+                                if (layoutController?.isSecondaryDrawerOpen)
+                                  layoutController?.toggleSecondaryDrawer(null);
                               }}
                             />
                           </li>

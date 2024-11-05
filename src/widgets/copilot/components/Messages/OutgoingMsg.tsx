@@ -1,7 +1,6 @@
 import { addInlineStyle } from "src/addStyles";
 import style from "./outgoing.scss?inline";
 import { memo } from "react";
-import IconUserCircle from "src/assets/SvgIcons/IconUserCircle";
 import clsx from "clsx";
 addInlineStyle(style);
 

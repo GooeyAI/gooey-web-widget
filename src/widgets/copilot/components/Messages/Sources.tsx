@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   extractFileDetails,
   extractMainDomain,
@@ -8,48 +8,103 @@ import {
   truncateMiddle,
 } from "./helpers";
 import { useSystemContext } from "src/contexts/hooks";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
+import IconClose from "src/assets/SvgIcons/IconClose";
 
-const SourcesCard = (props: any) => {
-  const { data, index, onClick } = props;
-  const { getTempStoreValue, setTempStoreValue }: any = useSystemContext();
+const FullSourcePreview = (props: any) => {
+  const { data, layoutController } = props;
+  if (!data || !data?.url) return null;
+  return (
+    <>
+      <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
+        <div className="d-flex align-center">
+          <p className="font_16_500">{data?.title}</p>
+          <IconButton
+            onClick={() => window.open(data?.url, "_ablank")}
+            variant="text-alt"
+            className="gml-4"
+          >
+            <IconExternalLink size={14} />
+          </IconButton>
+        </div>
+        <IconButton
+          onClick={() => layoutController?.toggleSecondaryDrawer(null)}
+          variant="text-alt"
+          className="gp-6"
+        >
+          <IconClose size={20} />
+        </IconButton>
+      </div>
+      <iframe
+        src={data?.url}
+        style={{ height: "100%", width: "100%", border: 0 }}
+      />
+    </>
+  );
+};
+
+interface Data {
+  url: string;
+  title: string;
+  refNumber?: string;
+}
+
+const SourcesCard = (props: { data: Data; index: number }) => {
+  const { data } = props;
+  const { getTempStoreValue, setTempStoreValue, layoutController } =
+    useSystemContext();
   const [metaData, setMetaData] = useState<any>(
-    getTempStoreValue(data.url) || null
+    getTempStoreValue?.(data.url) || null,
   );
   const { mainString } = extractFileDetails(data?.title);
   const [title, pageNum] = (mainString || "").split(",");
 
   useEffect(() => {
-    if (!data || metaData || getTempStoreValue[data.url]) return;
+    if (!data || metaData || getTempStoreValue?.(data.url)) return;
     try {
       fetchUrlMeta(data.url).then((meta) => {
         if (Object.keys(meta).length) {
           setMetaData(meta);
-          setTempStoreValue(data.url, meta);
+          setTempStoreValue?.(data.url, meta);
         }
       });
     } catch (e) {
       console.error(e);
     }
-  }, [data, getTempStoreValue, metaData, setTempStoreValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const redirectedUrl =
     metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
   const [domainName]: any = extractMainDomain(redirectedUrl || data?.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
-    metaData?.redirect_urls[0] || data?.url
+    metaData?.redirect_urls[0] || data?.url,
   );
   const domainNameText = domainName.includes("googleapis")
     ? ""
     : domainName + (data?.refNumber || pageNum ? "⋅" : "");
+
+  const openInWindow = () => window.open(data?.url, "_blank");
+  const openInSidebar = useCallback(() => {
+    layoutController?.toggleSecondaryDrawer?.(() => (
+      <FullSourcePreview data={data} layoutController={layoutController} />
+    ));
+  }, [data, layoutController]);
+
+  const isHtml =
+    (metaData?.content_type?.includes("html") &&
+      !metaData?.url?.includes("docs.google")) ||
+    metaData?.content_type?.includes("csv");
+  const onClick = isHtml ? openInWindow : openInSidebar;
+
   if (!data) return null;
   return (
     <button
-      onClick={onClick}
+      onClick={onClick.bind(null)}
       className={clsx(
         "pos-relative sources-card gp-0 gm-0 text-left overflow-hidden",
-        // index === 0 && "gml-48",
-        index !== data.length - 1 && "gmr-12"
       )}
       style={{ height: "64px" }}
     >
@@ -83,7 +138,7 @@ const SourcesCard = (props: any) => {
         <div
           className={clsx(
             "d-flex align-center font_10_600",
-            metaData?.image ? "text-white" : "text-muted"
+            metaData?.image ? "text-white" : "text-muted",
           )}
         >
           {ExtensionIcon || !metaData?.logo ? (
@@ -103,7 +158,7 @@ const SourcesCard = (props: any) => {
           <p
             className={clsx(
               "font_10_500 gml-4",
-              metaData?.image ? "text-white" : "text-muted"
+              metaData?.image ? "text-white" : "text-muted",
             )}
             style={{ margin: 0 }}
           >
@@ -120,21 +175,15 @@ const SourcesCard = (props: any) => {
 };
 
 const Sources = ({ data }: any) => {
-  const openInWindow = (url: string) => window.open(url, "_blank");
   if (!data || !data.length) return null;
   return (
     <div className="gmb-4 text-reveal-container">
-      {/* <div className="d-flex align-center">
-        <IconListTimeline size={20} />
-        <p className="font_16_600">Sources</p>
-      </div> */}
       <div className="gmt-8 sources-listContainer">
         {data.map((source: any, index: number) => (
           <SourcesCard
             key={source?.title + index}
             data={source}
             index={index}
-            onClick={openInWindow.bind(null, source?.url)}
           />
         ))}
       </div>

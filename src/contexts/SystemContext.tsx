@@ -3,17 +3,33 @@ import { CopilotConfigType } from "./types";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
 
 // eslint-disable-next-line react-refresh/only-export-components
-const toggleSidebarStyles = (isSidebarOpen: boolean) => {
-  const sideBarElement: HTMLElement | null | undefined =
-    gooeyShadowRoot?.querySelector("#gooey-side-navbar");
-  if (!sideBarElement) return;
-  // set width to 0px if sidebar is closed
-  if (!isSidebarOpen) {
-    sideBarElement.style.width = "260px";
-    sideBarElement.style.transition = "width ease-in-out 0.2s";
+const toggleSidebarStyles = (
+  isSidebarOpen: boolean,
+  sidebarName: "left" | "right" = "left",
+  isMobile: boolean = false,
+) => {
+  if (sidebarName === "right") {
+    const sideBarElement: HTMLElement | null | undefined =
+      gooeyShadowRoot?.querySelector("#gooey-right-bar");
+    if (!sideBarElement) return;
+    // set width to 0px if sidebar is closed
+    if (!isSidebarOpen) {
+      sideBarElement.style.width = isMobile ? "100%" : "65vw";
+    } else {
+      sideBarElement.style.width = "0px";
+    }
   } else {
-    sideBarElement.style.width = "0px";
-    sideBarElement.style.transition = "width ease-in-out 0.2s";
+    const sideBarElement: HTMLElement | null | undefined =
+      gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+    if (!sideBarElement) return;
+    // set width to 0px if sidebar is closed
+    if (!isSidebarOpen) {
+      sideBarElement.style.width = "260px";
+      sideBarElement.style.transition = "width ease-in-out 0.2s";
+    } else {
+      sideBarElement.style.width = "0px";
+      sideBarElement.style.transition = "width ease-in-out 0.2s";
+    }
   }
 };
 
@@ -21,6 +37,7 @@ interface LayoutController extends LayoutStateType {
   toggleOpenClose: () => void;
   toggleSidebar: () => void;
   toggleFocusMode: () => void;
+  toggleSecondaryDrawer: (data: Record<string, any> | null) => void;
   setState: (state: any) => void;
 }
 
@@ -31,6 +48,8 @@ type LayoutStateType = {
   isMobile: boolean;
 
   isSidebarOpen: boolean;
+  isSecondaryDrawerOpen: boolean;
+  secondaryDrawerContent: () => ReactNode | null;
   showCloseButton: boolean;
   showSidebarButton: boolean;
   showFocusModeButton: boolean;
@@ -68,6 +87,8 @@ const SystemContextProvider = ({
         ? true
         : config?.enableConversations,
     isMobile: false,
+    isSecondaryDrawerOpen: false,
+    secondaryDrawerContent: () => null,
   });
   const forceHideSidebar = !layoutState?.showNewConversationButton;
   const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
@@ -135,6 +156,31 @@ const SystemContextProvider = ({
           }
         });
       },
+      toggleSecondaryDrawer: (data = null) => {
+        setLayoutState((prev: any) => {
+          const triggerSidebar =
+            data && prev.isSidebarOpen && !prev.isSecondaryDrawerOpen;
+          if (triggerSidebar) toggleSidebarStyles(prev.isSidebarOpen);
+          if ((data && !prev.isSecondaryDrawerOpen) || !data)
+            // open / close secondary drawer
+            toggleSidebarStyles(
+              prev.isSecondaryDrawerOpen,
+              "right",
+              prev.isMobile,
+            );
+          return {
+            ...prev,
+            isSecondaryDrawerOpen: data ? true : false,
+            secondaryDrawerContent: data,
+            isSidebarOpen: triggerSidebar
+              ? !prev.isSidebarOpen
+              : prev.isSidebarOpen,
+            showSidebarButton: triggerSidebar
+              ? prev.isSidebarOpen
+              : prev.showSidebarButton,
+          };
+        });
+      },
       setState: (state: any) => {
         setLayoutState((prev) => ({
           ...prev,
@@ -143,7 +189,7 @@ const SystemContextProvider = ({
       },
       ...layoutState,
     }),
-    [setLayoutState, forceHideSidebar, layoutState]
+    [setLayoutState, forceHideSidebar, layoutState],
   );
 
   useEffect(() => {
