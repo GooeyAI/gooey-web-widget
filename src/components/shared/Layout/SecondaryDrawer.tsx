@@ -88,11 +88,11 @@ const SecondaryDrawer = () => {
         position: layoutController?.isMobile ? "absolute" : "relative",
       }}
       className={clsx(
-        "h-100 overflow-x-hidden top-0 right-0 bg-grey d-flex flex-col pos-relative",
+        "h-100 top-0 overflow-x-hidden right-0 bg-grey d-flex flex-col",
       )}
     >
       {/* Content Container */}
-      <div className="h-100 w-100 overflow-auto">
+      <div className="h-100 w-100 flex-1 d-flex flex-col">
         {layoutController?.secondaryDrawerContent?.()}
       </div>
 

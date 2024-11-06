@@ -18,7 +18,7 @@ const FullSourcePreview = (props: any) => {
   if (!data || !data?.url) return null;
   const embedUrl = getEmbedUrl(data.url);
   return (
-    <>
+    <div className="flex-1 d-flex flex-col">
       <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
           <p
@@ -50,9 +50,10 @@ const FullSourcePreview = (props: any) => {
       </div>
       <iframe
         src={embedUrl}
+        className="flex-1"
         style={{ height: "100%", width: "100%", border: 0 }}
       />
-    </>
+    </div>
   );
 };
 
