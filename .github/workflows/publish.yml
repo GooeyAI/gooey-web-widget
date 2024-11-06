@@ -1,0 +1,62 @@
+name: Build, Version Bump and Publish
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+jobs:
+  build:
+    env:
+      REACT_APP_GOOEY_SERVER: ${{ vars.REACT_APP_GOOEY_SERVER }}
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Get current version
+        id: version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          BUILD_NUM=$((${VERSION_PARTS[2]} + 1))
+          NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$BUILD_NUM"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Update version in package.json
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          npm version $NEW_VERSION --no-git-tag-version
+
+      - name: Build project
+        run: npm run build
+
+      - name: Commit changes
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          git checkout -b $NEW_VERSION
+          git add package.json package-lock.json dist/
+          git commit -m "build: $NEW_VERSION"
+          git push --set-upstream origin $NEW_VERSION
