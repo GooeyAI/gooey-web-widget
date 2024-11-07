@@ -36,7 +36,10 @@ export const FullSourcePreview = (props: any) => {
   if (isLoading) return null;
   return (
     <div className="flex-1 d-flex flex-col">
-      <div className="b-lt-1 b-rt-1 b-btm-1 gp-10 w-100 d-flex justify-between align-center bg-white">
+      <div
+        className="b-lt-1 b-rt-1 b-btm-1 gp-10 w-100 d-flex justify-between align-center bg-white"
+        style={{ height: "56px" }}
+      >
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
           {ExtensionIcon || !metaData?.logo ? (
             <ExtensionIcon />

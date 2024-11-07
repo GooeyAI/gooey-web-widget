@@ -178,7 +178,11 @@ const SideNavbar = () => {
               <Button
                 className="w-100 pos-relative text-dark"
                 disabled={isEmpty}
-                onClick={handleNewConversation}
+                onClick={() => {
+                  handleNewConversation();
+                  if (layoutController?.isSecondaryDrawerOpen)
+                    layoutController?.toggleSecondaryDrawer(null);
+                }}
                 hideOverflow
                 RightIconComponent={() => <IconPencilEdit size={18} />}
               >
