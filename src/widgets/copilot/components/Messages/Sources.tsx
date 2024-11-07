@@ -13,7 +13,7 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
 
-const FullSourcePreview = (props: any) => {
+export const FullSourcePreview = (props: any) => {
   const { data, layoutController, metaData } = props;
   const [isLoading, setIsLoading] = useState(true);
 

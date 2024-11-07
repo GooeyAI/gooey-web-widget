@@ -205,20 +205,10 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
       url: href,
     };
   }
-
-  // hide source if mailto;
-  const hideSource = href.startsWith("mailto:");
   return (
-    <React.Fragment>
-      <Link to={href} configColor={data?.linkColor || "default"}>
-        {domToReact(domNode.children, getReactParserOptions(data))}
-      </Link>{" "}
-      {!hideSource && (
-        <CollapsibleButton>
-          <Sources data={[source]} />
-        </CollapsibleButton>
-      )}
-    </React.Fragment>
+    <Link data={source} configColor={data?.linkColor || "default"}>
+      {domToReact(domNode.children, getReactParserOptions(data))}
+    </Link>
   );
 };
 
