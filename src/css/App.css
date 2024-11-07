@@ -43,7 +43,17 @@ ul {
 }
 
 .gooey-embed-container a {
-  text-decoration: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.45);
+  text-decoration-thickness: 0.6px;
+  text-underline-offset: 0.15em;
+}
+
+.gooey-embed-container a:hover {
+  color: inherit;
+  text-decoration-color: black;
+  text-decoration-thickness: 2px;
 }
 
 div:focus-visible {
@@ -51,7 +61,7 @@ div:focus-visible {
 }
 
 ::-webkit-scrollbar {
-  background: transparent;
+background: transparent;
   color: white;
   width: 8px;
   height: 8px;
