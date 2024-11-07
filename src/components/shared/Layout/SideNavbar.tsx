@@ -211,7 +211,7 @@ const SideNavbar = () => {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {branding?.name}
+                    New Chat
                   </p>
                 </div>
               </Button>
