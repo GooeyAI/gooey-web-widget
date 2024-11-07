@@ -96,7 +96,7 @@ const IncomingMsg = memo(
             </div>
           </BotMessageLayout>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-16 gml-36">
+            <div className="gmt-8 gml-36">
               <audio
                 autoPlay={isAutoPlay}
                 playsInline={true}

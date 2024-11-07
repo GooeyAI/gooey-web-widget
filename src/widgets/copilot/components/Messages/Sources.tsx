@@ -78,6 +78,9 @@ const SourcesCard = (props: { data: Data; index: number }) => {
     try {
       fetchUrlMeta(data.url).then((meta) => {
         if (Object.keys(meta).length) {
+          if (meta?.title === "- YouTube") {
+            meta.title = data.title;
+          }
           setMetaData(meta);
           setTempStoreValue?.(data.url, meta);
         }
@@ -86,7 +89,7 @@ const SourcesCard = (props: { data: Data; index: number }) => {
       console.error(e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, []);
 
   const redirectedUrl =
     metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
@@ -114,9 +117,8 @@ const SourcesCard = (props: { data: Data; index: number }) => {
     <button
       onClick={onClick.bind(null)}
       className={clsx(
-        "pos-relative sources-card gp-0 gm-0 text-left overflow-hidden",
+        "pos-relative sources-card gp-0 gm-0 text-left overflow-hidden gmr-8",
       )}
-      style={{ height: "64px" }}
     >
       {metaData?.image && (
         <div
@@ -187,8 +189,8 @@ const SourcesCard = (props: { data: Data; index: number }) => {
 const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   return (
-    <div className="gmb-4 text-reveal-container">
-      <div className="gmt-8 sources-listContainer">
+    <div className="text-reveal-container">
+      <div className="gmt-16 sources-listContainer">
         {data.map((source: any, index: number) => (
           <SourcesCard
             key={source?.title + index}
