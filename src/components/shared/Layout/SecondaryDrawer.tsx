@@ -97,29 +97,31 @@ const SecondaryDrawer = () => {
       </div>
 
       {/* Resize System */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: -RESIZE_HANDLE_WIDTH / 2,
-          width: `${RESIZE_HANDLE_WIDTH}px`,
-          height: "100%",
-          cursor: "ew-resize",
-          zIndex: 20,
-        }}
-        className={clsx(isResizing && "bg-light")}
-        onMouseDown={handleMouseDown}
-      >
+      {!layoutController?.isMobile && (
         <div
           style={{
             position: "absolute",
-            left: RESIZE_HANDLE_WIDTH / 2,
-            width: "5px",
+            top: 0,
+            left: -RESIZE_HANDLE_WIDTH / 2,
+            width: `${RESIZE_HANDLE_WIDTH}px`,
             height: "100%",
+            cursor: "ew-resize",
+            zIndex: 20,
           }}
-          className="bg-white b-lt-1 b-rt-1 drawer-resize-bar"
-        />
-      </div>
+          className={clsx(isResizing && "bg-light")}
+          onMouseDown={handleMouseDown}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: RESIZE_HANDLE_WIDTH / 2,
+              width: "5px",
+              height: "100%",
+            }}
+            className="bg-white b-lt-1 b-rt-1 drawer-resize-bar"
+          />
+        </div>
+      )}
 
       {/* Full-screen overlay during resize */}
       {isResizing && (
