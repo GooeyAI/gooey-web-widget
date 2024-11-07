@@ -15,16 +15,28 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 
 const FullSourcePreview = (props: any) => {
   const { data, layoutController, metaData } = props;
-  if (!data || !data?.url) return null;
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // fade loader for src reset
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 0);
+  }, [data.url]);
+
   const embedUrl = getEmbedUrl(data.url);
+  if (!data || !data?.url) return null;
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url,
     24,
   );
+
+  if (isLoading) return null;
   return (
     <div className="flex-1 d-flex flex-col">
-      <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
+      <div className="b-lt-1 b-rt-1 b-btm-1 gp-10 w-100 d-flex justify-between align-center bg-white">
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
           {ExtensionIcon || !metaData?.logo ? (
             <ExtensionIcon />
