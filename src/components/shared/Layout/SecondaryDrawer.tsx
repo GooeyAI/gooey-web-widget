@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const MIN_DRAWER_WIDTH = 300;
 const MAX_DRAWER_WIDTH = 800;
-const RESIZE_HANDLE_WIDTH = 4;
+const RESIZE_HANDLE_WIDTH = 5;
 
 const SecondaryDrawer = () => {
   const { layoutController } = useSystemContext();
@@ -114,10 +114,10 @@ const SecondaryDrawer = () => {
           style={{
             position: "absolute",
             left: RESIZE_HANDLE_WIDTH / 2,
-            width: "2px",
+            width: "5px",
             height: "100%",
           }}
-          className="bg-light drawer-resize-bar"
+          className="bg-white b-lt-1 b-rt-1 drawer-resize-bar"
         />
       </div>
 
