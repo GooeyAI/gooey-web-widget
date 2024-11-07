@@ -24,32 +24,33 @@ const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 export const findSourceIcon = (
   contentType: string,
   url: string,
+  size: number = 12,
 ): JSX.ElementType | null => {
   const urlLower = url.toLowerCase();
   // try to guess from url first
   if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) {
-    return () => <IconYoutube />;
+    return () => <IconYoutube size={size} />;
   }
   if (urlLower.endsWith(".pdf")) {
-    return () => <IconPDF style={{ fill: "#F40F02" }} size={12} />;
+    return () => <IconPDF style={{ fill: "#F40F02" }} size={size || 12} />;
   } else if (
     urlLower.endsWith(".xls") ||
     urlLower.endsWith(".xlsx") ||
     (urlLower.includes("docs.google") && urlLower.includes("spreadsheets"))
   ) {
-    return () => <IconSheets />;
+    return () => <IconSheets size={size} />;
   } else if (
     urlLower.endsWith(".docx") ||
     (urlLower.includes("docs.google") && urlLower.includes("document"))
   ) {
-    return () => <IconGoogleDocs />;
+    return () => <IconGoogleDocs size={size} />;
   } else if (
     urlLower.endsWith(".pptx") ||
     (urlLower.includes("docs.google") && urlLower.includes("presentation"))
   ) {
-    return () => <IconGoogleSlides />;
+    return () => <IconGoogleSlides size={size} />;
   } else if (urlLower.endsWith(".txt")) {
-    return () => <IconGoogleDocs />;
+    return () => <IconGoogleDocs size={size} />;
   } else if (urlLower.endsWith(".html")) {
     return null;
   }

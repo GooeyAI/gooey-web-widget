@@ -14,15 +14,34 @@ import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
 
 const FullSourcePreview = (props: any) => {
-  const { data, layoutController } = props;
+  const { data, layoutController, metaData } = props;
   if (!data || !data?.url) return null;
   const embedUrl = getEmbedUrl(data.url);
+  const ExtensionIcon: any = findSourceIcon(
+    metaData?.content_type,
+    metaData?.redirect_urls[0] || data?.url,
+    24,
+  );
   return (
     <div className="flex-1 d-flex flex-col">
       <div className="b-1 gp-10 w-100 d-flex justify-between align-center bg-white">
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
+          {ExtensionIcon || !metaData?.logo ? (
+            <ExtensionIcon />
+          ) : (
+            <img
+              src={metaData?.logo}
+              alt={data?.title}
+              style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "100px",
+                objectFit: "contain",
+              }}
+            />
+          )}
           <p
-            className="font_16_500 m-0 flex-1"
+            className="font_16_500 m-0 flex-1 gml-8"
             style={{
               maxWidth: "85%",
               whiteSpace: "nowrap",
@@ -105,9 +124,13 @@ const SourcesCard = (props: { data: Data; index: number }) => {
   const openInWindow = () => window.open(data?.url, "_blank");
   const openInSidebar = useCallback(() => {
     layoutController?.toggleSecondaryDrawer?.(() => (
-      <FullSourcePreview data={data} layoutController={layoutController} />
+      <FullSourcePreview
+        data={data}
+        layoutController={layoutController}
+        metaData={metaData}
+      />
     ));
-  }, [data, layoutController]);
+  }, [data, layoutController, metaData]);
 
   const isCsv = metaData?.content_type?.includes("csv");
   const onClick = isCsv ? openInWindow : openInSidebar;
