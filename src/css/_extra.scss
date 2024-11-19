@@ -119,6 +119,9 @@
 .b-rt-1 {
   border-right: 1px solid $border-color;
 }
+.b-lt-1 {
+  border-left: 1px solid $border-color;
+}
 .b-none {
   border: none !important;
 }
@@ -170,6 +173,9 @@
 }
 .left-0 {
   left: 0;
+}
+.right-0 {
+  right: 0;
 }
 .h-header {
   height: 56px;

@@ -6,6 +6,7 @@ import Header from "src/widgets/copilot/components/Header";
 import { addInlineStyle } from "src/addStyles";
 import style from "./appLayout.scss?inline";
 import SideNavbar from "./SideNavbar";
+import SecondaryDrawer from "./SecondaryDrawer";
 
 addInlineStyle(style);
 
@@ -21,7 +22,7 @@ const CHAT_WINDOW_WIDTH = 760;
 const generateParentContainerClass = (
   isInline: boolean,
   isFullScreen: boolean,
-  isFocusMode: boolean
+  isFocusMode: boolean,
 ) => {
   if (!isInline) {
     if (isFocusMode) return "gooey-focused-popup";
@@ -67,8 +68,8 @@ const AppLayout = ({ children }: Props) => {
         generateParentContainerClass(
           layoutController!.isInline,
           config?.mode === "fullscreen",
-          layoutController!.isFocusMode
-        )
+          layoutController!.isFocusMode,
+        ),
       )}
     >
       <div className="d-flex h-100 pos-relative">
@@ -85,6 +86,7 @@ const AppLayout = ({ children }: Props) => {
             <>{children}</>
           </div>
         </main>
+        <SecondaryDrawer />
       </div>
     </div>
   );

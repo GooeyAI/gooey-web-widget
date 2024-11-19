@@ -1,6 +1,24 @@
+import { useSystemContext } from "src/contexts/hooks";
+import { FullSourcePreview } from "src/widgets/copilot/components/Messages/Sources";
+
 const Link = (props: any) => {
+  const { layoutController } = useSystemContext();
+
+  const handleClick = () => {
+    layoutController?.toggleSecondaryDrawer?.(() => (
+      <FullSourcePreview
+        data={props?.data}
+        layoutController={layoutController}
+      />
+    ));
+  };
+
   return (
-    <a href={props?.to} target="_blank" style={{ color: props.configColor }}>
+    <a
+      onClick={() => handleClick()}
+      style={{ color: props.configColor }}
+      className="gooey-link cr-pointer"
+    >
       {props.children}
     </a>
   );

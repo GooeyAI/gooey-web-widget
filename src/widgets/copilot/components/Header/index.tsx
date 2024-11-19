@@ -18,7 +18,7 @@ const Header = ({ onEditClick }: HeaderProps) => {
   const { messages }: any = useMessagesContext();
   const { layoutController, config }: SystemContextType = useSystemContext();
   const isEmpty = !messages?.size;
-  const botName = config?.branding?.name;
+  const branding = config?.branding;
   return (
     <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
       <div className="d-flex align-center">
@@ -71,17 +71,33 @@ const Header = ({ onEditClick }: HeaderProps) => {
           </GooeyTooltip>
         )}
       </div>
-      <p
-        className="font_16_700"
+      <div
+        className="d-flex align-center"
         style={{
           position: "absolute",
           left: "50%",
           top: "50%",
           transform: "translate(-50%, -50%)",
+          marginLeft: "-24px",
         }}
       >
-        {botName}
-      </p>
+        <div
+          className="bot-avatar bg-primary gmr-8"
+          style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+        >
+          <img
+            src={branding?.photoUrl}
+            alt="bot-avatar"
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+        <p className="font_16_700">{branding?.name}</p>
+      </div>
       <div>
         {layoutController?.showNewConversationButton && (
           <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>

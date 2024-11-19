@@ -113,7 +113,7 @@ const SideNavbar = () => {
       }}
       className={clsx(
         "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
-        layoutController?.isMobile ? "pos-absolute" : "pos-relative"
+        layoutController?.isMobile ? "pos-absolute" : "pos-relative",
       )}
     >
       <div
@@ -176,13 +176,15 @@ const SideNavbar = () => {
           <div className="gp-8">
             <GooeyTooltip text="New Chat" direction="right" disabled={isEmpty}>
               <Button
-                className="w-100 pos-relative text-muted"
+                className="w-100 pos-relative text-dark"
                 disabled={isEmpty}
-                onClick={handleNewConversation}
+                onClick={() => {
+                  handleNewConversation();
+                  if (layoutController?.isSecondaryDrawerOpen)
+                    layoutController?.toggleSecondaryDrawer(null);
+                }}
                 hideOverflow
-                RightIconComponent={() => (
-                  <IconPencilEdit size={18} className="text-muted" />
-                )}
+                RightIconComponent={() => <IconPencilEdit size={18} />}
               >
                 <div className="d-flex align-center">
                   <div
@@ -205,7 +207,10 @@ const SideNavbar = () => {
                     />
                   </div>
                   <p
-                    className="font_16_600 text-left text-almostBlack"
+                    className={clsx(
+                      "font_16_600 text-left",
+                      isEmpty ? "text-muted" : "text-almostBlack",
+                    )}
                     style={{
                       maxWidth: "70%",
                       overflow: "hidden",
@@ -213,7 +218,7 @@ const SideNavbar = () => {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {branding?.name}
+                    New Chat
                   </p>
                 </div>
               </Button>
@@ -242,7 +247,7 @@ const SideNavbar = () => {
                       .sort(
                         (a: Conversation, b: Conversation) =>
                           new Date(b.timestamp as string).getTime() -
-                          new Date(a.timestamp as string).getTime()
+                          new Date(a.timestamp as string).getTime(),
                       )
                       .map((conversation: Conversation) => {
                         return (
@@ -256,6 +261,8 @@ const SideNavbar = () => {
                                 setActiveConversation(conversation);
                                 if (layoutController?.isMobile)
                                   layoutController?.toggleSidebar();
+                                if (layoutController?.isSecondaryDrawerOpen)
+                                  layoutController?.toggleSecondaryDrawer(null);
                               }}
                             />
                           </li>

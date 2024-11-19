@@ -23,27 +23,34 @@ const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
   contentType: string,
-  url: string
+  url: string,
+  size: number = 12,
 ): JSX.ElementType | null => {
   const urlLower = url.toLowerCase();
   // try to guess from url first
   if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) {
-    return () => <IconYoutube />;
+    return () => <IconYoutube size={size} />;
   }
   if (urlLower.endsWith(".pdf")) {
-    return () => <IconPDF style={{ fill: "#F40F02" }} size={12} />;
+    return () => <IconPDF style={{ fill: "#F40F02" }} size={size || 12} />;
   } else if (
     urlLower.endsWith(".xls") ||
     urlLower.endsWith(".xlsx") ||
-    urlLower.includes("sheets.google")
+    (urlLower.includes("docs.google") && urlLower.includes("spreadsheets"))
   ) {
-    return () => <IconSheets />;
-  } else if (urlLower.endsWith(".docx") || urlLower.includes("docs.google")) {
-    return () => <IconGoogleDocs />;
-  } else if (urlLower.endsWith(".pptx") || urlLower.includes("/presentation")) {
-    return () => <IconGoogleSlides />;
+    return () => <IconSheets size={size} />;
+  } else if (
+    urlLower.endsWith(".docx") ||
+    (urlLower.includes("docs.google") && urlLower.includes("document"))
+  ) {
+    return () => <IconGoogleDocs size={size} />;
+  } else if (
+    urlLower.endsWith(".pptx") ||
+    (urlLower.includes("docs.google") && urlLower.includes("presentation"))
+  ) {
+    return () => <IconGoogleSlides size={size} />;
   } else if (urlLower.endsWith(".txt")) {
-    return () => <IconGoogleDocs />;
+    return () => <IconGoogleDocs size={size} />;
   } else if (urlLower.endsWith(".html")) {
     return null;
   }
@@ -119,7 +126,7 @@ export function extractMainDomain(url: string) {
 export const fetchUrlMeta = async (url: string): Promise<any> => {
   try {
     const response: any = await axios.get(
-      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`
+      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`,
     );
     return response?.data;
   } catch (err) {
@@ -198,20 +205,10 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
       url: href,
     };
   }
-
-  // hide source if mailto;
-  const hideSource = href.startsWith("mailto:");
   return (
-    <React.Fragment>
-      <Link to={href} configColor={data?.linkColor || "default"}>
-        {domToReact(domNode.children, getReactParserOptions(data))}
-      </Link>{" "}
-      {!hideSource && (
-        <CollapsibleButton>
-          <Sources data={[source]} />
-        </CollapsibleButton>
-      )}
-    </React.Fragment>
+    <Link data={source} configColor={data?.linkColor || "default"}>
+      {domToReact(domNode.children, getReactParserOptions(data))}
+    </Link>
   );
 };
 
@@ -224,9 +221,9 @@ const customizedReferences = (reactNode: any, domNode: any, data: any) => {
   const matches: any = Array.from(
     new Set(
       (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
-        parseInt(match.slice(1, -1), 10)
-      )
-    )
+        parseInt(match.slice(1, -1), 10),
+      ),
+    ),
   );
 
   // return the text as it is if no match found
@@ -235,7 +232,7 @@ const customizedReferences = (reactNode: any, domNode: any, data: any) => {
   const { references = [] }: any = data;
   const sources = [...references].splice(
     matches[0] - 1,
-    matches[matches.length - 1]
+    matches[matches.length - 1],
   );
 
   text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
@@ -257,7 +254,7 @@ const customizedReferences = (reactNode: any, domNode: any, data: any) => {
 export const formatTextResponse = (
   data: any,
   linkColor: string,
-  showSources: boolean
+  showSources: boolean,
 ) => {
   const body = getOutputText(data);
   if (!body) return "";
@@ -274,7 +271,7 @@ export const formatTextResponse = (
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions({ ...data, showSources, linkColor })
+    getReactParserOptions({ ...data, showSources, linkColor }),
   );
   return parsedElements;
 };
@@ -316,64 +313,22 @@ export function truncateMiddle(str: string, charLimit: number) {
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
 
-// function detectNumberReference(str: string) {
-//   /// Define the regex pattern to match [2], [1,2,4], or [1, 2]
-//   const regex = /\[\d+(,\s*\d+)*\]/g;
+export const getEmbedUrl = (url: string) => {
+  try {
+    // Check if it's a YouTube URL
+    const youtubeRegex =
+      /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(youtubeRegex);
 
-//   // Use the regex to find matches
-//   const matches = str.match(regex);
+    if (match && match[1]) {
+      // Return the embedded YouTube URL format
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
 
-//   // If no matches found, return an empty array
-//   if (!matches) {
-//     return [];
-//   }
-
-//   // Extract numbers from each match
-//   const numbers = matches.map((match) => {
-//     // Remove the square brackets and split by comma
-//     return match
-//       .slice(1, -1)
-//       .split(",")
-//       .map((num) => parseInt(num.trim(), 10));
-//   });
-
-//   // Flatten the array of arrays into a single array
-//   return numbers.flat().sort();
-// }
-
-// export const sanitizeReferences = (data: any) => {
-//   // remove items from references which are not in output_text
-//   const { output_text = [], references = [] } = data;
-//   const outputText = output_text[0] || "";
-//   const numberReferences = detectNumberReference(outputText);
-//   const urlPattern = /\b(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*\b/g;
-//   const urlsInResponse = [...new Set(outputText.match(urlPattern))];
-//   if (numberReferences.length === 0 && urlsInResponse.length === 0) return [];
-//   const indices = numberReferences.map((num) => num - 1);
-
-//   // check ref numbers and remove the ones which are not in output_text by index
-//   let rejectedReferences: any = [];
-//   const newSources = references
-//     .map((_: any, index: number) => {
-//       if (indices.includes(index))
-//         return {
-//           ..._,
-//           refNumber: numberReferences[index - rejectedReferences.length],
-//         };
-//       else {
-//         rejectedReferences.push(_);
-//         return undefined;
-//       }
-//     })
-//     .filter((source: any) => source !== undefined);
-
-//   // removed all the un-indexed references
-//   if (!urlsInResponse.length) return newSources;
-
-//   // check urls in response and add them to sources
-//   rejectedReferences = rejectedReferences.filter(({ url }: any) => {
-//     if (url.endsWith("/")) url = url.slice(0, -1);
-//     return urlsInResponse.indexOf(url) !== -1;
-//   });
-//   return [...newSources, ...rejectedReferences];
-// };
+    // Return original URL if not YouTube
+    return url;
+  } catch (error) {
+    console.error("Error processing URL:", error);
+    return url;
+  }
+};
