@@ -31,7 +31,7 @@ export const BotMessageLayout = (props: Record<string, any>) => {
           />
         </div>
       )}
-      <div className="gmt-2">{props.children}</div>
+      <div className="gmt-2 mw-100 overflow-hidden">{props.children}</div>
     </div>
   );
 };
@@ -82,12 +82,12 @@ const IncomingMsg = memo(
 
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
-      <div className="gooey-incomingMsg gpb-12">
-        <div className="gpl-16">
+      <div className="gooey-incomingMsg gpb-12 mw-100">
+        <div className="gpl-16 mw-100">
           <BotMessageLayout>
             <div
               className={clsx(
-                "font_16_400 pos-relative gooey-output-text markdown text-reveal-container",
+                "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
                 isStreaming && "response-streaming",
               )}
               id={props?.id}
@@ -96,7 +96,7 @@ const IncomingMsg = memo(
             </div>
           </BotMessageLayout>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-8 gml-36">
+            <div className="gmt-8 gml-36 mw-100">
               <audio
                 autoPlay={isAutoPlay}
                 playsInline={true}
