@@ -88,7 +88,7 @@ const Header = () => {
           )}
           {/* Close / minimize button */}
           {layoutController?.showCloseButton && (
-            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+            <GooeyTooltip text="Close" direction="left">
               <IconButton
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
