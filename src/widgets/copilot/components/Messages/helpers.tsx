@@ -183,8 +183,14 @@ export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    if (domNode?.name === "a") return customizedLinks(reactNode, domNode, data);
-    else return reactNode;
+    switch (domNode.name) {
+      case "img":
+        return customizedImage(reactNode, domNode);
+      case "a":
+        return customizedLinks(reactNode, domNode, data);
+      default:
+        return reactNode;
+    }
   },
 });
 
@@ -192,6 +198,16 @@ const checkLinkInSources = (url: string, data: any): any => {
   const references = data?.references || [];
   const matches = references.filter((reference: any) => reference.url === url);
   matches.length ? matches[0] : null;
+};
+
+const customizedImage = (reactNode: any, domNode: any) => {
+  if (!reactNode) return reactNode;
+  const src = domNode.attribs.src;
+  return (
+    <a href={src} target="_blank" rel="noreferrer">
+      <img src={src} alt={domNode.attribs.alt} />
+    </a>
+  );
 };
 
 const customizedLinks = (reactNode: any, domNode: any, data: any) => {

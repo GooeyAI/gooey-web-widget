@@ -112,3 +112,11 @@ svg {
   fill: currentColor;
 }
 
+.gooey-output-text img {
+  max-height: 400px;
+  max-width: 800px;
+  border-radius: 8px;
+  object-fit: cover;
+  overflow: hidden;
+}
+
