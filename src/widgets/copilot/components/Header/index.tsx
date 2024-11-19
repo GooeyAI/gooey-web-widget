@@ -1,7 +1,5 @@
-import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import IconClose from "src/assets/SvgIcons/IconClose";
 import clsx from "clsx";
 import { SystemContextType } from "src/contexts/SystemContext";
 
