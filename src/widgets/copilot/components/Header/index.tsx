@@ -44,7 +44,12 @@ const Header = () => {
       >
         <div
           className="bot-avatar bg-primary gmr-8"
-          style={{ width: "24px", height: "24px", borderRadius: "100%" }}
+          style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "100%",
+            marginLeft: "-12px",
+          }}
         >
           <img
             src={branding?.photoUrl}
@@ -59,44 +64,43 @@ const Header = () => {
         </div>
         <p className="font_16_700">{branding?.name}</p>
       </div>
-      <div className="d-flex align-center">
-        {/* Focus mode button */}
-        {layoutController?.showFocusModeButton && (
-          <GooeyTooltip
-            text={
-              layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
-            }
-            direction="bottom"
-          >
-            <IconButton
-              variant="text"
-              className="cr-pointer"
-              onClick={layoutController?.toggleFocusMode}
-              style={{ transform: "rotate(90deg)" }}
-            >
-              {layoutController.isFocusMode ? (
-                <IconCollapse size={16} />
-              ) : (
-                <IconExpand size={16} />
-              )}
-            </IconButton>
-          </GooeyTooltip>
-        )}
-        {/* Close / minimize button */}
-      </div>
       <div>
-        {layoutController?.showCloseButton && (
-          <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
-            <IconButton
-              disabled={isEmpty}
-              variant="text"
-              className={clsx("gp-8 cr-pointer flex-1")}
-              onClick={layoutController?.toggleOpenClose}
+        <div className="d-flex align-center">
+          {/* Focus mode button */}
+          {layoutController?.showFocusModeButton && (
+            <GooeyTooltip
+              text={
+                layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
+              }
+              direction="bottom"
             >
-              <IconChevronDown size={16} />
-            </IconButton>
-          </GooeyTooltip>
-        )}
+              <IconButton
+                variant="text"
+                className="cr-pointer"
+                onClick={layoutController?.toggleFocusMode}
+                style={{ transform: "rotate(90deg)" }}
+              >
+                {layoutController.isFocusMode ? (
+                  <IconCollapse size={16} />
+                ) : (
+                  <IconExpand size={16} />
+                )}
+              </IconButton>
+            </GooeyTooltip>
+          )}
+          {/* Close / minimize button */}
+          {layoutController?.showCloseButton && (
+            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+              <IconButton
+                variant="text"
+                className={clsx("gp-8 cr-pointer flex-1")}
+                onClick={layoutController?.toggleOpenClose}
+              >
+                <IconChevronDown size={16} />
+              </IconButton>
+            </GooeyTooltip>
+          )}
+        </div>
       </div>
     </div>
   );
