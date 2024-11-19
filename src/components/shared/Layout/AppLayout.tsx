@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
+import { useSystemContext } from "src/contexts/hooks";
 import Header from "src/widgets/copilot/components/Header";
 
 import { addInlineStyle } from "src/addStyles";
@@ -52,13 +51,6 @@ const ClickAwayListener = ({ onClick, children }: any) => {
 
 const AppLayout = ({ children }: Props) => {
   const { config, layoutController } = useSystemContext();
-  const { handleNewConversation }: any = useMessagesContext();
-
-  const handleEditClick = () => {
-    handleNewConversation();
-    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
-    ele?.focus();
-  };
 
   return (
     <div
@@ -78,7 +70,7 @@ const AppLayout = ({ children }: Props) => {
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
         <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
-          <Header onEditClick={handleEditClick} />
+          <Header />
           <div
             style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
             className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"

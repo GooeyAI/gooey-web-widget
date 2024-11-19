@@ -231,11 +231,11 @@ const MessagesContextProvider = (props: any) => {
     if (isReceiving || isSending) cancelApiCall();
     if (layoutController?.isMobile && layoutController?.isSidebarOpen)
       layoutController?.toggleSidebar();
-    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
-    ele?.focus();
     setIsReceiving(false);
     setIsSendingMessage(false);
     purgeMessages();
+    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
+    ele?.focus();
   };
 
   const purgeMessages = () => {
