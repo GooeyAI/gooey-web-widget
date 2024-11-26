@@ -8,9 +8,11 @@ import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconSidebar from "src/assets/SvgIcons/IconSideBar";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import Button from "src/components/shared/Buttons/Button";
 
 const Header = () => {
-  const { messages }: any = useMessagesContext();
+  const { messages, handleNewConversation }: any = useMessagesContext();
   const { layoutController, config }: SystemContextType = useSystemContext();
   const isEmpty = !messages?.size;
   const branding = config?.branding;
@@ -32,7 +34,6 @@ const Header = () => {
         )}
       </div>
       <div
-        className="d-flex align-center"
         style={{
           position: "absolute",
           left: "50%",
@@ -40,27 +41,32 @@ const Header = () => {
           transform: "translate(-50%, -50%)",
         }}
       >
-        <div
-          className="bot-avatar bg-primary gmr-8"
-          style={{
-            width: "24px",
-            height: "24px",
-            borderRadius: "100%",
-            marginLeft: "-12px",
-          }}
-        >
-          <img
-            src={branding?.photoUrl}
-            alt="bot-avatar"
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-        <p className="font_16_700">{branding?.name}</p>
+        <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
+          <Button onClick={() => handleNewConversation()} disabled={isEmpty}>
+            <div className="d-flex align-center">
+              <div
+                className="bot-avatar bg-primary gmr-8"
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "100%",
+                  // marginLeft: "-12px",
+                }}
+              >
+                <img
+                  src={branding?.photoUrl}
+                  alt="bot-avatar"
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "100%",
+                  }}
+                />
+              </div>
+              <p className="font_16_700 text-almostBlack">{branding?.name}</p>
+            </div>
+          </Button>
+        </GooeyTooltip>
       </div>
       <div>
         <div className="d-flex align-center">
@@ -98,6 +104,20 @@ const Header = () => {
               </IconButton>
             </GooeyTooltip>
           )}
+          {/* New Chat button */}
+          {layoutController?.isInline &&
+            layoutController?.showNewConversationButton && (
+              <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+                <IconButton
+                  disabled={isEmpty}
+                  variant="text"
+                  className={clsx("gp-8 cr-pointer flex-1")}
+                  onClick={() => handleNewConversation()}
+                >
+                  <IconPencilEdit size={22} />
+                </IconButton>
+              </GooeyTooltip>
+            )}
         </div>
       </div>
     </div>
