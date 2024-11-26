@@ -332,15 +332,20 @@ const MessagesContextProvider = (props: any) => {
       // Load the latest conversation from DB
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
-    setTimeout(() => {
-      setPreventAutoplay(false);
-    }, 3000);
+    avoidAutoplay();
   }, [
     config,
     conversations,
     layoutController?.showNewConversationButton,
     setActiveConversation,
   ]);
+
+  const avoidAutoplay = () => {
+    setPreventAutoplay(true);
+    setTimeout(() => {
+      setPreventAutoplay(false);
+    }, 3000);
+  };
 
   const valueMessages = {
     sendPrompt,
@@ -358,6 +363,7 @@ const MessagesContextProvider = (props: any) => {
     currentConversationId: currentConversation.current?.id || null,
     isMessagesLoading,
     preventAutoplay,
+    avoidAutoplay,
   };
 
   return (
