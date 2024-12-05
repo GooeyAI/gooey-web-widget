@@ -74,6 +74,8 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+
+    // Parse the response text and format it - customised links, sources, etc.
     const parsedElements = formatTextResponse(
       props.data,
       props?.linkColor,

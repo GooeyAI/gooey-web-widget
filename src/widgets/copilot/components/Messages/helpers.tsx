@@ -179,7 +179,7 @@ export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
   },
   transform(reactNode, domNode) {
     if (domNode.type === "text" && data.showSources) {
-      return customizedReferences(reactNode, domNode, data);
+      return customizedSources(reactNode, domNode, data);
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -228,7 +228,7 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
   );
 };
 
-const customizedReferences = (reactNode: any, domNode: any, data: any) => {
+const customizedSources = (reactNode: any, domNode: any, data: any) => {
   if (!domNode) return domNode;
   let text = domNode.data || "";
 
@@ -259,10 +259,11 @@ const customizedReferences = (reactNode: any, domNode: any, data: any) => {
   return (
     <React.Fragment>
       {text}{" "}
-      <CollapsibleButton disabled={!references.length}>
-        <Sources data={sources} />
-      </CollapsibleButton>
-      <br />
+      {!!references.length && (
+        <CollapsibleButton>
+          <Sources data={sources} />
+        </CollapsibleButton>
+      )}
     </React.Fragment>
   );
 };
