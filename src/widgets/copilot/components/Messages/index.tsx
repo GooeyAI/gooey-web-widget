@@ -4,7 +4,7 @@ import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import PlaceholderMessage from "./PlaceholderMessage";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
 
 const Responses = (props: any) => {
@@ -44,8 +44,19 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading }: any =
-    useMessagesContext();
+  const {
+    messages,
+    isSending,
+    scrollContainerRef,
+    isMessagesLoading,
+    avoidAutoplay,
+  }: any = useMessagesContext();
+
+  useEffect(() => {
+    // avoid autoplay on mount
+    avoidAutoplay();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isMessagesLoading) {
     return (
@@ -61,7 +72,7 @@ const Messages = () => {
       ref={scrollContainerRef}
       className={clsx(
         "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 d-flex flex-col",
-        isEmpty ? "justify-end" : "justify-start"
+        isEmpty ? "justify-end" : "justify-start",
       )}
       style={{ overflowY: "auto" }}
     >

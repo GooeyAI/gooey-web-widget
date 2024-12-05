@@ -170,18 +170,23 @@ const SourcesCard = (props: { data: Data; index: number }) => {
             backgroundSize: "cover",
             backgroundPosition: "center",
             zIndex: 0,
-            filter: "brightness(0.4)",
+            filter: "brightness(0.6)",
             transition: "all 1s ease-in-out",
           }}
         />
       )}
       <div
         className="d-flex flex-col justify-between gp-6"
-        style={{ zIndex: 1, height: "100%" }}
+        style={{
+          zIndex: 1,
+          height: "100%",
+        }}
       >
         <p
           className={clsx("font_10_600", metaData?.image ? "text-white" : "")}
-          style={{ margin: 0 }}
+          style={{
+            margin: 0,
+          }}
         >
           {truncateMiddle(metaData?.title || title, 50)}
         </p>

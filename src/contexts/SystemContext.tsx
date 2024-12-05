@@ -44,8 +44,8 @@ interface LayoutController extends LayoutStateType {
 type LayoutStateType = {
   isOpen: boolean;
   isFocusMode: boolean;
-  isInline: boolean;
-  isMobile: boolean;
+  isInline: boolean; // true - when widget is mounted in fullscreen / inline mode
+  isMobile: boolean; // true - when widget is <= mobile
 
   isSidebarOpen: boolean;
   isSecondaryDrawerOpen: boolean;
