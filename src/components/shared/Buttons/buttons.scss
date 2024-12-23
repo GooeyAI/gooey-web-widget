@@ -87,6 +87,16 @@ button:hover .icon-hover {
   transition: transform 0.3s ease;
 }
 
+.chevron-down > svg {
+  transform: rotate(0);
+  transition: transform 0.3s ease;
+}
+
+.chevron-up > svg {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
 .button-text-alt:hover {
   background-color: $light;
 }

@@ -233,7 +233,7 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   return (
     <div className="text-reveal-container">
-      <div className="gmt-16 sources-listContainer">
+      <div className="gpb-8 gpt-4 sources-listContainer">
         {data.map((source: any, index: number) => (
           <SourcesCard
             key={source?.title + index}
