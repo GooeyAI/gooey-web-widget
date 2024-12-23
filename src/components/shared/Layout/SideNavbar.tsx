@@ -5,9 +5,6 @@ import Button from "../Buttons/Button";
 import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
 import React from "react";
-import IconClose from "src/assets/SvgIcons/IconClose";
-import IconCollapse from "src/assets/SvgIcons/IconCollapse";
-import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import GooeyTooltip from "../Tooltip";
 
@@ -41,7 +38,7 @@ const SideNavbar = () => {
 
     conversations.forEach((conversation: Conversation) => {
       const lastMessageTimestamp = new Date(
-        conversation.timestamp as string
+        conversation.timestamp as string,
       ).getTime();
       let subheading: string;
 
@@ -64,7 +61,7 @@ const SideNavbar = () => {
           "default",
           {
             month: "long",
-          }
+          },
         );
         if (!grouped.Months[monthName]) {
           grouped.Months[monthName] = [];
@@ -80,7 +77,7 @@ const SideNavbar = () => {
       ([monthName, conversations]) => ({
         subheading: monthName,
         conversations,
-      })
+      }),
     );
 
     // Combine all groups into a single array
@@ -123,43 +120,6 @@ const SideNavbar = () => {
         {/* Header */}
         <div className="gp-8 b-btm-1 h-header d-flex align-center">
           {/* Close / minimize button */}
-          {layoutController?.showCloseButton && layoutController?.isMobile && (
-            <GooeyTooltip text="Close" direction="bottom">
-              <IconButton
-                variant="text"
-                className="gp-4 cr-pointer"
-                onClick={layoutController?.toggleOpenClose}
-              >
-                <IconClose size={24} />
-              </IconButton>
-            </GooeyTooltip>
-          )}
-          {/* Focus mode button */}
-          {layoutController?.showFocusModeButton &&
-            layoutController?.isMobile && (
-              <GooeyTooltip
-                text={
-                  layoutController?.isFocusMode
-                    ? "Disable Focus"
-                    : "Enable Focus"
-                }
-                direction="bottom"
-              >
-                <IconButton
-                  variant="text"
-                  className="gp-8"
-                  onClick={layoutController?.toggleFocusMode}
-                  style={{ transform: "rotate(90deg)", height: "38px" }}
-                >
-                  {layoutController?.isFocusMode ? (
-                    <IconCollapse size={16} />
-                  ) : (
-                    <IconExpand size={16} />
-                  )}
-                </IconButton>
-              </GooeyTooltip>
-            )}
-
           {/* Sidebar button */}
           <GooeyTooltip text="Close sidebar" direction="right">
             <IconButton

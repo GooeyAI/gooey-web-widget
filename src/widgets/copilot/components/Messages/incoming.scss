@@ -33,7 +33,7 @@
   cursor: pointer;
   min-width: 160px;
   max-width: 160px;
-  height: 64px;
+  height: 128px;
   padding: 8px;
   border: 1px solid transparent;
 }
@@ -62,29 +62,6 @@
   100% {
     background-position: 468px 0;
   }
-}
-
-.sources-skeleton .line {
-  height: 12px;
-  margin-bottom: 6px;
-  border-radius: 2px;
-  background: rgba(130, 130, 130, 0.2);
-  background: -webkit-gradient(
-    linear,
-    left top,
-    right top,
-    color-stop(8%, rgba(130, 130, 130, 0.2)),
-    color-stop(18%, rgba(130, 130, 130, 0.3)),
-    color-stop(33%, rgba(130, 130, 130, 0.2))
-  );
-  background: linear-gradient(
-    to right,
-    rgba(130, 130, 130, 0.2) 8%,
-    rgba(130, 130, 130, 0.3) 18%,
-    rgba(130, 130, 130, 0.2) 33%
-  );
-  background-size: 800px 100px;
-  animation: wave-lines 1s infinite ease-out;
 }
 
 .gooey-placeholderMsg-container {
@@ -327,6 +304,15 @@
     animation: pulseSize 0.5s ease-in-out infinite;
   }
 }
+
+.markdown img {
+  max-height: 400px;
+  max-width: 800px;
+  border-radius: 8px;
+  object-fit: cover;
+  overflow: hidden;
+}
+
 
 @-webkit-keyframes pulseSize {
   0%,

@@ -56,20 +56,6 @@ ul {
   text-decoration-thickness: 2px;
 }
 
-.gooey-embed-container .gooey-link {
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-color: rgba(0, 0, 0, 0.45);
-  text-decoration-thickness: 0.6px;
-  text-underline-offset: 0.15em;
-}
-
-.gooey-embed-container .gooey-link:hover {
-  color: inherit;
-  text-decoration-color: black;
-  text-decoration-thickness: 2px;
-}
-
 div:focus-visible {
   outline: none;
 }
@@ -94,6 +80,7 @@ code[class*="language-"] {
   color: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
+  max-width: 100%;
 }
 
 pre,
@@ -110,4 +97,3 @@ pre[class*="language-"] {
 svg {
   fill: currentColor;
 }
-

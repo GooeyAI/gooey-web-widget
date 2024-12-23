@@ -231,11 +231,11 @@ const MessagesContextProvider = (props: any) => {
     if (isReceiving || isSending) cancelApiCall();
     if (layoutController?.isMobile && layoutController?.isSidebarOpen)
       layoutController?.toggleSidebar();
-    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
-    ele?.focus();
     setIsReceiving(false);
     setIsSendingMessage(false);
     purgeMessages();
+    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
+    ele?.focus();
   };
 
   const purgeMessages = () => {
@@ -332,15 +332,20 @@ const MessagesContextProvider = (props: any) => {
       // Load the latest conversation from DB
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
-    setTimeout(() => {
-      setPreventAutoplay(false);
-    }, 3000);
+    avoidAutoplay();
   }, [
     config,
     conversations,
     layoutController?.showNewConversationButton,
     setActiveConversation,
   ]);
+
+  const avoidAutoplay = () => {
+    setPreventAutoplay(true);
+    setTimeout(() => {
+      setPreventAutoplay(false);
+    }, 3000);
+  };
 
   const valueMessages = {
     sendPrompt,
@@ -358,6 +363,7 @@ const MessagesContextProvider = (props: any) => {
     currentConversationId: currentConversation.current?.id || null,
     isMessagesLoading,
     preventAutoplay,
+    avoidAutoplay,
   };
 
   return (
