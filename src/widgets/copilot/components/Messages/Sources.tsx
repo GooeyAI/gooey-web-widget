@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { SyntheticEvent, useCallback, useEffect, useState } from "react";
 import {
   extractFileDetails,
   extractMainDomain,
@@ -12,6 +12,8 @@ import { useSystemContext } from "src/contexts/hooks";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
+import IconBooks from "src/assets/SvgIcons/IconBooks";
+import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 
 export const FullSourcePreview = (props: any) => {
   const { data, layoutController, metaData } = props;
@@ -173,6 +175,7 @@ const SourcesCard = (props: { data: Data; index: number }) => {
             filter: "brightness(0.6)",
             transition: "all 1s ease-in-out",
           }}
+          className="bg-filter"
         />
       )}
       <div
@@ -229,17 +232,58 @@ const SourcesCard = (props: { data: Data; index: number }) => {
   );
 };
 
+export const SourcesSection = (data: any) => {
+  const { references = [] }: any = data;
+  const sources = [...references];
+  const { config } = useSystemContext();
+  const [isExpanded, setIsExpanded] = useState<boolean>(
+    config?.expandedSources || true,
+  );
+
+  const toggleExpansion = (e: SyntheticEvent) => {
+    e.preventDefault();
+    setIsExpanded((prev) => !prev);
+  };
+
+  return (
+    <div className="gmb-8">
+      <div className="d-flex align-center gpt-4 gpb-8 gpl-16">
+        <span
+          style={{ height: "24px", width: "24px" }}
+          className="d-flex justify-center align-center gmr-12"
+        >
+          <IconBooks />
+        </span>
+        <h4 className="font_16_500 gmr-6">Sources</h4>
+        <IconButton
+          variant="filled"
+          className={clsx(
+            "bg-light gp-4",
+            isExpanded ? "chevron-down" : "chevron-up",
+          )}
+          onClick={toggleExpansion}
+        >
+          <IconCaretUp size={12} />
+        </IconButton>
+      </div>
+      {isExpanded && <Sources data={sources} />}
+    </div>
+  );
+};
+
 const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   return (
     <div className="text-reveal-container">
-      <div className="gmt-16 sources-listContainer">
+      <div className="gpb-8 gpt-4 sources-listContainer">
         {data.map((source: any, index: number) => (
-          <SourcesCard
-            key={source?.title + index}
-            data={source}
-            index={index}
-          />
+          <div className={clsx(index === 0 && "gml-52")}>
+            <SourcesCard
+              key={source?.title + index}
+              data={source}
+              index={index}
+            />
+          </div>
         ))}
       </div>
     </div>

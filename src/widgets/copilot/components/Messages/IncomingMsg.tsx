@@ -8,6 +8,7 @@ import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
 import { memo } from "react";
+import { SourcesSection } from "./Sources";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -69,7 +70,12 @@ const IncomingMsg = memo(
     autoPlay: boolean | undefined;
     onFeedbackClick: (buttonId: string, botMessageId: string) => void;
   }) => {
-    const { output_audio = [], type, output_video = [] } = props.data;
+    const {
+      output_audio = [],
+      type,
+      output_video = [],
+      references = [],
+    } = props.data;
     const isAutoPlay = props.autoPlay === false ? false : true;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
@@ -85,6 +91,9 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
+        {props.showSources && !!references.length && (
+          <SourcesSection {...props.data} />
+        )}
         <div className="gpl-16 mw-100">
           <BotMessageLayout>
             <div
