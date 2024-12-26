@@ -7,11 +7,8 @@ import style from "./incoming.scss?inline";
 import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
 import Button from "src/components/shared/Buttons/Button";
-import React, { memo } from "react";
-import Sources from "./Sources";
-import IconBooks from "src/assets/SvgIcons/IconBooks";
-import IconButton from "src/components/shared/Buttons/IconButton";
-import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
+import { memo } from "react";
+import { SourcesSection } from "./Sources";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -64,40 +61,6 @@ const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
   );
 };
 
-const SourcesSection = (data: any) => {
-  const { references = [] }: any = data;
-  const sources = [...references];
-  const { config } = useSystemContext();
-  const [isExpanded, setIsExpanded] = React.useState<boolean>(
-    config?.expandedSources || true,
-  );
-
-  const toggleExpansion = (e) => {
-    e.preventDefault();
-    setIsExpanded((prev) => !prev);
-  };
-
-  return (
-    <div className="gmb-8">
-      <div className="d-flex align-center gpt-4 gpb-8">
-        <IconBooks />
-        <h4 className="font_16_500 gml-4 gmr-8">Sources</h4>
-        <IconButton
-          variant="filled"
-          className={clsx(
-            "bg-light gp-4",
-            isExpanded ? "chevron-down" : "chevron-up",
-          )}
-          onClick={toggleExpansion}
-        >
-          <IconCaretUp size={12} />
-        </IconButton>
-      </div>
-      {isExpanded && <Sources data={sources} />}
-    </div>
-  );
-};
-
 const IncomingMsg = memo(
   (props: {
     data: any;
@@ -128,10 +91,10 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
+        {props.showSources && !!references.length && (
+          <SourcesSection {...props.data} />
+        )}
         <div className="gpl-16 mw-100">
-          {props.showSources && !!references.length && (
-            <SourcesSection {...props.data} />
-          )}
           <BotMessageLayout>
             <div
               className={clsx(
