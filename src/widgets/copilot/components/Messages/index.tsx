@@ -32,7 +32,7 @@ const Responses = (props: any) => {
             data={responseData}
             key={id}
             id={id}
-            showSources={config?.showSources || true}
+            showSources={config?.showSources || false}
             linkColor={config?.branding?.colors?.primary || "initial"}
             onFeedbackClick={handleFeedbackClick}
             autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
