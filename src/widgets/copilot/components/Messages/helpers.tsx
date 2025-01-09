@@ -178,9 +178,9 @@ export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
     }
   },
   transform(reactNode, domNode) {
-    if (domNode.type === "text" && data.showSources) {
-      return customizedSources(reactNode, domNode, data);
-    }
+    // if (domNode.type === "text" && data.showSources) {
+    //   return customizedSources(reactNode, domNode, data);
+    // }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     switch (domNode.name) {
