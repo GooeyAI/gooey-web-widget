@@ -91,9 +91,6 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        {props.showSources && !!references.length && (
-          <SourcesSection {...props.data} />
-        )}
         <div className="gpl-16 mw-100">
           <BotMessageLayout>
             <div
@@ -134,6 +131,9 @@ const IncomingMsg = memo(
             />
           )}
         </div>
+        {props.showSources && !!references.length && (
+          <SourcesSection {...props.data} />
+        )}
       </div>
     );
   },
