@@ -14,12 +14,9 @@ import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
-import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
-import Sources from "./Sources";
-import React from "react";
 
 const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
-const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
+// const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
   contentType: string,
@@ -228,45 +225,45 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
   );
 };
 
-const customizedSources = (reactNode: any, domNode: any, data: any) => {
-  if (!domNode) return domNode;
-  let text = domNode.data || "";
+// const customizedSources = (reactNode: any, domNode: any, data: any) => {
+//   if (!domNode) return domNode;
+//   let text = domNode.data || "";
 
-  // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
-  // and add the text before and after the match to parts final render array
-  const matches: any = Array.from(
-    new Set(
-      (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
-        parseInt(match.slice(1, -1), 10),
-      ),
-    ),
-  );
+//   // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
+//   // and add the text before and after the match to parts final render array
+//   const matches: any = Array.from(
+//     new Set(
+//       (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
+//         parseInt(match.slice(1, -1), 10),
+//       ),
+//     ),
+//   );
 
-  // return the text as it is if no match found
-  if (!matches || !matches.length) return reactNode;
+//   // return the text as it is if no match found
+//   if (!matches || !matches.length) return reactNode;
 
-  const { references = [] }: any = data;
-  const sources = [...references].splice(
-    matches[0] - 1,
-    matches[matches.length - 1],
-  );
+//   const { references = [] }: any = data;
+//   const sources = [...references].splice(
+//     matches[0] - 1,
+//     matches[matches.length - 1],
+//   );
 
-  text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
-  // remove trailing dot and space
-  if (text[text.length - 1] === "." && text[text.length - 2] === " ") {
-    text = text.slice(0, -2) + ".";
-  }
-  return (
-    <React.Fragment>
-      {text}{" "}
-      {!!references.length && (
-        <CollapsibleButton>
-          <Sources data={sources} />
-        </CollapsibleButton>
-      )}
-    </React.Fragment>
-  );
-};
+//   text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
+//   // remove trailing dot and space
+//   if (text[text.length - 1] === "." && text[text.length - 2] === " ") {
+//     text = text.slice(0, -2) + ".";
+//   }
+//   return (
+//     <React.Fragment>
+//       {text}{" "}
+//       {!!references.length && (
+//         <CollapsibleButton>
+//           <Sources data={sources} />
+//         </CollapsibleButton>
+//       )}
+//     </React.Fragment>
+//   );
+// };
 
 export const formatTextResponse = (
   data: any,
