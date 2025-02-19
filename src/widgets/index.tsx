@@ -21,6 +21,7 @@ export function CopilotChatWidget({ config }: { config?: any }) {
       ...config?.branding,
     },
   };
+  config.apiUrl ||= "https://api.gooey.ai";
   config.branding.name ||= "Gooey";
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
 
@@ -42,7 +43,7 @@ export function renderCopilotChatWidget(elem: Element, config?: any) {
   root.render(
     <React.StrictMode>
       <CopilotChatWidget config={config} />
-    </React.StrictMode>,
+    </React.StrictMode>
   );
   return root;
 }

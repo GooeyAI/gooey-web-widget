@@ -1,4 +1,4 @@
-import { useSystemContext } from "src/contexts/hooks";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import ResponseLoader from "../Loader";
 
@@ -37,28 +37,79 @@ export const BotMessageLayout = (props: Record<string, any>) => {
   );
 };
 
-const FeedbackButtons = ({ data, onFeedbackClick }: any) => {
+type ReplyButton = {
+  id: string;
+  title: string;
+  isPressed?: boolean;
+};
+
+const FeedbackButtons = ({
+  data,
+}: {
+  data: {
+    buttons: ReplyButton[];
+    bot_message_id: string;
+  };
+}) => {
   const { buttons, bot_message_id } = data;
+  const { initializeQuery }: any = useMessagesContext();
   if (!buttons) return null;
-  return (
-    <div className="d-flex gml-36">
-      {buttons.map(
-        (button: any) =>
-          !!button && (
-            <Button
-              key={button.id}
-              className="gmr-4 text-muted"
-              variant="text"
-              onClick={() =>
-                !button.isPressed && onFeedbackClick(button.id, bot_message_id)
-              }
-            >
-              {getFeedbackButtonIcon(button.id, button.isPressed)}
-            </Button>
-          ),
-      )}
-    </div>
-  );
+  const children = buttons
+    .map(
+      (button) =>
+        button && (
+          <FeedbackButton
+            key={button.id}
+            button={button}
+            onClick={() => {
+              if (button.isPressed) return;
+              initializeQuery({
+                button_pressed: {
+                  button_id: button.id,
+                  button_title: button.title,
+                  context_msg_id: bot_message_id,
+                },
+              });
+            }}
+          />
+        )
+    )
+    .filter(Boolean);
+  return <div className="d-flex gml-36">{children}</div>;
+};
+
+const FeedbackButton = ({
+  button,
+  onClick,
+}: {
+  button: ReplyButton;
+  onClick: () => void;
+}) => {
+  let icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
+  if (icon) {
+    return (
+      <Button
+        key={button.id}
+        className="gmr-4 text-muted"
+        variant="text"
+        onClick={onClick}
+      >
+        {icon}
+      </Button>
+    );
+  } else {
+    return (
+      <Button
+        key={button.id}
+        className="gmr-4"
+        variant="text"
+        onClick={onClick}
+        hideOverflow={false}
+      >
+        {button.title}
+      </Button>
+    );
+  }
 };
 
 const IncomingMsg = memo(
@@ -68,7 +119,6 @@ const IncomingMsg = memo(
     showSources: boolean;
     linkColor: string;
     autoPlay: boolean | undefined;
-    onFeedbackClick: (buttonId: string, botMessageId: string) => void;
   }) => {
     const {
       output_audio = [],
@@ -85,7 +135,7 @@ const IncomingMsg = memo(
     const parsedElements = formatTextResponse(
       props.data,
       props?.linkColor,
-      props?.showSources,
+      props?.showSources
     );
 
     if (!parsedElements) return <ResponseLoader show={true} />;
@@ -96,7 +146,7 @@ const IncomingMsg = memo(
             <div
               className={clsx(
                 "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
-                isStreaming && "response-streaming",
+                isStreaming && "response-streaming"
               )}
               id={props?.id}
             >
@@ -125,10 +175,7 @@ const IncomingMsg = memo(
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (
-            <FeedbackButtons
-              onFeedbackClick={props?.onFeedbackClick}
-              data={props?.data}
-            />
+            <FeedbackButtons data={props?.data} />
           )}
         </div>
         {props.showSources && !!references.length && (
@@ -136,7 +183,7 @@ const IncomingMsg = memo(
         )}
       </div>
     );
-  },
+  }
 );
 
 export default IncomingMsg;

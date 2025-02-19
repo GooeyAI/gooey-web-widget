@@ -5,7 +5,13 @@ import clsx from "clsx";
 addInlineStyle(style);
 
 const OutgoingMsg = memo((props: any) => {
-  const { input_prompt = "", input_audio = "", input_images = [] } = props.data;
+  let {
+    input_prompt = "",
+    input_audio = "",
+    input_images = [],
+    button_pressed = {},
+  } = props.data;
+  input_prompt ||= button_pressed?.button_title;
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
       {input_images.length > 0 &&
@@ -16,7 +22,7 @@ const OutgoingMsg = memo((props: any) => {
               alt={url}
               className={clsx(
                 "outgoingMsg-image b-1 br-large",
-                input_prompt && "gmb-4",
+                input_prompt && "gmb-4"
               )}
             />
           </a>
