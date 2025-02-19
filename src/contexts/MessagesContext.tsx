@@ -110,13 +110,14 @@ const MessagesContextProvider = (props: any) => {
     (payload: any) => {
       setMessages((prev: any) => {
         // stream close
-        if (!payload) {
+        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
+          const text = (prevMessage?.text || "") + (payload?.text || "");
           newMessages.set(lastResponseId, {
             ...prevMessage,
-            output_text: [prevMessage?.text ?? ""],
+            output_text: [text],
             type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
             status: "completed",
           });
@@ -210,7 +211,10 @@ const MessagesContextProvider = (props: any) => {
           [payload.input_audio],
           `gooey-widget-recording-${uuidv4()}.webm`
         );
-        payload.input_audio = await uploadFileToGooey(file as File);
+        payload.input_audio = await uploadFileToGooey(
+          config!.apiUrl!,
+          file as File
+        );
       }
       payload = {
         ...config?.payload,
@@ -219,9 +223,9 @@ const MessagesContextProvider = (props: any) => {
         ...payload,
       };
       const streamUrl = await createStreamApi(
+        config!.apiUrl!,
         payload,
-        apiSource.current,
-        config?.apiUrl
+        apiSource.current
       );
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage

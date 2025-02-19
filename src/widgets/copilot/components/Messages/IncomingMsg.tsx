@@ -66,6 +66,7 @@ const FeedbackButtons = ({
               initializeQuery({
                 button_pressed: {
                   button_id: button.id,
+                  button_title: button.title,
                   context_msg_id: bot_message_id,
                 },
               });

@@ -3,8 +3,6 @@ import { resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
 import { peerDependencies } from "./package.json";
 
-const { REACT_APP_GOOEY_SERVER } = loadEnv("dev", process.cwd(), "");
-
 export default defineConfig({
   build: {
     commonjsOptions: {
@@ -32,11 +30,6 @@ export default defineConfig({
     },
     // sourcemap: true, // Generates source maps for debugging.
     emptyOutDir: true, // Clears the output directory before building.
-  },
-  define: {
-    "process.env": {
-      REACT_APP_GOOEY_SERVER,
-    },
   },
   resolve: {
     alias: {
