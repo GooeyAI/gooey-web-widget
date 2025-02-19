@@ -31,6 +31,7 @@ export default defineConfig({
     // sourcemap: true, // Generates source maps for debugging.
     emptyOutDir: true, // Clears the output directory before building.
   },
+  define: { "process.env": {} },
   resolve: {
     alias: {
       src: resolve(__dirname, "src"),
