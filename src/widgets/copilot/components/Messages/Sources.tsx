@@ -237,11 +237,12 @@ export const SourcesSection = (data: any) => {
   const sources = [...references];
   const { config } = useSystemContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(
-    config?.expandedSources || true,
+    config?.expandedSources || false,
   );
 
   const toggleExpansion = (e: SyntheticEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsExpanded((prev) => !prev);
   };
 
@@ -254,17 +255,19 @@ export const SourcesSection = (data: any) => {
         >
           <IconBooks />
         </span>
-        <h4 className="font_16_500 gmr-6">Sources</h4>
-        <IconButton
-          variant="filled"
-          className={clsx(
-            "bg-light gp-4",
-            isExpanded ? "chevron-down" : "chevron-up",
-          )}
-          onClick={toggleExpansion}
-        >
-          <IconCaretUp size={12} />
-        </IconButton>
+        <div className="d-flex cr-pointer" onClick={toggleExpansion}>
+          <h4 className="font_14_500 gmr-6">Sources</h4>
+          <IconButton
+            variant="filled"
+            className={clsx(
+              "bg-light gp-2",
+              isExpanded ? "chevron-down" : "chevron-up",
+            )}
+            onClick={toggleExpansion}
+          >
+            <IconCaretUp size={12} />
+          </IconButton>
+        </div>
       </div>
       {isExpanded && <Sources data={sources} />}
     </div>

@@ -16,6 +16,10 @@
   border-radius: 12px;
 }
 
+.sources-listContainer::-webkit-scrollbar {
+  display: none;
+}
+
 .sources-listContainer {
   display: flex;
   min-height: 72px;
