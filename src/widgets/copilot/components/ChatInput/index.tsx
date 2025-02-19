@@ -179,7 +179,8 @@ const ChatInput = () => {
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
               className={clsx(
-                "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0", isLeftButtons ? "gpl-32" : "gpl-12"
+                "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
+                isLeftButtons ? "gpl-32" : "gpl-12"
               )}
               placeholder={`Message ${config.branding.name || ""}`}
             ></textarea>
@@ -187,7 +188,11 @@ const ChatInput = () => {
             {/* Left icons */}
             {isLeftButtons && (
               <div className="input-left-buttons">
-                <IconButton onClick={handleFileUpload} variant="text-alt" className="gp-4">
+                <IconButton
+                  onClick={handleFileUpload}
+                  variant="text-alt"
+                  className="gp-4"
+                >
                   <IconPaperClip size={18} />
                 </IconButton>
               </div>

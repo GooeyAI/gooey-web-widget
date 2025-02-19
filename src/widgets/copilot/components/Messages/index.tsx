@@ -9,7 +9,7 @@ import SpinLoader from "src/components/shared/SpinLoader";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const { handleFeedbackClick, preventAutoplay }: any = useMessagesContext();
+  const { preventAutoplay }: any = useMessagesContext();
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
@@ -34,7 +34,6 @@ const Responses = (props: any) => {
             id={id}
             showSources={config?.showSources || false}
             linkColor={config?.branding?.colors?.primary || "initial"}
-            onFeedbackClick={handleFeedbackClick}
             autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
           />
         );
@@ -72,7 +71,7 @@ const Messages = () => {
       ref={scrollContainerRef}
       className={clsx(
         "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 d-flex flex-col",
-        isEmpty ? "justify-end" : "justify-start",
+        isEmpty ? "justify-end" : "justify-start"
       )}
       style={{ overflowY: "auto" }}
     >

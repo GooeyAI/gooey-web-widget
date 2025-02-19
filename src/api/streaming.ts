@@ -46,17 +46,35 @@ export const getDataFromStream = (sseUrl: string, setterFn: any) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   window.GooeyEventSource = evtSource;
+
+  evtSource.addEventListener("close", () => {
+    // close the event source
+    evtSource.close();
+    // set the state to null
+    setterFn(null);
+  });
+
+  evtSource.addEventListener("error", (event: MessageEvent) => {
+    // parse the error message as JSON
+    const { detail } = JSON.parse(event.data);
+    // display the error message
+    setterFn({
+      type: STREAM_MESSAGE_TYPES.MESSAGE_PART,
+      text: `<p className="text-gooeyDanger font_14_400">${detail}</p>`,
+    });
+    // close the event source
+    evtSource.close();
+  });
+
   evtSource.onmessage = (event) => {
     // parse the message as JSON
     const data = JSON.parse(event.data);
+    // update the state with the streamed message
+    setterFn(data);
     // check if the message is the final response
     if (data.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
       // close the stream
-      setterFn(data);
       evtSource.close();
-    } else {
-      // update the state with the streamed message
-      setterFn(data);
     }
   };
 };

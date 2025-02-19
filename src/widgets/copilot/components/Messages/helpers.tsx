@@ -21,7 +21,7 @@ const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
 export const findSourceIcon = (
   contentType: string,
   url: string,
-  size: number = 12,
+  size: number = 12
 ): JSX.ElementType | null => {
   const urlLower = url.toLowerCase();
   // try to guess from url first
@@ -123,7 +123,7 @@ export function extractMainDomain(url: string) {
 export const fetchUrlMeta = async (url: string): Promise<any> => {
   try {
     const response: any = await axios.get(
-      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`,
+      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`
     );
     return response?.data;
   } catch (err) {
@@ -268,13 +268,13 @@ const customizedLinks = (reactNode: any, domNode: any, data: any) => {
 export const formatTextResponse = (
   data: any,
   linkColor: string,
-  showSources: boolean,
+  showSources: boolean
 ) => {
   const body = getOutputText(data);
   if (!body) return "";
   const rawHtml = marked.parse(body, {
     async: false,
-    breaks: false,
+    breaks: true,
     extensions: null,
     gfm: true,
     hooks: null,
@@ -285,7 +285,7 @@ export const formatTextResponse = (
   });
   const parsedElements = parse(
     rawHtml as string,
-    getReactParserOptions({ ...data, showSources, linkColor }),
+    getReactParserOptions({ ...data, showSources, linkColor })
   );
   return parsedElements;
 };
