@@ -323,22 +323,22 @@ const MessagesContextProvider = (props: any) => {
 
       return messages;
     },
-    [cancelApiCall, isReceiving, isSending]
+    [cancelApiCall, isReceiving, isSending],
   );
 
   useEffect(() => {
     setPreventAutoplay(true);
-    if (!layoutController?.showNewConversationButton && conversations.length)
-      // Load the latest conversation from DB
+    if (
+      !layoutController?.showNewConversationButton &&
+      conversations.length &&
+      !messages.size
+    )
+      // Load the latest conversation from DB - initial load
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
     avoidAutoplay();
-  }, [
-    config,
-    conversations,
-    layoutController?.showNewConversationButton,
-    setActiveConversation,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations]);
 
   const avoidAutoplay = () => {
     setPreventAutoplay(true);
