@@ -88,21 +88,18 @@ const FeedbackButton = ({
   let icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
   if (icon) {
     return (
-      <Button
-        key={button.id}
-        className="gmr-4 text-muted"
-        variant="text"
-        onClick={onClick}
-      >
-        {icon}
-      </Button>
+      <div className="my-auto">
+        <Button key={button.id} className="gmr-8 text-muted" onClick={onClick}>
+          {icon}
+        </Button>
+      </div>
     );
   } else {
     return (
       <Button
         key={button.id}
-        className="gmr-4"
-        variant="text"
+        className="gmr-8 text-left"
+        variant="outlined"
         onClick={onClick}
         hideOverflow={false}
       >

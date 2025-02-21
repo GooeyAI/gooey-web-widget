@@ -35,7 +35,7 @@ $space-values: (
   76,
   80,
   96,
-  100
+  100,
 );
 
 // margin and padding shorthands
@@ -67,3 +67,8 @@ $space-prefixes: (
   $grid-breakpoints,
   "px"
 );
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}

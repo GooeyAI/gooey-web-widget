@@ -54,10 +54,13 @@ button:hover .icon-hover {
 
 // Variant - OUTLINED
 .button-outlined {
-  border: 1px solid #eee;
+  border-radius: 12px;
+  background-color: #f5f5f5;
 }
+
 .button-outlined:hover {
   background-color: $light;
+  scale: 0.98;
 }
 
 // Variant - TEXT
