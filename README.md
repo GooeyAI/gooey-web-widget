@@ -56,7 +56,11 @@ const config = {
     showPoweredByGooey: true,
   },
   payload: {
-    user_id: "123", 
+    user_id: "123",
+    variables: {
+        "product_id": "sample_id",
+        "product_name": "sample_name"
+    },
   },
 }
 GooeyEmbed.mount(config);
@@ -124,6 +128,8 @@ Controls visual aspects of the widget and defines the textual content and relate
 
 Contains the data sent to the Gooey API.
 Consult the [Gooey API documentation](https://api.gooey.ai/docs#tag/Copilot-Integrations/operation/video-bots__stream_create) for additional payload options.
+
+Note: If you want to work with "variables" in payload, refer to our [Advanced prompting guide](https://docs.gooey.ai/guides/copilot/craft-your-ai-copilots-personality#advanced-prompting-strategies)
 
 ## **Project Setup Guide**
 
