@@ -43,9 +43,9 @@ export const FullSourcePreview = (props: any) => {
         style={{ height: "56px" }}
       >
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
-          {ExtensionIcon || !metaData?.logo ? (
+          {ExtensionIcon ? (
             <ExtensionIcon />
-          ) : (
+          ) : metaData?.logo ? (
             <img
               src={metaData?.logo}
               alt={data?.title}
@@ -56,7 +56,7 @@ export const FullSourcePreview = (props: any) => {
                 objectFit: "contain",
               }}
             />
-          )}
+          ) : null}
           <p
             className="font_16_500 m-0 flex-1 gml-8"
             style={{
