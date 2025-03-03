@@ -43,9 +43,9 @@ export const FullSourcePreview = (props: any) => {
         style={{ height: "56px" }}
       >
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>
-          {ExtensionIcon || !metaData?.logo ? (
+          {ExtensionIcon ? (
             <ExtensionIcon />
-          ) : (
+          ) : metaData?.logo ? (
             <img
               src={metaData?.logo}
               alt={data?.title}
@@ -56,7 +56,7 @@ export const FullSourcePreview = (props: any) => {
                 objectFit: "contain",
               }}
             />
-          )}
+          ) : null}
           <p
             className="font_16_500 m-0 flex-1 gml-8"
             style={{
@@ -278,16 +278,18 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   return (
     <div className="text-reveal-container">
-      <div className="gpb-8 gpt-4 sources-listContainer">
-        {data.map((source: any, index: number) => (
-          <div className={clsx(index === 0 && "gml-52")}>
-            <SourcesCard
+      <div className="gooey-scroll-wrapper">
+        <div className="gpb-8 gpt-4 sources-listContainer gooey-scroll-container">
+          {data.map((source: any, index: number) => (
+            <div
+              className={clsx(index === 0 && "gml-52")}
               key={source?.title + index}
-              data={source}
-              index={index}
-            />
-          </div>
-        ))}
+            >
+              <SourcesCard data={source} index={index} />
+            </div>
+          ))}
+          <div className="gooey-scroll-fade"></div>
+        </div>
       </div>
     </div>
   );

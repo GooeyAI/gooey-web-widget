@@ -16,19 +16,11 @@
   border-radius: 12px;
 }
 
-.sources-listContainer::-webkit-scrollbar {
-  display: none;
-}
-
 .sources-listContainer {
   display: flex;
   min-height: 72px;
   max-width: calc(100% + 16px); // 16px is the padding of the parent container
-  overflow: auto;
-}
-
-.sources-listContainer:hover {
-  overflow-x: auto;
+  
 }
 
 .sources-card {
@@ -53,6 +45,7 @@
 .sources-card p {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   word-break: break-all;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -311,10 +304,9 @@
 
 .markdown img {
   max-height: 400px;
-  max-width: 800px;
+  max-width: 90%;
   border-radius: 8px;
   object-fit: cover;
-  overflow: hidden;
 }
 
 
