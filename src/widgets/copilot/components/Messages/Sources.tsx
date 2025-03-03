@@ -281,12 +281,11 @@ const Sources = ({ data }: any) => {
       <div className="gooey-scroll-wrapper">
         <div className="gpb-8 gpt-4 sources-listContainer gooey-scroll-container">
           {data.map((source: any, index: number) => (
-            <div className={clsx(index === 0 && "gml-52")}>
-              <SourcesCard
-                key={source?.title + index}
-                data={source}
-                index={index}
-              />
+            <div
+              className={clsx(index === 0 && "gml-52")}
+              key={source?.title + index}
+            >
+              <SourcesCard data={source} index={index} />
             </div>
           ))}
           <div className="gooey-scroll-fade"></div>
