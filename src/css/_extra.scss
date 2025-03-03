@@ -207,6 +207,12 @@
   white-space: nowrap;
 }
 
+@media (max-width: 1100px) {
+  .gooey-scroll-container {
+    white-space: normal;
+  }
+}
+
 .gooey-scroll-container::-webkit-scrollbar {
   display: none;
 }
@@ -215,7 +221,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 50px;
+  width: 20px;
   height: 100%;
   pointer-events: none;
   background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);

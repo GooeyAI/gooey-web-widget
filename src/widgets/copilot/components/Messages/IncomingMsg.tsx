@@ -54,39 +54,82 @@ const FeedbackButtons = ({
   const { buttons, bot_message_id } = data;
   const { initializeQuery }: any = useMessagesContext();
   if (!buttons) return null;
-  const children = buttons
-    .map(
-      (button, idx) =>
-        button && (
-          <FeedbackButton
-            key={button.id}
-            button={button}
-            className={clsx(idx === 0 && "gml-16")}
-            onClick={() => {
-              if (button.isPressed) return;
-              initializeQuery({
-                button_pressed: {
-                  button_id: button.id,
-                  button_title: button.title,
-                  context_msg_id: bot_message_id,
-                },
-              });
-            }}
-          />
-        ),
-    )
-    .filter(Boolean);
+
+  // Separate thumb buttons from normal buttons
+  const thumbButtons: ReplyButton[] = [];
+  const normalButtons: ReplyButton[] = [];
+
+  buttons.forEach((button) => {
+    if (
+      button.id.includes("thumb") ||
+      getFeedbackButtonIcon(button.id, button.isPressed || false)
+    ) {
+      thumbButtons.push(button);
+    } else {
+      normalButtons.push(button);
+    }
+  });
+
   return (
-    <div className="gooey-scroll-wrapper">
-      <div className="mw-100 gooey-scroll-container">
-        <div
-          className="flex-1 d-flex"
-          style={{ overflow: "auto", width: "max-content" }}
-        >
-          {children}
+    <div>
+      {thumbButtons.length > 0 && (
+        <div>
+          {normalButtons.length > 0 && (
+            <div className="gooey-scroll-wrapper">
+              <div
+                className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
+                style={{ gap: "12px" }}
+              >
+                {normalButtons.map(
+                  (button) =>
+                    button && (
+                      <FeedbackButton
+                        key={button.id}
+                        button={button}
+                        className={clsx("my-1 mx-md-2")}
+                        onClick={() => {
+                          if (button.isPressed) return;
+                          initializeQuery({
+                            button_pressed: {
+                              button_id: button.id,
+                              button_title: button.title,
+                              context_msg_id: bot_message_id,
+                            },
+                          });
+                        }}
+                      />
+                    ),
+                )}
+              </div>
+              <div className="gooey-scroll-fade d-none sm-d-block"></div>
+            </div>
+          )}
+          <div
+            className="d-flex gmt-2 justify-content-start gml-36"
+            style={{ gap: "4px" }}
+          >
+            {thumbButtons.map(
+              (button) =>
+                button && (
+                  <FeedbackButton
+                    key={button.id}
+                    button={button}
+                    onClick={() => {
+                      if (button.isPressed) return;
+                      initializeQuery({
+                        button_pressed: {
+                          button_id: button.id,
+                          button_title: button.title,
+                          context_msg_id: bot_message_id,
+                        },
+                      });
+                    }}
+                  />
+                ),
+            )}
+          </div>
         </div>
-        <div className="gooey-scroll-fade"></div>
-      </div>
+      )}
     </div>
   );
 };
@@ -104,7 +147,7 @@ const FeedbackButton = ({
   if (icon) {
     return (
       <div className={clsx("my-auto", className)}>
-        <Button key={button.id} className="gmr-8 text-muted" onClick={onClick}>
+        <Button key={button.id} className="text-muted" onClick={onClick}>
           {icon}
         </Button>
       </div>
@@ -113,7 +156,7 @@ const FeedbackButton = ({
     return (
       <Button
         key={button.id}
-        className={clsx("gmr-8 text-left gmb-8", className)}
+        className={clsx("text-left", className)}
         variant="outlined"
         onClick={onClick}
         hideOverflow={false}
