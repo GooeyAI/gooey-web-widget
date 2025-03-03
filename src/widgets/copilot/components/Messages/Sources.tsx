@@ -278,16 +278,19 @@ const Sources = ({ data }: any) => {
   if (!data || !data.length) return null;
   return (
     <div className="text-reveal-container">
-      <div className="gpb-8 gpt-4 sources-listContainer">
-        {data.map((source: any, index: number) => (
-          <div className={clsx(index === 0 && "gml-52")}>
-            <SourcesCard
-              key={source?.title + index}
-              data={source}
-              index={index}
-            />
-          </div>
-        ))}
+      <div className="gooey-scroll-wrapper">
+        <div className="gpb-8 gpt-4 sources-listContainer gooey-scroll-container">
+          {data.map((source: any, index: number) => (
+            <div className={clsx(index === 0 && "gml-52")}>
+              <SourcesCard
+                key={source?.title + index}
+                data={source}
+                index={index}
+              />
+            </div>
+          ))}
+          <div className="gooey-scroll-fade"></div>
+        </div>
       </div>
     </div>
   );

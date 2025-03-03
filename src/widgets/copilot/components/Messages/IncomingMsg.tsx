@@ -56,11 +56,12 @@ const FeedbackButtons = ({
   if (!buttons) return null;
   const children = buttons
     .map(
-      (button) =>
+      (button, idx) =>
         button && (
           <FeedbackButton
             key={button.id}
             button={button}
+            className={clsx(idx === 0 && "gml-16")}
             onClick={() => {
               if (button.isPressed) return;
               initializeQuery({
@@ -72,23 +73,37 @@ const FeedbackButtons = ({
               });
             }}
           />
-        )
+        ),
     )
     .filter(Boolean);
-  return <div className="d-flex gml-36">{children}</div>;
+  return (
+    <div className="gooey-scroll-wrapper">
+      <div className="mw-100 gooey-scroll-container">
+        <div
+          className="flex-1 d-flex"
+          style={{ overflow: "auto", width: "max-content" }}
+        >
+          {children}
+        </div>
+        <div className="gooey-scroll-fade"></div>
+      </div>
+    </div>
+  );
 };
 
 const FeedbackButton = ({
   button,
   onClick,
+  className,
 }: {
   button: ReplyButton;
   onClick: () => void;
+  className?: string;
 }) => {
-  let icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
+  const icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
   if (icon) {
     return (
-      <div className="my-auto">
+      <div className={clsx("my-auto", className)}>
         <Button key={button.id} className="gmr-8 text-muted" onClick={onClick}>
           {icon}
         </Button>
@@ -98,7 +113,7 @@ const FeedbackButton = ({
     return (
       <Button
         key={button.id}
-        className="gmr-8 text-left"
+        className={clsx("gmr-8 text-left gmb-8", className)}
         variant="outlined"
         onClick={onClick}
         hideOverflow={false}
@@ -132,7 +147,7 @@ const IncomingMsg = memo(
     const parsedElements = formatTextResponse(
       props.data,
       props?.linkColor,
-      props?.showSources
+      props?.showSources,
     );
 
     if (!parsedElements) return <ResponseLoader show={true} />;
@@ -143,7 +158,7 @@ const IncomingMsg = memo(
             <div
               className={clsx(
                 "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
-                isStreaming && "response-streaming"
+                isStreaming && "response-streaming",
               )}
               id={props?.id}
             >
@@ -180,7 +195,7 @@ const IncomingMsg = memo(
         )}
       </div>
     );
-  }
+  },
 );
 
 export default IncomingMsg;
