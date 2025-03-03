@@ -86,7 +86,7 @@ const FeedbackButtons = ({
                       <FeedbackButton
                         key={button.id}
                         button={button}
-                        className={clsx("my-1 mx-md-2")}
+                        className={clsx("my-1 mx-md-2 w-100")}
                         onClick={() => {
                           if (button.isPressed) return;
                           initializeQuery({
