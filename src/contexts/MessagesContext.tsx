@@ -62,6 +62,7 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const initializeQuery = (payload: any) => {
+    if (!payload || isSending || isReceiving) return;
     setPreventAutoplay(false);
     // calls the server and updates the state with user message
     const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
