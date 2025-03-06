@@ -274,7 +274,13 @@ export const SourcesSection = (data: any) => {
   );
 };
 
-const Sources = ({ data }: any) => {
+const Sources = ({
+  data,
+  isInline = false,
+}: {
+  data: any;
+  isInline?: boolean;
+}) => {
   if (!data || !data.length) return null;
   return (
     <div className="text-reveal-container">
@@ -282,7 +288,7 @@ const Sources = ({ data }: any) => {
         <div className="gpb-8 gpt-4 sources-listContainer gooey-scroll-container">
           {data.map((source: any, index: number) => (
             <div
-              className={clsx(index === 0 && "gml-52")}
+              className={clsx(index === 0 && !isInline && "gml-52")}
               key={source?.title + index}
             >
               <SourcesCard data={source} index={index} />
