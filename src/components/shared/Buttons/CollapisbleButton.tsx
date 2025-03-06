@@ -7,7 +7,7 @@ import { useSystemContext } from "src/contexts/hooks";
 const CollapsibleButton = ({ children, ...restProps }: any) => {
   const { config } = useSystemContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(
-    config?.expandedSources || true,
+    config?.expandedSources || false,
   );
 
   const toggleExpansion = () => {
