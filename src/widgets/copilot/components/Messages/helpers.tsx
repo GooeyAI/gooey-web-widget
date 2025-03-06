@@ -248,7 +248,7 @@ const customizedSources = (reactNode: any, domNode: any, data: any) => {
   const { references = [] }: any = data;
   const sources = [...references].splice(
     matches[0] - 1,
-    matches[matches.length - 1],
+    matches[matches.length - 1] - matches[0] + 1,
   );
 
   text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
