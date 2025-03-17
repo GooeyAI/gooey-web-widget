@@ -123,15 +123,11 @@ export function extractMainDomain(url: string) {
   }
 }
 
-export const fetchUrlMeta = async (url: string): Promise<any> => {
-  try {
-    const response: any = await axios.get(
-      `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`,
-    );
-    return response?.data;
-  } catch (err) {
-    console.error(err);
-  }
+export const fetchUrlMeta = async (url: string) => {
+  const response: any = await axios.get(
+    `${GOOEY_META_SCRAPPER_API}/fetchUrlMeta?url=${url}`,
+  );
+  return response?.data || {};
 };
 
 // Text Rendering Logic
