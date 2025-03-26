@@ -4,14 +4,47 @@ import { memo } from "react";
 import clsx from "clsx";
 addInlineStyle(style);
 
+function calculateBoundingBox(
+  lat: number,
+  lon: number,
+  zoom: number
+): [number, number, number, number] {
+  const degreesPerTile = 360 / Math.pow(2, zoom);
+  const halfTile = degreesPerTile / 2;
+
+  const minLon = lon - halfTile;
+  const maxLon = lon + halfTile;
+  const minLat = lat - halfTile;
+  const maxLat = lat + halfTile;
+
+  return [minLon, minLat, maxLon, maxLat];
+}
+
+
 const OutgoingMsg = memo((props: any) => {
   let {
     input_prompt = "",
     input_audio = "",
     input_images = [],
     button_pressed = {},
+    input_location = {},
   } = props.data;
-  input_prompt ||= button_pressed?.button_title;
+
+  const { latitude, longitude } = input_location || {};
+
+  const hasValidLocation = latitude !== undefined && longitude !== undefined;
+
+  input_prompt ||= hasValidLocation ? '' : (button_pressed?.button_title || '');
+
+  const zoomLevel = 16;
+  let bbox = '';
+
+  if (hasValidLocation) {
+
+    const [minLon, minLat, maxLon, maxLat] = calculateBoundingBox(latitude, longitude, zoomLevel);
+    bbox = `${minLon},${minLat},${maxLon},${maxLat}`;
+  }
+
   return (
     <div className="gooey-outgoingMsg gmb-12 gpl-16">
       {input_images.length > 0 &&
@@ -40,6 +73,12 @@ const OutgoingMsg = memo((props: any) => {
           {input_prompt}
         </p>
       )}
+      {input_location.latitude && input_location.longitude && (<iframe
+        width="100%"
+        height="200px"
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${input_location.latitude},${input_location.longitude}`}
+        style={{ border: '1px solid black', aspectRatio: '16/9', borderRadius: '8px' }}
+      ></iframe>)}
     </div>
   );
 });

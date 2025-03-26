@@ -89,13 +89,65 @@ const FeedbackButtons = ({
                         className={clsx("my-1 mx-md-2 w-100")}
                         onClick={() => {
                           if (button.isPressed) return;
-                          initializeQuery({
-                            button_pressed: {
-                              button_id: button.id,
-                              button_title: button.title,
-                              context_msg_id: bot_message_id,
-                            },
-                          });
+                           // Check if this is a location request button
+                           if (button.id.includes('send_location')) {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                  const crd = position.coords;
+                                  const requestData = {
+                                    button_pressed: {
+                                      button_id: button.id,
+                                      button_title: button.title,
+                                      context_msg_id: bot_message_id,
+                                    },
+                                    input_location: {
+                                      latitude: crd.latitude,
+                                      longitude: crd.longitude,
+                                      accuracy: crd.accuracy
+                                    }
+                                  };
+                                  initializeQuery(requestData);
+                                },
+                                (error) => {
+                                  // Handle location error
+                                  console.error('Error getting location:', error);
+                                  let errorMessage = 'Unable to get location. ';
+                                  
+                                  switch (error.code) {
+                                    case error.PERMISSION_DENIED:
+                                      errorMessage += 'Please enable location services in your browser settings.';
+                                      break;
+                                    case error.POSITION_UNAVAILABLE:
+                                      errorMessage += 'Location information is unavailable. Please check if your GPS is enabled';
+                                      break;
+                                    case error.TIMEOUT:
+                                      errorMessage += 'Location request timed out. Please try again.';
+                                      break;
+                                    default:
+                                      errorMessage += error.message;
+                                  }
+                                  alert(errorMessage);
+                                },
+                                {
+                                  enableHighAccuracy: false,
+                                  timeout: 10000,
+                                  maximumAge: 10000
+                                }
+                              );
+                            } else {
+                              alert('Your browser does not support geolocation. Please enter your location manually or use a different browser.');
+                            }
+                          } else {
+                            // Follow up button press
+                            initializeQuery({
+                              button_pressed: {
+                                button_id: button.id,
+                                button_title: button.title,
+                                context_msg_id: bot_message_id,
+                              },
+                            });
+                          }
                         }}
                       />
                     ),
