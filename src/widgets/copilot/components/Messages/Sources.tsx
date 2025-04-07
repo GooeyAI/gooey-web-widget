@@ -111,19 +111,16 @@ const SourcesCard = (props: { data: Data; index: number }) => {
 
   useEffect(() => {
     if (!data || metaData || getTempStoreValue?.(data.url)) return;
-    try {
-      fetchUrlMeta(data.url).then((meta) => {
-        if (Object.keys(meta).length) {
-          if (meta?.title === "- YouTube") {
-            meta.title = data.title;
-          }
-          setMetaData(meta);
-          setTempStoreValue?.(data.url, meta);
+    fetchUrlMeta(data.url).then((meta) => {
+      if (meta && Object.keys(meta).length) {
+        if (meta?.title === "- YouTube") {
+          // was not able to fetch the title
+          meta.title = data.title;
         }
-      });
-    } catch (e) {
-      console.error(e);
-    }
+        setMetaData(meta);
+        setTempStoreValue?.(data.url, meta);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
