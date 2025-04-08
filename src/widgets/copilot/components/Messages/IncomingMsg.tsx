@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import ResponseLoader from "../Loader";
-
+import LocationModal from "./LocationModal";
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
 import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
@@ -37,7 +38,7 @@ export const BotMessageLayout = (props: Record<string, any>) => {
   );
 };
 
-type ReplyButton = {
+export type ReplyButton = {
   id: string;
   title: string;
   isPressed?: boolean;
@@ -53,6 +54,41 @@ const FeedbackButtons = ({
 }) => {
   const { buttons, bot_message_id } = data;
   const { initializeQuery }: any = useMessagesContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [modalData, setModalData] = useState<{
+    button: ReplyButton;
+    bot_message_id: string;
+  } | null>(null);
+
+  const handleOpenModal = (button: ReplyButton, bot_message_id: string) => {
+    setModalData({ button, bot_message_id });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSendLocation = (
+    location: { latitude: number; longitude: number },
+    { button, bot_message_id }: { button: ReplyButton; bot_message_id: string }
+  ) => {
+    const requestData = {
+      button_pressed: {
+        button_id: button.id,
+        button_title: button.title,
+        context_msg_id: bot_message_id,
+      },
+      input_location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    };
+    initializeQuery(requestData);
+    handleCloseModal();
+  };
+
   if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
@@ -89,55 +125,8 @@ const FeedbackButtons = ({
                         className={clsx("my-1 mx-md-2 w-100")}
                         onClick={() => {
                           if (button.isPressed) return;
-                           // Check if this is a location request button
-                           if (button.id.includes('send_location')) {
-                            if (navigator.geolocation) {
-                              navigator.geolocation.getCurrentPosition(
-                                (position) => {
-                                  const crd = position.coords;
-                                  const requestData = {
-                                    button_pressed: {
-                                      button_id: button.id,
-                                      button_title: button.title,
-                                      context_msg_id: bot_message_id,
-                                    },
-                                    input_location: {
-                                      latitude: crd.latitude,
-                                      longitude: crd.longitude,
-                                      accuracy: crd.accuracy
-                                    }
-                                  };
-                                  initializeQuery(requestData);
-                                },
-                                (error) => {
-                                  // Handle location error
-                                  console.error('Error getting location:', error);
-                                  let errorMessage = 'Unable to get location. ';
-                                  
-                                  switch (error.code) {
-                                    case error.PERMISSION_DENIED:
-                                      errorMessage += 'Please enable location services in your browser settings.';
-                                      break;
-                                    case error.POSITION_UNAVAILABLE:
-                                      errorMessage += 'Location information is unavailable. Please check if your GPS is enabled';
-                                      break;
-                                    case error.TIMEOUT:
-                                      errorMessage += 'Location request timed out. Please try again.';
-                                      break;
-                                    default:
-                                      errorMessage += error.message;
-                                  }
-                                  alert(errorMessage);
-                                },
-                                {
-                                  enableHighAccuracy: false,
-                                  timeout: 10000,
-                                  maximumAge: 10000
-                                }
-                              );
-                            } else {
-                              alert('Your browser does not support geolocation. Please enter your location manually or use a different browser.');
-                            }
+                          if (button.id.includes("send_location")) {
+                            handleOpenModal(button, bot_message_id);
                           } else {
                             // Follow up button press
                             initializeQuery({
@@ -150,7 +139,7 @@ const FeedbackButtons = ({
                           }
                         }}
                       />
-                    ),
+                    )
                 )}
               </div>
               <div className="gooey-scroll-fade d-none sm-d-block"></div>
@@ -182,6 +171,12 @@ const FeedbackButtons = ({
           </div>
         </div>
       )}
+      <LocationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSendLocation={handleSendLocation}
+        buttonData={modalData}
+      />
     </div>
   );
 };
