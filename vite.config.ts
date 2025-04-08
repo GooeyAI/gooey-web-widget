@@ -1,54 +1,100 @@
-import { sentryVitePlugin } from "@sentry/vite-plugin";
-import react from "@vitejs/plugin-react";
-import { resolve } from "path";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+import dts from "vite-plugin-dts";
+import { resolve } from "path";
 import { peerDependencies } from "./package.json";
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 
-export default defineConfig({
-  build: {
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
 
-    lib: {
-      entry: "./src/lib.tsx", // Specifies the entry point for building the library.
-      name: "gooey-chat", // Sets the name of the generated library.
-      fileName: (format) => `index.${format}.js`, // Generates the output file name based on the format.
-      formats: ["iife"], // Specifies the output formats (CommonJS and ES modules).
-    },
-
-    rollupOptions: {
-      external: [...Object.keys(peerDependencies)], // Defines external dependencies for Rollup bundling.
-      preserveEntrySignatures: "strict",
-      output: {
-        manualChunks: undefined,
-        extend: true,
-        globals: {
-          react: "React",
-        },
-        inlineDynamicImports: true,
-        entryFileNames: "[name].js", // currently does not work for the legacy bundle
-        assetFileNames: "[name].[ext]", // currently does not work for images
+export default defineConfig(({ mode }) => {
+  const baseConfig = {
+    define: { "process.env": {} },
+    resolve: {
+      alias: {
+        src: resolve(__dirname, "src"),
       },
     },
+    plugins: [
+      react(),
+    ],
+  };
 
-    // sourcemap: true, // Generates source maps for debugging.
-    // Clears the output directory before building.
-    emptyOutDir: true,
+  // === PACKAGE BUILD (for publishing components) ===
+  if (mode === "components") {
+    return {
+      ...baseConfig,
+      plugins: [
+        ...baseConfig.plugins,
+        dts({
+          insertTypesEntry: true,
+          include: ["src/components/**/*.ts", "src/components/**/*.tsx"],
+        }),
+        cssInjectedByJsPlugin(),
+      ],
+      build: {
+        cssCodeSplit: false,
+        copyPublicDir: false,
+        outDir: "components-dist",
+        lib: {
+          entry: "./src/components/index.ts",
+          name: "gooey-web-widget",
+          fileName: (format) => `gooey-chat-components.${format}.js`,
+        },
+        rollupOptions: {
+          external: ["react", "react-dom", "react/jsx-runtime"],
+          output: {
+            globals: {
+              react: "React",
+              "react-dom": "ReactDOM",
+            },
+            manualChunks: undefined,
+          },
+        },
+        commonjsOptions: {
+          transformMixedEsModules: true,
+        },
+        emptyOutDir: true,
+      },
+    };
+  }
 
-    sourcemap: true
-  },
-  define: { "process.env": {} },
-  resolve: {
-    alias: {
-      src: resolve(__dirname, "src"),
+  // === DEFAULT WIDGET BUILD (standalone IIFE for embed) ===
+  return {
+    ...baseConfig,
+    plugins: [
+      ...baseConfig.plugins,
+      sentryVitePlugin({
+        org: "dara-network",
+        project: "copilot-web-widget",
+      }),
+    ],
+    build: {
+      lib: {
+        entry: "./src/lib.tsx",
+        name: "gooey-chat",
+        fileName: (format) => `index.${format}.js`,
+        formats: ["iife"],
+      },
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+      rollupOptions: {
+        external: [...Object.keys(peerDependencies)],
+        preserveEntrySignatures: "strict",
+        output: {
+          manualChunks: undefined,
+          extend: true,
+          globals: {
+            react: "React",
+          },
+          inlineDynamicImports: true,
+          entryFileNames: "[name].js",
+          assetFileNames: "[name].[ext]",
+        },
+      },
+      emptyOutDir: true,
+      sourcemap: true,
     },
-  },
-  plugins: [react(), sentryVitePlugin({
-    org: "dara-network",
-    project: "copilot-web-widget"
-  }), sentryVitePlugin({
-    org: "dara-network",
-    project: "copilot-web-widget"
-  })], // Uses the 'vite-plugin-dts' plugin for generating TypeScript declaration files (d.ts).
+  };
 });
