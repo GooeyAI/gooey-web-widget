@@ -1,0 +1,16 @@
+(function(){"use strict";try{if(typeof document<"u"){var e=document.createElement("style");e.appendChild(document.createTextNode(":export{primary:hsl(169,55%,82%);secondary:hsl(12,100%,97%);border-color:#eee;gooeyDanger:#dc3545}@keyframes popup{0%{opacity:0;transform:translateY(1000px)}30%{opacity:.6;transform:translateY(100px)}to{opacity:1;transform:translateY(0)}}@keyframes fade-in-A{0%{opacity:0;transition:opacity .2s ease}to{opacity:1}}.fade-in-A{animation:fade-in-A .3s ease .5s}.anim-typing{line-height:130%!important;opacity:1;width:100%;animation:typing .25s steps(30),blink-border .2s step-end infinite alternate;overflow:hidden;white-space:inherit}.text-reveal-container *:not(code,div,pre,ol,ul){opacity:1;animation:anim-textReveal .35s cubic-bezier(.43,.02,.06,.62) 0s forwards 1}@keyframes anim-textReveal{0%{opacity:0}to{opacity:1}}@keyframes typing{0%{opacity:0;width:0;white-space:nowrap}to{opacity:1;white-space:nowrap}}.anim-blink-self{animation:blink 1s infinite}.anim-blink{animation:border-blink .5s infinite}@keyframes border-blink{0%{opacity:0}to{opacity:1}}@keyframes rotate{0%{transform:rotate(0)}to{transform:rotate(360deg)}}")),document.head.appendChild(e)}}catch(t){console.error("vite-plugin-css-injected-by-js",t)}})();
+import { jsx as t } from "react/jsx-runtime";
+const i = ({ size: r = 50 }) => {
+  const o = {
+    width: r + "px",
+    height: r + "px",
+    border: "2px solid #ccc",
+    borderTopColor: "transparent",
+    borderRadius: "50%",
+    animation: "rotate 1s linear infinite"
+  };
+  return /* @__PURE__ */ t("div", { style: o });
+};
+export {
+  i as SpinLoader
+};

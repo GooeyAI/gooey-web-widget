@@ -1,33 +1,36 @@
 {
-  "name": "gooey-chat",
-  "private": true,
-  "version": "2.3.3",
+  "name": "gooey-web-widget",
+  "version": "3.0.0",
   "type": "module",
+  "files": [
+    "components-dist"
+  ],
+  "main": "./components-dist/gooey-chat-components.umd.js",
+  "module": "./components-dist/gooey-chat-components.es.js",
+  "types": "./components-dist/gooey-chat-components.d.ts",
+  "exports": {
+    ".": {
+      "import": "./components-dist/gooey-chat-components.es.js",
+      "require": "./components-dist/gooey-chat-components.umd.js",
+      "types": "./components-dist/gooey-chat-components.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build-components": "tsc && vite build --mode components",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@sentry/react": "^9.1.0",
     "@sentry/tracing": "^7.120.3",
     "@sentry/vite-plugin": "^3.2.0",
-    "@vis.gl/react-google-maps": "^1.5.2",
-    "axios": "^1.6.5",
-    "html-react-parser": "^5.1.10",
-    "leaflet": "^1.9.4",
-    "marked": "^12.0.2",
-    "prism-react-renderer": "^2.3.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-leaflet": "4.2.1",
-    "uuid": "^9.0.1"
-  },
-  "peerDependencies": {},
-  "devDependencies": {
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
-    "@types/leaflet": "^1.9.17",
     "@types/node": "^20.11.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
@@ -35,14 +38,21 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "axios": "^1.6.5",
     "clsx": "^2.1.0",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "prettier": "^3.5.3",
+    "html-react-parser": "^5.1.10",
+    "marked": "^12.0.2",
+    "prism-react-renderer": "^2.3.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "sass": "^1.69.7",
     "typescript": "^5.2.2",
+    "uuid": "^9.0.1",
     "vite": "^5.0.8",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^3.7.0",
     "vite-plugin-require-transform": "^1.0.21"
   }
