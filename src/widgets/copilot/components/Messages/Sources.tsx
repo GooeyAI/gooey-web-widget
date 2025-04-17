@@ -20,7 +20,7 @@ export const FullSourcePreview = (props: any) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // fade loader for src reset
+    // fake loader for src reset
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);

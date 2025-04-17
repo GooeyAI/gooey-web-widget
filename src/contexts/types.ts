@@ -10,6 +10,9 @@ export interface CopilotConfigType {
   showSources: boolean;
   expandedSources: boolean;
   apiUrl?: string;
+  apiKeys?: {
+    GoogleMapsAPI?: string;
+  };
   branding: {
     name?: string;
     byLine?: string;

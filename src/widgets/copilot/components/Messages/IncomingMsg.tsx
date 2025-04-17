@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import ResponseLoader from "../Loader";
-
+import LocationModal from "./LocationModal";
 import { addInlineStyle } from "src/addStyles";
 import style from "./incoming.scss?inline";
 import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
@@ -37,7 +38,7 @@ export const BotMessageLayout = (props: Record<string, any>) => {
   );
 };
 
-type ReplyButton = {
+export type ReplyButton = {
   id: string;
   title: string;
   isPressed?: boolean;
@@ -53,6 +54,41 @@ const FeedbackButtons = ({
 }) => {
   const { buttons, bot_message_id } = data;
   const { initializeQuery }: any = useMessagesContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [modalData, setModalData] = useState<{
+    button: ReplyButton;
+    bot_message_id: string;
+  } | null>(null);
+
+  const handleOpenModal = (button: ReplyButton, bot_message_id: string) => {
+    setModalData({ button, bot_message_id });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSendLocation = (
+    location: { latitude: number; longitude: number },
+    { button, bot_message_id }: { button: ReplyButton; bot_message_id: string }
+  ) => {
+    const requestData = {
+      button_pressed: {
+        button_id: button.id,
+        button_title: button.title,
+        context_msg_id: bot_message_id,
+      },
+      input_location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    };
+    initializeQuery(requestData);
+    handleCloseModal();
+  };
+
   if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
@@ -89,16 +125,21 @@ const FeedbackButtons = ({
                         className={clsx("my-1 mx-md-2 w-100")}
                         onClick={() => {
                           if (button.isPressed) return;
-                          initializeQuery({
-                            button_pressed: {
-                              button_id: button.id,
-                              button_title: button.title,
-                              context_msg_id: bot_message_id,
-                            },
-                          });
+                          if (button.id.includes("send_location")) {
+                            handleOpenModal(button, bot_message_id);
+                          } else {
+                            // Follow up button press
+                            initializeQuery({
+                              button_pressed: {
+                                button_id: button.id,
+                                button_title: button.title,
+                                context_msg_id: bot_message_id,
+                              },
+                            });
+                          }
                         }}
                       />
-                    ),
+                    )
                 )}
               </div>
               <div className="gooey-scroll-fade d-none sm-d-block"></div>
@@ -130,6 +171,12 @@ const FeedbackButtons = ({
           </div>
         </div>
       )}
+      <LocationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSendLocation={handleSendLocation}
+        buttonData={modalData}
+      />
     </div>
   );
 };
