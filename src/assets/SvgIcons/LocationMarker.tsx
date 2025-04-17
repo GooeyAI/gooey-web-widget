@@ -1,0 +1,34 @@
+import SvgIcon from "src/components/shared/SvgIcon";
+
+const LocationMarker = (props: any) => {
+  const size = props.size || 45;
+  return (
+    <SvgIcon {...props}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 384 560"
+        width={size}
+        height={size}
+        {...props}
+      >
+        <g>
+          <ellipse
+            cx="192"
+            cy="520"
+            rx="75"
+            ry="55"
+            fill="rgba(0, 0, 0, 0.2)"
+          />{" "}
+
+          {/* Font Awesome Free 6.7.2 by
+          @fontawesome - https://fontawesome.com License -
+          https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. */}
+
+          <path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z" />
+        </g>
+      </svg>
+    </SvgIcon>
+  );
+};
+
+export default LocationMarker;

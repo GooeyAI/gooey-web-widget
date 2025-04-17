@@ -1,12 +1,12 @@
 @import "src/css/colors.module";
 
 .location-modal-overlay {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #fff;
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -22,16 +22,14 @@
 .location-modal {
   background-color: white;
   padding: 16px;
-  border-radius: 16px 16px 0 0;
-  height:100%;
+  height: 100%;
   width: 100%;
   box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
   max-height: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; 
-
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-header {
@@ -64,11 +62,10 @@
   height: 100%;
   padding-bottom: 56.25%; /* 16:9 aspect ratio fallback */
   border: 1px solid black;
-
 }
 
 .location-map-iframe iframe {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
@@ -79,7 +76,6 @@
   display: flex;
   justify-content: center;
   margin-top: 16px;
-
 }
 
 .error-text {
