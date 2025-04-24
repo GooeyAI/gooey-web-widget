@@ -6,34 +6,49 @@ const MIN_DRAWER_WIDTH = 300;
 const MAX_DRAWER_WIDTH = 800;
 const RESIZE_HANDLE_WIDTH = 5;
 
-const SecondaryDrawer = () => {
+type SecondaryDrawerProps = {
+  isMobile?: boolean;
+  isOpen?: boolean;
+  contentRenderer?: () => React.ReactNode;
+};
+
+const SecondaryDrawer = ({
+  isMobile,
+  isOpen,
+  contentRenderer,
+}: SecondaryDrawerProps) => {
+  console.log({
+    isMobile,
+    isOpen,
+    contentRenderer,      
+  }, "SecondaryDrawer props");
+
   const { layoutController } = useSystemContext();
+
+  // Fallbacks to context values
+  const effectiveIsMobile = isMobile ?? layoutController?.isMobile;
+  const effectiveIsOpen = isOpen ?? layoutController?.isSecondaryDrawerOpen;
+  const renderContent = contentRenderer ?? layoutController?.secondaryDrawerContent;
+
   const drawerRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth * 0.65);
 
   useEffect(() => {
     const sideBarElement = drawerRef.current;
+    if (!sideBarElement || !effectiveIsOpen) return;
 
-    if (!sideBarElement || !layoutController?.isSecondaryDrawerOpen) return;
-
-    if (layoutController?.isMobile) {
+    if (effectiveIsMobile) {
       sideBarElement.style.width = "100%";
       sideBarElement.style.position = "absolute !important";
     } else {
-      if (layoutController?.isSecondaryDrawerOpen) {
-        sideBarElement.style.width = `${drawerWidth}px`;
-        sideBarElement.style.position = "relative !important";
-      }
+      sideBarElement.style.width = `${drawerWidth}px`;
+      sideBarElement.style.position = "relative !important";
     }
-  }, [
-    layoutController?.isMobile,
-    layoutController?.isSecondaryDrawerOpen,
-    drawerWidth,
-  ]);
+  }, [effectiveIsMobile, effectiveIsOpen, drawerWidth]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (layoutController?.isMobile) return;
+    if (effectiveIsMobile) return;
     setIsResizing(true);
     e.preventDefault();
   };
@@ -50,15 +65,13 @@ const SecondaryDrawer = () => {
 
       const constrainedWidth = Math.min(
         Math.max(newWidth, MIN_DRAWER_WIDTH),
-        Math.max(MAX_DRAWER_WIDTH, containerRect.width * 0.8),
+        Math.max(MAX_DRAWER_WIDTH, containerRect.width * 0.8)
       );
 
       setDrawerWidth(constrainedWidth);
     };
 
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
+    const handleMouseUp = () => setIsResizing(false);
 
     if (isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -85,19 +98,19 @@ const SecondaryDrawer = () => {
       style={{
         zIndex: 10,
         transition: isResizing ? "none" : "width 0.2s ease",
-        position: layoutController?.isMobile ? "absolute" : "relative",
+        position: effectiveIsMobile ? "absolute" : "relative",
       }}
       className={clsx(
-        "h-100 top-0 overflow-x-hidden right-0 bg-grey d-flex flex-col",
+        "h-100 top-0 overflow-x-hidden right-0 bg-grey d-flex flex-col"
       )}
     >
-      {/* Content Container */}
+      {/* Content */}
       <div className="h-100 w-100 flex-1 d-flex flex-col">
-        {layoutController?.secondaryDrawerContent?.()}
+        {renderContent?.()}
       </div>
 
-      {/* Resize System */}
-      {!layoutController?.isMobile && (
+      {/* Resize Handle */}
+      {!effectiveIsMobile && (
         <div
           style={{
             position: "absolute",
@@ -123,7 +136,7 @@ const SecondaryDrawer = () => {
         </div>
       )}
 
-      {/* Full-screen overlay during resize */}
+      {/* Overlay */}
       {isResizing && (
         <div
           style={{

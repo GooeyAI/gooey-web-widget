@@ -55,5 +55,8 @@
     "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^3.7.0",
     "vite-plugin-require-transform": "^1.0.21"
+  },
+  "dependencies": {
+    "html-dom-parser": "^5.0.13"
   }
 }

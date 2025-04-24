@@ -1,7 +1,15 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+  MutableRefObject,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
-import axios from "axios";
+import axios, { CancelTokenSource } from "axios";
 import {
   STREAM_MESSAGE_TYPES,
   getDataFromStream,
@@ -20,11 +28,44 @@ interface IncomingMsg {
   input_audio?: string;
   conversation_id: string;
   citation_style: "symbol" | "number";
+  user_id?: string;
 }
 
-const CITATION_STYLE = "number";
+interface StreamPayload {
+  id?: string;
+  text?: string;
+  output_text?: string[];
+  conversation_id?: string;
+  type?: string;
+  status?: string;
+  bot_message_id?: string;
+  user_id?: string;
+  title?: string;
+  created_at?: string;
+  buttons?: any[];
+  [key: string]: any;
+}
 
-const createNewQuery = (payload: any) => {
+export interface MessagesContextType {
+  messages: Map<string, any>;
+  isSending: boolean;
+  initializeQuery: (payload: IncomingMsg) => void;
+  handleNewConversation: () => void;
+  cancelApiCall: () => void;
+  scrollMessageContainer: (y?: number) => void;
+  scrollContainerRef: MutableRefObject<HTMLElement | null>;
+  isReceiving: boolean;
+  conversations: Conversation[];
+  setActiveConversation: (conversation: Conversation) => Promise<void | any[] | undefined>;
+  currentConversationId: string | null;
+  isMessagesLoading: boolean;
+  preventAutoplay: boolean;
+  avoidAutoplay: () => void;
+}
+
+const CITATION_STYLE: "number" = "number";
+
+const createNewQuery = (payload: any): any => {
   return {
     ...payload,
     id: uuidv4(),
@@ -32,9 +73,9 @@ const createNewQuery = (payload: any) => {
   };
 };
 
-export const MessagesContext: any = createContext({});
+export const MessagesContext = createContext<MessagesContextType | undefined>(undefined);
 
-const MessagesContextProvider = (props: any) => {
+const MessagesContextProvider = (props: { children: ReactNode }) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const config = useSystemContext()?.config;
   const layoutController = useSystemContext()?.layoutController;
@@ -43,29 +84,28 @@ const MessagesContextProvider = (props: any) => {
     config?.integration_id as string
   );
 
-  const [messages, setMessages] = useState(new Map());
-  const [isSending, setIsSendingMessage] = useState(false);
-  const [isReceiving, setIsReceiving] = useState(false);
-  const [isMessagesLoading, setMessagesLoading] = useState(true);
-  const [preventAutoplay, setPreventAutoplay] = useState(true);
+  const [messages, setMessages] = useState<Map<string, any>>(new Map());
+  const [isSending, setIsSendingMessage] = useState<boolean>(false);
+  const [isReceiving, setIsReceiving] = useState<boolean>(false);
+  const [isMessagesLoading, setMessagesLoading] = useState<boolean>(true);
+  const [preventAutoplay, setPreventAutoplay] = useState<boolean>(true);
 
-  const apiSource = useRef(axios.CancelToken.source());
-  const currentStreamRef = useRef<any>(null);
-  const scrollContainerRef = useRef<null | HTMLElement>(null);
-  const currentConversation = useRef<Conversation | null>(null);
+  const apiSource = useRef<CancelTokenSource>(axios.CancelToken.source());
+  const currentStreamRef = useRef<string | null>(null);
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
+  const currentConversation = useRef<Partial<Conversation> | null>(null);
 
-  const updateCurrentConversation = (conversation: Conversation) => {
+  const updateCurrentConversation = (conversation: Partial<Conversation>) => {
     currentConversation.current = {
       ...currentConversation.current,
       ...conversation,
     };
   };
 
-  const initializeQuery = (payload: any) => {
+  const initializeQuery = (payload: IncomingMsg) => {
     if (!payload || isSending || isReceiving) return;
     setPreventAutoplay(false);
-    // calls the server and updates the state with user message
-    const lastResponse: any = Array.from(messages.values()).pop(); // will get the data from last server msg
+    const lastResponse: any = Array.from(messages.values()).pop();
     const conversationId = lastResponse?.conversation_id;
     setIsSendingMessage(true);
     const newQuery = createNewQuery(payload);
@@ -79,143 +119,114 @@ const MessagesContextProvider = (props: any) => {
   };
 
   const addResponse = (response: any) => {
-    setMessages((prev: any) => {
+    setMessages((prev) => {
       const newMessages = new Map(prev.set(response.id, response));
       return newMessages;
     });
   };
 
-  const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
-      // scroll to y position
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: y,
-          behavior: "smooth",
-        });
-      }
-    },
-    [scrollContainerRef]
-  );
+  const scrollMessageContainer = useCallback((y: number = 0) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scroll({
+        top: y,
+        behavior: "smooth",
+      });
+    }
+  }, []);
 
   const scrollToMessage = useCallback(() => {
-    // scroll to the last message
     setTimeout(() => {
-      scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number
-      );
+      scrollMessageContainer(scrollContainerRef?.current?.scrollHeight || 0);
     }, 10);
   }, [scrollMessageContainer]);
 
-  const updateStreamedMessage = useCallback(
-    (payload: any) => {
-      setMessages((prev: any) => {
-        // stream close
-        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
-          const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
-          const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload?.text || "");
-          newMessages.set(lastResponseId, {
-            ...prevMessage,
-            output_text: [text],
-            type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
-            status: "completed",
-          });
-          setIsReceiving(false);
-          return newMessages;
-        }
+  const updateStreamedMessage = useCallback((payload: StreamPayload) => {
+    setMessages((prev) => {
+      if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        const newMessages = new Map(prev);
+        const lastResponseId: any = Array.from(prev.keys()).pop();
+        const prevMessage = prev.get(lastResponseId);
+        const text = (prevMessage?.text || "") + (payload?.text || "");
+        newMessages.set(lastResponseId, {
+          ...prevMessage,
+          output_text: [text],
+          type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
+          status: "completed",
+        });
+        setIsReceiving(false);
+        return newMessages;
+      }
 
-        // stream start
-        if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
-          setIsSendingMessage(false);
-          setIsReceiving(true);
-          currentStreamRef.current = payload!.bot_message_id;
-          const newMessages = new Map(prev);
-          newMessages.set(payload!.bot_message_id, {
-            id: currentStreamRef.current,
-            ...payload,
-          });
-          updateLocalUser(payload?.user_id);
-          return newMessages;
-        }
+      if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
+        setIsSendingMessage(false);
+        setIsReceiving(true);
+        currentStreamRef.current = payload!.bot_message_id!;
+        const newMessages = new Map(prev);
+        newMessages.set(payload!.bot_message_id!, {
+          id: currentStreamRef.current,
+          ...payload,
+        });
+        updateLocalUser(payload?.user_id as string);
+        return newMessages;
+      }
 
-        // stream end
-        if (
-          payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-          payload?.status === "completed"
-        ) {
-          const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
-          const prevMessage = prev.get(lastResponseId);
-          const { output, ...restPayload } = payload;
-          newMessages.set(lastResponseId, {
-            ...prevMessage,
-            conversation_id: prevMessage?.conversation_id, // keep the conversation id
-            id: currentStreamRef.current,
-            ...output,
-            ...restPayload,
-          });
-          setIsReceiving(false);
-          // update current conversation for every time the stream ends
-          const conversationData = {
-            id: prevMessage?.conversation_id,
-            user_id: prevMessage?.user_id,
-            title: payload?.title,
-            timestamp: payload?.created_at,
-            bot_id: config?.integration_id,
-          };
-          updateCurrentConversation(conversationData);
-          handleAddConversation(
-            Object.assign(
-              {},
-              {
-                ...conversationData,
-                messages: Array.from(newMessages.values()),
-              }
-            )
-          );
-          return newMessages;
-        }
+      if (payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && payload?.status === "completed") {
+        const newMessages = new Map(prev);
+        const lastResponseId: any = Array.from(prev.keys()).pop();
+        const prevMessage = prev.get(lastResponseId);
+        const { output, ...restPayload } = payload;
+        newMessages.set(lastResponseId, {
+          ...prevMessage,
+          conversation_id: prevMessage?.conversation_id,
+          id: currentStreamRef.current,
+          ...output,
+          ...restPayload,
+        });
+        setIsReceiving(false);
+        const conversationData: Partial<Conversation> = {
+          id: prevMessage?.conversation_id,
+          user_id: prevMessage?.user_id,
+          title: payload?.title,
+          timestamp: payload?.created_at,
+          bot_id: config?.integration_id,
+        };
+        updateCurrentConversation(conversationData);
+        handleAddConversation({
+          ...conversationData,
+          messages: Array.from(newMessages.values()),
+        });
+        return newMessages;
+      }
 
-        // streaming data
-        if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-          const newConversations = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
-          const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload.text || "");
-          const buttons = [
-            ...(prevMessage?.buttons || []),
-            ...(payload.buttons || []),
-          ];
-          newConversations.set(lastResponseId, {
-            ...prevMessage,
-            ...payload,
-            id: currentStreamRef.current,
-            text,
-            buttons,
-          });
-          return newConversations;
-        }
-        return prev;
-      });
-      scrollToMessage();
-    },
-    [config?.integration_id, handleAddConversation, scrollToMessage]
-  );
+      if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
+        const newConversations = new Map(prev);
+        const lastResponseId: any = Array.from(prev.keys()).pop();
+        const prevMessage = prev.get(lastResponseId);
+        const text = (prevMessage?.text || "") + (payload.text || "");
+        const buttons = [
+          ...(prevMessage?.buttons || []),
+          ...(payload.buttons || []),
+        ];
+        newConversations.set(lastResponseId, {
+          ...prevMessage,
+          ...payload,
+          id: currentStreamRef.current,
+          text,
+          buttons,
+        });
+        return newConversations;
+      }
+
+      return prev;
+    });
+    scrollToMessage();
+  }, [config?.integration_id, handleAddConversation, scrollToMessage]);
 
   const sendPayload = async (payload: IncomingMsg) => {
     try {
       if (payload?.input_audio) {
-        // upload audio file to gooey
-        const file = new File(
-          [payload.input_audio],
-          `gooey-widget-recording-${uuidv4()}.webm`
-        );
-        payload.input_audio = await uploadFileToGooey(
-          config!.apiUrl!,
-          file as File
-        );
+        const file = new File([payload.input_audio], `gooey-widget-recording-${uuidv4()}.webm`);
+        payload.input_audio = await uploadFileToGooey(config!.apiUrl!, file);
       }
       payload = {
         ...config?.payload,
@@ -223,21 +234,16 @@ const MessagesContextProvider = (props: any) => {
         user_id: currentUserId,
         ...payload,
       };
-      const streamUrl = await createStreamApi(
-        config!.apiUrl!,
-        payload,
-        apiSource.current
-      );
+      const streamUrl = await createStreamApi(config!.apiUrl!, payload, apiSource.current);
       getDataFromStream(streamUrl, updateStreamedMessage);
-      // setLoading false in updateStreamedMessage
     } finally {
       setIsSendingMessage(false);
     }
   };
 
-  const preLoadData = (data: any) => {
-    const newMap = new Map();
-    data.forEach((obj: any) => {
+  const preLoadData = (data: any[]) => {
+    const newMap = new Map<string, any>();
+    data.forEach((obj) => {
       newMap.set(obj.id, { ...obj });
     });
     setMessages(newMap);
@@ -272,20 +278,20 @@ const MessagesContextProvider = (props: any) => {
     else apiSource?.current.cancel("Operation canceled by the user.");
 
     if (!isReceiving && !isSending) {
-      apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
+      apiSource.current = axios.CancelToken.source();
     }
-    // delete last message from the state
+
     const newMessages = new Map(messages);
     const idsArray = Array.from(messages.keys());
-    // check if state is loading then remove the last one
+
     if (isSending) {
-      newMessages.delete(idsArray.pop());
+      newMessages.delete(idsArray.pop()!);
       setMessages(newMessages);
     }
 
     if (isReceiving) {
-      newMessages.delete(idsArray.pop()); // delete server message
-      newMessages.delete(idsArray.pop()); // delete user message
+      newMessages.delete(idsArray.pop()!);
+      newMessages.delete(idsArray.pop()!);
       setMessages(newMessages);
     }
 
@@ -293,7 +299,7 @@ const MessagesContextProvider = (props: any) => {
       messages: Array.from(newMessages.values()),
     });
 
-    apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
+    apiSource.current = axios.CancelToken.source();
     setIsReceiving(false);
     setIsSendingMessage(false);
   }, [isReceiving, isSending, messages]);
@@ -313,7 +319,6 @@ const MessagesContextProvider = (props: any) => {
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
-
       return messages;
     },
     [cancelApiCall, isReceiving, isSending],
@@ -325,12 +330,12 @@ const MessagesContextProvider = (props: any) => {
       !layoutController?.showNewConversationButton &&
       conversations.length &&
       !messages.size
-    )
-      // Load the latest conversation from DB - initial load
+    ) {
       setActiveConversation(conversations[0]);
-    else setMessagesLoading(false);
+    } else {
+      setMessagesLoading(false);
+    }
     avoidAutoplay();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations]);
 
   const avoidAutoplay = () => {
@@ -340,7 +345,7 @@ const MessagesContextProvider = (props: any) => {
     }, 3000);
   };
 
-  const valueMessages = {
+  const valueMessages: MessagesContextType = {
     messages,
     isSending,
     initializeQuery,

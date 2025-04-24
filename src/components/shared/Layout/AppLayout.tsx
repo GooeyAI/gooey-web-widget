@@ -1,11 +1,13 @@
 import clsx from "clsx";
-import { useSystemContext } from "src/contexts/hooks";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import Header from "src/widgets/copilot/components/Header";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./appLayout.scss?inline";
 import SideNavbar from "./SideNavbar";
 import SecondaryDrawer from "./SecondaryDrawer";
+import { MessagesContextType } from "src/contexts/MessagesContext";
+import { SystemContextType } from "src/contexts/SystemContext";
 
 addInlineStyle(style);
 
@@ -50,8 +52,8 @@ const ClickAwayListener = ({ onClick, children }: any) => {
 };
 
 const AppLayout = ({ children }: Props) => {
-  const { config, layoutController } = useSystemContext();
-
+  const { config, layoutController, } = useSystemContext() as SystemContextType;
+  const { messages, handleNewConversation } = useMessagesContext() as MessagesContextType;
   return (
     <div
       id="gooeyChat-container"
@@ -70,7 +72,14 @@ const AppLayout = ({ children }: Props) => {
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
         <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
-          <Header />
+          <Header
+            {...layoutController}
+            isEmptyMessages={!messages.size}
+            onNewConversation={handleNewConversation}
+            name={config?.branding?.name}
+            photoUrl={config?.branding?.photoUrl}
+            className='gp-8'
+          />
           <div
             style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
             className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"

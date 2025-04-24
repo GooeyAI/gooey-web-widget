@@ -69,23 +69,23 @@ const GooeyTooltip = ({
   const arrowStyles = getArrowStyles(direction);
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const eventHandlers = isTouchDevice
-  ? {
-      onTouchStart: () => null,
-      onTouchEnd: () => null,
-    }
-  : {
-      onMouseEnter: () => {
-        if (disabled) return;
-        timerRef.current = setTimeout(() => {
-          setShowModal(true);
-          timerRef.current = null;
-        }, 300);
-      },
-      onMouseLeave: () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-        setShowModal(false);
-      },
-    };
+    ? {
+        onTouchStart: () => null,
+        onTouchEnd: () => null,
+      }
+    : {
+        onMouseEnter: () => {
+          if (disabled) return;
+          timerRef.current = setTimeout(() => {
+            setShowModal(true);
+            timerRef.current = null;
+          }, 300);
+        },
+        onMouseLeave: () => {
+          if (timerRef.current) clearTimeout(timerRef.current);
+          setShowModal(false);
+        },
+      };
   return (
     <GooeyPopper
       ModalContent={() => (

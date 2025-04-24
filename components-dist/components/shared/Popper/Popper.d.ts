@@ -8,6 +8,7 @@ interface PopperProps extends React.HTMLAttributes<HTMLDivElement> {
     direction?: PopperDirection;
     showModal: boolean;
     ModalProps?: Record<string, any>;
+    gooeyShadowRoot?: ShadowRoot | null;
 }
 declare const GooeyPopper: (props: PopperProps) => import("react/jsx-runtime").JSX.Element;
 export default GooeyPopper;

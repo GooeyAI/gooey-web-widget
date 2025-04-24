@@ -271,6 +271,7 @@ export const formatTextResponse = (
   showSources: boolean,
 ) => {
   const body = getOutputText(data);
+  console.log(body, ">>body");
   if (!body) return "";
   const rawHtml = marked.parse(body, {
     async: false,
@@ -283,6 +284,7 @@ export const formatTextResponse = (
     tokenizer: null,
     walkTokens: null,
   });
+  console.log(rawHtml, ">>rawHtml");
   const parsedElements = parse(
     rawHtml as string,
     getReactParserOptions({

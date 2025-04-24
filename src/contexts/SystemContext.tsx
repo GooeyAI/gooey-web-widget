@@ -93,7 +93,7 @@ const SystemContextProvider = ({
   const forceHideSidebar = !layoutState?.showNewConversationButton;
   const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
     layoutState?.isOpen,
-  ]);
+  ], gooeyShadowRoot);
 
   const setTempStoreValue = (key: string, value: any) => {
     setTempStore((prev: Map<string, any>) => {

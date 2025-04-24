@@ -1,3 +1,4 @@
-import { default as SpinLoader } from './shared/SpinLoader';
+import { default as GWChatWidget, GWChatWidgetProps } from './ChatWidget';
 
-export { SpinLoader };
+export { GWChatWidget };
+export type { GWChatWidgetProps };

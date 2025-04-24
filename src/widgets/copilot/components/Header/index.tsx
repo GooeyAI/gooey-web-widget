@@ -1,38 +1,72 @@
-import IconButton from "src/components/shared/Buttons/IconButton";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import clsx from "clsx";
-import { SystemContextType } from "src/contexts/SystemContext";
+
+import IconButton from "src/components/shared/Buttons/IconButton";
+import Button from "src/components/shared/Buttons/Button";
+import GooeyTooltip from "src/components/shared/Tooltip";
 
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
 import IconSidebar from "src/assets/SvgIcons/IconSideBar";
-import GooeyTooltip from "src/components/shared/Tooltip";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
-import Button from "src/components/shared/Buttons/Button";
 
-const Header = () => {
-  const { messages, handleNewConversation }: any = useMessagesContext();
-  const { layoutController, config }: SystemContextType = useSystemContext();
-  const isEmpty = !messages?.size;
-  const branding = config?.branding;
+type HeaderProps = {
+  isEmptyMessages?: boolean;
+  onNewConversation?: () => void;
+  isFocusMode?: boolean;
+  showFocusModeButton?: boolean;
+  showCloseButton?: boolean;
+  showNewConversationButton?: boolean;
+  showSidebarButton?: boolean;
+  isInline?: boolean;
+  toggleFocusMode?: () => void;
+  toggleOpenClose?: () => void;
+  toggleSidebar?: () => void;
+  name?: string;
+  photoUrl?: string;
+  className?: string;
+};
+
+const Header = ({
+  isEmptyMessages = true,
+  onNewConversation = () => {},
+  name = "Gooey Bot",
+  photoUrl = "https://gooey.ai/favicon.ico",
+  showSidebarButton = false,
+  isFocusMode = false,
+  isInline = true,
+  showCloseButton = false,
+  showFocusModeButton = false,
+  showNewConversationButton = false,
+  toggleFocusMode = () => {},
+  toggleOpenClose = () => {},
+  toggleSidebar = () => {},
+  className = "",
+}: HeaderProps) => {
   return (
-    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
+    <div
+      className={clsx(
+        "bg-white b-btm-1 d-flex justify-between align-center pos-sticky w-100 h-header",
+        className
+      )}
+    >
+      {/* Left section (sidebar button) */}
       <div className="d-flex align-center">
-        {/* Sidebar button */}
-        {layoutController?.showSidebarButton && (
+        {showSidebarButton && (
           <GooeyTooltip text="Open sidebar" direction="right">
             <IconButton
               id="sidebar-toggle-icon-header"
               variant="text"
               className="cr-pointer"
-              onClick={layoutController?.toggleSidebar}
+              onClick={toggleSidebar}
             >
               <IconSidebar size={20} />
             </IconButton>
           </GooeyTooltip>
         )}
       </div>
+
+      {/* Center (branding and new conversation button) */}
       <div
         style={{
           position: "absolute",
@@ -41,8 +75,12 @@ const Header = () => {
           transform: "translate(-50%, -50%)",
         }}
       >
-        <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
-          <Button onClick={() => handleNewConversation()} disabled={isEmpty}>
+        <GooeyTooltip
+          text="New Chat"
+          disabled={isEmptyMessages}
+          direction="bottom"
+        >
+          <Button onClick={onNewConversation} disabled={isEmptyMessages}>
             <div className="d-flex align-center">
               <div
                 className="bot-avatar bg-primary gmr-8"
@@ -50,11 +88,10 @@ const Header = () => {
                   width: "24px",
                   height: "24px",
                   borderRadius: "100%",
-                  // marginLeft: "-12px",
                 }}
               >
                 <img
-                  src={branding?.photoUrl}
+                  src={photoUrl}
                   alt="bot-avatar"
                   style={{
                     width: "24px",
@@ -63,28 +100,27 @@ const Header = () => {
                   }}
                 />
               </div>
-              <p className="font_16_700 text-almostBlack">{branding?.name}</p>
+              <p className="font_16_700 text-almostBlack">{name}</p>
             </div>
           </Button>
         </GooeyTooltip>
       </div>
+
+      {/* Right section (action buttons) */}
       <div>
         <div className="d-flex align-center">
-          {/* Focus mode button */}
-          {layoutController?.showFocusModeButton && (
+          {showFocusModeButton && (
             <GooeyTooltip
-              text={
-                layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
-              }
+              text={isFocusMode ? "Disable Focus" : "Enable Focus"}
               direction="bottom"
             >
               <IconButton
                 variant="text"
                 className="cr-pointer"
-                onClick={layoutController?.toggleFocusMode}
+                onClick={toggleFocusMode}
                 style={{ transform: "rotate(90deg)" }}
               >
-                {layoutController.isFocusMode ? (
+                {isFocusMode ? (
                   <IconCollapse size={16} />
                 ) : (
                   <IconExpand size={16} />
@@ -92,32 +128,35 @@ const Header = () => {
               </IconButton>
             </GooeyTooltip>
           )}
-          {/* Close / minimize button */}
-          {layoutController?.showCloseButton && (
+
+          {showCloseButton && (
             <GooeyTooltip text="Close" direction="left">
               <IconButton
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
-                onClick={layoutController?.toggleOpenClose}
+                onClick={toggleOpenClose}
               >
                 <IconChevronDown size={16} />
               </IconButton>
             </GooeyTooltip>
           )}
-          {/* New Chat button */}
-          {layoutController?.isInline &&
-            layoutController?.showNewConversationButton && (
-              <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
-                <IconButton
-                  disabled={isEmpty}
-                  variant="text"
-                  className={clsx("gp-8 cr-pointer flex-1")}
-                  onClick={() => handleNewConversation()}
-                >
-                  <IconPencilEdit size={22} />
-                </IconButton>
-              </GooeyTooltip>
-            )}
+
+          {isInline && showNewConversationButton && (
+            <GooeyTooltip
+              text="New Chat"
+              direction="left"
+              disabled={isEmptyMessages}
+            >
+              <IconButton
+                disabled={isEmptyMessages}
+                variant="text"
+                className={clsx("gp-8 cr-pointer flex-1")}
+                onClick={onNewConversation}
+              >
+                <IconPencilEdit size={22} />
+              </IconButton>
+            </GooeyTooltip>
+          )}
         </div>
       </div>
     </div>

@@ -20,6 +20,13 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
     ],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          silenceDeprecations: ["legacy-js-api"],
+        },
+      },
+    },
   };
 
   // === PACKAGE BUILD (for publishing components) ===
@@ -31,6 +38,7 @@ export default defineConfig(({ mode }) => {
         dts({
           insertTypesEntry: true,
           include: ["src/components/**/*.ts", "src/components/**/*.tsx"],
+          exclude:["widgets/*"]
         }),
         cssInjectedByJsPlugin(),
       ],
@@ -39,7 +47,7 @@ export default defineConfig(({ mode }) => {
         copyPublicDir: false,
         outDir: "components-dist",
         lib: {
-          entry: "./src/components/index.ts",
+          entry: "./src/components/index.tsx",
           name: "gooey-web-widget",
           fileName: (format) => `gooey-chat-components.${format}.js`,
         },

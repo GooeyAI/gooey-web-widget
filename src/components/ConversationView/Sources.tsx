@@ -99,10 +99,10 @@ interface Data {
   refNumber?: string;
 }
 
-const SourcesCard = (props: { data: Data; index: number }) => {
-  const { data } = props;
-  const { getTempStoreValue, setTempStoreValue, layoutController } =
-    useSystemContext();
+const SourcesCard = (props: { data: Data; index: number; layoutController?: any }) => {
+  const { data, layoutController: propLayoutController } = props;
+  const { getTempStoreValue, setTempStoreValue, layoutController: contextLayoutController } = useSystemContext();
+  const layoutController = propLayoutController || contextLayoutController;
   const [metaData, setMetaData] = useState<any>(
     getTempStoreValue?.(data.url) || null,
   );
@@ -229,10 +229,17 @@ const SourcesCard = (props: { data: Data; index: number }) => {
   );
 };
 
-export const SourcesSection = (data: any) => {
-  const { references = [] }: any = data;
+export const SourcesSection = (props: {
+  references?: any[];
+  layoutController?: {
+    toggleSecondaryDrawer: (content: any) => void;
+  };
+}) => {
+  const { references = [], layoutController: propLayoutController } = props;
   const sources = [...references];
-  const { config } = useSystemContext();
+  const { config, layoutController: contextLayoutController } = useSystemContext();
+  const layoutController = propLayoutController || contextLayoutController;
+
   const [isExpanded, setIsExpanded] = useState<boolean>(
     config?.expandedSources || false,
   );
@@ -266,7 +273,7 @@ export const SourcesSection = (data: any) => {
           </IconButton>
         </div>
       </div>
-      {isExpanded && <Sources data={sources} />}
+      {isExpanded && <Sources data={sources} layoutController={layoutController} />}
     </div>
   );
 };
@@ -274,11 +281,16 @@ export const SourcesSection = (data: any) => {
 const Sources = ({
   data,
   isInline = false,
+  layoutController,
 }: {
-  data: any;
+  data: any[];
   isInline?: boolean;
+  layoutController?: {
+    toggleSecondaryDrawer: (content: any) => void;
+  };
 }) => {
   if (!data || !data.length) return null;
+
   return (
     <div className="text-reveal-container">
       <div className="gooey-scroll-wrapper">
@@ -288,7 +300,7 @@ const Sources = ({
               className={clsx(index === 0 && !isInline && "gml-52")}
               key={source?.title + index}
             >
-              <SourcesCard data={source} index={index} />
+              <SourcesCard data={source} index={index} layoutController={layoutController} />
             </div>
           ))}
           <div className="gooey-scroll-fade"></div>
@@ -297,5 +309,4 @@ const Sources = ({
     </div>
   );
 };
-
 export default Sources;

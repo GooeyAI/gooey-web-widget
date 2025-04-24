@@ -1,3 +1,5 @@
+import "../../css/_animations.scss";
+
 const SpinLoader = ({ size = 50 }: { size?: number }) => {
   const spinnerStyle = {
     width: size + "px",

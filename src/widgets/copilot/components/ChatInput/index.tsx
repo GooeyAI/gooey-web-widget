@@ -2,7 +2,6 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import React, { useMemo, useRef, useState } from "react";
 
 import clsx from "clsx";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import CircleUP from "src/assets/SvgIcons/CircleUP";
 import CircleStop from "src/assets/SvgIcons/CircleStop";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
@@ -13,6 +12,8 @@ import style from "./chatInput.scss?inline";
 import IconPaperClip from "src/assets/SvgIcons/IconPaperClip";
 import FilePreview from "./FilePreview";
 import { uploadFileToGooey } from "src/api/file-upload";
+import { CopilotConfigType } from "src/contexts/types";
+
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
@@ -31,15 +32,29 @@ const makeFileBuffer = (file: File) => {
     reader.readAsArrayBuffer(file);
   });
 };
+export type OnSendCallbackType = (payload: {
+  input_prompt?: string;
+  input_images?: string[];
+  input_audio?: Blob;
+}) => void;
+interface ChatInputProps {
+  config: CopilotConfigType;
+  isSending: boolean;
+  isReceiving: boolean;
+  onSend: OnSendCallbackType;
+  onCancelSend: () => void;
+}
 
-const ChatInput = () => {
-  const { config } = useSystemContext();
-  const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
-    useMessagesContext();
+const ChatInput: React.FC<ChatInputProps> = ({
+  config,
+  isSending,
+  isReceiving,
+  onSend,
+  onCancelSend,
+}) => {
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [files, setFiles] = useState<Array<any> | null>(null);
-
   const inputRef = useRef<null | HTMLElement>(null);
 
   const resetHeight = () => {
@@ -64,52 +79,45 @@ const ChatInput = () => {
   };
 
   const handleChangeLine = () => {
-    // increase height by 24px
     const ele: HTMLElement | null = inputRef.current;
     if (ele!.scrollHeight > INPUT_HEIGHT)
-      ele?.setAttribute(
-        "style",
-        "height:" + ele.scrollHeight + "px !important"
-      );
+      ele?.setAttribute("style", "height:" + ele.scrollHeight + "px !important");
   };
 
   const handleSendMessage = () => {
     if ((!value.trim() && !files?.length) || disableSend) return null;
-    const payload: any = {
-      input_prompt: value.trim(),
-    };
+    const payload: any = { input_prompt: value.trim() };
     if (files?.length) {
       payload.input_images = files.map((file) => file.gooeyUrl);
       setFiles([]);
     }
-    initializeQuery(payload);
+    onSend(payload);
     setValue("");
     resetHeight();
   };
 
-  const handleCancelSend = () => {
-    cancelApiCall();
-  };
-
-  const handleRecordClick = () => {
-    setIsRecording(true);
-  };
-
   const handleSendAudio = (blob: Blob) => {
-    initializeQuery({ input_audio: blob });
+    onSend({ input_audio: blob });
     setIsRecording(false);
   };
 
+  const handleFileUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = acceptedTypes;
+    input.onchange = onFileAdded;
+    input.click();
+  };
+
   const onFileAdded = (e: any) => {
-    const files = Array.from(e.target.files);
-    if (!files || !files.length) return;
+    const fileList = Array.from(e.target.files);
     setFiles(
-      files.map((file: any, index: number) => {
+      fileList.map((file: any, index: number) => {
         makeFileBuffer(file).then((blob) => {
           const toUpload = new File([blob as Blob], file.name);
           uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
             setFiles((prev: any) => {
-              if (!prev[index]) return prev; // if photo removed before upload completed
+              if (!prev[index]) return prev;
               prev[index].isUploading = false;
               prev[index].gooeyUrl = url;
               return [...prev];
@@ -123,36 +131,24 @@ const ChatInput = () => {
           data: file,
           gooeyUrl: "",
           isUploading: true,
-          removeFile: () => {
+          removeFile: () =>
             setFiles((prev: any) => {
               prev.splice(index, 1);
               return [...prev];
-            });
-          },
+            }),
         };
       })
     );
   };
 
-  const handleFileUpload = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedTypes;
-    input.onchange = onFileAdded;
-    input.click();
-  };
-
-  if (!config) return null;
   const showStop = isSending || isReceiving;
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
     files?.some((file) => file.isUploading);
-  const isLeftButtons = useMemo(
-    () => config?.enablePhotoUpload,
-    [config?.enablePhotoUpload]
-  );
+  const isLeftButtons = useMemo(() => config?.enablePhotoUpload, [config?.enablePhotoUpload]);
+
   return (
-    <React.Fragment>
+    <>
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
           <FilePreview files={files} />
@@ -171,11 +167,9 @@ const ChatInput = () => {
           />
         ) : (
           <div className="pos-relative">
-            {/* Typing area */}
             <textarea
               value={value}
               ref={inputRef as any}
-              id={CHAT_INPUT_ID}
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
               className={clsx(
@@ -183,32 +177,23 @@ const ChatInput = () => {
                 isLeftButtons ? "gpl-32" : "gpl-12"
               )}
               placeholder={`Message ${config.branding.name || ""}`}
-            ></textarea>
-
-            {/* Left icons */}
+            />
             {isLeftButtons && (
               <div className="input-left-buttons">
-                <IconButton
-                  onClick={handleFileUpload}
-                  variant="text-alt"
-                  className="gp-4"
-                >
+                <IconButton onClick={handleFileUpload} variant="text-alt" className="gp-4">
                   <IconPaperClip size={18} />
                 </IconButton>
               </div>
             )}
-
-            {/* Right icons */}
             <div className="input-right-buttons">
               {!files?.length &&
                 !showStop &&
                 config?.enableAudioMessage &&
                 !value && (
-                  <IconButton onClick={handleRecordClick} variant="text-alt">
+                  <IconButton onClick={() => setIsRecording(true)} variant="text-alt">
                     <IconMicrophone size={18} />
                   </IconButton>
                 )}
-              {/* Send Actions */}
               {(!!value ||
                 !config?.enableAudioMessage ||
                 showStop ||
@@ -217,7 +202,7 @@ const ChatInput = () => {
                   disabled={disableSend}
                   variant="text-alt"
                   className="gp-4"
-                  onClick={showStop ? handleCancelSend : handleSendMessage}
+                  onClick={showStop ? onCancelSend : handleSendMessage}
                 >
                   {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
                 </IconButton>
@@ -226,7 +211,6 @@ const ChatInput = () => {
           </div>
         )}
 
-        {/* Gooey Branding */}
         {!!config.branding.showPoweredByGooey && !isRecording && (
           <p
             className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
@@ -235,7 +219,7 @@ const ChatInput = () => {
             Powered by{" "}
             <a
               href="https://gooey.ai/copilot/"
-              target="_ablank"
+              target="_blank"
               className="text-darkGrey text-underline"
             >
               Gooey.AI
@@ -243,7 +227,7 @@ const ChatInput = () => {
           </p>
         )}
       </div>
-    </React.Fragment>
+    </>
   );
 };
 
