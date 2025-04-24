@@ -1,5 +1,5 @@
 import { useSystemContext } from "src/contexts/hooks";
-import { FullSourcePreview } from "src/widgets/copilot/components/Messages/Sources";
+import { FullSourcePreview } from "src/components/ConversationView/Sources";
 
 const Link = (props: any) => {
   const { layoutController } = useSystemContext();

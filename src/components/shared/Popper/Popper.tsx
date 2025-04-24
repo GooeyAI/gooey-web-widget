@@ -16,6 +16,7 @@ interface PopperProps extends React.HTMLAttributes<HTMLDivElement> {
   direction?: PopperDirection;
   showModal: boolean;
   ModalProps?: Record<string, any>;
+  gooeyShadowRoot?: ShadowRoot | null;
 }
 
 const getModalCoordinates = (
@@ -116,7 +117,6 @@ const GooeyPopper = (props: PopperProps) => {
     ModalProps,
     ...restProps
   } = props;
-
   const [refContainer, setRefContainer] = useState<HTMLElement | null>(null);
   return (
     <div

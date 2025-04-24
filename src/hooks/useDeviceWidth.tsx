@@ -9,19 +9,21 @@ const checkMediaQuery = (width: number, windowWidth: number, query: string) => {
 
 const useDeviceWidth = (
   query: "mobile" = "mobile",
-  deps: any[] = []
+  deps: any[] = [],
+  domContext: ShadowRoot | null = null
 ): boolean[] => {
   const [isWidgetMatches, setIsWidgetMatches] = useState(false);
   const [isWindowMatches, setIsWindowMatches] = useState(false);
   const depTrigger = deps?.some((dep) => !dep);
 
+  console.log(depTrigger, ">>depTrigger");
   useEffect(() => {
-    const rootDiv = gooeyShadowRoot?.querySelector("#gooeyChat-container");
-    if (!rootDiv) return;
+    const container = domContext?.querySelector("#gooeyChat-container");
+    if (!container) return;
 
     // set initial value
     const [widgetMatches, windowMatches] = checkMediaQuery(
-      rootDiv.clientWidth,
+      container.clientWidth,
       window.innerWidth,
       query
     );
@@ -31,14 +33,14 @@ const useDeviceWidth = (
     const resizeObserver = new ResizeObserver(() => {
       // set initial value
       const [widgetMatches, windowMatches] = checkMediaQuery(
-        rootDiv.clientWidth,
+        container.clientWidth,
         window.innerWidth,
         query
       );
       setIsWidgetMatches(widgetMatches);
       setIsWindowMatches(windowMatches);
     });
-    resizeObserver.observe(rootDiv);
+    resizeObserver.observe(container);
 
     return () => {
       resizeObserver.disconnect();
