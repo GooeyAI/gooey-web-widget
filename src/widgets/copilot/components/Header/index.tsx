@@ -25,6 +25,7 @@ type HeaderProps = {
   name?: string;
   photoUrl?: string;
   className?: string;
+  disableTooltip?: boolean;
 };
 
 const Header = ({
@@ -42,6 +43,7 @@ const Header = ({
   toggleOpenClose = () => {},
   toggleSidebar = () => {},
   className = "",
+  disableTooltip = false,
 }: HeaderProps) => {
   return (
     <div
@@ -53,7 +55,7 @@ const Header = ({
       {/* Left section (sidebar button) */}
       <div className="d-flex align-center">
         {showSidebarButton && (
-          <GooeyTooltip text="Open sidebar" direction="right">
+          <GooeyTooltip text="Open sidebar" direction="right" disabled={disableTooltip}>
             <IconButton
               id="sidebar-toggle-icon-header"
               variant="text"
@@ -77,7 +79,7 @@ const Header = ({
       >
         <GooeyTooltip
           text="New Chat"
-          disabled={isEmptyMessages}
+          disabled={isEmptyMessages || disableTooltip}
           direction="bottom"
         >
           <Button onClick={onNewConversation} disabled={isEmptyMessages}>
@@ -113,6 +115,7 @@ const Header = ({
             <GooeyTooltip
               text={isFocusMode ? "Disable Focus" : "Enable Focus"}
               direction="bottom"
+              disabled={disableTooltip}
             >
               <IconButton
                 variant="text"
@@ -130,7 +133,7 @@ const Header = ({
           )}
 
           {showCloseButton && (
-            <GooeyTooltip text="Close" direction="left">
+            <GooeyTooltip text="Close" direction="left" disabled={disableTooltip}>
               <IconButton
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
@@ -145,7 +148,7 @@ const Header = ({
             <GooeyTooltip
               text="New Chat"
               direction="left"
-              disabled={isEmptyMessages}
+              disabled={isEmptyMessages || disableTooltip}
             >
               <IconButton
                 disabled={isEmptyMessages}
