@@ -1,7 +1,7 @@
 import { OnSendCallbackType } from '../../widgets/copilot/components/ChatInput';
 import { default as React, ReactNode } from 'react';
 
-export interface GWChatWidgetProps {
+export interface GooeyChatWidgetProps {
     messages: Array<{
         id?: string;
         bot_message_id?: string;
@@ -16,7 +16,7 @@ export interface GWChatWidgetProps {
     onCancelSend: () => void;
     onNewConversation: () => void;
 }
-declare const GWChatWidget: React.FC<GWChatWidgetProps>;
+declare const GooeyChatWidget: React.FC<GooeyChatWidgetProps>;
 export declare const useSecondaryDrawerController: ({ isMobile, shadowRoot, }: {
     isMobile?: boolean;
     shadowRoot?: ShadowRoot | null;
@@ -25,4 +25,4 @@ export declare const useSecondaryDrawerController: ({ isMobile, shadowRoot, }: {
     secondaryDrawerContent: () => ReactNode;
     toggleSecondaryDrawer: (content: (() => ReactNode) | null) => void;
 };
-export default GWChatWidget;
+export default GooeyChatWidget;

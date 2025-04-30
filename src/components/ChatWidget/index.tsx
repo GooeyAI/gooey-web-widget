@@ -17,7 +17,7 @@ import { CopilotConfigType } from "src/contexts/types";
 import ConversationView from "../ConversationView";
 import SecondaryDrawer from "../shared/Layout/SecondaryDrawer";
 
-export interface GWChatWidgetProps {
+export interface GooeyChatWidgetProps {
   messages: Array<{ id?: string; bot_message_id?: string; [key: string]: any }>;
   isSending: boolean;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
@@ -29,7 +29,7 @@ export interface GWChatWidgetProps {
   onNewConversation: () => void;
 }
 
-const GWChatWidget: React.FC<GWChatWidgetProps> = (props) => {
+const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
   const {
     messages = [],
     isSending = false,
@@ -211,4 +211,4 @@ export const useSecondaryDrawerController = ({
   };
 };
 
-export default GWChatWidget;
+export default GooeyChatWidget;

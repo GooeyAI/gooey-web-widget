@@ -1,4 +1,4 @@
-import { default as GWChatWidget, GWChatWidgetProps } from './ChatWidget';
+import { default as GooeyChatWidget, GooeyChatWidgetProps } from './ChatWidget';
 
-export { GWChatWidget };
-export type { GWChatWidgetProps };
+export { GooeyChatWidget as GWChatWidget };
+export type { GooeyChatWidgetProps as GWChatWidgetProps };
