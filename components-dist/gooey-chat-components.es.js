@@ -2326,14 +2326,16 @@ const Ga = (t, e) => {
   direction: n = "right",
   disabled: i = !1
 }) => {
+  if (i)
+    return e;
   const [r, a] = j(!1), o = ht(null), p = Wa(n), m = "ontouchstart" in window || navigator.maxTouchPoints > 0 ? {
     onTouchStart: () => null,
     onTouchEnd: () => null
   } : {
     onMouseEnter: () => {
-      i || (o.current = setTimeout(() => {
+      o.current = setTimeout(() => {
         a(!0), o.current = null;
-      }, 300));
+      }, 300);
     },
     onMouseLeave: () => {
       o.current && clearTimeout(o.current), a(!1);
@@ -2463,7 +2465,8 @@ const Ga = (t, e) => {
   },
   toggleSidebar: h = () => {
   },
-  className: k = ""
+  className: k = "",
+  disableTooltip: c = !1
 }) => /* @__PURE__ */ E(
   "div",
   {
@@ -2472,7 +2475,7 @@ const Ga = (t, e) => {
       k
     ),
     children: [
-      /* @__PURE__ */ s("div", { className: "d-flex align-center", children: r && /* @__PURE__ */ s(zt, { text: "Open sidebar", direction: "right", children: /* @__PURE__ */ s(
+      /* @__PURE__ */ s("div", { className: "d-flex align-center", children: r && /* @__PURE__ */ s(zt, { text: "Open sidebar", direction: "right", disabled: c, children: /* @__PURE__ */ s(
         Y,
         {
           id: "sidebar-toggle-icon-header",
@@ -2495,7 +2498,7 @@ const Ga = (t, e) => {
             zt,
             {
               text: "New Chat",
-              disabled: t,
+              disabled: t || c,
               direction: "bottom",
               children: /* @__PURE__ */ s(vt, { onClick: e, disabled: t, children: /* @__PURE__ */ E("div", { className: "d-flex align-center", children: [
                 /* @__PURE__ */ s(
@@ -2533,6 +2536,7 @@ const Ga = (t, e) => {
           {
             text: a ? "Disable Focus" : "Enable Focus",
             direction: "bottom",
+            disabled: c,
             children: /* @__PURE__ */ s(
               Y,
               {
@@ -2545,7 +2549,7 @@ const Ga = (t, e) => {
             )
           }
         ),
-        p && /* @__PURE__ */ s(zt, { text: "Close", direction: "left", children: /* @__PURE__ */ s(
+        p && /* @__PURE__ */ s(zt, { text: "Close", direction: "left", disabled: c, children: /* @__PURE__ */ s(
           Y,
           {
             variant: "text",
@@ -2559,7 +2563,7 @@ const Ga = (t, e) => {
           {
             text: "New Chat",
             direction: "left",
-            disabled: t,
+            disabled: t || c,
             children: /* @__PURE__ */ s(
               Y,
               {
@@ -10411,7 +10415,8 @@ const td = (t) => {
               showNewConversationButton: !0,
               name: ((T = b == null ? void 0 : b.branding) == null ? void 0 : T.name) || "",
               photoUrl: ((O = b == null ? void 0 : b.branding) == null ? void 0 : O.photoUrl) || "",
-              onNewConversation: R
+              onNewConversation: R,
+              disableTooltip: !0
             }
           ),
           /* @__PURE__ */ s(

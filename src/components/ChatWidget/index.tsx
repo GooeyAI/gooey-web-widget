@@ -107,6 +107,7 @@ const GWChatWidget: React.FC<GWChatWidgetProps> = (props) => {
           name={safeConfig?.branding?.name || ""}
           photoUrl={safeConfig?.branding?.photoUrl || ""}
           onNewConversation={handleNewConversation}
+          disableTooltip={true}
         />
         <ConversationView
           messages={messages_map}

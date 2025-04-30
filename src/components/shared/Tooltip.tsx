@@ -64,6 +64,10 @@ const GooeyTooltip = ({
   direction?: TooltipDirection;
   disabled?: boolean;
 }) => {
+  if (disabled) {
+    return children;
+  }
+
   const [showModal, setShowModal] = useState(false);
   const timerRef = useRef<any>(null);
   const arrowStyles = getArrowStyles(direction);
@@ -75,7 +79,6 @@ const GooeyTooltip = ({
       }
     : {
         onMouseEnter: () => {
-          if (disabled) return;
           timerRef.current = setTimeout(() => {
             setShowModal(true);
             timerRef.current = null;
