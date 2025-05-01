@@ -66,7 +66,7 @@ const OutgoingMsg = memo((props: any) => {
           src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${input_location.latitude},${input_location.longitude}`}
           loading="lazy"
           style={{
-            border: "1px solid black",
+            border: "1px solid #ddd",
             aspectRatio: "16/9",
             borderRadius: "8px",
           }}
