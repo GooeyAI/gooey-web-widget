@@ -1,6 +1,6 @@
 import SvgIcon from "src/components/shared/SvgIcon";
 
-const LocationRefresh = (props: any) => {
+const IconLocationArrow = (props: any) => {
   const size = props.size || 16;
   return (
     <SvgIcon {...props}>
@@ -19,4 +19,4 @@ const LocationRefresh = (props: any) => {
   );
 };
 
-export default LocationRefresh;
+export default IconLocationArrow;

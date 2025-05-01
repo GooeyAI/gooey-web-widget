@@ -6,7 +6,7 @@ import leafletStyle from "leaflet/dist/leaflet.css?inline";
 import buttonStyle from "/src/components/shared/Buttons/buttons.scss?inline";
 import clsx from "clsx";
 
-import LocationRefresh from "src/assets/SvgIcons/LocationRefresh";
+import IconLocationArrow from "src/assets/SvgIcons/IconLocationArrow";
 import LocationMarker from "src/assets/SvgIcons/LocationMarker";
 import Spinner from "src/assets/SvgIcons/Spinner";
 
@@ -404,7 +404,7 @@ const LocationModal = ({
                   <Spinner size={16} />
                 </div>
               ) : (
-                <LocationRefresh size={16} />
+                <IconLocationArrow size={16} />
               )}
             </IconButton>
           </div>
