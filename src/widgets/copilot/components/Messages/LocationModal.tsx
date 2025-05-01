@@ -13,6 +13,7 @@ import Spinner from "src/assets/SvgIcons/Spinner";
 import Button from "src/components/shared/Buttons/Button";
 import { ReplyButton } from "./IncomingMsg";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import GooeyTooltip from "src/components/shared/Tooltip";
 
 import L from "leaflet";
 import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
@@ -347,25 +348,27 @@ const LocationModal = ({
 
           {/* Refresh */}
           <div className="flex items-center justify-end w-1/3">
-            <IconButton
-              className={clsx("button-outlined text-dark centre")}
-              onClick={handleRefreshLocation}
-              disabled={isRefreshing}
-            >
-              {isRefreshing ? (
-                <div
-                  style={{
-                    animation: "spin 1s linear infinite",
-                    width: 16,
-                    height: 16,
-                  }}
-                >
-                  <Spinner size={16} />
-                </div>
-              ) : (
-                <IconLocationArrow size={16} />
-              )}
-            </IconButton>
+            <GooeyTooltip text="Refresh Location">
+              <IconButton
+                className={clsx("button-outlined text-dark centre")}
+                onClick={handleRefreshLocation}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <div
+                    style={{
+                      animation: "spin 1s linear infinite",
+                      width: 16,
+                      height: 16,
+                    }}
+                  >
+                    <Spinner size={16} />
+                  </div>
+                ) : (
+                  <IconLocationArrow size={16} />
+                )}
+              </IconButton>
+            </GooeyTooltip>
           </div>
         </div>
 
