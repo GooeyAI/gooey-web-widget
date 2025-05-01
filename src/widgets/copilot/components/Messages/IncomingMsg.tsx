@@ -108,67 +108,65 @@ const FeedbackButtons = ({
 
   return (
     <div>
-      {thumbButtons.length > 0 && (
-        <div>
-          {normalButtons.length > 0 && (
-            <div className="gooey-scroll-wrapper">
-              <div
-                className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
-                style={{ gap: "12px" }}
-              >
-                {normalButtons.map(
-                  (button) =>
-                    button && (
-                      <FeedbackButton
-                        key={button.id}
-                        button={button}
-                        className={clsx("my-1 mx-md-2 w-100")}
-                        onClick={() => {
-                          if (button.isPressed) return;
-                          if (button.id.includes("send_location")) {
-                            handleOpenModal(button, bot_message_id);
-                          } else {
-                            // Follow up button press
-                            initializeQuery({
-                              button_pressed: {
-                                button_id: button.id,
-                                button_title: button.title,
-                                context_msg_id: bot_message_id,
-                              },
-                            });
-                          }
-                        }}
-                      />
-                    )
-                )}
-              </div>
-              <div className="gooey-scroll-fade d-none sm-d-block"></div>
-            </div>
-          )}
+      {normalButtons.length > 0 && (
+        <div className="gooey-scroll-wrapper">
           <div
-            className="d-flex gmt-2 justify-content-start gml-36"
-            style={{ gap: "4px" }}
+            className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
+            style={{ gap: "12px" }}
           >
-            {thumbButtons.map(
+            {normalButtons.map(
               (button) =>
                 button && (
                   <FeedbackButton
                     key={button.id}
                     button={button}
+                    className={clsx("my-1 mx-md-2 w-100")}
                     onClick={() => {
                       if (button.isPressed) return;
-                      initializeQuery({
-                        button_pressed: {
-                          button_id: button.id,
-                          button_title: button.title,
-                          context_msg_id: bot_message_id,
-                        },
-                      });
+                      if (button.id.includes("send_location")) {
+                        handleOpenModal(button, bot_message_id);
+                      } else {
+                        // Follow up button press
+                        initializeQuery({
+                          button_pressed: {
+                            button_id: button.id,
+                            button_title: button.title,
+                            context_msg_id: bot_message_id,
+                          },
+                        });
+                      }
                     }}
                   />
-                ),
+                )
             )}
           </div>
+          <div className="gooey-scroll-fade d-none sm-d-block"></div>
+        </div>
+      )}
+      {thumbButtons.length > 0 && (
+        <div
+          className="d-flex gmt-2 justify-content-start gml-36"
+          style={{ gap: "4px" }}
+        >
+          {thumbButtons.map(
+            (button) =>
+              button && (
+                <FeedbackButton
+                  key={button.id}
+                  button={button}
+                  onClick={() => {
+                    if (button.isPressed) return;
+                    initializeQuery({
+                      button_pressed: {
+                        button_id: button.id,
+                        button_title: button.title,
+                        context_msg_id: bot_message_id,
+                      },
+                    });
+                  }}
+                />
+              ),
+          )}
         </div>
       )}
       <LocationModal
