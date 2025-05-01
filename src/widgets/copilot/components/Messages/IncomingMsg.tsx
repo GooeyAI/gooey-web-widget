@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import ResponseLoader from "../Loader";
-import LocationModal from "./LocationModal";
-import { addInlineStyle } from "src/addStyles";
-import style from "./incoming.scss?inline";
-import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
+import { memo, useRef } from "react";
+import { addInlineStyle } from "src/addStyles";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import Button from "src/components/shared/Buttons/Button";
-import { memo } from "react";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import ResponseLoader from "../Loader";
+import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
+import style from "./incoming.scss?inline";
+import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
+import type { LocationModalRef } from "./LocationModal";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -38,7 +38,7 @@ export const BotMessageLayout = (props: Record<string, any>) => {
   );
 };
 
-export type ReplyButton = {
+type ReplyButton = {
   id: string;
   title: string;
   isPressed?: boolean;
@@ -54,46 +54,15 @@ const FeedbackButtons = ({
 }) => {
   const { buttons, bot_message_id } = data;
   const { initializeQuery }: any = useMessagesContext();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [modalData, setModalData] = useState<{
-    button: ReplyButton;
-    bot_message_id: string;
-  } | null>(null);
-
-  const handleOpenModal = (button: ReplyButton, bot_message_id: string) => {
-    setModalData({ button, bot_message_id });
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleSendLocation = (
-    location: { latitude: number; longitude: number },
-    { button, bot_message_id }: { button: ReplyButton; bot_message_id: string }
-  ) => {
-    const requestData = {
-      button_pressed: {
-        button_id: button.id,
-        button_title: button.title,
-        context_msg_id: bot_message_id,
-      },
-      input_location: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      },
-    };
-    initializeQuery(requestData);
-    handleCloseModal();
-  };
+  const locationModalRef = useRef<LocationModalRef | null>(null);
 
   if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
   const normalButtons: ReplyButton[] = [];
+  // Check if any button has 'send_location' in its id
+  let hasSendLocationButton = false;
 
   buttons.forEach((button) => {
     if (
@@ -103,6 +72,9 @@ const FeedbackButtons = ({
       thumbButtons.push(button);
     } else {
       normalButtons.push(button);
+    }
+    if (button.id.includes("send_location")) {
+      hasSendLocationButton = true;
     }
   });
 
@@ -124,7 +96,7 @@ const FeedbackButtons = ({
                     onClick={() => {
                       if (button.isPressed) return;
                       if (button.id.includes("send_location")) {
-                        handleOpenModal(button, bot_message_id);
+                        locationModalRef.current?.open();
                       } else {
                         // Follow up button press
                         initializeQuery({
@@ -137,7 +109,7 @@ const FeedbackButtons = ({
                       }
                     }}
                   />
-                )
+                ),
             )}
           </div>
           <div className="gooey-scroll-fade d-none sm-d-block"></div>
@@ -169,12 +141,16 @@ const FeedbackButtons = ({
           )}
         </div>
       )}
-      <LocationModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSendLocation={handleSendLocation}
-        buttonData={modalData}
-      />
+      {hasSendLocationButton && (
+        <LocationModal
+          ref={locationModalRef}
+          onSendLocation={(location) => {
+            initializeQuery({
+              input_location: location,
+            });
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -189,6 +165,7 @@ const FeedbackButton = ({
   className?: string;
 }) => {
   const icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
+
   if (icon) {
     return (
       <div className={clsx("my-auto", className)}>
@@ -197,20 +174,24 @@ const FeedbackButton = ({
         </Button>
       </div>
     );
-  } else {
-    const title = button?.id?.includes("send_location") && !button?.title ? " 📍 Share Location" : button?.title
-    return (
-      <Button
-        key={button.id}
-        className={clsx("text-left", className)}
-        variant="outlined"
-        onClick={onClick}
-        hideOverflow={false}
-      >
-        {title}
-      </Button>
-    );
   }
+
+  let title = button.title;
+  if (!title && button?.id?.includes("send_location")) {
+    title = " 📍 Share Location";
+  }
+
+  return (
+    <Button
+      key={button.id}
+      className={clsx("text-left", className)}
+      variant="outlined"
+      onClick={onClick}
+      hideOverflow={false}
+    >
+      {title}
+    </Button>
+  );
 };
 
 const IncomingMsg = memo(
