@@ -158,63 +158,61 @@ const LocationModal = ({
     };
   }, []);
 
-  /** Grab current position the first time the modal opens */
+  const getCurrentPosition = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    const positionCallback = async (position: GeolocationPosition) => {
+      const { coords } = position;
+      const newLocation = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      };
+
+      // Delay to simulate loading
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setSelectedLocation(newLocation);
+      setError(null);
+
+      // Move the map view to the new location
+      if (hasGoogleMapsKey && googleMapRef.current) {
+        googleMapRef.current.panTo({
+          lat: newLocation.latitude,
+          lng: newLocation.longitude,
+        });
+        googleMapRef.current.setZoom(15);
+      } else if (leafletMapRef.current) {
+        leafletMapRef.current.flyTo(
+          [newLocation.latitude, newLocation.longitude],
+          15,
+          { animate: true, duration: 0.5 }
+        );
+      } else {
+        console.warn("Leaflet map is not fully initialized yet.");
+      }
+      setIsRefreshing(false);
+    };
+
+    const errorCallback = () => {
+      alert("Unable to retrieve location. Please enable location services.");
+    };
+
+    setIsRefreshing(true);
+
+    navigator.geolocation.getCurrentPosition(positionCallback, errorCallback);
+  };
+
+  // Grab current position the first time the modal opens
   useEffect(() => {
     if (!isOpen) {
       locationInitialized.current = false;
       return;
     }
 
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    if (!locationInitialized.current) {
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          const newLocation = {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-          };
-
-          setSelectedLocation(newLocation);
-          setError(null);
-          // Update map centers
-          setTimeout(() => {
-            // Give time for maps to initialize
-            if (googleMapRef.current) {
-              googleMapRef.current.panTo({
-                lat: newLocation.latitude,
-                lng: newLocation.longitude,
-              });
-              // Only set zoom initially, not on every update
-              if (!locationInitialized.current) {
-                googleMapRef.current.setZoom(15);
-              }
-            }
-
-            if (leafletMapRef.current) {
-              leafletMapRef.current.setView(
-                [newLocation.latitude, newLocation.longitude],
-                // Only set zoom initially, not on every update
-                locationInitialized.current
-                  ? leafletMapRef.current.getZoom()
-                  : 15,
-                { animate: false }
-              );
-            }
-          }, 300);
-
-          locationInitialized.current = true;
-        },
-        (_) => {
-          alert(
-            "Unable to retrieve location. Please enable location services."
-          );
-        }
-      );
-    }
+    getCurrentPosition();
   }, [isOpen]);
 
   const handleSendLocation = () => {
@@ -232,48 +230,8 @@ const LocationModal = ({
     }
   };
 
-  const refreshLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
-      return;
-    }
-    setIsRefreshing(true);
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        const newLocation = {
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        };
-
-        //delay to simulate loading
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        setSelectedLocation(newLocation);
-        setError(null);
-        setIsRefreshing(false);
-
-        // Move the map view to the new location
-        if (hasGoogleMapsKey && googleMapRef.current) {
-          googleMapRef.current.panTo({
-            lat: newLocation.latitude,
-            lng: newLocation.longitude,
-          });
-          googleMapRef.current.setZoom(15);
-        } else if (leafletMapRef.current) {
-          leafletMapRef.current.flyTo(
-            [newLocation.latitude, newLocation.longitude],
-            15,
-            { animate: true, duration: 0.5 }
-          );
-        } else {
-          console.warn("Leaflet map is not fully initialized yet.");
-        }
-      },
-      (_) => {
-        alert("Unable to refresh location. Please enable location services.");
-        setIsRefreshing(false);
-      }
-    );
+  const handleRefreshLocation = () => {
+    getCurrentPosition();
   };
 
   /* ---------- default centre ---------- */
@@ -391,7 +349,8 @@ const LocationModal = ({
           <div className="flex items-center justify-end w-1/3">
             <IconButton
               className={clsx("button-outlined text-dark centre")}
-              onClick={refreshLocation}
+              onClick={handleRefreshLocation}
+              disabled={isRefreshing}
             >
               {isRefreshing ? (
                 <div
@@ -430,7 +389,6 @@ const LocationModal = ({
             className="w-100"
             variant="outlined"
             onClick={handleSendLocation}
-            disabled={!selectedLocation}
           >
             📍 Send this location
           </Button>
