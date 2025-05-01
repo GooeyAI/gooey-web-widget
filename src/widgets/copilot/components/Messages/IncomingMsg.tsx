@@ -198,6 +198,7 @@ const FeedbackButton = ({
       </div>
     );
   } else {
+    const title = button?.id?.includes("send_location") && !button?.title ? " 📍 Share Location" : button?.title
     return (
       <Button
         key={button.id}
@@ -206,7 +207,7 @@ const FeedbackButton = ({
         onClick={onClick}
         hideOverflow={false}
       >
-        {button.title}
+        {title}
       </Button>
     );
   }
