@@ -288,14 +288,87 @@ function GoogleMapView({
   googleMapsError: boolean;
   setGoogleMapsError: (error: boolean) => void;
 }) {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!searchInputRef.current || !googleMapRef.current || !isApiLoaded)
+      return;
+
+    try {
+      const autocomplete = new google.maps.places.Autocomplete(
+        searchInputRef.current,
+        {
+          types: ["geocode"],
+        },
+      );
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry || !place.geometry.location) {
+          console.log("Returned place contains no geometry");
+          return;
+        }
+
+        // Set the selected location
+        setSelectedLocation({
+          latitude: place.geometry.location.lat(),
+          longitude: place.geometry.location.lng(),
+        });
+
+        // If the place has a viewport, fit the map to it
+        if (place.geometry.viewport) {
+          googleMapRef.current?.fitBounds(place.geometry.viewport);
+        } else {
+          googleMapRef.current?.setCenter(place.geometry.location);
+          googleMapRef.current?.setZoom(15);
+        }
+      });
+
+      return () => {
+        google.maps.event.clearInstanceListeners(autocomplete);
+      };
+    } catch (error) {
+      console.error("Error initializing Autocomplete:", error);
+    }
+  }, [googleMapRef.current, isApiLoaded]);
+
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 1000,
+          width: "100%",
+          padding: "10px",
+        }}
+      >
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search for a location..."
+          style={{
+            width: "100%",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+            fontSize: "14px",
+          }}
+        />
+      </div>
+
       <APIProvider
         apiKey={googleMapsApiKey}
+        onLoad={() => setIsApiLoaded(true)}
         onError={(e) => {
           console.error("Google Maps API error:", e);
           setGoogleMapsError(true);
         }}
+        libraries={["places"]}
       >
         <Map
           style={{ height: "100%", width: "100%" }}
@@ -303,7 +376,9 @@ function GoogleMapView({
           defaultZoom={15}
           controlSize={26}
           gestureHandling={"greedy"}
-          disableDefaultUI={false}
+          disableDefaultUI={true}
+          zoomControl={true}
+          streetViewControl={false}
           mapId="DEMO_MAP_ID"
         />
         <GoogleMapCenterWatcher
