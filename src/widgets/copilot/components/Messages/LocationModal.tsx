@@ -478,7 +478,7 @@ function LeafletMapView({
         key={`leaflet-map-${isOpen.toString()}`}
         center={center}
         zoom={15}
-        scrollWheelZoom
+        scrollWheelZoom="center"
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
