@@ -57,7 +57,6 @@ const LocationModal = forwardRef<LocationModalRef, LocationModalProps>(
     } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [googleMapsError, setGoogleMapsError] = useState(false);
     const leafletMapRef = useRef<L.Map | null>(null);
     const googleMapRef = useRef<google.maps.Map | null>(null);
 
@@ -66,11 +65,8 @@ const LocationModal = forwardRef<LocationModalRef, LocationModalProps>(
         setIsOpen(true);
         setSelectedLocation(null);
         setError(null);
-        setGoogleMapsError(false);
       },
     }));
-
-    useGoogleMapsAuthFailure(setGoogleMapsError);
 
     useEffect(() => {
       if (!isOpen) return;
@@ -182,8 +178,6 @@ const LocationModal = forwardRef<LocationModalRef, LocationModalProps>(
                 center={googleMapCenter}
                 setSelectedLocation={setSelectedLocation}
                 googleMapRef={googleMapRef}
-                googleMapsError={googleMapsError}
-                setGoogleMapsError={setGoogleMapsError}
               />
             ) : (
               <LeafletMapView
@@ -278,22 +272,20 @@ function GoogleMapView({
   center,
   setSelectedLocation,
   googleMapRef,
-  googleMapsError,
-  setGoogleMapsError,
 }: {
   googleMapsApiKey: string;
   center: { lat: number; lng: number };
   setSelectedLocation: (loc: { latitude: number; longitude: number }) => void;
   googleMapRef: React.MutableRefObject<google.maps.Map | null>;
-  googleMapsError: boolean;
-  setGoogleMapsError: (error: boolean) => void;
 }) {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useGoogleMapsAuthFailure(setHasError);
 
   useEffect(() => {
-    if (!searchInputRef.current || !googleMapRef.current || !isApiLoaded)
-      return;
+    if (!searchInputRef.current || !googleMapRef.current || !isLoaded) return;
 
     try {
       const autocomplete = new google.maps.places.Autocomplete(
@@ -326,13 +318,19 @@ function GoogleMapView({
         }
       });
 
+      // Add a style to the document head to ensure the autocomplete results are on top
+      const style = document.createElement("style");
+      style.innerHTML = ".pac-container { z-index: 199999 !important; }";
+      document.head.appendChild(style);
+
       return () => {
         google.maps.event.clearInstanceListeners(autocomplete);
+        document.head.removeChild(style);
       };
     } catch (error) {
       console.error("Error initializing Autocomplete:", error);
     }
-  }, [googleMapRef.current, isApiLoaded]);
+  }, [googleMapRef.current, isLoaded]);
 
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
@@ -363,10 +361,10 @@ function GoogleMapView({
 
       <APIProvider
         apiKey={googleMapsApiKey}
-        onLoad={() => setIsApiLoaded(true)}
+        onLoad={() => setIsLoaded(true)}
         onError={(e) => {
           console.error("Google Maps API error:", e);
-          setGoogleMapsError(true);
+          setHasError(true);
         }}
         libraries={["places"]}
       >
@@ -387,7 +385,7 @@ function GoogleMapView({
         />
       </APIProvider>
 
-      {!googleMapsError && (
+      {!hasError && (
         <div
           style={{
             position: "absolute",
@@ -436,15 +434,13 @@ function GoogleMapCenterWatcher({
   return null;
 }
 
-function useGoogleMapsAuthFailure(
-  setGoogleMapsError: (error: boolean) => void,
-) {
+function useGoogleMapsAuthFailure(setHasError: (error: boolean) => void) {
   useEffect(() => {
     const previousHandler = window.gm_authFailure;
 
     window.gm_authFailure = () => {
       console.error("Google Maps authentication failed - API key issue");
-      setGoogleMapsError(true);
+      setHasError(true);
 
       if (typeof previousHandler === "function") {
         previousHandler();
@@ -458,7 +454,7 @@ function useGoogleMapsAuthFailure(
         delete window.gm_authFailure;
       }
     };
-  }, [setGoogleMapsError]);
+  }, [setHasError]);
 }
 
 function LeafletMapView({
