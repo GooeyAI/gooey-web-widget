@@ -19,7 +19,7 @@ export const STREAM_MESSAGE_TYPES = {
 export const createStreamApi = async (
   apiUrl: string,
   body: any,
-  cancelToken: any
+  cancelToken: any,
 ) => {
   let url = new URL("/v3/integrations/stream/", apiUrl).toString();
   const headers = getHeaders();

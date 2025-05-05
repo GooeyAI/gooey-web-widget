@@ -132,7 +132,7 @@ export const fetchUrlMeta = async (url: string) => {
 
 // Text Rendering Logic
 const getOutputText = (data: any) => {
-  const { type = "", status = "", text, detail, output_text = {} } = data;
+  const { type = "", status = "", text, detail, output_text = {}, raw_output_text = {} } = data;
   let out = "";
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
     if (text) {
@@ -143,9 +143,9 @@ const getOutputText = (data: any) => {
     out = detail;
   }
   if (type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && status === "completed") {
-    out = output_text[0];
+    out = output_text[0] || raw_output_text[0];
   }
-
+  
   // replace 🎧 I heard from out
   out = out.replace("🎧 I heard", "🎙️");
   return out;

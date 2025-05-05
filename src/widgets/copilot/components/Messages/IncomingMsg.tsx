@@ -1,14 +1,15 @@
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import ResponseLoader from "../Loader";
-
-import { addInlineStyle } from "src/addStyles";
-import style from "./incoming.scss?inline";
-import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
 import clsx from "clsx";
+import { memo, useRef } from "react";
+import { addInlineStyle } from "src/addStyles";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import Button from "src/components/shared/Buttons/Button";
-import { memo } from "react";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import ResponseLoader from "../Loader";
+import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
+import style from "./incoming.scss?inline";
+import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
+import type { LocationModalRef } from "./LocationModal";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -53,11 +54,15 @@ const FeedbackButtons = ({
 }) => {
   const { buttons, bot_message_id } = data;
   const { initializeQuery }: any = useMessagesContext();
+  const locationModalRef = useRef<LocationModalRef | null>(null);
+
   if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
   const normalButtons: ReplyButton[] = [];
+  // Check if any button has 'send_location' in its id
+  let hasSendLocationButton = false;
 
   buttons.forEach((button) => {
     if (
@@ -68,67 +73,83 @@ const FeedbackButtons = ({
     } else {
       normalButtons.push(button);
     }
+    if (button.id.includes("send_location")) {
+      hasSendLocationButton = true;
+    }
   });
 
   return (
     <div>
-      {thumbButtons.length > 0 && (
-        <div>
-          {normalButtons.length > 0 && (
-            <div className="gooey-scroll-wrapper">
-              <div
-                className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
-                style={{ gap: "12px" }}
-              >
-                {normalButtons.map(
-                  (button) =>
-                    button && (
-                      <FeedbackButton
-                        key={button.id}
-                        button={button}
-                        className={clsx("my-1 mx-md-2 w-100")}
-                        onClick={() => {
-                          if (button.isPressed) return;
-                          initializeQuery({
-                            button_pressed: {
-                              button_id: button.id,
-                              button_title: button.title,
-                              context_msg_id: bot_message_id,
-                            },
-                          });
-                        }}
-                      />
-                    ),
-                )}
-              </div>
-              <div className="gooey-scroll-fade d-none sm-d-block"></div>
-            </div>
-          )}
+      {normalButtons.length > 0 && (
+        <div className="gooey-scroll-wrapper">
           <div
-            className="d-flex gmt-2 justify-content-start gml-36"
-            style={{ gap: "4px" }}
+            className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
+            style={{ gap: "12px" }}
           >
-            {thumbButtons.map(
+            {normalButtons.map(
               (button) =>
                 button && (
                   <FeedbackButton
                     key={button.id}
                     button={button}
+                    className={clsx("my-1 mx-md-2 w-100")}
                     onClick={() => {
                       if (button.isPressed) return;
-                      initializeQuery({
-                        button_pressed: {
-                          button_id: button.id,
-                          button_title: button.title,
-                          context_msg_id: bot_message_id,
-                        },
-                      });
+                      if (button.id.includes("send_location")) {
+                        locationModalRef.current?.open();
+                      } else {
+                        // Follow up button press
+                        initializeQuery({
+                          button_pressed: {
+                            button_id: button.id,
+                            button_title: button.title,
+                            context_msg_id: bot_message_id,
+                          },
+                        });
+                      }
                     }}
                   />
                 ),
             )}
           </div>
+          <div className="gooey-scroll-fade d-none sm-d-block"></div>
         </div>
+      )}
+      {thumbButtons.length > 0 && (
+        <div
+          className="d-flex gmt-2 justify-content-start gml-36"
+          style={{ gap: "4px" }}
+        >
+          {thumbButtons.map(
+            (button) =>
+              button && (
+                <FeedbackButton
+                  key={button.id}
+                  button={button}
+                  onClick={() => {
+                    if (button.isPressed) return;
+                    initializeQuery({
+                      button_pressed: {
+                        button_id: button.id,
+                        button_title: button.title,
+                        context_msg_id: bot_message_id,
+                      },
+                    });
+                  }}
+                />
+              ),
+          )}
+        </div>
+      )}
+      {hasSendLocationButton && (
+        <LocationModal
+          ref={locationModalRef}
+          onSendLocation={(location) => {
+            initializeQuery({
+              input_location: location,
+            });
+          }}
+        />
       )}
     </div>
   );
@@ -144,6 +165,7 @@ const FeedbackButton = ({
   className?: string;
 }) => {
   const icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
+
   if (icon) {
     return (
       <div className={clsx("my-auto", className)}>
@@ -152,19 +174,24 @@ const FeedbackButton = ({
         </Button>
       </div>
     );
-  } else {
-    return (
-      <Button
-        key={button.id}
-        className={clsx("text-left", className)}
-        variant="outlined"
-        onClick={onClick}
-        hideOverflow={false}
-      >
-        {button.title}
-      </Button>
-    );
   }
+
+  let title = button.title;
+  if (!title && button?.id?.includes("send_location")) {
+    title = " 📍 Share Location";
+  }
+
+  return (
+    <Button
+      key={button.id}
+      className={clsx("text-left", className)}
+      variant="outlined"
+      onClick={onClick}
+      hideOverflow={false}
+    >
+      {title}
+    </Button>
+  );
 };
 
 const IncomingMsg = memo(

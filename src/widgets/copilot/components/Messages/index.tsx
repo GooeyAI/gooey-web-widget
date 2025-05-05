@@ -18,25 +18,27 @@ const Responses = (props: any) => {
     <>
       {que.map((id: string) => {
         const responseData = msgs.get(id);
-        const role = responseData.role;
-        if (role === "user")
+        if (responseData.role === "user") {
+          return <OutgoingMsg 
+            key={id} 
+            input_prompt={responseData.input_prompt}
+            input_audio={responseData.input_audio}
+            input_images={responseData.input_images}
+            button_pressed={responseData.button_pressed}
+            input_location={responseData.input_location}
+          />;
+        } else {
           return (
-            <OutgoingMsg
+            <IncomingMsg
               data={responseData}
               key={id}
-              preventAutoplay={preventAutoplay}
+              id={id}
+              showSources={config?.showSources || false}
+              linkColor={config?.branding?.colors?.primary || "initial"}
+              autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
             />
           );
-        return (
-          <IncomingMsg
-            data={responseData}
-            key={id}
-            id={id}
-            showSources={config?.showSources || false}
-            linkColor={config?.branding?.colors?.primary || "initial"}
-            autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
-          />
-        );
+        }
       })}
     </>
   );
@@ -71,7 +73,7 @@ const Messages = () => {
       ref={scrollContainerRef}
       className={clsx(
         "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 d-flex flex-col",
-        isEmpty ? "justify-end" : "justify-start"
+        isEmpty ? "justify-end" : "justify-start",
       )}
       style={{ overflowY: "auto" }}
     >
