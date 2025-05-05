@@ -19,7 +19,14 @@ const Responses = (props: any) => {
       {que.map((id: string) => {
         const responseData = msgs.get(id);
         if (responseData.role === "user") {
-          return <OutgoingMsg key={id} />;
+          return <OutgoingMsg 
+            key={id} 
+            input_prompt={responseData.input_prompt}
+            input_audio={responseData.input_audio}
+            input_images={responseData.input_images}
+            button_pressed={responseData.button_pressed}
+            input_location={responseData.input_location}
+          />;
         } else {
           return (
             <IncomingMsg
