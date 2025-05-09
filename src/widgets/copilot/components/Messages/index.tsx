@@ -78,7 +78,7 @@ const Messages = () => {
       style={{ overflowY: "auto" }}
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
-      <Responses queue={Array.from(messages.keys())} data={messages} />
+      <Responses queue={messages ? Array.from(messages.keys()) : []} data={messages} />
       <ResponseLoader show={isSending} />
     </div>
   );

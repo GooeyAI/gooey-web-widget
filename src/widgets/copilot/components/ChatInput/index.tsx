@@ -1,5 +1,5 @@
 import IconButton from "src/components/shared/Buttons/IconButton";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 
 import clsx from "clsx";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
@@ -39,8 +39,20 @@ const ChatInput = () => {
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [files, setFiles] = useState<Array<any> | null>(null);
+  const [preAttachedFileUsed, setPreAttachedFileUsed] = useState(false);
 
   const inputRef = useRef<null | HTMLElement>(null);
+
+  // Handle preAttachedFile on mount
+  useEffect(() => {
+    if (!config?.preAttachedFile || preAttachedFileUsed || files?.length) return;
+
+    const { name, mime, bytes } = config.preAttachedFile;
+    const fileObj = new File([new Uint8Array(bytes)], name, { type: mime });
+    setFiles(processFiles([fileObj]));
+    setPreAttachedFileUsed(true);
+
+  }, [config?.preAttachedFile, preAttachedFileUsed]);
 
   const resetHeight = () => {
     const ele: HTMLElement | null = inputRef.current;
@@ -100,38 +112,40 @@ const ChatInput = () => {
     setIsRecording(false);
   };
 
+  const processFiles = (files: Array<any>) => {
+    return files.map((file: any, index: number) => {
+      makeFileBuffer(file).then((blob) => {
+        const toUpload = new File([blob as Blob], file.name);
+        uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
+          setFiles((prev: any) => {
+            if (!prev[index]) return prev; // if photo removed before upload completed
+            prev[index].isUploading = false;
+            prev[index].gooeyUrl = url;
+            return [...prev];
+          });
+        });
+      });
+
+      return {
+        name: file.name,
+        type: file.type.split("/")[0],
+        data: file,
+        gooeyUrl: "",
+        isUploading: true,
+        removeFile: () => {
+          setFiles((prev: any) => {
+            prev.splice(index, 1);
+            return [...prev];
+          });
+        },
+      };
+    });
+  };
+  
   const onFileAdded = (e: any) => {
     const files = Array.from(e.target.files);
     if (!files || !files.length) return;
-    setFiles(
-      files.map((file: any, index: number) => {
-        makeFileBuffer(file).then((blob) => {
-          const toUpload = new File([blob as Blob], file.name);
-          uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
-            setFiles((prev: any) => {
-              if (!prev[index]) return prev; // if photo removed before upload completed
-              prev[index].isUploading = false;
-              prev[index].gooeyUrl = url;
-              return [...prev];
-            });
-          });
-        });
-
-        return {
-          name: file.name,
-          type: file.type.split("/")[0],
-          data: file,
-          gooeyUrl: "",
-          isUploading: true,
-          removeFile: () => {
-            setFiles((prev: any) => {
-              prev.splice(index, 1);
-              return [...prev];
-            });
-          },
-        };
-      })
-    );
+    setFiles(processFiles(files));
   };
 
   const handleFileUpload = () => {
