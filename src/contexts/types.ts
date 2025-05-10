@@ -28,9 +28,4 @@ export interface CopilotConfigType {
     };
   };
   payload?: any;
-  preAttachedFile?: {
-    name: string;
-    mime: string;
-    bytes: number[];
-  };
 }

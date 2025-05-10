@@ -45,14 +45,20 @@ const ChatInput = () => {
 
   // Handle preAttachedFile on mount
   useEffect(() => {
-    if (!config?.preAttachedFile || preAttachedFileUsed || files?.length) return;
+    const input_images = config?.payload?.input_images || [];
+    if (!input_images?.length || preAttachedFileUsed || files?.length) return;
 
-    const { name, mime, bytes } = config.preAttachedFile;
-    const fileObj = new File([new Uint8Array(bytes)], name, { type: mime });
-    setFiles(processFiles([fileObj]));
-    setPreAttachedFileUsed(true);
+    input_images.forEach((image: any) => {
+      if (typeof image === "string") return; // @TODO: support for CDN URLs
+      // check if image is { name: string; mime: string; bytes: number[]; };
+      if (typeof image === "object" && image.bytes) {
+        const fileObj = new File([new Uint8Array(image.bytes)], image.name || "gooey-image.png", { type: image.mime || "image/png" });
+        setFiles(processFiles([fileObj]));
+        setPreAttachedFileUsed(true);
+      }
+    });
 
-  }, [config?.preAttachedFile, preAttachedFileUsed]);
+  }, [config?.payload?.input_images, preAttachedFileUsed]);
 
   const resetHeight = () => {
     const ele: HTMLElement | null = inputRef.current;
@@ -141,7 +147,7 @@ const ChatInput = () => {
       };
     });
   };
-  
+
   const onFileAdded = (e: any) => {
     const files = Array.from(e.target.files);
     if (!files || !files.length) return;
@@ -227,15 +233,15 @@ const ChatInput = () => {
                 !config?.enableAudioMessage ||
                 showStop ||
                 !!files?.length) && (
-                <IconButton
-                  disabled={disableSend}
-                  variant="text-alt"
-                  className="gp-4"
-                  onClick={showStop ? handleCancelSend : handleSendMessage}
-                >
-                  {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
-                </IconButton>
-              )}
+                  <IconButton
+                    disabled={disableSend}
+                    variant="text-alt"
+                    className="gp-4"
+                    onClick={showStop ? handleCancelSend : handleSendMessage}
+                  >
+                    {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
+                  </IconButton>
+                )}
             </div>
           </div>
         )}
