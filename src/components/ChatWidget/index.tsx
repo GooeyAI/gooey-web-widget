@@ -16,24 +16,99 @@ import Header from "src/widgets/copilot/components/Header";
 import { CopilotConfigType } from "src/contexts/types";
 import ConversationView from "../ConversationView";
 import SecondaryDrawer from "../shared/Layout/SecondaryDrawer";
+import useSecondaryDrawerController from "src/hooks/useSecondaryDrawerController";
+
+// Define a Message type to avoid 'any'
+export interface Message {
+  id?: string;
+  bot_message_id?: string;
+  [key: string]: unknown;
+}
 
 export interface GooeyChatWidgetProps {
-  messages: Array<{ id?: string; bot_message_id?: string; [key: string]: any }>;
+  messages: Message[];
   isSending: boolean;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
-  config: {
-    [key: string]: any;
-  };
+  config: Record<string, unknown>;
   onSend: OnSendCallbackType;
   onCancelSend: () => void;
   onNewConversation: () => void;
 }
 
+// Move WidgetComponent outside the main component to avoid re-creation on every render
+const WidgetComponent = (props: {
+  messages_map: Map<string, Message>;
+  isSending: boolean;
+  scrollContainerRef: React.RefObject<HTMLDivElement>;
+  preventAutoplay: boolean;
+  avoidAutoplay: () => void;
+  safeConfig: CopilotConfigType;
+  handleNewConversation: () => void;
+  handleSend: OnSendCallbackType;
+  handleCancelSend: () => void;
+  isSecondaryDrawerOpen: boolean;
+  secondaryDrawerContent: () => ReactNode;
+  toggleSecondaryDrawer: (content: (() => ReactNode) | null) => void;
+}) => {
+  const {
+    messages_map,
+    isSending,
+    scrollContainerRef,
+    preventAutoplay,
+    avoidAutoplay,
+    safeConfig,
+    handleNewConversation,
+    handleSend,
+    handleCancelSend,
+    isSecondaryDrawerOpen,
+    secondaryDrawerContent,
+    toggleSecondaryDrawer,
+  } = props;
+  return (
+    <div
+      className="gooey-embed-container d-flex flex-col h-100 flex-1"
+      id="gooeyChat-container"
+    >
+      <Header
+        isEmptyMessages={messages_map.size === 0}
+        showNewConversationButton={true}
+        name={safeConfig?.branding?.name || ""}
+        photoUrl={safeConfig?.branding?.photoUrl || ""}
+        onNewConversation={handleNewConversation}
+        disableTooltip={true}
+      />
+      <ConversationView
+        messages={messages_map}
+        isSending={isSending}
+        scrollContainerRef={scrollContainerRef}
+        preventAutoplay={preventAutoplay}
+        avoidAutoplay={avoidAutoplay}
+        config={safeConfig}
+        layoutController={{
+          toggleSecondaryDrawer,
+        }}
+      />
+      <ChatInput
+        config={safeConfig}
+        isSending={isSending}
+        isReceiving={isSending}
+        onSend={handleSend}
+        onCancelSend={handleCancelSend}
+      />
+      <SecondaryDrawer
+        isMobile={true}
+        isOpen={isSecondaryDrawerOpen}
+        contentRenderer={secondaryDrawerContent}
+      />
+    </div>
+  );
+};
+
 const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
   const {
     messages = [],
     isSending = false,
-    scrollContainerRef = null,
+    scrollContainerRef,
     config,
     onSend,
     onCancelSend,
@@ -50,15 +125,12 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
     isSecondaryDrawerOpen,
     secondaryDrawerContent,
     toggleSecondaryDrawer,
-  } = useSecondaryDrawerController({
-    isMobile: true,
-    shadowRoot: hostRef.current?.shadowRoot,
-  });
+  } = useSecondaryDrawerController();
 
   const messages_map = useMemo(() => {
-    let _map = new Map();
-    messages.forEach((message: any) => {
-      _map.set(message.id || message.bot_message_id, message);
+    const _map = new Map<string, Message>();
+    messages.forEach((message: Message) => {
+      _map.set((message.id || message.bot_message_id) ?? '', message);
     });
     return _map;
   }, [JSON.stringify(messages.map((m) => m.id || m.bot_message_id))]);
@@ -71,144 +143,97 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
   };
 
   // Safe defaults
+  function extractBranding(obj: unknown): Record<string, unknown> {
+    if (typeof obj === 'object' && obj !== null && 'branding' in obj) {
+      const branding = (obj as { branding?: unknown }).branding;
+      if (typeof branding === 'object' && branding !== null) {
+        return branding as Record<string, unknown>;
+      }
+    }
+    return {};
+  }
   const safeConfig: CopilotConfigType = {
-    ...config,
+    ...((typeof config === 'object' && config !== null) ? config : {}),
     branding: {
       name: "Gooey Bot",
       photoUrl: "https://gooey.ai/favicon.ico",
-      ...config?.branding,
+      ...extractBranding(config),
     },
   } as CopilotConfigType;
 
-  const handleSend = useCallback(
-    onSend || ((msg) => console.log("Send message:", msg)),
+  const handleSend: OnSendCallbackType = useCallback((msg) => {
+    if (onSend) {
+      onSend(msg);
+    } else {
+      console.log("Send message pressed!, No Callback received", msg);
+    }
+  },
     [onSend]
   );
 
   const handleCancelSend = useCallback(
-    onCancelSend || (() => console.log("Cancel send")),
+    () => {
+      if (onCancelSend) {
+        onCancelSend();
+      } else {
+        console.log("Cancel send pressed!, No Callback received");
+      }
+    },
     [onCancelSend]
   );
 
-  const handleNewConversation = useCallback(
-    onNewConversation || (() => console.log("New conversation")),
+  const handleNewConversation = useCallback(() => {
+    if (onNewConversation) {
+      onNewConversation();
+    } else {
+      console.log("New conversation pressed!, No Callback received");
+    }
+  },
     [onNewConversation]
   );
-
-  const WidgetComponent = () => {
-    return (
-      <div
-        className="gooey-embed-container d-flex flex-col h-100 flex-1"
-        id="gooeyChat-container"
-      >
-        <Header
-          isEmptyMessages={messages_map.size === 0}
-          showNewConversationButton={true}
-          name={safeConfig?.branding?.name || ""}
-          photoUrl={safeConfig?.branding?.photoUrl || ""}
-          onNewConversation={handleNewConversation}
-          disableTooltip={true}
-        />
-        <ConversationView
-          messages={messages_map}
-          isSending={isSending}
-          scrollContainerRef={scrollContainerRef}
-          preventAutoplay={preventAutoplay}
-          avoidAutoplay={avoidAutoplay}
-          config={safeConfig}
-          layoutController={{
-            toggleSecondaryDrawer,
-          }}
-        />
-        <ChatInput
-          config={safeConfig}
-          isSending={isSending}
-          isReceiving={isSending}
-          onSend={handleSend}
-          onCancelSend={handleCancelSend}
-        />
-        <SecondaryDrawer
-          isMobile={true}
-          isOpen={isSecondaryDrawerOpen}
-          contentRenderer={secondaryDrawerContent}
-        />
-      </div>
-    );
-  };
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-
-    // Check if we already created and rendered into a shadow root
-    if (host.shadowRoot && rootRef.current) return;
-
-    // Create Shadow DOM if not already created
-    const shadow =
-      host.shadowRoot ??
+    if (!host.shadowRoot) {
       host.attachShadow({
         mode: "open",
         delegatesFocus: true,
       });
-
-    const root = ReactDOM.createRoot(shadow);
-    rootRef.current = root;
-
-    root.render(
+    }
+    const shadow = host.shadowRoot!;
+    if (!rootRef.current) {
+      rootRef.current = ReactDOM.createRoot(shadow);
+    }
+    rootRef.current.render(
       <React.StrictMode>
         <Styles />
-        <WidgetComponent />
+        <WidgetComponent
+          messages_map={messages_map}
+          isSending={isSending}
+          scrollContainerRef={scrollContainerRef}
+          preventAutoplay={preventAutoplay}
+          avoidAutoplay={avoidAutoplay}
+          safeConfig={safeConfig}
+          handleNewConversation={handleNewConversation}
+          handleSend={handleSend}
+          handleCancelSend={handleCancelSend}
+          isSecondaryDrawerOpen={isSecondaryDrawerOpen}
+          secondaryDrawerContent={secondaryDrawerContent}
+          toggleSecondaryDrawer={toggleSecondaryDrawer}
+        />
       </React.StrictMode>
     );
-
     return () => {
-      root.unmount();
-      rootRef.current = null;
+      if (rootRef.current) {
+        rootRef.current.unmount();
+        rootRef.current = null;
+      }
     };
-  }, [isSending, messages_map]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages_map, isSending]);
 
   return <span ref={hostRef} style={{ display: "contents" }} />;
-};
-
-export const useSecondaryDrawerController = ({
-  isMobile = false,
-  shadowRoot = null,
-}: {
-  isMobile?: boolean;
-  shadowRoot?: ShadowRoot | null;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [contentRenderer, setContentRenderer] = useState<() => ReactNode>(
-    () => null
-  );
-  console.log(shadowRoot, ">>sideBarElement");
-  const toggleSecondaryDrawer = useCallback(
-    (content: (() => ReactNode) | null) => {
-      const sideBarElement = shadowRoot?.querySelector(
-        "#gooey-right-bar"
-      ) as HTMLElement;
-      console.log(sideBarElement, ">>sideBarElement");
-      if (!sideBarElement) return;
-
-      const open = !!content;
-      setIsOpen(open);
-      setContentRenderer(() => content || (() => null));
-
-      // mimic toggleSidebarStyles logic
-      if (open) {
-        sideBarElement.style.width = isMobile ? "100%" : "65vw";
-      } else {
-        sideBarElement.style.width = "0px";
-      }
-    },
-    [isMobile, shadowRoot]
-  );
-
-  return {
-    isSecondaryDrawerOpen: isOpen,
-    secondaryDrawerContent: contentRenderer,
-    toggleSecondaryDrawer,
-  };
 };
 
 export default GooeyChatWidget;

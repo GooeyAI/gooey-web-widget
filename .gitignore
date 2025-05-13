@@ -25,3 +25,7 @@ gitleaks-baseline.json
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Local Builds
+dist/*
+components-dist/*
