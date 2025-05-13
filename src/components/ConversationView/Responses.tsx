@@ -35,7 +35,6 @@ const MessagesList = ({
       {queue.map((id) => {
         const responseData = data.get(id);
         if (!responseData) return null;
-        console.log(responseData, ">>11");
         const role = responseData.role;
         if (role === "user") {
           return (

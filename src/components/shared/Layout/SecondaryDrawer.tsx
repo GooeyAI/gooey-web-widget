@@ -17,12 +17,6 @@ const SecondaryDrawer = ({
   isOpen,
   contentRenderer,
 }: SecondaryDrawerProps) => {
-  console.log({
-    isMobile,
-    isOpen,
-    contentRenderer,      
-  }, "SecondaryDrawer props");
-
   const { layoutController } = useSystemContext();
 
   // Fallbacks to context values
@@ -91,6 +85,7 @@ const SecondaryDrawer = ({
     };
   }, [isResizing]);
 
+  if (!effectiveIsOpen) return null;
   return (
     <div
       ref={drawerRef}

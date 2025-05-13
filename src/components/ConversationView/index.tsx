@@ -9,13 +9,13 @@ import { OnSendCallbackType } from "src/widgets/copilot/components/ChatInput";
 
 export type ConversationViewProps = {
   messages: Map<string, any>;
+  onSend: OnSendCallbackType
   isSending?: boolean;
   scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
   isMessagesLoading?: boolean;
   avoidAutoplay?: () => void | null;
   preventAutoplay?: boolean;
   config?: CopilotConfigType;
-  onSend?: OnSendCallbackType
   layoutController?: {
     toggleSecondaryDrawer: (content: any) => void;
   };
@@ -33,8 +33,8 @@ const ConversationView = ({
   layoutController,
 }: ConversationViewProps) => {
   useEffect(() => {
-    avoidAutoplay();
-  }, [avoidAutoplay]);
+    if (!preventAutoplay) avoidAutoplay();
+  }, [avoidAutoplay, preventAutoplay]);
 
   if (isMessagesLoading) {
     return (

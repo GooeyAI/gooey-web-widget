@@ -16,7 +16,6 @@ const useDeviceWidth = (
   const [isWindowMatches, setIsWindowMatches] = useState(false);
   const depTrigger = deps?.some((dep) => !dep);
 
-  console.log(depTrigger, ">>depTrigger");
   useEffect(() => {
     const container = domContext?.querySelector("#gooeyChat-container");
     if (!container) return;

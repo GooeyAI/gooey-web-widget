@@ -9,7 +9,7 @@ addInlineStyle(AppStyles);
 import ChatInput, {
   OnSendCallbackType,
 } from "src/widgets/copilot/components/ChatInput";
-import ReactDOM from "react-dom/client";
+import { createPortal } from "react-dom";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addInlineStyle, Styles } from "src/addStyles";
 import Header from "src/widgets/copilot/components/Header";
@@ -28,7 +28,6 @@ export interface Message {
 export interface GooeyChatWidgetProps {
   messages: Message[];
   isSending: boolean;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
   config: Record<string, unknown>;
   onSend: OnSendCallbackType;
   onCancelSend: () => void;
@@ -66,7 +65,7 @@ const WidgetComponent = (props: {
   } = props;
   return (
     <div
-      className="gooey-embed-container d-flex flex-col h-100 flex-1"
+      className="gooey-embed-container d-flex flex-col h-100 flex-1 pos-relative"
       id="gooeyChat-container"
     >
       <Header
@@ -79,6 +78,7 @@ const WidgetComponent = (props: {
       />
       <ConversationView
         messages={messages_map}
+        onSend={handleSend}
         isSending={isSending}
         scrollContainerRef={scrollContainerRef}
         preventAutoplay={preventAutoplay}
@@ -108,7 +108,6 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
   const {
     messages = [],
     isSending = false,
-    scrollContainerRef,
     config,
     onSend,
     onCancelSend,
@@ -118,9 +117,10 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
   const [preventAutoplay, setPreventAutoplay] = useState<boolean>(true);
 
   const hostRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<ReactDOM.Root | null>(null);
+  const shadowRootRef = useRef<ShadowRoot | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isShadowRootReady, setIsShadowRootReady] = useState(false);
 
-  console.log(hostRef?.current?.shadowRoot, ">>shadowRoot");
   const {
     isSecondaryDrawerOpen,
     secondaryDrawerContent,
@@ -133,7 +133,7 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
       _map.set((message.id || message.bot_message_id) ?? '', message);
     });
     return _map;
-  }, [JSON.stringify(messages.map((m) => m.id || m.bot_message_id))]);
+  }, [messages]);
 
   const avoidAutoplay = () => {
     setPreventAutoplay(true);
@@ -192,48 +192,55 @@ const GooeyChatWidget: React.FC<GooeyChatWidgetProps> = (props) => {
     [onNewConversation]
   );
 
+  // Scroll to bottom on new message
   useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    if (!host.shadowRoot) {
-      host.attachShadow({
-        mode: "open",
-        delegatesFocus: true,
-      });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
-    const shadow = host.shadowRoot!;
-    if (!rootRef.current) {
-      rootRef.current = ReactDOM.createRoot(shadow);
-    }
-    rootRef.current.render(
-      <React.StrictMode>
-        <Styles />
-        <WidgetComponent
-          messages_map={messages_map}
-          isSending={isSending}
-          scrollContainerRef={scrollContainerRef}
-          preventAutoplay={preventAutoplay}
-          avoidAutoplay={avoidAutoplay}
-          safeConfig={safeConfig}
-          handleNewConversation={handleNewConversation}
-          handleSend={handleSend}
-          handleCancelSend={handleCancelSend}
-          isSecondaryDrawerOpen={isSecondaryDrawerOpen}
-          secondaryDrawerContent={secondaryDrawerContent}
-          toggleSecondaryDrawer={toggleSecondaryDrawer}
-        />
-      </React.StrictMode>
-    );
-    return () => {
-      if (rootRef.current) {
-        rootRef.current.unmount();
-        rootRef.current = null;
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages_map, isSending]);
+  }, [messages]);
 
-  return <span ref={hostRef} style={{ display: "contents" }} />;
+  useEffect(() => {
+    console.log("hostRef.current", hostRef.current);
+    if (hostRef.current && !shadowRootRef.current) {
+      if (!hostRef.current.shadowRoot) {
+        shadowRootRef.current = hostRef.current.attachShadow({
+          mode: "open",
+          delegatesFocus: true,
+        });
+      } else {
+        shadowRootRef.current = hostRef.current.shadowRoot;
+      }
+      setIsShadowRootReady(true);
+    }
+  }, []);
+
+  // Only render the portal if the shadow root is ready
+  console.log(isSending, ">>");
+  return (
+    <span ref={hostRef} style={{ display: "contents" }}>
+      {isShadowRootReady &&shadowRootRef.current &&
+        createPortal(
+          <>
+            <Styles />
+            <WidgetComponent
+              messages_map={messages_map}
+              isSending={isSending}
+              scrollContainerRef={scrollContainerRef}
+              preventAutoplay={preventAutoplay}
+              avoidAutoplay={avoidAutoplay}
+              safeConfig={safeConfig}
+              handleNewConversation={handleNewConversation}
+              handleSend={handleSend}
+              handleCancelSend={handleCancelSend}
+              isSecondaryDrawerOpen={isSecondaryDrawerOpen}
+              secondaryDrawerContent={secondaryDrawerContent}
+              toggleSecondaryDrawer={toggleSecondaryDrawer}
+            />
+          </>,
+          shadowRootRef.current
+        )}
+    </span>
+  );
 };
 
 export default GooeyChatWidget;

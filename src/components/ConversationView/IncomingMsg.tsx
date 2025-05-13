@@ -45,7 +45,6 @@ const IncomingMsg = memo(
       setParsedElements(formatTextResponse(data, linkColor, showSources) as string)
     },[data])
 
-    console.log(parsedElements, ">>parsedElements");
     if (!parsedElements) return <ResponseLoader show={true} />;
 
     return (
