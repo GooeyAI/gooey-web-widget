@@ -1,6 +1,6 @@
 {
-  "name": "gooey-web-widget",
-  "version": "3.0.0",
+  "name": "gooey-copilot-widget",
+  "version": "0.0.1",
   "type": "module",
   "files": [
     "components-dist"
@@ -17,10 +17,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build-components": "tsc && vite build --mode components",
+    "build": "tsc && vite build --mode components",
+    "build-embed": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "react": "^18.2.0",
