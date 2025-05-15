@@ -6,7 +6,6 @@ import { peerDependencies } from "./package.json";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  console.log(env.SENTRY_AUTH_TOKEN, '>>>>');
   return {
     define: { "process.env": {} },
     build: {
