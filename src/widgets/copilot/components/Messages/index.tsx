@@ -9,7 +9,7 @@ import SpinLoader from "src/components/shared/SpinLoader";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const { preventAutoplay }: any = useMessagesContext();
+  const { preventAutoplay } = useMessagesContext();
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
@@ -19,14 +19,16 @@ const Responses = (props: any) => {
       {que.map((id: string) => {
         const responseData = msgs.get(id);
         if (responseData.role === "user") {
-          return <OutgoingMsg 
-            key={id} 
-            input_prompt={responseData.input_prompt}
-            input_audio={responseData.input_audio}
-            input_images={responseData.input_images}
-            button_pressed={responseData.button_pressed}
-            input_location={responseData.input_location}
-          />;
+          return (
+            <OutgoingMsg
+              key={id}
+              input_prompt={responseData.input_prompt}
+              input_audio={responseData.input_audio}
+              input_images={responseData.input_images}
+              button_pressed={responseData.button_pressed}
+              input_location={responseData.input_location}
+            />
+          );
         } else {
           return (
             <IncomingMsg
@@ -51,11 +53,10 @@ const Messages = () => {
     scrollContainerRef,
     isMessagesLoading,
     avoidAutoplay,
-  }: any = useMessagesContext();
-
+  } = useMessagesContext();
   useEffect(() => {
     // avoid autoplay on mount
-    avoidAutoplay();
+    avoidAutoplay?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -78,7 +79,10 @@ const Messages = () => {
       style={{ overflowY: "auto" }}
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
-      <Responses queue={Array.from(messages.keys())} data={messages} />
+      <Responses
+        queue={Array.from(messages?.keys() ?? [])}
+        data={messages ?? new Map()}
+      />
       <ResponseLoader show={isSending} />
     </div>
   );

@@ -55,7 +55,11 @@ const OutgoingMsg = memo(
           <div className="gmt-16">
             <audio
               controls
-              src={(URL || webkitURL).createObjectURL(input_audio as Blob)}
+              src={
+                typeof input_audio === "string"
+                  ? input_audio
+                  : (URL || webkitURL).createObjectURL(input_audio as Blob)
+              }
             ></audio>
           </div>
         )}

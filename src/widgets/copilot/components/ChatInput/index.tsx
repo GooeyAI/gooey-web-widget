@@ -13,6 +13,7 @@ import style from "./chatInput.scss?inline";
 import IconPaperClip from "src/assets/SvgIcons/IconPaperClip";
 import FilePreview from "./FilePreview";
 import { uploadFileToGooey } from "src/api/file-upload";
+import { RequestModel } from "src/contexts/MessagesContext";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
@@ -34,7 +35,7 @@ const makeFileBuffer = (file: File) => {
 
 const ChatInput = () => {
   const { config } = useSystemContext();
-  const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
+  const { initializeQuery, isSending, cancelApiCall, isReceiving } =
     useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -69,26 +70,26 @@ const ChatInput = () => {
     if (ele!.scrollHeight > INPUT_HEIGHT)
       ele?.setAttribute(
         "style",
-        "height:" + ele.scrollHeight + "px !important"
+        "height:" + ele.scrollHeight + "px !important",
       );
   };
 
   const handleSendMessage = () => {
     if ((!value.trim() && !files?.length) || disableSend) return null;
-    const payload: any = {
+    let payload: RequestModel = {
       input_prompt: value.trim(),
     };
     if (files?.length) {
       payload.input_images = files.map((file) => file.gooeyUrl);
       setFiles([]);
     }
-    initializeQuery(payload);
+    initializeQuery?.(payload);
     setValue("");
     resetHeight();
   };
 
   const handleCancelSend = () => {
-    cancelApiCall();
+    cancelApiCall?.();
   };
 
   const handleRecordClick = () => {
@@ -96,7 +97,7 @@ const ChatInput = () => {
   };
 
   const handleSendAudio = (blob: Blob) => {
-    initializeQuery({ input_audio: blob });
+    initializeQuery?.({ input_audio: blob });
     setIsRecording(false);
   };
 
@@ -130,7 +131,7 @@ const ChatInput = () => {
             });
           },
         };
-      })
+      }),
     );
   };
 
@@ -149,7 +150,7 @@ const ChatInput = () => {
     files?.some((file) => file.isUploading);
   const isLeftButtons = useMemo(
     () => config?.enablePhotoUpload,
-    [config?.enablePhotoUpload]
+    [config?.enablePhotoUpload],
   );
   return (
     <React.Fragment>
@@ -161,7 +162,7 @@ const ChatInput = () => {
       <div
         className={clsx(
           "gooeyChat-chat-input gpr-8 gpl-8",
-          !config.branding.showPoweredByGooey && "gpb-8"
+          !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
         {isRecording ? (
@@ -180,7 +181,7 @@ const ChatInput = () => {
               onKeyDown={handlePressEnter}
               className={clsx(
                 "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
-                isLeftButtons ? "gpl-32" : "gpl-12"
+                isLeftButtons ? "gpl-32" : "gpl-12",
               )}
               placeholder={`Message ${config.branding.name || ""}`}
             ></textarea>
