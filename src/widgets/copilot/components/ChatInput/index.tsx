@@ -64,7 +64,7 @@ const ChatInput = () => {
           image.name || "gooey-image.png",
           { type: image.mime || "image/png" },
         );
-        setFiles(processFiles([fileObj]));
+        setFiles((prev: any) => [...prev, ...processFiles([fileObj])]);
         setPreAttachedFileUsed(true);
       }
     });
