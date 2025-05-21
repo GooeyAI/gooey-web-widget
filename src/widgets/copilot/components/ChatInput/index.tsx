@@ -34,7 +34,6 @@ interface UploadedFile {
   data: File;
   gooeyUrl: string;
   isUploading: boolean;
-  removeFile: () => void;
 }
 
 const ChatInput = () => {
@@ -64,7 +63,8 @@ const ChatInput = () => {
           image.name || "gooey-image.png",
           { type: image.mime || "image/png" },
         );
-        setFiles((prev: any) => [...prev, ...processFiles([fileObj])]);
+        const newFiles = processFiles([fileObj]).filter((f: any) => !!f);
+        setFiles((prev: any) => prev ? [...prev, ...newFiles] : newFiles);
         setPreAttachedFileUsed(true);
       }
     });
@@ -159,7 +159,12 @@ const ChatInput = () => {
     setIsRecording(false);
   };
 
-  const processFiles = (files: Array<any>) => {
+  const handleRemoveFile = (id: string) => {
+    setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
+  };
+
+  const processFiles = (files: Array<any>) : Array<UploadedFile | undefined> => {
+    if (!files || !files.length) return [];
     return files.map((file: any) => {
       const id = uuidv4();
       try {
@@ -168,6 +173,7 @@ const ChatInput = () => {
           setFiles((prev: any) => {
             const idx = prev.findIndex((f: any) => f.id === id);
             if (idx === -1) return prev; // if photo removed before upload completed
+            // @TODO: cancel upload if file removed
             const updated = [...prev];
             updated[idx] = {
               ...updated[idx],
@@ -190,10 +196,7 @@ const ChatInput = () => {
         data: file,
         gooeyUrl: "",
         isUploading: true,
-        removeFile: function () {
-          setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
-        },
-      };
+      } as UploadedFile;
     });
   };
 
@@ -238,7 +241,7 @@ const ChatInput = () => {
     <React.Fragment>
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
-          <FilePreview files={files} isRemovable={true} />
+          <FilePreview files={files} onRemove={handleRemoveFile} />
         </div>
       )}
       <div

@@ -11,10 +11,10 @@ import { isGoogleDocsEmbeddable, truncateMiddle } from "../Messages/helpers";
 
 const FilePreview = ({
   files,
-  isRemovable = false,
+  onRemove,
 }: {
   files: Array<any>;
-  isRemovable?: boolean;
+  onRemove?: (id: string) => void;
 }) => {
   if (!files) return null;
   const { layoutController } = useSystemContext();
@@ -48,7 +48,7 @@ const FilePreview = ({
       style={{ gap: "12px", flexWrap: "nowrap", scrollbarWidth: "thin" }}
     >
       {files.map((file, index) => {
-        const { isUploading, data, removeFile } = file;
+        const { isUploading, data } = file;
         const fileURL = URL.createObjectURL(data);
         const fileType = file.type.split("/")[0];
 
@@ -56,27 +56,27 @@ const FilePreview = ({
           <div key={index}>
             {fileType === "image" ? (
               <ImagePreviewItem
-                removeFile={() => {
+                onRemove={() => {
                   layoutController?.toggleSecondaryDrawer?.(null);
-                  removeFile();
+                  onRemove?.(file?.id);
                 }}
                 fileURL={fileURL}
                 onClick={() => handleFileClick(file)}
                 isUploading={isUploading}
-                isRemovable={isRemovable}
+                isRemovable={!!onRemove}
               />
             ) : (
               <FilePreviewItem
                 file={file}
-                removeFile={(e) => {
+                onRemove={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   layoutController?.toggleSecondaryDrawer?.(null);
-                  removeFile();
+                  onRemove?.(file?.id);
                 }}
                 onClick={() => handleFileClick(file)}
                 isUploading={isUploading}
-                isRemovable={isRemovable}
+                isRemovable={!!onRemove}
               />
             )}
           </div>
@@ -88,16 +88,16 @@ const FilePreview = ({
 };
 
 const ImagePreviewItem = ({
-  removeFile,
+  onRemove,
   fileURL,
   isUploading,
   onClick,
   isRemovable,
 }: {
-  removeFile: () => void;
+  onRemove: () => void;
   fileURL: string;
   isUploading: boolean;
-  onClick: (e: any) => void;
+  onClick: (e: SyntheticEvent) => void;
   isRemovable: boolean;
 }) => {
   return (
@@ -135,7 +135,7 @@ const ImagePreviewItem = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              removeFile();
+              onRemove();
             }}
           >
             <IconClose size={12} />
@@ -156,13 +156,13 @@ const ImagePreviewItem = ({
 
 export const FilePreviewItem = ({
   file,
-  removeFile = () => {},
+  onRemove,
   onClick,
   isUploading,
   isRemovable,
 }: {
   file: any;
-  removeFile?: (e: SyntheticEvent) => void;
+  onRemove?: (e: SyntheticEvent) => void;
   onClick: (e: SyntheticEvent) => void;
   isUploading: boolean;
   isRemovable: boolean;
@@ -205,7 +205,7 @@ export const FilePreviewItem = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              removeFile(e);
+              onRemove?.(e);
             }}
           >
             <IconClose size={12} />
