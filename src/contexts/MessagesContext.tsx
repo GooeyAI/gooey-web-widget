@@ -69,6 +69,7 @@ const MessagesContextProvider = (props: any) => {
     const conversationId = lastResponse?.conversation_id;
     setIsSendingMessage(true);
     const newQuery = createNewQuery(payload);
+    if (payload?.attached_files?.length) delete payload.attached_files;
     sendPayload({
       ...payload,
       conversation_id: conversationId,

@@ -132,7 +132,14 @@ export const fetchUrlMeta = async (url: string) => {
 
 // Text Rendering Logic
 const getOutputText = (data: any) => {
-  const { type = "", status = "", text, detail, output_text = {}, raw_output_text = {} } = data;
+  const {
+    type = "",
+    status = "",
+    text,
+    detail,
+    output_text = {},
+    raw_output_text = {},
+  } = data;
   let out = "";
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
     if (text) {
@@ -145,7 +152,7 @@ const getOutputText = (data: any) => {
   if (type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && status === "completed") {
     out = output_text[0] || raw_output_text[0];
   }
-  
+
   // replace 🎧 I heard from out
   out = out.replace("🎧 I heard", "🎙️");
   return out;
@@ -331,6 +338,62 @@ export function truncateMiddle(str: string, charLimit: number) {
   return str.slice(0, frontChars) + ellipsis + str.slice(-backChars);
 }
 
+export function isGoogleDocsEmbeddable(input: string): boolean {
+  const supportedMimeTypes = new Set([
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/plain",
+    "application/rtf",
+    "text/csv",
+  ]);
+
+  const supportedExtensions = new Set([
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".ppt",
+    ".pptx",
+    ".xls",
+    ".xlsx",
+    ".txt",
+    ".rtf",
+  ]);
+
+  // MIME type
+  if (input.includes("/") && !input.startsWith("http")) {
+    return supportedMimeTypes.has(input);
+  }
+
+  try {
+    const url = new URL(input);
+    let pathname = url.pathname.toLowerCase();
+
+    // Remove trailing slash if present
+    if (pathname.endsWith("/")) {
+      pathname = pathname.slice(0, -1);
+    }
+
+    // Extract filename from path
+    const filename = pathname.split("/").pop() || "";
+
+    // Check if the filename ends with any of the supported extensions
+    let match = false;
+    for (const ext of supportedExtensions) {
+      if (filename.endsWith(ext)) {
+        match = true;
+        break;
+      }
+    }
+    return match;
+  } catch {
+    return false;
+  }
+}
 export const getEmbedUrl = (url: string) => {
   try {
     // Check if it's a YouTube URL
@@ -343,10 +406,46 @@ export const getEmbedUrl = (url: string) => {
       return `https://www.youtube.com/embed/${match[1]}`;
     }
 
-    // Return original URL if not YouTube
+    if (isGoogleDocsEmbeddable(url)) {
+      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+    }
+
+    // Return original
     return url;
   } catch (error) {
     console.error("Error processing URL:", error);
     return url;
   }
 };
+export function renderImageInIframe(imgBlobUrl: string) {
+  const html = `
+    <html>
+      <head>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+          }
+          img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${imgBlobUrl}" />
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+  return blobUrl;
+}

@@ -10,14 +10,31 @@ import InlineAudioRecorder from "./InlineAudioRecorder";
 
 import { addInlineStyle } from "src/addStyles";
 import style from "./chatInput.scss?inline";
-import IconPaperClip from "src/assets/SvgIcons/IconPaperClip";
 import FilePreview from "./FilePreview";
 import { uploadFileToGooey } from "src/api/file-upload";
+import IconPlus from "src/assets/SvgIcons/IconPlus";
+import GooeyPopper from "src/components/shared/Popper/Popper";
+import Button from "src/components/shared/Buttons/Button";
+import IconFile from "src/assets/SvgIcons/IconFile";
+import IconImage from "src/assets/SvgIcons/IconImage";
+import { v4 as uuidv4 } from "uuid";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
-const acceptedTypes = "image/*";
+const acceptedFileTypes = "application/*, text/*";
+const acceptedImageTypes = "image/*, video/*";
+
+// Define a type for file state
+interface UploadedFile {
+  id: string;
+  name: string;
+  type: string;
+  data: File;
+  gooeyUrl: string;
+  isUploading: boolean;
+  removeFile: () => void;
+}
 
 const makeFileBuffer = (file: File) => {
   return new Promise((resolve, reject) => {
@@ -38,8 +55,10 @@ const ChatInput = () => {
     useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [files, setFiles] = useState<Array<any> | null>(null);
+  const [files, setFiles] = useState<UploadedFile[] | null>(null);
   const [preAttachedFileUsed, setPreAttachedFileUsed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLDivElement | null>(null);
 
   const inputRef = useRef<null | HTMLElement>(null);
 
@@ -52,26 +71,44 @@ const ChatInput = () => {
       if (typeof image === "string") return; // @TODO: support for CDN URLs
       // check if image is { name: string; mime: string; bytes: number[]; };
       if (typeof image === "object" && image.bytes) {
-        const fileObj = new File([new Uint8Array(image.bytes)], image.name || "gooey-image.png", { type: image.mime || "image/png" });
+        const fileObj = new File(
+          [new Uint8Array(image.bytes)],
+          image.name || "gooey-image.png",
+          { type: image.mime || "image/png" },
+        );
         setFiles(processFiles([fileObj]));
         setPreAttachedFileUsed(true);
       }
     });
-
   }, [config?.payload?.input_images, preAttachedFileUsed]);
+
+  // Dismiss menu on outside click
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(e.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isMenuOpen]);
 
   const resetHeight = () => {
     const ele: HTMLElement | null = inputRef.current;
     ele!.style!.height = INPUT_HEIGHT + "px";
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     setValue(value);
     if (!value) resetHeight();
   };
 
-  const handlePressEnter = (e: any) => {
+  const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && !e.shiftKey) {
       if (isSending || isReceiving) return;
       e.preventDefault();
@@ -87,7 +124,7 @@ const ChatInput = () => {
     if (ele!.scrollHeight > INPUT_HEIGHT)
       ele?.setAttribute(
         "style",
-        "height:" + ele.scrollHeight + "px !important"
+        "height:" + ele.scrollHeight + "px !important",
       );
   };
 
@@ -97,7 +134,23 @@ const ChatInput = () => {
       input_prompt: value.trim(),
     };
     if (files?.length) {
-      payload.input_images = files.map((file) => file.gooeyUrl);
+      const documents = files.filter(
+        (file) => file.type === "application" || file.type === "text",
+      );
+      const images = files.filter((file) => file.type === "image");
+      const videos = files.filter((file) => file.type === "video");
+
+      // attach to payload for server to process
+      if (documents.length)
+        payload.input_documents = documents.map((file) => file.gooeyUrl);
+      if (images.length)
+        payload.input_images = images.map((file) => file.gooeyUrl);
+      if (videos.length)
+        payload.input_documents = [
+          ...(payload.input_documents || []),
+          ...videos.map((file) => file.gooeyUrl),
+        ];
+      payload.attached_files = [...files];
       setFiles([]);
     }
     initializeQuery(payload);
@@ -119,30 +172,34 @@ const ChatInput = () => {
   };
 
   const processFiles = (files: Array<any>) => {
-    return files.map((file: any, index: number) => {
+    return files.map((file: any) => {
+      const id = uuidv4();
       makeFileBuffer(file).then((blob) => {
         const toUpload = new File([blob as Blob], file.name);
         uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
           setFiles((prev: any) => {
-            if (!prev[index]) return prev; // if photo removed before upload completed
-            prev[index].isUploading = false;
-            prev[index].gooeyUrl = url;
-            return [...prev];
+            const idx = prev.findIndex((f: any) => f.id === id);
+            if (idx === -1) return prev; // if photo removed before upload completed
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              isUploading: false,
+              gooeyUrl: url,
+            };
+            return updated;
           });
         });
       });
 
       return {
+        id,
         name: file.name,
         type: file.type.split("/")[0],
         data: file,
         gooeyUrl: "",
         isUploading: true,
-        removeFile: () => {
-          setFiles((prev: any) => {
-            prev.splice(index, 1);
-            return [...prev];
-          });
+        removeFile: function () {
+          setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
         },
       };
     });
@@ -151,14 +208,28 @@ const ChatInput = () => {
   const onFileAdded = (e: any) => {
     const files = Array.from(e.target.files);
     if (!files || !files.length) return;
-    setFiles(processFiles(files));
+    setFiles((prev: any) =>
+      prev ? [...prev, ...processFiles(files)] : processFiles(files),
+    );
   };
 
-  const handleFileUpload = () => {
+  const handleFileMenuClick = () => {
+    setIsMenuOpen(false);
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = acceptedTypes;
+    input.accept = acceptedFileTypes;
     input.onchange = onFileAdded;
+    input.multiple = true;
+    input.click();
+  };
+
+  const handlePhotoMenuClick = () => {
+    setIsMenuOpen(false);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = acceptedImageTypes;
+    input.onchange = onFileAdded;
+    input.multiple = true;
     input.click();
   };
 
@@ -169,19 +240,19 @@ const ChatInput = () => {
     files?.some((file) => file.isUploading);
   const isLeftButtons = useMemo(
     () => config?.enablePhotoUpload,
-    [config?.enablePhotoUpload]
+    [config?.enablePhotoUpload],
   );
   return (
     <React.Fragment>
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
-          <FilePreview files={files} />
+          <FilePreview files={files} isRemovable={true} />
         </div>
       )}
       <div
         className={clsx(
           "gooeyChat-chat-input gpr-8 gpl-8",
-          !config.branding.showPoweredByGooey && "gpb-8"
+          !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
         {isRecording ? (
@@ -200,7 +271,7 @@ const ChatInput = () => {
               onKeyDown={handlePressEnter}
               className={clsx(
                 "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
-                isLeftButtons ? "gpl-32" : "gpl-12"
+                isLeftButtons ? "gpl-32" : "gpl-12",
               )}
               placeholder={`Message ${config.branding.name || ""}`}
             ></textarea>
@@ -208,13 +279,42 @@ const ChatInput = () => {
             {/* Left icons */}
             {isLeftButtons && (
               <div className="input-left-buttons">
-                <IconButton
-                  onClick={handleFileUpload}
-                  variant="text-alt"
-                  className="gp-4"
+                <GooeyPopper
+                  showModal={isMenuOpen}
+                  direction={{ x: "left", y: "top" }}
+                  ModalContent={() => (
+                    <div className="gp-8">
+                      <Button
+                        className="w-100 text-left"
+                        style={{ minWidth: "100px" }}
+                        variant="text-alt"
+                        onClick={handleFileMenuClick}
+                        LeftIconComponent={() => <IconFile size={16} />}
+                      >
+                        <p className="font_14_500">File</p>
+                      </Button>
+                      <Button
+                        className="w-100 text-left"
+                        variant="text-alt"
+                        onClick={handlePhotoMenuClick}
+                        LeftIconComponent={() => <IconImage size={16} />}
+                      >
+                        <p className="font_14_500">Image or Video </p>
+                      </Button>
+                    </div>
+                  )}
                 >
-                  <IconPaperClip size={18} />
-                </IconButton>
+                  <div ref={menuButtonRef} style={{ display: "inline-block" }}>
+                    <IconButton
+                      onClick={() => setIsMenuOpen((v) => !v)}
+                      variant="text-alt"
+                      isPressed={isMenuOpen}
+                      className={clsx("gp-4", isMenuOpen && "depressed")}
+                    >
+                      <IconPlus size={18} />
+                    </IconButton>
+                  </div>
+                </GooeyPopper>
               </div>
             )}
 
@@ -233,15 +333,15 @@ const ChatInput = () => {
                 !config?.enableAudioMessage ||
                 showStop ||
                 !!files?.length) && (
-                  <IconButton
-                    disabled={disableSend}
-                    variant="text-alt"
-                    className="gp-4"
-                    onClick={showStop ? handleCancelSend : handleSendMessage}
-                  >
-                    {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
-                  </IconButton>
-                )}
+                <IconButton
+                  disabled={disableSend}
+                  variant="text-alt"
+                  className="gp-4"
+                  onClick={showStop ? handleCancelSend : handleSendMessage}
+                >
+                  {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
+                </IconButton>
+              )}
             </div>
           </div>
         )}

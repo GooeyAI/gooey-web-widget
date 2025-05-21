@@ -158,6 +158,7 @@ const SystemContextProvider = ({
       },
       toggleSecondaryDrawer: (data = null) => {
         setLayoutState((prev: any) => {
+          if(!data && !prev?.isSecondaryDrawerOpen) return prev;
           const triggerSidebar =
             data && prev.isSidebarOpen && !prev.isSecondaryDrawerOpen;
           if (triggerSidebar) toggleSidebarStyles(prev.isSidebarOpen);

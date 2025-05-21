@@ -32,11 +32,21 @@
 }
 
 .file-preview-box img {
-  height: 80px;
-  max-width: 100px;
+  height: 60px;
+  width: 100px;
   object-fit: cover;
 }
 
 .uploading-box {
   filter: brightness(0.2);
+}
+
+.gooey-menu-item {
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.gooey-menu-item:hover {
+  background-color: $light;
 }

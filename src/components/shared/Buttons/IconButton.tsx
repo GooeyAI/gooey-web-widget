@@ -5,9 +5,10 @@ const IconButton = ({
   className,
   variant = "text",
   onClick,
+  isPressed,
   ...rest
 }: ButtonProps) => {
-  const btnClasses = clsx(`button-${variant?.toLowerCase()}`, className);
+  const btnClasses = clsx(`button-${variant?.toLowerCase()}`, className, isPressed && "depressed");
   return (
     <button {...rest} className={btnClasses} onClick={onClick}>
       {rest.children}
