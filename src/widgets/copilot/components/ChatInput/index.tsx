@@ -37,19 +37,6 @@ interface UploadedFile {
   removeFile: () => void;
 }
 
-const makeFileBuffer = (file: File) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const arrayBuffer = e.target.result;
-      const blob = new Blob([new Uint8Array(arrayBuffer)], { type: file.type });
-      resolve(blob);
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-};
-
 const ChatInput = () => {
   const { config } = useSystemContext();
   const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
@@ -175,29 +162,26 @@ const ChatInput = () => {
   const processFiles = (files: Array<any>) => {
     return files.map((file: any) => {
       const id = uuidv4();
-      makeFileBuffer(file).then((blob) => {
-        const toUpload = new File([blob as Blob], file.name);
-        try {
-          if (!config || !config.apiUrl) return;
-          uploadFileToGooey(config.apiUrl, toUpload).then((url) => {
-            setFiles((prev: any) => {
-              const idx = prev.findIndex((f: any) => f.id === id);
-              if (idx === -1) return prev; // if photo removed before upload completed
-              const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                isUploading: false,
-                gooeyUrl: url,
-              };
-              return updated;
-            });
+      try {
+        if (!config || !config.apiUrl) return;
+        uploadFileToGooey(config.apiUrl, file).then((url) => {
+          setFiles((prev: any) => {
+            const idx = prev.findIndex((f: any) => f.id === id);
+            if (idx === -1) return prev; // if photo removed before upload completed
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              isUploading: false,
+              gooeyUrl: url,
+            };
+            return updated;
           });
-        } catch (err) {
-          console.error(err);
-          setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
-          // TODO: show error toast
-        }
-      });
+        });
+      } catch (err) {
+        console.error(err);
+        setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
+        // TODO: show error toast
+      }
 
       return {
         id,
