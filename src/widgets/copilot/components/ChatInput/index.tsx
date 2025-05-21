@@ -150,7 +150,7 @@ const ChatInput = () => {
           ...(payload.input_documents || []),
           ...videos.map((file) => file.gooeyUrl),
         ];
-      payload.attached_files = [...files];
+      payload.attached_files = files ? [...files] : [];
       setFiles([]);
     }
     initializeQuery(payload);
