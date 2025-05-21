@@ -177,7 +177,8 @@ const ChatInput = () => {
       makeFileBuffer(file).then((blob) => {
         const toUpload = new File([blob as Blob], file.name);
         try {
-          uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
+          if (!config || !config.apiUrl) return;
+          uploadFileToGooey(config.apiUrl, toUpload).then((url) => {
             setFiles((prev: any) => {
               const idx = prev.findIndex((f: any) => f.id === id);
               if (idx === -1) return prev; // if photo removed before upload completed
