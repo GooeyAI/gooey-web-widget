@@ -43,14 +43,17 @@ const FilePreview = ({
   };
 
   return (
-    <div className="d-flex" style={{ gap: "12px", flexWrap: "wrap" }}>
+    <div
+      className="d-flex overflow-scroll gooey-scroll-container"
+      style={{ gap: "12px", flexWrap: "nowrap", scrollbarWidth: "thin" }}
+    >
       {files.map((file, index) => {
         const { isUploading, data, removeFile } = file;
         const fileURL = URL.createObjectURL(data);
         const fileType = file.type.split("/")[0];
 
         return (
-          <div key={index} className="d-flex">
+          <div key={index}>
             {fileType === "image" ? (
               <ImagePreviewItem
                 removeFile={() => {
@@ -79,6 +82,7 @@ const FilePreview = ({
           </div>
         );
       })}
+      <div className="gooey-scroll-fade"></div>
     </div>
   );
 };

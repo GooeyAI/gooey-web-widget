@@ -176,19 +176,25 @@ const ChatInput = () => {
       const id = uuidv4();
       makeFileBuffer(file).then((blob) => {
         const toUpload = new File([blob as Blob], file.name);
-        uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
-          setFiles((prev: any) => {
-            const idx = prev.findIndex((f: any) => f.id === id);
-            if (idx === -1) return prev; // if photo removed before upload completed
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              isUploading: false,
-              gooeyUrl: url,
-            };
-            return updated;
+        try {
+          uploadFileToGooey(config!.apiUrl!, toUpload).then((url) => {
+            setFiles((prev: any) => {
+              const idx = prev.findIndex((f: any) => f.id === id);
+              if (idx === -1) return prev; // if photo removed before upload completed
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                isUploading: false,
+                gooeyUrl: url,
+              };
+              return updated;
+            });
           });
-        });
+        } catch (err) {
+          console.error(err);
+          setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
+          // TODO: show error toast
+        }
       });
 
       return {
