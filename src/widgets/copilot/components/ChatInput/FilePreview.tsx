@@ -35,7 +35,7 @@ const FilePreview = ({
       openInSidebar({
         url: URL.createObjectURL(file.data),
         title: file.name,
-        isImage: true,
+        isImage: file?.data?.type?.includes("image"),
       });
     } else {
       window.open(URL.createObjectURL(file.data), "_blank");

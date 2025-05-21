@@ -22,8 +22,9 @@ addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
-const acceptedFileTypes = "application/*, text/*";
-const acceptedImageTypes = "image/*, video/*";
+const acceptedFileTypes =
+  "application/*, text/*, application/pdf, text/plain, application/json, text/json, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation";
+const acceptedImageTypes = "image/*, video/*,";
 
 // Define a type for file state
 interface UploadedFile {
