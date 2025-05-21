@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { createPopper, Placement } from "@popperjs/core";
 import { addInlineStyle } from "src/addStyles";
 import style from "./popper.scss?inline";
 
@@ -12,129 +13,95 @@ type PopperDirection = {
 
 interface PopperProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  ModalContent?: any;
+  ModalContent?: () => React.ReactNode;
   direction?: PopperDirection;
   showModal: boolean;
   ModalProps?: Record<string, any>;
 }
 
-const getModalCoordinates = (
-  containerRef: HTMLElement,
-  direction: PopperDirection
-) => {
-  const containerCoordinates = containerRef.getBoundingClientRect();
-  let translateX = "0px";
-  let translateY = "0px";
-  const x = direction.x;
-  const y = direction.y;
-  const modalCoordinates = {
-    top: 0,
-    left: 0,
-    transform: "none",
-  };
-  switch (x) {
-    case "left":
-      modalCoordinates.left =
-        containerCoordinates.left - containerCoordinates.width;
-      translateX = "calc(-50% - 12px)";
-      break;
-    case "right":
-      modalCoordinates.left = containerCoordinates.right;
-      translateX = "12px";
-      break;
-    case "center":
-      modalCoordinates.left =
-        containerCoordinates.left + containerCoordinates.width / 2;
-      modalCoordinates.transform = "translate(-50%, 12px)";
-      translateY = "12px";
-      translateX = "-50%";
-      break;
-  }
-
-  switch (y) {
-    case "top":
-      modalCoordinates.top = containerCoordinates.top - 12;
-      if (x === "center") modalCoordinates.transform = "translate(-50%, -100%)";
-      else modalCoordinates.transform = "translate(0, -100%)";
-      translateY = "0";
-      if (translateX === "0") translateX = "-100%";
-      break;
-    case "bottom":
-      modalCoordinates.top = containerCoordinates.bottom;
-      break;
-    case "center":
-      modalCoordinates.top =
-        containerCoordinates.top + containerCoordinates.height / 2;
-      translateY = "-50%";
-      if (translateX === "0") translateX = "12px";
-      break;
-  }
-  modalCoordinates.transform = `translate(${translateX}, ${translateY})`;
-  return modalCoordinates;
+// Map your direction prop to Popper.js placement
+const getPopperPlacement = (direction: PopperDirection): Placement => {
+  const { x, y } = direction;
+  if (y === "top") return x === "left" ? "top-start" : x === "right" ? "top-end" : "top";
+  if (y === "bottom") return x === "left" ? "bottom-start" : x === "right" ? "bottom-end" : "bottom";
+  if (x === "left") return "left";
+  if (x === "right") return "right";
+  if (x === "center") return "top-start";
+  return "bottom";
 };
 
 const Modal = ({
-  containerRef,
+  referenceElement,
   direction,
-  style,
-  className = "",
   ModalContent,
-  ...restProps
+  style: styleProp,
+  className = "",
+  showModal,
+  ...rest
 }: {
-  ModalContent: any;
-  containerRef: HTMLElement | null;
+  ModalContent: () => React.ReactNode;
+  referenceElement: HTMLElement | null;
   direction: PopperDirection;
   style?: React.CSSProperties;
   className?: string;
+  showModal: boolean;
 }) => {
-  if (!containerRef) return null;
-  const modalCoordinates = getModalCoordinates(containerRef, direction);
-  if (!ModalContent) return null;
+  const popperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (referenceElement && popperRef.current && showModal) {
+      const instance = createPopper(referenceElement, popperRef.current, {
+        placement: getPopperPlacement(direction),
+        modifiers: [
+          { name: "preventOverflow", options: { padding: 8 } },
+          { name: "flip", options: { fallbackPlacements: ["top", "bottom", "right", "left"] } },
+        ],
+      });
+      return () => {
+        instance.destroy();
+      };
+    }
+  }, [referenceElement, direction, showModal]);
+
+  if (!referenceElement || !ModalContent || !showModal) return null;
   return (
     <div
-      className={(className += " gooey-modal")}
-      style={{
-        ...style,
-        ...modalCoordinates,
-      }}
-      {...restProps}
+      ref={popperRef}
+      className={`gooey-modal ${className}`.trim()}
+      style={styleProp}
+      {...rest}
     >
       {ModalContent()}
     </div>
   );
 };
 
-const GooeyPopper = (props: PopperProps) => {
-  const {
-    ModalContent = () => null,
-    children,
-    direction = {
-      x: "center",
-      y: "bottom",
-    },
-    showModal,
-    ModalProps,
-    ...restProps
-  } = props;
-
-  const [refContainer, setRefContainer] = useState<HTMLElement | null>(null);
+const GooeyPopper = ({
+  ModalContent = () => null,
+  children,
+  direction = { x: "center", y: "bottom" },
+  showModal,
+  ModalProps,
+  ...rest
+}: PopperProps) => {
+  const refContainer = useRef<HTMLDivElement>(null);
   return (
     <div
       className="gooey-clipping-container"
-      ref={setRefContainer}
-      {...restProps}
+      ref={refContainer}
+      {...rest}
     >
       {children}
       {showModal &&
         createPortal(
           <Modal
-            containerRef={refContainer}
+            referenceElement={refContainer.current}
             direction={direction}
-            ModalContent={ModalContent as React.FC<any>}
+            ModalContent={ModalContent}
+            showModal={showModal}
             {...ModalProps}
           />,
-          gooeyShadowRoot?.querySelector(".gooey-embed-container") ||
-            (document.body as Element)
+          gooeyShadowRoot?.querySelector(".gooey-embed-container") || document.body
         )}
     </div>
   );

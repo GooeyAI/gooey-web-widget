@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@sentry/react": "^9.1.0",
     "@sentry/tracing": "^7.120.3",
     "@sentry/vite-plugin": "^3.2.0",

@@ -6,6 +6,7 @@ import {
   fetchUrlMeta,
   findSourceIcon,
   getEmbedUrl,
+  renderImageInIframe,
   truncateMiddle,
 } from "./helpers";
 import { useSystemContext } from "src/contexts/hooks";
@@ -27,8 +28,8 @@ export const FullSourcePreview = (props: any) => {
     }, 0);
   }, [data.url]);
 
-  const embedUrl = getEmbedUrl(data.url);
-  if (!data || !data?.url) return null;
+  if (!data || (!data?.url && !data?.isImage)) return null;
+  const embedUrl = data?.isImage ? renderImageInIframe(data.url) : getEmbedUrl(data.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url,

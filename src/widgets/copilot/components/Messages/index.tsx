@@ -26,6 +26,7 @@ const Responses = (props: any) => {
             input_images={responseData.input_images}
             button_pressed={responseData.button_pressed}
             input_location={responseData.input_location}
+            attached_files={responseData.attached_files}
           />;
         } else {
           return (
@@ -55,7 +56,7 @@ const Messages = () => {
 
   useEffect(() => {
     // avoid autoplay on mount
-    avoidAutoplay();
+    if (avoidAutoplay) avoidAutoplay();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

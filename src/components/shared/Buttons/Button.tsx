@@ -12,8 +12,10 @@ export interface ButtonProps
   className?: string;
   variant?: "filled" | "contained" | "outlined" | "text" | "text-alt";
   RightIconComponent?: React.FC<any>;
+  LeftIconComponent?: React.FC<any>;
   showIconOnHover?: boolean;
   hideOverflow?: boolean;
+  isPressed?: boolean;
 }
 
 const Button = ({
@@ -22,8 +24,10 @@ const Button = ({
   className = "",
   onClick,
   RightIconComponent,
+  LeftIconComponent,
   showIconOnHover,
   hideOverflow,
+  isPressed,
   ...rest
 }: ButtonProps) => {
   const variantClasses = `button-${variant?.toLowerCase()}`;
@@ -32,7 +36,7 @@ const Button = ({
     <button
       {...rest}
       onMouseDown={onClick}
-      className={variantClasses + " " + className}
+      className={clsx(variantClasses, className, isPressed && "depressed")}
     >
       <div
         className={clsx(
@@ -40,18 +44,36 @@ const Button = ({
           hideOverflow && "btn-hide-overflow",
         )}
       >
-        {rest.children}
-        {RightIconComponent && (
+        {LeftIconComponent && (
           <div
             className={clsx(
-              "btn-icon right-icon",
-              "flex items-center justify-center",
+              "btn-icon-left",
+              "d-flex items-center",
+              showIconOnHover && "icon-hover",
+            )}
+            style={{
+              width: "fit-content",
+              gap: "4px",
+            }}
+          >
+            <LeftIconComponent />
+            {rest.children}
+          </div>
+        )}
+        {!RightIconComponent && !LeftIconComponent && (rest.children)}
+        {RightIconComponent && (
+          <div
+            className={clsx("d-flex items-center",
               showIconOnHover && "icon-hover",
             )}
           >
-            <RightIconComponent />
+            {rest.children}
+            <span className="btn-icon-right">
+              <RightIconComponent />
+            </span>
           </div>
         )}
+
         {hideOverflow && <div className="button-right-blur" />}
       </div>
     </button>
