@@ -11,7 +11,6 @@ on:
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     env:
@@ -58,7 +57,7 @@ jobs:
           NEW_VERSION=${{ steps.version.outputs.new_version }}
           git checkout master
           npm version ${NEW_VERSION#v} --no-git-tag-version
-          git commit -am "chore: bump version to ${NEW_VERSION}"
+          git commit -am "build: ${NEW_VERSION}"
           git push origin master
 
       - name: Build project
@@ -72,7 +71,7 @@ jobs:
           git checkout --detach
           git add package.json package-lock.json
           git add -f dist/
-          git commit -m "release: $NEW_VERSION"
+          git commit -m "build: $NEW_VERSION"
 
           # Create and push tag
           git tag $NEW_VERSION
