@@ -36,6 +36,7 @@ ul {
 }
 .gooey-embed-container {
   height: 100%;
+  position: relative;
 }
 
 .gooey-embed-container p {
