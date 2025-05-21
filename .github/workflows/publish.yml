@@ -64,7 +64,8 @@ jobs:
           
           # Create a detached commit with dist
           git checkout --detach
-          git add package.json package-lock.json dist/
+          git add package.json package-lock.json
+          git add -f dist/
           git commit -m "release: $NEW_VERSION"
           git tag $NEW_VERSION
-          git push origin $NEW_VERSION
+          git push origin --tags
