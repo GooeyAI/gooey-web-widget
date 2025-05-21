@@ -28,7 +28,7 @@ export const FullSourcePreview = (props: any) => {
     }, 0);
   }, [data.url]);
 
-  if (!data || !data?.url && !data?.isImage) return null;
+  if (!data || (!data?.url && !data?.isImage)) return null;
   const embedUrl = data?.isImage ? renderImageInIframe(data.url) : getEmbedUrl(data.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
