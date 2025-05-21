@@ -89,7 +89,7 @@ const GooeyTooltip = ({
   return (
     <GooeyPopper
       ModalContent={() => (
-        <>
+        <div className="gp-8">
           <div
             style={{
               position: "absolute",
@@ -99,7 +99,7 @@ const GooeyTooltip = ({
             }}
           />
           <p className="font_14_500">{text}</p>
-        </>
+        </div>
       )}
       showModal={showModal}
       direction={{

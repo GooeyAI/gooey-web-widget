@@ -4,11 +4,10 @@
 }
 
 .gooey-modal {
-  transition: all 0.3s;
+  transition: opacity 0.3s;
   position: fixed;
   width: max-content;
   background-color: white;
-  padding: 10px;
   border-radius: 8px;
   z-index: 99999;
   font-weight: lighter;
