@@ -11,7 +11,7 @@ declare global {
 
 class GooeyEmbedFactory {
   defaultConfig = {};
-  _mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
+  mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
 
   mount(config: any) {
     config = { ...this.defaultConfig, ...config } as CopilotEmbedConfig;
@@ -32,18 +32,18 @@ class GooeyEmbedFactory {
       targetElem.removeChild(targetElem.children[0]);
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config);
-    this._mounted.push({ innerDiv, root });
+    this.mounted.push({ innerDiv, root });
 
     // Global reference to the inner document
     globalThis.gooeyShadowRoot = innerDiv?.shadowRoot;
   }
 
   unmount() {
-    for (const { innerDiv, root } of this._mounted) {
+    for (const { innerDiv, root } of this.mounted) {
       root.unmount();
       innerDiv.remove();
     }
-    this._mounted = [];
+    this.mounted = [];
   }
 }
 
