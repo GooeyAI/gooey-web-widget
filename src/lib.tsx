@@ -1,3 +1,4 @@
+import { CopilotChatWidgetController } from "./contexts/ControllerUtils";
 import { CopilotConfigType } from "./contexts/types";
 import { renderCopilotChatWidget } from "./widgets";
 
@@ -13,7 +14,7 @@ class GooeyEmbedFactory {
   defaultConfig = {};
   mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
 
-  mount(config: any) {
+  mount(config: any, controller?: CopilotChatWidgetController) {
     config = { ...this.defaultConfig, ...config } as CopilotEmbedConfig;
     const targetElem = document.querySelector(config.target);
     if (!targetElem) {
@@ -31,7 +32,7 @@ class GooeyEmbedFactory {
     if (targetElem.children.length > 0)
       targetElem.removeChild(targetElem.children[0]);
     targetElem.appendChild(innerDiv);
-    const root = renderCopilotChatWidget(innerDiv, config);
+    const root = renderCopilotChatWidget(innerDiv, config, controller);
     this.mounted.push({ innerDiv, root });
 
     // Global reference to the inner document
