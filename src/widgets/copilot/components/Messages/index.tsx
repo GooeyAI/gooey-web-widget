@@ -74,6 +74,7 @@ const Messages = () => {
       style={{ overflowY: "auto" }}
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
+      <div className="h-100 "></div>
       <Responses
         queue={Array.from(messages?.keys() ?? [])}
         data={messages ?? new Map()}
