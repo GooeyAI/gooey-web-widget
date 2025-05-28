@@ -28,4 +28,5 @@ export interface CopilotConfigType {
     };
   };
   payload?: any;
+  fillParent?: boolean;
 }

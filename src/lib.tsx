@@ -27,16 +27,23 @@ class GooeyEmbedFactory {
         `Integration ID is required. Please provide an "integration_id" in the config object.`
       );
     }
+
     const innerDiv = document.createElement("div");
     innerDiv.style.display = "contents";
-    if (targetElem.children.length > 0)
+    if (targetElem.children.length > 0) {
       targetElem.removeChild(targetElem.children[0]);
+    }
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config, controller);
     this.mounted.push({ innerDiv, root });
 
     // Global reference to the inner document
     globalThis.gooeyShadowRoot = innerDiv?.shadowRoot;
+
+    
+    if (config.fillParent) {
+      fillParent(targetElem);
+    }
   }
 
   unmount() {
@@ -46,6 +53,26 @@ class GooeyEmbedFactory {
     }
     this.mounted = [];
   }
+}
+
+function fillParent(targetElem: HTMLElement) {
+  const updateHeight = () => {
+    if (!targetElem.children.length) {
+      window.removeEventListener("resize", updateHeight);
+      window.removeEventListener("scroll", updateHeight);
+      resizeObserver?.disconnect();
+      return;
+    }
+    let rect = targetElem.getBoundingClientRect();
+    let top = Math.max(rect.top, 0);
+    let remainingHeight = window.innerHeight - top - 8;
+    targetElem.style.height = `${remainingHeight}px`;
+  }
+  let resizeObserver = new window.ResizeObserver(updateHeight);
+  resizeObserver.observe(targetElem);
+  window.addEventListener("resize", updateHeight);
+  window.addEventListener("scroll", updateHeight);
+  updateHeight();
 }
 
 const GooeyEmbed = new GooeyEmbedFactory();
