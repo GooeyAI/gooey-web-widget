@@ -43,6 +43,7 @@ export function CopilotChatWidget({
   };
   config.apiUrl ||= "https://api.gooey.ai";
   config.branding.name ||= "Gooey";
+  config.branding.title ||= config.branding.name;
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
 
   return (

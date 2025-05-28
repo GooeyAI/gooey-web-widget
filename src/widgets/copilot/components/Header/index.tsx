@@ -63,7 +63,7 @@ const Header = () => {
                   }}
                 />
               </div>
-              <p className="font_16_700 text-almostBlack">{branding?.name}</p>
+              <p className="font_16_700 text-almostBlack">{branding?.title}</p>
             </div>
           </Button>
         </GooeyTooltip>
