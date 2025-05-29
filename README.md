@@ -196,7 +196,7 @@ Note: If you want to work with "variables" in payload, refer to our [Advanced pr
 ## **Notes**
 
 - `src/widgets/*`: List of embeddable React components.
-- `index.html` + `src/main.tsx`: Entry point for the development React app.
+- `index.html` + `src/main.js`: Entry point for the development React app.
 - `src/lib.tsx`: Library entry point for the widget.
 - `vite.config.js`: Configuration for bundling the library.
 

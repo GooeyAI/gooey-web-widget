@@ -2,8 +2,13 @@
 
 .gooeyChat-chat-input {
   width: 100%;
-  bottom: 0px;
   background: transparent;
+  position: sticky;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  border-radius: 16px 16px 0 0;
 }
 
 .gooeyChat-chat-input textarea {

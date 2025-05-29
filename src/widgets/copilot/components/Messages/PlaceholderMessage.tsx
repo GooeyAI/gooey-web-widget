@@ -60,18 +60,21 @@ const BotProfile = () => {
 };
 
 const PlaceholderMessage = () => {
-  const { initializeQuery }: any = useMessagesContext();
+  const { initializeQuery } = useMessagesContext();
   const { config } = useSystemContext();
   const conversationStarters = config?.branding.conversationStarters ?? [];
   return (
-    <div className="no-scroll-bar w-100 gpl-16">
+    <div
+      className="pos-sticky no-scroll-bar w-100 gpl-16 gpb-8 mw-760"
+      style={{ bottom: "60px" }}
+    >
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
         {conversationStarters?.map((que) => (
           <Button
             key={que}
             variant="outlined"
-            onClick={() => initializeQuery({ input_prompt: que })}
+            onClick={() => initializeQuery?.({ input_prompt: que })}
             className={clsx("text-left font_12_500 w-100")}
           >
             {que}

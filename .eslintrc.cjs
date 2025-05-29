@@ -26,9 +26,11 @@ module.exports = {
   plugins: ['react', 'react-refresh'],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
+    "react-refresh/only-export-components": [
+      "warn",
       { allowConstantExport: true },
     ],
+    "prefer-const": "off",
+    "@typescript-eslint/no-unused-vars": "off",
   },
 };

@@ -15,7 +15,7 @@ const SideNavbar = () => {
     currentConversationId,
     handleNewConversation,
     messages,
-  }: any = useMessagesContext();
+  } = useMessagesContext();
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
   const conversationsList = React.useMemo(() => {
@@ -139,7 +139,7 @@ const SideNavbar = () => {
                 className="w-100 pos-relative text-dark"
                 disabled={isEmpty}
                 onClick={() => {
-                  handleNewConversation();
+                  handleNewConversation?.();
                   if (layoutController?.isSecondaryDrawerOpen)
                     layoutController?.toggleSecondaryDrawer(null);
                 }}
@@ -218,7 +218,7 @@ const SideNavbar = () => {
                                 currentConversationId === conversation?.id
                               }
                               onClick={() => {
-                                setActiveConversation(conversation);
+                                setActiveConversation?.(conversation);
                                 if (layoutController?.isMobile)
                                   layoutController?.toggleSidebar();
                                 if (layoutController?.isSecondaryDrawerOpen)
