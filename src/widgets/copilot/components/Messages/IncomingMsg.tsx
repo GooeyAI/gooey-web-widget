@@ -53,8 +53,8 @@ const FeedbackButtons = ({
   };
 }) => {
   const { buttons, bot_message_id } = data;
-  const { initializeQuery }: any = useMessagesContext();
   const locationModalRef = useRef<LocationModalRef | null>(null);
+  const { initializeQuery } = useMessagesContext();
 
   if (!buttons) return null;
 
@@ -99,7 +99,7 @@ const FeedbackButtons = ({
                         locationModalRef.current?.open();
                       } else {
                         // Follow up button press
-                        initializeQuery({
+                        initializeQuery?.({
                           button_pressed: {
                             button_id: button.id,
                             button_title: button.title,
@@ -128,7 +128,7 @@ const FeedbackButtons = ({
                   button={button}
                   onClick={() => {
                     if (button.isPressed) return;
-                    initializeQuery({
+                    initializeQuery?.({
                       button_pressed: {
                         button_id: button.id,
                         button_title: button.title,
@@ -145,7 +145,7 @@ const FeedbackButtons = ({
         <LocationModal
           ref={locationModalRef}
           onSendLocation={(location) => {
-            initializeQuery({
+            initializeQuery?.({
               input_location: location,
             });
           }}
@@ -223,7 +223,7 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div className="gpl-16 mw-100">
+        <div className="gpl-12 gpr-12 mw-100">
           <BotMessageLayout>
             <div
               className={clsx(
