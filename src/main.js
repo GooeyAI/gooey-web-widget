@@ -27,3 +27,34 @@ const defaultConfig = {
 
 GooeyEmbed.mount({ target: "#popup", mode: "popup", ...defaultConfig });
 GooeyEmbed.mount({ target: "#inline", mode: "inline", ...defaultConfig });
+
+
+
+async function loadGooeyEmbed() {
+  await window.waitUntilHydrated;
+  if (
+      typeof GooeyEmbed === 'undefined' 
+      || document.getElementById("gooey-embed")?.children.length
+  ) return;
+  let controller = {
+      messages,
+      onSendMessage: (payload) => {
+          let btn = document.getElementById("onSendMessage");
+          if (!btn) return;
+          btn.value = JSON.stringify(payload);
+          btn.click();
+      },
+      onNewConversation() {
+          document.getElementById("onNewConversation").click();
+      },
+  };
+  GooeyEmbed.controller = controller;
+  GooeyEmbed.mount(config, controller);
+}
+const script = document.getElementById("gooey-embed-script");
+if (script) script.onload = loadGooeyEmbed;
+loadGooeyEmbed();
+window.addEventListener("hydrated", loadGooeyEmbed);
+if (typeof GooeyEmbed !== 'undefined' && GooeyEmbed.controller) {
+  GooeyEmbed.controller.setMessages?.(messages);
+}

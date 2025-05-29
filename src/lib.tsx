@@ -12,19 +12,19 @@ declare global {
 
 class GooeyEmbedFactory {
   defaultConfig = {};
-  mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
+  _mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
 
   mount(config: any, controller?: CopilotChatWidgetController) {
     config = { ...this.defaultConfig, ...config } as CopilotEmbedConfig;
     const targetElem = document.querySelector(config.target);
     if (!targetElem) {
       throw new Error(
-        `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`
+        `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`,
       );
     }
     if (!config.integration_id) {
       throw new Error(
-        `Integration ID is required. Please provide an "integration_id" in the config object.`
+        `Integration ID is required. Please provide an "integration_id" in the config object.`,
       );
     }
 
@@ -35,18 +35,18 @@ class GooeyEmbedFactory {
     }
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config, controller);
-    this.mounted.push({ innerDiv, root });
+    this._mounted.push({ innerDiv, root });
 
     // Global reference to the inner document
     globalThis.gooeyShadowRoot = innerDiv?.shadowRoot;
   }
 
   unmount() {
-    for (const { innerDiv, root } of this.mounted) {
+    for (const { innerDiv, root } of this._mounted) {
       root.unmount();
       innerDiv.remove();
     }
-    this.mounted = [];
+    this._mounted = [];
   }
 }
 

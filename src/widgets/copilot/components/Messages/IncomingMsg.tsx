@@ -223,7 +223,7 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div className="gpl-16 mw-100">
+        <div className="gpl-12 gpr-12 mw-100">
           <BotMessageLayout>
             <div
               className={clsx(

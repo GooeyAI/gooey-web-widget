@@ -37,7 +37,7 @@ const OutgoingMsg = memo(
     }
 
     return (
-      <div className="gooey-outgoingMsg gmb-12 gpl-16">
+      <div className="gooey-outgoingMsg gmb-12 gpl-12 gpr-12">
         {input_images.length > 0 &&
           input_images.map((url: string) => (
             <a href={url} target="_blank">
