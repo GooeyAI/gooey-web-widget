@@ -12,12 +12,15 @@ import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
 
 const Header = () => {
-  const { messages, handleNewConversation }: any = useMessagesContext();
   const { layoutController, config }: SystemContextType = useSystemContext();
+  const { messages, handleNewConversation } = useMessagesContext();
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   return (
-    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
+    <div
+      className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header"
+      style={{ zIndex: 1 }}
+    >
       <div className="d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
@@ -42,7 +45,7 @@ const Header = () => {
         }}
       >
         <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
-          <Button onClick={() => handleNewConversation()} disabled={isEmpty}>
+          <Button onClick={handleNewConversation} disabled={isEmpty}>
             <div className="d-flex align-center">
               <div
                 className="bot-avatar bg-primary gmr-8"
@@ -63,7 +66,7 @@ const Header = () => {
                   }}
                 />
               </div>
-              <p className="font_16_700 text-almostBlack">{branding?.name}</p>
+              <p className="font_16_700 text-almostBlack">{branding?.title}</p>
             </div>
           </Button>
         </GooeyTooltip>
@@ -105,19 +108,18 @@ const Header = () => {
             </GooeyTooltip>
           )}
           {/* New Chat button */}
-          {layoutController?.isInline &&
-            layoutController?.showNewConversationButton && (
-              <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
-                <IconButton
-                  disabled={isEmpty}
-                  variant="text"
-                  className={clsx("gp-8 cr-pointer flex-1")}
-                  onClick={() => handleNewConversation()}
-                >
-                  <IconPencilEdit size={22} />
-                </IconButton>
-              </GooeyTooltip>
-            )}
+          {layoutController?.isInline && (
+            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+              <IconButton
+                disabled={isEmpty}
+                variant="text"
+                className={clsx("gp-8 cr-pointer flex-1")}
+                onClick={handleNewConversation}
+              >
+                <IconPencilEdit size={22} />
+              </IconButton>
+            </GooeyTooltip>
+          )}
         </div>
       </div>
     </div>

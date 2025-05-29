@@ -11,8 +11,9 @@
 }
 
 .gooey-incomingMsg video {
-  width: 360px;
-  height: 360px;
+  max-width: 90%;
+  max-height: 360px;
+  height: auto;
   border-radius: 12px;
 }
 

@@ -10,13 +10,11 @@ import SecondaryDrawer from "./SecondaryDrawer";
 addInlineStyle(style);
 
 type Props = {
-  children: JSX.Element | JSX.Element[] | (() => JSX.Element);
+  children: React.ReactNode;
   view?: string;
   onViewChange?: (val: string) => void;
   isInline?: boolean;
 };
-
-const CHAT_WINDOW_WIDTH = 760;
 
 const generateParentContainerClass = (
   isInline: boolean,
@@ -56,7 +54,7 @@ const AppLayout = ({ children }: Props) => {
     <div
       id="gooeyChat-container"
       className={clsx(
-        "overflow-hidden gooeyChat-widget-container",
+        "gooeyChat-widget-container",
         generateParentContainerClass(
           layoutController!.isInline,
           config?.mode === "fullscreen",
@@ -64,19 +62,16 @@ const AppLayout = ({ children }: Props) => {
         ),
       )}
     >
-      <div className="d-flex h-100 pos-relative">
+      <div
+        className="d-flex h-100 pos-relative"
+      >
         <SideNavbar />
         {layoutController?.isSidebarOpen && layoutController?.isMobile && (
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
-        <main className="pos-relative d-flex flex-1 flex-col align-center overflow-hidden h-100 bg-white">
+        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100 bg-white">
           <Header />
-          <div
-            style={{ maxWidth: `${CHAT_WINDOW_WIDTH}px`, height: "100%" }}
-            className="d-flex flex-col flex-1 gp-0 w-100 overflow-hidden bg-white w-100"
-          >
-            <>{children}</>
-          </div>
+          {children}
         </main>
         <SecondaryDrawer />
       </div>
