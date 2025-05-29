@@ -15,6 +15,7 @@ export interface CopilotConfigType {
   };
   branding: {
     name?: string;
+    title?: string;
     byLine?: string;
     description?: string;
     conversationStarters?: string[];
