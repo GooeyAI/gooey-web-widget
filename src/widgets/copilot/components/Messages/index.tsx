@@ -2,7 +2,6 @@ import clsx from "clsx";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
-import PlaceholderMessage from "./PlaceholderMessage";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useEffect, useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
@@ -13,7 +12,7 @@ const Responses = (props: any) => {
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
-  return que?.toReversed().map((id: string) => {
+  return que?.map((id: string) => {
     const responseData = msgs.get(id);
     if (responseData.role === "user") {
       return (
@@ -68,17 +67,16 @@ const Messages = () => {
     <div
       ref={scrollContainerRef}
       className={clsx(
-        "flex-1 bg-white gpt-16 gpb-16 gpr-16 gpb-16 d-flex flex-col flex-col-reverse",
+        "flex-1 bg-white gpt-16 overflow-y-auto w-100",
         isEmpty ? "justify-end" : "justify-start",
       )}
-      style={{ overflowY: "auto" }}
     >
-      {!messages?.size && !isSending && <PlaceholderMessage />}
-      <div className="h-100 "></div>
-      <Responses
-        queue={Array.from(messages?.keys() ?? [])}
-        data={messages ?? new Map()}
-      />
+      <div className="mw-760 d-flex flex-col">
+        <Responses
+          queue={Array.from(messages?.keys() ?? [])}
+          data={messages ?? new Map()}
+        />
+      </div>
       <ResponseLoader show={isSending} />
     </div>
   );

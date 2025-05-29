@@ -64,8 +64,10 @@ const PlaceholderMessage = () => {
   const { config } = useSystemContext();
   const conversationStarters = config?.branding.conversationStarters ?? [];
   return (
-    <>
-    <div className="no-scroll-bar w-100 gpl-16">
+    <div
+      className="pos-sticky no-scroll-bar w-100 gpl-16 gpb-8 mw-760"
+      style={{ bottom: "60px" }}
+    >
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
         {conversationStarters?.map((que) => (
@@ -77,11 +79,9 @@ const PlaceholderMessage = () => {
           >
             {que}
           </Button>
-          ))}
-        </div>
+        ))}
       </div>
-      <div className="h-100"></div>
-      </>
+    </div>
   );
 };
 

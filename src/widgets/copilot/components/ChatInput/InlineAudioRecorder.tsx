@@ -102,17 +102,17 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
 
   if (isLoading) {
     return (
-      <div className="gpl-8 gpr-8 d-flex align-center justify-center gpb-25 w-100">
-        <SpinLoader size={44} />
+      <div className="gpl-8 gpr-8 d-flex align-center justify-center gpb-5 gpt-3 w-100">
+        <SpinLoader size={43} />
       </div>
     );
   }
   return (
-    <div className="gpl-8 gpr-8 d-flex align-center gpb-25">
+    <div className="gpl-8 gpr-8 d-flex align-center gpb-2">
       <IconButton
         variant="text"
         className="bg-light gp-8"
-        style={{ borderRadius: "100px", height: "44px" }}
+        style={{ borderRadius: "100px", height: "41px" }}
         onClick={handleClose}
       >
         <IconClose size="24" />

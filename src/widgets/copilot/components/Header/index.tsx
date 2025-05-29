@@ -17,7 +17,10 @@ const Header = () => {
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   return (
-    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header">
+    <div
+      className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky w-100 h-header"
+      style={{ zIndex: 1 }}
+    >
       <div className="d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
