@@ -111,6 +111,8 @@ const LocationModal = forwardRef<LocationModalRef, LocationModalProps>(
       }
     }
 
+    if (!isOpen) return null;
+
     return (
       <div className={clsx("location-modal-overlay", { "is-open": isOpen })}>
         <div className={clsx("location-modal")}>
