@@ -18,6 +18,8 @@ import Button from "src/components/shared/Buttons/Button";
 import IconFile from "src/assets/SvgIcons/IconFile";
 import IconImage from "src/assets/SvgIcons/IconImage";
 import { v4 as uuidv4 } from "uuid";
+import { isMobile } from "../Messages/helpers";
+import IconCamera from "src/assets/SvgIcons/IconCamera";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
@@ -64,7 +66,7 @@ const ChatInput = () => {
           { type: image.mime || "image/png" },
         );
         const newFiles = processFiles([fileObj]).filter((f: any) => !!f);
-        setFiles((prev: any) => prev ? [...prev, ...newFiles] : newFiles);
+        setFiles((prev: any) => (prev ? [...prev, ...newFiles] : newFiles));
         setPreAttachedFileUsed(true);
       }
     });
@@ -163,7 +165,7 @@ const ChatInput = () => {
     setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
   };
 
-  const processFiles = (files: Array<any>) : Array<UploadedFile | undefined> => {
+  const processFiles = (files: Array<any>): Array<UploadedFile | undefined> => {
     if (!files || !files.length) return [];
     return files.map((file: any) => {
       const id = uuidv4();
@@ -225,6 +227,16 @@ const ChatInput = () => {
     input.accept = acceptedImageTypes;
     input.onchange = onFileAdded;
     input.multiple = true;
+    input.click();
+  };
+
+  const handleTakePhotoClick = () => {
+    setIsMenuOpen(false);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = acceptedImageTypes;
+    input.capture = "environment"; // opens camera directly on mobile
+    input.onchange = onFileAdded;
     input.click();
   };
 
@@ -296,6 +308,16 @@ const ChatInput = () => {
                       >
                         <p className="font_14_500">Image or Video </p>
                       </Button>
+                      {isMobile() && (
+                        <Button
+                          className="w-100 text-left"
+                          variant="text-alt"
+                          onClick={handleTakePhotoClick}
+                          LeftIconComponent={() => <IconCamera size={16} />}
+                        >
+                          <p className="font_14_500">Take Photo</p>
+                        </Button>
+                      )}
                     </div>
                   )}
                 >

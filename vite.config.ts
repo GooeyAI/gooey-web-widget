@@ -12,14 +12,14 @@ export default defineConfig(({ mode }) => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
-  
+
       lib: {
         entry: "./src/lib.tsx", // Specifies the entry point for building the library.
         name: "gooey-chat", // Sets the name of the generated library.
         fileName: (format) => `index.${format}.js`, // Generates the output file name based on the format.
         formats: ["iife"], // Specifies the output formats (CommonJS and ES modules).
       },
-  
+
       rollupOptions: {
         external: [...Object.keys(peerDependencies)], // Defines external dependencies for Rollup bundling.
         preserveEntrySignatures: "strict",
@@ -34,22 +34,25 @@ export default defineConfig(({ mode }) => {
           assetFileNames: "[name].[ext]", // currently does not work for images
         },
       },
-  
+
       // sourcemap: true, // Generates source maps for debugging.
       // Clears the output directory before building.
       emptyOutDir: true,
-  
-      sourcemap: true
+
+      sourcemap: true,
     },
     resolve: {
       alias: {
         src: resolve(__dirname, "src"),
       },
     },
-    plugins: [react(), sentryVitePlugin({
-      org: "dara-network",
-      project: "copilot-web-widget",
-      authToken: env.SENTRY_AUTH_TOKEN,
-    })],
+    plugins: [
+      react(),
+      sentryVitePlugin({
+        org: "dara-network",
+        project: "copilot-web-widget",
+        authToken: env.SENTRY_AUTH_TOKEN,
+      }),
+    ],
   };
 });

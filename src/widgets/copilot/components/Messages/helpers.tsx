@@ -449,3 +449,9 @@ export function renderImageInIframe(imgBlobUrl: string) {
   const blobUrl = URL.createObjectURL(blob);
   return blobUrl;
 }
+
+export const isMobile = () =>
+  typeof window !== "undefined" &&
+  /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+    navigator.userAgent,
+  );
