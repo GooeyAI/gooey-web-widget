@@ -77,8 +77,8 @@ const Messages = () => {
           queue={Array.from(messages?.keys() ?? [])}
           data={messages ?? new Map()}
         />
-      </div>
       <ResponseLoader show={isSending} />
+      </div>
     </div>
   );
 };
