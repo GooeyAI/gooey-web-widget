@@ -282,7 +282,7 @@ const ChatInput = () => {
                 "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
                 isLeftButtons ? "gpl-32" : "gpl-12",
               )}
-              placeholder={`Message ${config.branding.name || ""}`}
+              placeholder={"Message"}
             ></textarea>
 
             {/* Left icons */}
