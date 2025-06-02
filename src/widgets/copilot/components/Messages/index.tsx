@@ -26,7 +26,7 @@ const Responses = (props: any) => {
             input_images={responseData.input_images}
             button_pressed={responseData.button_pressed}
             input_location={responseData.input_location}
-            attached_files={responseData.attached_files}
+            input_documents={responseData.input_documents}
           />;
         } else {
           return (

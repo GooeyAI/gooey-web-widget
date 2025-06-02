@@ -7,7 +7,11 @@ import { CircularLoader } from "src/components/shared/Loaders";
 import { FullSourcePreview } from "../Messages/Sources";
 import { useSystemContext } from "src/contexts/hooks";
 import { SyntheticEvent } from "react";
-import { isGoogleDocsEmbeddable, truncateMiddle } from "../Messages/helpers";
+import {
+  extractFileDetails,
+  isGoogleDocsEmbeddable,
+  truncateMiddle,
+} from "../Messages/helpers";
 
 const FilePreview = ({
   files,
@@ -26,19 +30,21 @@ const FilePreview = ({
   };
 
   const handleFileClick = (file: any) => {
-    if (isGoogleDocsEmbeddable(file?.data?.type)) {
-      openInSidebar({ url: file.gooeyUrl, title: file.name });
+    const fileURL = file?.url || URL.createObjectURL(file?.data);
+    if (isGoogleDocsEmbeddable(file?.data?.type || "")) {
+      openInSidebar({ url: fileURL, title: file.name });
     } else if (
       file?.data?.type?.includes("json") ||
-      file?.data?.type?.includes("image")
+      file?.data?.type?.includes("image") || 
+      file?.url
     ) {
       openInSidebar({
-        url: URL.createObjectURL(file.data),
+        url: fileURL,
         title: file.name,
         isImage: file?.data?.type?.includes("image"),
       });
     } else {
-      window.open(URL.createObjectURL(file.data), "_blank");
+      window.open(fileURL, "_blank");
     }
   };
 
@@ -48,9 +54,9 @@ const FilePreview = ({
       style={{ gap: "12px", flexWrap: "nowrap", scrollbarWidth: "thin" }}
     >
       {files.map((file, index) => {
-        const { isUploading, data } = file;
-        const fileURL = URL.createObjectURL(data);
-        const fileType = file.type.split("/")[0];
+        const { isUploading, data, url } = file;
+        const fileURL = url || URL.createObjectURL(data);
+        const fileType = file?.type?.split("/")[0] || "application";
 
         return (
           <div key={index}>
@@ -167,6 +173,14 @@ export const FilePreviewItem = ({
   isUploading: boolean;
   isRemovable: boolean;
 }) => {
+  const { mainString, extension } = file?.name
+    ? { mainString: file?.name, extension: file?.name?.split(".")[1] }
+    : extractFileDetails(file?.title || file?.url || "");
+  const [title] = (mainString || "").split(",");
+  const fileName = file?.name ?file?.name?.split(".")[0] : title;
+  const fileExtension = file?.name?.split(".")[1] || extension?.split(".")[1];
+  // support both blob and direct urls
+
   return (
     <div
       className={clsx(
@@ -226,11 +240,9 @@ export const FilePreviewItem = ({
           className="font_14_500"
           style={{ width: "90%", textOverflow: "ellipsis" }}
         >
-          {truncateMiddle(file.name.split(".")[0], 20)}
+          {truncateMiddle(fileName, 20)}
         </p>
-        <p className="font_12_400 text-muted">
-          {file.name.split(".")[1].toUpperCase()}
-        </p>
+        <p className="font_12_400 text-muted">{fileExtension?.toUpperCase()}</p>
       </div>
     </div>
   );

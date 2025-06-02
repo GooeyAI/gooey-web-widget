@@ -2,6 +2,7 @@ import { addInlineStyle } from "src/addStyles";
 import style from "./outgoing.scss?inline";
 import { memo } from "react";
 import FilePreview from "../ChatInput/FilePreview";
+import clsx from "clsx";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -20,7 +21,6 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
-  attached_files?: any[];
 }
 
 const OutgoingMsg = memo(
@@ -29,7 +29,8 @@ const OutgoingMsg = memo(
     input_audio = undefined,
     button_pressed = undefined,
     input_location: { latitude, longitude } = {},
-    attached_files = [],
+    input_images = [],
+    input_documents = [],
   }: OutgoingMsgProps) => {
     let mapUrl;
     if (latitude && longitude) {
@@ -38,9 +39,10 @@ const OutgoingMsg = memo(
       input_prompt ||= button_pressed?.button_title || "";
     }
 
+
     return (
       <div className="gooey-outgoingMsg gmb-12 gpl-16">
-        {/* {input_images.length > 0 &&
+        {input_images.length > 0 &&
           input_images.map((url: string) => (
             <a href={url} target="_blank">
               <img
@@ -52,18 +54,22 @@ const OutgoingMsg = memo(
                 )}
               />
             </a>
-          ))} */}
+          ))}
+        {input_documents.length > 0 && (
+          <FilePreview
+            files={input_documents.map((url: string) => ({
+              url,
+              title: url,
+              refNumber: "",
+            }))}
+          />
+        )}
         {input_audio && (
           <div className="gmt-16">
             <audio
               controls
               src={(URL || webkitURL).createObjectURL(input_audio as Blob)}
             ></audio>
-          </div>
-        )}
-        {attached_files && attached_files.length > 0 && (
-          <div className="gmt-16">
-            <FilePreview files={attached_files} />
           </div>
         )}
         {input_prompt && (
