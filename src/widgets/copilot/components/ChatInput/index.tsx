@@ -20,6 +20,8 @@ import IconImage from "src/assets/SvgIcons/IconImage";
 import { v4 as uuidv4 } from "uuid";
 import { isMobile } from "../Messages/helpers";
 import IconCamera from "src/assets/SvgIcons/IconCamera";
+import { RequestModel } from "src/contexts/MessagesContext";
+import PlaceholderMessage from "../Messages/PlaceholderMessage";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
@@ -40,7 +42,7 @@ interface UploadedFile {
 
 const ChatInput = () => {
   const { config } = useSystemContext();
-  const { initializeQuery, isSending, cancelApiCall, isReceiving }: any =
+  const { messages, initializeQuery, isSending, cancelApiCall, isReceiving } =
     useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -120,7 +122,7 @@ const ChatInput = () => {
 
   const handleSendMessage = () => {
     if ((!value.trim() && !files?.length) || disableSend) return null;
-    const payload: any = {
+    let payload: RequestModel = {
       input_prompt: value.trim(),
     };
     if (files?.length) {
@@ -140,16 +142,15 @@ const ChatInput = () => {
           ...(payload.input_documents || []),
           ...videos.map((file) => file.gooeyUrl),
         ];
-      payload.attached_files = files ? [...files] : [];
       setFiles([]);
     }
-    initializeQuery(payload);
+    initializeQuery?.(payload);
     setValue("");
     resetHeight();
   };
 
   const handleCancelSend = () => {
-    cancelApiCall();
+    cancelApiCall?.();
   };
 
   const handleRecordClick = () => {
@@ -157,7 +158,7 @@ const ChatInput = () => {
   };
 
   const handleSendAudio = (blob: Blob) => {
-    initializeQuery({ input_audio: blob });
+    initializeQuery?.({ input_audio: blob });
     setIsRecording(false);
   };
 
@@ -250,18 +251,19 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <React.Fragment>
-      {files && files.length > 0 && (
-        <div className="gp-12 b-1 br-large gmb-12 gm-12">
-          <FilePreview files={files} onRemove={handleRemoveFile} />
-        </div>
-      )}
+    <>
+      {!messages?.size && !isSending && <PlaceholderMessage />}
       <div
         className={clsx(
-          "gooeyChat-chat-input gpr-8 gpl-8",
+          "gooeyChat-chat-input gpr-8 gpl-8 mw-760",
           !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
+        {files && files.length > 0 && (
+          <div className="gp-12 b-1 br-large gmb-12 gm-12">
+            <FilePreview files={files} onRemove={handleRemoveFile} />
+          </div>
+        )}
         {isRecording ? (
           <InlineAudioRecorder
             onSend={handleSendAudio}
@@ -280,7 +282,7 @@ const ChatInput = () => {
                 "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
                 isLeftButtons ? "gpl-32" : "gpl-12",
               )}
-              placeholder={`Message ${config.branding.name || ""}`}
+              placeholder={"Message"}
             ></textarea>
 
             {/* Left icons */}
@@ -362,9 +364,8 @@ const ChatInput = () => {
             </div>
           </div>
         )}
-
         {/* Gooey Branding */}
-        {!!config.branding.showPoweredByGooey && !isRecording && (
+        {!!config.branding.showPoweredByGooey && (
           <p
             className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
             style={{ fontSize: "8px" }}
@@ -380,7 +381,7 @@ const ChatInput = () => {
           </p>
         )}
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

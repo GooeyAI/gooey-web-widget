@@ -100,7 +100,7 @@ interface Data {
   refNumber?: string;
 }
 
-const SourcesCard = (props: { data: Data; index: number }) => {
+export const SourcesCard = (props: { data: Data; index: number }) => {
   const { data } = props;
   const { getTempStoreValue, setTempStoreValue, layoutController } =
     useSystemContext();
