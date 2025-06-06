@@ -56,20 +56,20 @@ const ChatInput = () => {
     const input_images = config?.payload?.input_images || [];
     if (!input_images?.length || preAttachedFileUsed || files?.length) return;
 
-    input_images.forEach((image: any) => {
-      if (typeof image === "string") return; // @TODO: support for CDN URLs
-      // check if image is { name: string; mime: string; bytes: number[]; };
-      if (typeof image === "object" && image.bytes) {
+    const newFiles = processFiles(
+      input_images.map((image: any) => {
+        if (typeof image === "string") return; // @TODO: support for CDN URLs
+        // check if image is { name: string; mime: string; bytes: number[]; };
         const fileObj = new File(
           [new Uint8Array(image.bytes)],
           image.name || "gooey-image.png",
           { type: image.mime || "image/png" },
         );
-        const newFiles = processFiles([fileObj]).filter((f: any) => !!f);
-        setFiles((prev: any) => (prev ? [...prev, ...newFiles] : newFiles));
-        setPreAttachedFileUsed(true);
-      }
-    });
+        return fileObj;
+      }),
+    );
+    setPreAttachedFileUsed(true);
+    setFiles(newFiles as [UploadedFile]);
   }, [config?.payload?.input_images, preAttachedFileUsed]);
 
   // Dismiss menu on outside click
