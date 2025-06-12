@@ -2,7 +2,7 @@
 
 .gooey-incomingMsg {
   width: 100%;
-  word-wrap: normal;
+  word-break: break-word !important;
 }
 
 .gooey-incomingMsg audio {
