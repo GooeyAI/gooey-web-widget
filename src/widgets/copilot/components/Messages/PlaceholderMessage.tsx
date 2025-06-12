@@ -66,7 +66,7 @@ const PlaceholderMessage = () => {
   return (
     <div
       className="pos-sticky no-scroll-bar w-100 gpl-8 gpr-8 gpb-8 mw-760"
-      style={{ bottom: "60px" }}
+      style={{ bottom: "60px", overflow: "auto" }}
     >
       <BotProfile />
       <div className="gmt-48 gooey-placeholderMsg-container">
