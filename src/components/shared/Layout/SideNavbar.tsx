@@ -109,7 +109,7 @@ const SideNavbar = () => {
         zIndex: 10,
       }}
       className={clsx(
-        "b-rt-1 h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
+        "h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
         layoutController?.isMobile ? "pos-absolute" : "pos-relative",
       )}
     >

@@ -88,7 +88,6 @@ const FilePreview = ({
           </div>
         );
       })}
-      <div className="gooey-scroll-fade"></div>
     </div>
   );
 };

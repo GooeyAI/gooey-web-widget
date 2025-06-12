@@ -15,6 +15,7 @@ import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconBooks from "src/assets/SvgIcons/IconBooks";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
+import { MESSAGE_GUTTER } from ".";
 
 export const FullSourcePreview = (props: any) => {
   const { data, layoutController, metaData } = props;
@@ -246,10 +247,10 @@ export const SourcesSection = (data: any) => {
 
   return (
     <div className="gmb-8">
-      <div className="d-flex align-center gpt-4 gpb-8 gpl-16">
+      <div className={clsx(`d-flex align-center gpt-4 gpb-8`, `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`)}>
         <span
           style={{ height: "24px", width: "24px" }}
-          className="d-flex justify-center align-center gmr-12"
+          className="d-flex justify-center align-center gmr-8"
         >
           <IconBooks />
         </span>
@@ -286,13 +287,12 @@ const Sources = ({
         <div className="gpb-8 gpt-4 sources-listContainer gooey-scroll-container">
           {data.map((source: any, index: number) => (
             <div
-              className={clsx(index === 0 && !isInline && "gml-52")}
+              className={clsx(index === 0 && !isInline && "gml-40")}
               key={source?.title + index}
             >
               <SourcesCard data={source} index={index} />
             </div>
           ))}
-          <div className="gooey-scroll-fade"></div>
         </div>
       </div>
     </div>

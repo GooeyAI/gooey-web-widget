@@ -208,7 +208,6 @@
   overflow: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-right: 20px; /* Prevent content from being cut off */
   white-space: nowrap;
   position: relative;
 }
@@ -221,14 +220,4 @@
 
 .gooey-scroll-container::-webkit-scrollbar {
   display: none;
-}
-
-.gooey-scroll-fade {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 20px;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
 }

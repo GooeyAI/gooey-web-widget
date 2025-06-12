@@ -6,6 +6,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useEffect, useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
 
+export const MESSAGE_GUTTER = 12;
 const Responses = (props: any) => {
   const { config } = useSystemContext();
   const { preventAutoplay } = useMessagesContext();

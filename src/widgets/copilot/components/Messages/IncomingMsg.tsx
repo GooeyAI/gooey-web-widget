@@ -10,6 +10,7 @@ import style from "./incoming.scss?inline";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import type { LocationModalRef } from "./LocationModal";
+import { MESSAGE_GUTTER } from ".";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -112,7 +113,6 @@ const FeedbackButtons = ({
                 ),
             )}
           </div>
-          <div className="gooey-scroll-fade d-none sm-d-block"></div>
         </div>
       )}
       {thumbButtons.length > 0 && (
@@ -223,7 +223,7 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div className="gpl-12 mw-100">
+        <div className={clsx(`gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`, "mw-100")}>
           <div
             className={clsx(
               "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",

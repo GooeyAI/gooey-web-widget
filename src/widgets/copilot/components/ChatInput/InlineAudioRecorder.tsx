@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import CircleUP from "src/assets/SvgIcons/CircleUP";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import SpinLoader from "src/components/shared/SpinLoader";
+import { MESSAGE_GUTTER } from "../Messages";
 
 interface InlineAudioRecorderProps {
   onCancel: () => void;
@@ -102,7 +104,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
 
   if (isLoading) {
     return (
-      <div className="gpl-8 gpr-8 d-flex align-center justify-center gpb-5 gpt-3 w-100">
+      <div className={clsx(`gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`, "d-flex align-center justify-center gpb-5 gpt-3 w-100")}>
         <SpinLoader size={43} />
       </div>
     );
