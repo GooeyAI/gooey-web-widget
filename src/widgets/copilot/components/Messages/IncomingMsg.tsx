@@ -223,7 +223,12 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div className={clsx(`gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`, "mw-100")}>
+        <div
+          className={clsx(
+            `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
+            "mw-100",
+          )}
+        >
           <div
             className={clsx(
               "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
@@ -234,7 +239,7 @@ const IncomingMsg = memo(
             {parsedElements}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-8 mw-100">
+            <div className="gmt-8 gmb-8 mw-100">
               <audio
                 autoPlay={isAutoPlay}
                 playsInline={true}
@@ -244,7 +249,7 @@ const IncomingMsg = memo(
             </div>
           )}
           {!isStreaming && videoTrack && (
-            <div className="gmt-16">
+            <div className="gmt-16 gmb-8">
               <video
                 autoPlay={isAutoPlay}
                 playsInline={true}
