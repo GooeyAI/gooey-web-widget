@@ -17,20 +17,6 @@
   }
 }
 
-@keyframes fade-in-A {
-  0% {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-.fade-in-A {
-  animation: fade-in-A 0.3s ease 0.5s;
-}
 
 .anim-typing {
   line-height: 130% !important;

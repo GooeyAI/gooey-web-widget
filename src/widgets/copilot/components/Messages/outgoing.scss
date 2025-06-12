@@ -1,5 +1,5 @@
 .gooey-outgoingMsg {
-  max-width: 100%;
+  max-width: 80%;
   animation: fade-in-A 0.4s;
 }
 .gooey-outgoingMsg audio {
@@ -17,4 +17,20 @@
   animation: fade-in-A 0.4s;
   height: 100px;
   object-fit: cover;
+}
+
+
+@keyframes fade-in-A {
+  0% {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.fade-in-A {
+  animation: fade-in-A 0.3s ease 0.5s;
 }

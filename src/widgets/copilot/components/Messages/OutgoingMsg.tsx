@@ -41,59 +41,61 @@ const OutgoingMsg = memo(
 
 
     return (
-      <div className="gooey-outgoingMsg gmb-12 gpl-12 gpr-12">
-        {input_images.length > 0 &&
-          input_images.map((url: string) => (
-            <a href={url} target="_blank">
-              <img
-                src={url}
-                alt={url}
-                className={clsx(
-                  "outgoingMsg-image b-1 br-large",
-                  input_prompt && "gmb-4",
-                )}
-              />
-            </a>
-          ))}
-        {input_documents.length > 0 && (
-          <FilePreview
-            files={input_documents.map((url: string) => ({
-              url,
-              title: url,
-              refNumber: "",
-            }))}
-          />
-        )}
-        {input_audio && (
-          <div className="gmt-16">
-            <audio
-              controls
-              src={
-                typeof input_audio === "string"
-                  ? input_audio
-                  : (URL || webkitURL).createObjectURL(input_audio as Blob)
-              }
-            ></audio>
-          </div>
-        )}
-        {input_prompt && (
-          <p className="font_20_400 anim-typing gooey-outgoing-text">
-            {input_prompt}
-          </p>
-        )}
-        {latitude && longitude && (
-          <iframe
-            width="100%"
-            height="200px"
-            src={mapUrl}
-            loading="lazy"
-            style={{
-              border: "1px solid #ddd",
-              aspectRatio: "16/9",
-              borderRadius: "8px",
-            }}
-          ></iframe>
-        )}
+      <div className="d-flex flex-col align-end">
+        <div className="gooey-outgoingMsg gmb-24">
+          {input_images.length > 0 &&
+            input_images.map((url: string) => (
+              <a href={url} target="_blank">
+                <img
+                  src={url}
+                  alt={url}
+                  className={clsx(
+                    "outgoingMsg-image b-1 br-large",
+                    input_prompt && "gmb-4",
+                  )}
+                />
+              </a>
+            ))}
+          {input_documents.length > 0 && (
+            <FilePreview
+              files={input_documents.map((url: string) => ({
+                url,
+                title: url,
+                refNumber: "",
+              }))}
+            />
+          )}
+          {input_audio && (
+            <div className="gmt-16">
+              <audio
+                controls
+                src={
+                  typeof input_audio === "string"
+                    ? input_audio
+                    : (URL || webkitURL).createObjectURL(input_audio as Blob)
+                }
+              ></audio>
+            </div>
+          )}
+          {input_prompt && (
+            <p className="font_18_400 gooey-outgoing-text gm-4 gp-12 bg-grey br-large">
+              {input_prompt}
+            </p>
+          )}
+          {latitude && longitude && (
+            <iframe
+              width="100%"
+              height="200px"
+              src={mapUrl}
+              loading="lazy"
+              style={{
+                border: "1px solid #ddd",
+                aspectRatio: "16/9",
+                borderRadius: "8px",
+              }}
+            ></iframe>
+          )}
+        </div>
       </div>
     );
   },
