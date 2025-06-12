@@ -83,7 +83,7 @@ const FeedbackButtons = ({
       {normalButtons.length > 0 && (
         <div className="gooey-scroll-wrapper">
           <div
-            className="d-flex flex-col sm-flex-row gooey-scroll-container gpl-36"
+            className="d-flex flex-col sm-flex-row gooey-scroll-container"
             style={{ gap: "12px" }}
           >
             {normalButtons.map(
@@ -117,7 +117,7 @@ const FeedbackButtons = ({
       )}
       {thumbButtons.length > 0 && (
         <div
-          className="d-flex gmt-2 justify-content-start gml-36"
+          className="d-flex gmt-2 justify-content-start"
           style={{ gap: "4px" }}
         >
           {thumbButtons.map(
@@ -223,20 +223,18 @@ const IncomingMsg = memo(
     if (!parsedElements) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div className="gpl-12 gpr-12 mw-100">
-          <BotMessageLayout>
-            <div
-              className={clsx(
-                "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
-                isStreaming && "response-streaming",
-              )}
-              id={props?.id}
-            >
-              {parsedElements}
-            </div>
-          </BotMessageLayout>
+        <div className="gpl-12 mw-100">
+          <div
+            className={clsx(
+              "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
+              isStreaming && "response-streaming",
+            )}
+            id={props?.id}
+          >
+            {parsedElements}
+          </div>
           {!isStreaming && !videoTrack && audioTrack && (
-            <div className="gmt-8 gml-36 mw-100">
+            <div className="gmt-8 mw-100">
               <audio
                 autoPlay={isAutoPlay}
                 playsInline={true}
@@ -246,7 +244,7 @@ const IncomingMsg = memo(
             </div>
           )}
           {!isStreaming && videoTrack && (
-            <div className="gmt-16 gml-36">
+            <div className="gmt-16">
               <video
                 autoPlay={isAutoPlay}
                 playsInline={true}
