@@ -1,78 +1,78 @@
-name: Build and Tag Release
+# name: Build and Tag Release
 
-on:
-  pull_request:
-    types: [closed]
-    branches:
-      - master
-  push:
-    branches:
-      - master
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - master
+#   push:
+#     branches:
+#       - master
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
+# jobs:
+#   release:
+#     runs-on: ubuntu-latest
 
-    env:
-      REACT_APP_GOOEY_SERVER: ${{ vars.REACT_APP_GOOEY_SERVER }}
+#     env:
+#       REACT_APP_GOOEY_SERVER: ${{ vars.REACT_APP_GOOEY_SERVER }}
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
+#           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '18'
+#           cache: 'npm'
 
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
+#       - name: Configure Git
+#         run: |
+#           git config user.name "GitHub Actions Bot"
+#           git config user.email "actions@github.com"
 
-      - name: Install dependencies
-        run: npm install
+#       - name: Install dependencies
+#         run: npm install
 
-      - name: Get latest version from tags and bump patch
-        id: version
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
+#       - name: Get latest version from tags and bump patch
+#         id: version
+#         run: |
+#           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+#           echo "Latest tag: $LATEST_TAG"
 
-          VERSION=${LATEST_TAG#v}
-          IFS='.' read -ra PARTS <<< "$VERSION"
-          MAJOR=${PARTS[0]}
-          MINOR=${PARTS[1]}
-          PATCH=${PARTS[2]}
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+#           VERSION=${LATEST_TAG#v}
+#           IFS='.' read -ra PARTS <<< "$VERSION"
+#           MAJOR=${PARTS[0]}
+#           MINOR=${PARTS[1]}
+#           PATCH=${PARTS[2]}
+#           NEW_PATCH=$((PATCH + 1))
+#           NEW_VERSION="v${MAJOR}.${MINOR}.${NEW_PATCH}"
 
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+#           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Bump version in master (without dist/)
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          git checkout master
-          npm version ${NEW_VERSION#v} --no-git-tag-version
-          git commit -am "build: ${NEW_VERSION}"
-          git push origin master
+#       - name: Bump version in master (without dist/)
+#         run: |
+#           NEW_VERSION=${{ steps.version.outputs.new_version }}
+#           git checkout master
+#           npm version ${NEW_VERSION#v} --no-git-tag-version
+#           git commit -am "build: ${NEW_VERSION}"
+#           git push origin master
 
-      - name: Build project
-        run: npm run build
+#       - name: Build project
+#         run: npm run build
 
-      - name: Create detached commit with dist and tag it
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
+#       - name: Create detached commit with dist and tag it
+#         run: |
+#           NEW_VERSION=${{ steps.version.outputs.new_version }}
 
-          # Create detached commit with dist
-          git checkout --detach
-          git add package.json package-lock.json
-          git add -f dist/
-          git commit -m "build: $NEW_VERSION"
+#           # Create detached commit with dist
+#           git checkout --detach
+#           git add package.json package-lock.json
+#           git add -f dist/
+#           git commit -m "build: $NEW_VERSION"
 
-          # Create and push tag
-          git tag $NEW_VERSION
-          git push origin $NEW_VERSION
+#           # Create and push tag
+#           git tag $NEW_VERSION
+#           git push origin $NEW_VERSION
