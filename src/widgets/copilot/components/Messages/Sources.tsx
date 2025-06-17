@@ -30,7 +30,9 @@ export const FullSourcePreview = (props: any) => {
   }, [data.url]);
 
   if (!data || (!data?.url && !data?.isImage)) return null;
-  const embedUrl = data?.isImage ? renderImageInIframe(data.url) : getEmbedUrl(data.url);
+  const embedUrl = data?.isImage
+    ? renderImageInIframe(data.url)
+    : getEmbedUrl(data.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url,
@@ -129,10 +131,25 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
   const redirectedUrl =
     metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
   const [domainName]: any = extractMainDomain(redirectedUrl || data?.url);
-  const ExtensionIcon: any = findSourceIcon(
+  let MetadataIcon: any = findSourceIcon(
     metaData?.content_type,
     metaData?.redirect_urls[0] || data?.url,
   );
+  if (!MetadataIcon && metaData?.logo) {
+    MetadataIcon = () => (
+      <img
+        src={metaData?.logo}
+        alt={data?.title}
+        style={{
+          width: "14px",
+          height: "14px",
+          borderRadius: "100px",
+          objectFit: "contain",
+        }}
+      />
+    );
+  }
+
   const domainNameText = domainName.includes("googleapis")
     ? ""
     : domainName + (data?.refNumber || pageNum ? "⋅" : "");
@@ -198,20 +215,7 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
             metaData?.image ? "text-white" : "text-muted",
           )}
         >
-          {ExtensionIcon || !metaData?.logo ? (
-            <ExtensionIcon />
-          ) : (
-            <img
-              src={metaData?.logo}
-              alt={data?.title}
-              style={{
-                width: "14px",
-                height: "14px",
-                borderRadius: "100px",
-                objectFit: "contain",
-              }}
-            />
-          )}
+          {MetadataIcon && <MetadataIcon />}
           <p
             className={clsx(
               "font_10_500 gml-4",

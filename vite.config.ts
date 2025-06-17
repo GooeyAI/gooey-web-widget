@@ -4,7 +4,7 @@ import { resolve } from "path";
 import { defineConfig, loadEnv } from "vite";
 import { peerDependencies } from "./package.json";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, ...args }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     define: { "process.env": {} },
@@ -49,6 +49,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       sentryVitePlugin({
+        disable: process.argv.includes("--watch"),
         org: "dara-network",
         project: "copilot-web-widget",
         authToken: env.SENTRY_AUTH_TOKEN,
