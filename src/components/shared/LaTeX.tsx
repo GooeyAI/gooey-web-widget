@@ -25,8 +25,12 @@ const LaTeX: React.FC<LaTeXProps> = ({
 
     return (
       <span
-        className={`latex-math ${displayMode ? "latex-display" : "latex-inline"} ${className}`}
+        className={`latex-math ${displayMode ? "latex-display" : "latex-inline"} gooey-latex ${className}`}
         dangerouslySetInnerHTML={{ __html: html }}
+        style={{
+          overflowX: "scroll",
+          overflowY: "hidden",
+        }}
       />
     );
   } catch (error) {

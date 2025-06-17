@@ -37,7 +37,7 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   return (
     <div
       className={clsx(
-        "font_16_400 pos-relative markdown text-reveal-container mw-100",
+        "font_16_400 pos-relative markdown text-reveal-container mw-100 overflow-hidden",
         isStreaming && "response-streaming",
       )}
       id={id}

@@ -176,6 +176,10 @@
   object-fit: cover;
 }
 
+.gooey-latex > .katex-display {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
 
 @-webkit-keyframes pulseSize {
 
