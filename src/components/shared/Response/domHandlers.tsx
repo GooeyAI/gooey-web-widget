@@ -75,18 +75,19 @@ export class DomNodeHandlers {
 
     const { placeholder, expression } = result;
     const parts = domNode.data.split(placeholder);
-
     if (parts.length === 2) {
       return (
         <React.Fragment>
           {parts[0]}
+          {this.handleLatexExpression({ ...domNode, data: parts[0] }, data)}
           <LaTeX displayMode={expression.displayMode}>
             {expression.content}
           </LaTeX>
-          {parts[1]}
+          {this.handleLatexExpression({ ...domNode, data: parts[1] }, data)}
         </React.Fragment>
       );
     }
+    return;
   }
 
   public handleSourceReferences(

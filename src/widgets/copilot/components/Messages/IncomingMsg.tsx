@@ -223,19 +223,13 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
-          <div
-            className={clsx(
-              "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
-              isStreaming && "response-streaming",
-            )}
+          <GooeyTextResponse
+            data={props.data}
+            linkColor={props?.linkColor}
+            showSources={props?.showSources}
+            isStreaming={isStreaming}
             id={props?.id}
-          >
-            <GooeyTextResponse
-              data={props.data}
-              linkColor={props?.linkColor}
-              showSources={props?.showSources}
-            />
-          </div>
+          />
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
               <audio

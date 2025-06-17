@@ -47,11 +47,9 @@ export const parseResponseBody = (
   const body = extractOutputText(data);
   if (!body) return "";
 
-  console.log("body", body);
   const { processedText, expressions } = latexProcessor.processText(body);
   const rawHtml = marked.parse(processedText, MARKED_OPTIONS);
 
-  console.log("rawHtml", rawHtml, data);
   const processingData: ProcessingData = {
     ...data,
     showSources,

@@ -1,7 +1,10 @@
 import React from "react";
 import { parseResponseBody } from "./responseParser";
+import clsx from "clsx";
+import style from "./response.scss?inline";
+import { addInlineStyle } from "src/addStyles";
+addInlineStyle(style);
 
-// Types
 interface GooeyTextResponseProps {
   data: {
     text?: string;
@@ -13,12 +16,17 @@ interface GooeyTextResponseProps {
   };
   linkColor?: string;
   showSources?: boolean;
+  isStreaming?: boolean;
+  id?: string;
 }
 
 const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   data,
   linkColor,
   showSources,
+  isStreaming,
+  id,
+  ...restProps
 }) => {
   const parsedElements = parseResponseBody(
     data,
@@ -27,8 +35,15 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   );
 
   return (
-    <div className="gooey-response">
-      <div className="font_16_400 markdown mw-100">{parsedElements}</div>
+    <div
+      className={clsx(
+        "font_16_400 pos-relative markdown text-reveal-container mw-100",
+        isStreaming && "response-streaming",
+      )}
+      id={id}
+      {...restProps}
+    >
+      {parsedElements}
     </div>
   );
 };
