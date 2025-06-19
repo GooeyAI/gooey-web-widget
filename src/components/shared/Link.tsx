@@ -16,7 +16,10 @@ const Link = (props: any) => {
   return (
     <a
       onClick={() => handleClick()}
-      style={{ color: props.configColor }}
+      style={{
+        color: props.configColor,
+        textDecorationColor: props.configColor,
+      }}
       className="gooey-link cr-pointer"
     >
       {props.children}
