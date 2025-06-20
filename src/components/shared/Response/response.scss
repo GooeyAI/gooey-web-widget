@@ -1,0 +1,206 @@
+.markdown {
+  max-width: none;
+  font-size: 16px !important;
+}
+
+.markdown h1 {
+  font-weight: 600;
+}
+
+.markdown h1:first-child {
+  margin-top: 0;
+}
+
+.markdown p {
+  margin-bottom: 12px;
+}
+
+.markdown h2 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.markdown h2:first-child {
+  margin-top: 0;
+}
+
+.markdown h3 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+.markdown h3:first-child {
+  margin-top: 0;
+}
+
+.markdown h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+.markdown h4:first-child {
+  margin-top: 0;
+}
+
+.markdown h5 {
+  font-weight: 600;
+}
+
+.markdown li {
+  margin-bottom: 12px;
+}
+
+.markdown h5:first-child {
+  margin-top: 0;
+}
+
+.markdown blockquote {
+  --tw-border-opacity: 1;
+  border-color: rgba(155, 155, 155);
+  border-left-width: 2px;
+  line-height: 1.5rem;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+}
+
+.markdown blockquote>p {
+  margin: 0;
+}
+
+.markdown blockquote>p:after,
+.markdown blockquote>p:before {
+  display: none;
+}
+
+.response-streaming> :not(ol):not(ul):not(pre):last-child:after,
+.response-streaming>pre:last-child code:after {
+  content: "\25CF";
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+  animation: pulseSize 0.5s ease-in-out infinite;
+  font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+    Cantarell, Noto Sans, sans-serif;
+  line-height: normal;
+  margin-left: 0.25rem;
+  vertical-align: baseline;
+}
+
+@supports (selector(:has(*))) {
+
+  .response-streaming>ol:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ol:last-child>li:last-child>ol:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ol:last-child>li:last-child>ol:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ol:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ol:last-child>li:last-child>ul:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ol:last-child>li:last-child>ul:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ol:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ol:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ul:last-child>li:last-child>ol:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child>ul:last-child>li:last-child>ul:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child[*|\:not-has\(]:after {
+    content: "\25CF";
+    font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
+    line-height: normal;
+    margin-left: 0.25rem;
+    vertical-align: baseline;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+    animation: pulseSize 0.5s ease-in-out infinite;
+  }
+
+  .response-streaming>ul:last-child>li:last-child:not(:has(* > li)):after {
+    content: "\25CF";
+    font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
+    line-height: normal;
+    margin-left: 0.25rem;
+    vertical-align: baseline;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+    animation: pulseSize 0.5s ease-in-out infinite;
+  }
+
+  .response-streaming>ol:last-child>li:last-child[*|\:not-has\(]:after {
+    content: "\25CF";
+    font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
+    line-height: normal;
+    margin-left: 0.25rem;
+    vertical-align: baseline;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+    animation: pulseSize 0.5s ease-in-out infinite;
+  }
+
+  .response-streaming>ol:last-child>li:last-child:not(:has(* > li)):after {
+    content: "\25CF";
+    font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
+    line-height: normal;
+    margin-left: 0.25rem;
+    vertical-align: baseline;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+    animation: pulseSize 0.5s ease-in-out infinite;
+  }
+}
+
+@supports not (selector(:has(*))) {
+
+  .response-streaming>ol:last-child>li:last-child:after,
+  .response-streaming>ul:last-child>li:last-child:after {
+    content: "\25CF";
+    font-family: Circle, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
+    line-height: normal;
+    margin-left: 0.25rem;
+    vertical-align: baseline;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-animation: pulseSize 0.5s ease-in-out infinite;
+    animation: pulseSize 0.5s ease-in-out infinite;
+  }
+}
+
+.markdown img {
+  max-height: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.gooey-latex > .katex-display {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+@-webkit-keyframes pulseSize {
+
+  0%,
+  to {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulseSize {
+
+  0%,
+  to {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}

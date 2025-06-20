@@ -5,12 +5,13 @@ import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import Button from "src/components/shared/Buttons/Button";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import ResponseLoader from "../Loader";
-import { formatTextResponse, getFeedbackButtonIcon } from "./helpers";
+import { getFeedbackButtonIcon } from "./helpers";
 import style from "./incoming.scss?inline";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import type { LocationModalRef } from "./LocationModal";
 import { MESSAGE_GUTTER } from ".";
+import GooeyTextResponse from "src/components/shared/Response";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -213,14 +214,7 @@ const IncomingMsg = memo(
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
 
-    // Parse the response text and format it - customised links, sources, etc.
-    const parsedElements = formatTextResponse(
-      props.data,
-      props?.linkColor,
-      props?.showSources,
-    );
-
-    if (!parsedElements) return <ResponseLoader show={true} />;
+    if (!props.data) return <ResponseLoader show={true} />;
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
         <div
@@ -229,15 +223,13 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
-          <div
-            className={clsx(
-              "font_16_400 pos-relative gooey-output-text markdown text-reveal-container mw-100",
-              isStreaming && "response-streaming",
-            )}
+          <GooeyTextResponse
+            data={props.data}
+            linkColor={props?.linkColor}
+            showSources={props?.showSources}
+            isStreaming={isStreaming}
             id={props?.id}
-          >
-            {parsedElements}
-          </div>
+          />
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
               <audio

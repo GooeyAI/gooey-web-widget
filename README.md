@@ -123,6 +123,9 @@ Controls visual aspects of the widget and defines the textual content and relate
 - `photoUrl`: The URL of an image used as the bot's avatar.
 - `websiteUrl`: A URL to the bot's or company's homepage, which can be accessed for more information.
 - `showPoweredByGooey`: A boolean to show or hide the "Powered by Gooey" attribution in the widget.
+- `colors`: An object to set the theme colors for widget ( e.g Colored Links, Buttons etc.)
+    - `primary`: string
+    - `secondary`: string
 
 ##### `payload: object`
 

@@ -242,6 +242,7 @@ const ChatInput = () => {
   };
 
   if (!config) return null;
+  const { colors } = config?.branding || {};
   const showStop = isSending || isReceiving;
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
@@ -357,6 +358,7 @@ const ChatInput = () => {
                   variant="text-alt"
                   className="gp-4"
                   onClick={showStop ? handleCancelSend : handleSendMessage}
+                  style={{ color: colors?.primary || "default" }}
                 >
                   {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
                 </IconButton>

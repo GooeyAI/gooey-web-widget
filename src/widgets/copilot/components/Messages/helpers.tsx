@@ -1,25 +1,16 @@
 import axios from "axios";
-import { marked } from "marked";
-import parse, { HTMLReactParserOptions, domToReact } from "html-react-parser";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import CodeBlock from "src/components/shared/CodeBlock";
 import IconThumbsUp from "src/assets/SvgIcons/IconThumbsUp";
 import IconThumbsUpFilled from "src/assets/SvgIcons/IconThumbsUpFilled";
 import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
 import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
-import Link from "src/components/shared/Link";
 import IconSheets from "src/assets/SvgIcons/IconSheets";
 import IconGoogleDocs from "src/assets/SvgIcons/IconGoogleDocs";
 import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
-import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
-import React from "react";
-import Sources from "./Sources";
 
 const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
-const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
 
 export const findSourceIcon = (
   contentType: string,
@@ -78,7 +69,7 @@ export const findSourceIcon = (
   }
 };
 
-function extractLastPathSegment(str: string) {
+export function extractLastPathSegment(str: string) {
   // Extract the last segment of the path
   const parts = str.split("/");
   return parts[parts.length - 1];
@@ -130,176 +121,6 @@ export const fetchUrlMeta = async (url: string) => {
   return response?.data || {};
 };
 
-// Text Rendering Logic
-const getOutputText = (data: any) => {
-  const {
-    type = "",
-    status = "",
-    text,
-    detail,
-    output_text = {},
-    raw_output_text = {},
-  } = data;
-  let out = "";
-  if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    if (text) {
-      out = text;
-      out = out.replace("🎧 I heard", "🎙️");
-      return out;
-    }
-    out = detail;
-  }
-  if (type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE && status === "completed") {
-    out = output_text[0] || raw_output_text[0];
-  }
-
-  // replace 🎧 I heard from out
-  out = out.replace("🎧 I heard", "🎙️");
-  return out;
-};
-
-export const getReactParserOptions = (data: any): HTMLReactParserOptions => ({
-  htmlparser2: {
-    lowerCaseTags: false,
-    lowerCaseAttributeNames: false,
-  },
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-expect-error
-  replace: function (domNode: { attribs: any; children: any; name: string }) {
-    if (!domNode.attribs) return;
-    if (
-      domNode.children.length &&
-      domNode.children[0].name === "code" &&
-      domNode.children[0].attribs?.class?.includes("language-")
-    ) {
-      return (
-        <CodeBlock
-          domNode={domNode.children[0]}
-          options={getReactParserOptions(data)}
-        />
-      );
-    }
-  },
-  transform(reactNode, domNode) {
-    if (domNode.type === "text" && data.showSources) {
-      return customizedSources(reactNode, domNode, data);
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    switch (domNode.name) {
-      case "img":
-        return customizedImage(reactNode, domNode);
-      case "a":
-        return customizedLinks(reactNode, domNode, data);
-      default:
-        return reactNode;
-    }
-  },
-});
-
-const checkLinkInSources = (url: string, data: any): any => {
-  const references = data?.references || [];
-  const matches = references.filter((reference: any) => reference.url === url);
-  matches.length ? matches[0] : null;
-};
-
-const customizedImage = (reactNode: any, domNode: any) => {
-  if (!reactNode) return reactNode;
-  const src = domNode.attribs.src;
-  return (
-    <a href={src} target="_blank" rel="noreferrer">
-      <img src={src} alt={domNode.attribs.alt} />
-    </a>
-  );
-};
-
-const customizedLinks = (reactNode: any, domNode: any, data: any) => {
-  if (!reactNode) return reactNode;
-  const href = domNode.attribs.href;
-  delete domNode.attribs.href;
-  let source: any = checkLinkInSources(href, data);
-  if (!source) {
-    source = {
-      title: domNode?.children[0].data || extractLastPathSegment(href),
-      url: href,
-    };
-  }
-  return (
-    <Link data={source} configColor={data?.linkColor || "default"}>
-      {domToReact(domNode.children, getReactParserOptions(data))}
-    </Link>
-  );
-};
-
-const customizedSources = (reactNode: any, domNode: any, data: any) => {
-  if (!domNode) return domNode;
-  let text = domNode.data || "";
-
-  // match regex pattern[1,2]/[1]/[1][2] in text and replace with custom component (IconButton)
-  // and add the text before and after the match to parts final render array
-  const matches: any = Array.from(
-    new Set(
-      (text.match(NUMBER_REFERENCE_REGEX) || []).map((match: string) =>
-        parseInt(match.slice(1, -1), 10),
-      ),
-    ),
-  );
-
-  // return the text as it is if no match found
-  if (!matches || !matches.length) return reactNode;
-
-  const { references = [] }: any = data;
-  const sources = [...references].splice(
-    matches[0] - 1,
-    matches[matches.length - 1] - matches[0] + 1,
-  );
-
-  text = text.replaceAll(NUMBER_REFERENCE_REGEX, "");
-  // remove trailing dot and space
-  if (text[text.length - 1] === "." && text[text.length - 2] === " ") {
-    text = text.slice(0, -2) + ".";
-  }
-
-  return (
-    <React.Fragment>
-      {text}{" "}
-      {!!references.length && (
-        <CollapsibleButton>
-          <Sources data={sources} isInline />
-        </CollapsibleButton>
-      )}
-    </React.Fragment>
-  );
-};
-
-export const formatTextResponse = (
-  data: any,
-  linkColor: string,
-  showSources: boolean,
-) => {
-  const body = getOutputText(data);
-  if (!body) return "";
-  const rawHtml = marked.parse(body, {
-    async: false,
-    breaks: true,
-    extensions: null,
-    gfm: true,
-    hooks: null,
-    pedantic: false,
-    silent: false,
-    tokenizer: null,
-    walkTokens: null,
-  });
-  const parsedElements = parse(
-    rawHtml as string,
-    getReactParserOptions({
-      ...data,
-      showSources,
-      linkColor,
-    }),
-  );
-  return parsedElements;
-};
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   switch (title) {
