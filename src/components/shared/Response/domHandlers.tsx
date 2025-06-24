@@ -112,7 +112,7 @@ export class DomNodeHandlers {
         {cleanText}{" "}
         {data.references?.length && (
           <CollapsibleButton>
-            <Sources data={sources} isInline />
+            <Sources sources={sources} isInline />
           </CollapsibleButton>
         )}
       </React.Fragment>

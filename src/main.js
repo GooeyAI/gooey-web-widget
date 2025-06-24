@@ -22,7 +22,7 @@ const defaultConfig = {
   enablePhotoUpload: true,
   enableAudioMessage: true,
   enableConversations: true,
-  integration_id: "Kbo",
+  integration_id: "Wdy",
 };
 
 GooeyEmbed.mount({ target: "#popup", mode: "popup", ...defaultConfig });
