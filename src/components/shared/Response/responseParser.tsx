@@ -36,7 +36,6 @@ const MARKED_OPTIONS = {
   tokenizer: null,
   walkTokens: null,
   smartLists: true,
-  smartypants: false,
 } as const;
 
 export const parseResponseBody = (

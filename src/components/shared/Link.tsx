@@ -2,15 +2,22 @@ import { useSystemContext } from "src/contexts/hooks";
 import { FullSourcePreview } from "src/widgets/copilot/components/Messages/Sources";
 
 const Link = (props: any) => {
-  const { layoutController } = useSystemContext();
+  const { layoutController, config } = useSystemContext();
 
   const handleClick = () => {
-    layoutController?.toggleSecondaryDrawer?.(() => (
-      <FullSourcePreview
-        data={props?.data}
-        layoutController={layoutController}
-      />
-    ));
+    if (
+      config?.enableSourcePreview !== undefined &&
+      !config?.enableSourcePreview
+    ) {
+      window.open(props?.data?.url, "_blank");
+    } else {
+      layoutController?.toggleSecondaryDrawer?.(() => (
+        <FullSourcePreview
+          data={props?.data}
+          layoutController={layoutController}
+        />
+      ));
+    }
   };
 
   return (

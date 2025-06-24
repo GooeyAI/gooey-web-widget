@@ -10,6 +10,7 @@ export interface CopilotConfigType {
   showSources: boolean;
   expandedSources: boolean;
   apiUrl?: string;
+  enableSourcePreview?: boolean;
   secrets?: {
     GOOGLE_MAPS_API_KEY?: string;
   };

@@ -35,7 +35,7 @@ export const FullSourcePreview = (props: any) => {
     : getEmbedUrl(data.url);
   const ExtensionIcon: any = findSourceIcon(
     metaData?.content_type,
-    metaData?.redirect_urls[0] || data?.url,
+    data?.redirectedUrl || data?.url,
     24,
   );
 
@@ -105,7 +105,7 @@ interface Data {
 
 export const SourcesCard = (props: { data: Data; index: number }) => {
   const { data } = props;
-  const { getTempStoreValue, setTempStoreValue, layoutController } =
+  const { getTempStoreValue, setTempStoreValue, layoutController, config } =
     useSystemContext();
   const [metaData, setMetaData] = useState<any>(
     getTempStoreValue?.(data.url) || null,
@@ -115,27 +115,31 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
 
   useEffect(() => {
     if (!data || metaData || getTempStoreValue?.(data.url)) return;
-    fetchUrlMeta(data.url).then((meta) => {
-      if (meta && Object.keys(meta).length) {
-        if (meta?.title === "- YouTube") {
-          // was not able to fetch the title
-          meta.title = data.title;
+    fetchUrlMeta(data.url)
+      .then((meta) => {
+        if (meta && Object.keys(meta).length) {
+          if (meta?.title === "- YouTube") {
+            // was not able to fetch the title
+            meta.title = data.title;
+          }
+          setMetaData(meta);
+          setTempStoreValue?.(data.url, meta);
         }
-        setMetaData(meta);
-        setTempStoreValue?.(data.url, meta);
-      }
-    }).catch((err) => {
-      console.log("error fetching url meta", err);
-    });
+      })
+      .catch((err) => {
+        console.log("error fetching url meta", err);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const redirectedUrl =
-    metaData?.redirect_urls[metaData?.redirect_urls.length - 1] || data?.url;
+    metaData && metaData?.redirect_urls
+      ? metaData?.redirect_urls[metaData?.redirect_urls?.length - 1]
+      : data?.url;
   const [domainName]: any = extractMainDomain(redirectedUrl || data?.url);
   let MetadataIcon: any = findSourceIcon(
     metaData?.content_type,
-    metaData?.redirect_urls[0] || data?.url,
+    redirectedUrl || data?.url,
   );
   if (!MetadataIcon && metaData?.logo) {
     MetadataIcon = () => (
@@ -160,15 +164,19 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
   const openInSidebar = useCallback(() => {
     layoutController?.toggleSecondaryDrawer?.(() => (
       <FullSourcePreview
-        data={data}
+        data={{ ...data, redirectedUrl }}
         layoutController={layoutController}
         metaData={metaData}
       />
     ));
-  }, [data, layoutController, metaData]);
+  }, [data, layoutController, metaData, redirectedUrl]);
 
   const isCsv = metaData?.content_type?.includes("csv");
-  const onClick = isCsv ? openInWindow : openInSidebar;
+  const enableSourcePreview =
+    config?.enableSourcePreview === undefined
+      ? true
+      : config?.enableSourcePreview;
+  const onClick = isCsv || !enableSourcePreview ? openInWindow : openInSidebar;
 
   if (!data) return null;
   return (
@@ -238,7 +246,7 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
 };
 
 export const SourcesSection = (data: any) => {
-  const { references = [] }: any = data;
+  const { references = [], enableSourcePreview }: any = data;
   const sources = [...references];
   const { config } = useSystemContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(
@@ -253,7 +261,12 @@ export const SourcesSection = (data: any) => {
 
   return (
     <div className="gmb-8">
-      <div className={clsx(`d-flex align-center gpt-4 gpb-8`, `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`)}>
+      <div
+        className={clsx(
+          `d-flex align-center gpt-4 gpb-8`,
+          `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
+        )}
+      >
         <span
           style={{ height: "24px", width: "24px" }}
           className="d-flex justify-center align-center gmr-8"
@@ -274,7 +287,12 @@ export const SourcesSection = (data: any) => {
           </IconButton>
         </div>
       </div>
-      {isExpanded && <Sources data={sources} />}
+      {isExpanded && (
+        <Sources
+          data={sources}
+          enableSourcePreview={config?.enableSourcePreview}
+        />
+      )}
     </div>
   );
 };
