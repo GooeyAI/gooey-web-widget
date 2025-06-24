@@ -107,6 +107,11 @@ A boolean to enable or disable the user's conversation history.
 
 A boolean to enable or disable the photo upload button.
 
+
+##### `enableSourcePreview: boolean;`
+
+A boolean to enable or disable the links & sources preview panel.
+
 #####  `showSources`
 
 A boolean that dictates whether sources of information (if any) should be shown.
