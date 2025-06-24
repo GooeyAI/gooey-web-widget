@@ -124,6 +124,8 @@ export const SourcesCard = (props: { data: Data; index: number }) => {
         setMetaData(meta);
         setTempStoreValue?.(data.url, meta);
       }
+    }).catch((err) => {
+      console.log("error fetching url meta", err);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
