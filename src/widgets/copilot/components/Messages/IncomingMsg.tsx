@@ -209,7 +209,9 @@ const IncomingMsg = memo(
       output_video = [],
       references = [],
     } = props.data;
-    const isAutoPlay = props.autoPlay === false ? false : true;
+    const { latestMessageIds } = useMessagesContext();
+    const isNewlyReceived = latestMessageIds?.has(props.id);
+    const isAutoPlay = props.autoPlay === false ? false : isNewlyReceived;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;

@@ -3,13 +3,12 @@ import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
 
 export const MESSAGE_GUTTER = 12;
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const { preventAutoplay } = useMessagesContext();
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
@@ -35,7 +34,7 @@ const Responses = (props: any) => {
           id={id}
           showSources={config?.showSources || false}
           linkColor={config?.branding?.colors?.primary || "initial"}
-          autoPlay={preventAutoplay ? false : config?.autoPlayResponses}
+          autoPlay={config?.autoPlayResponses}
         />
       );
     }
@@ -43,18 +42,8 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const {
-    messages,
-    isSending,
-    scrollContainerRef,
-    isMessagesLoading,
-    avoidAutoplay,
-  } = useMessagesContext();
-  useEffect(() => {
-    // avoid autoplay on mount
-    avoidAutoplay?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { messages, isSending, scrollContainerRef, isMessagesLoading } =
+    useMessagesContext();
 
   if (isMessagesLoading) {
     return (
@@ -78,7 +67,7 @@ const Messages = () => {
           queue={Array.from(messages?.keys() ?? [])}
           data={messages ?? new Map()}
         />
-      <ResponseLoader show={isSending} />
+        <ResponseLoader show={isSending} />
       </div>
     </div>
   );

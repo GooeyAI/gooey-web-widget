@@ -44,8 +44,7 @@ export interface MessagesContextType {
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
   currentConversationId?: string | null;
   isMessagesLoading?: boolean;
-  preventAutoplay?: boolean;
-  avoidAutoplay?: () => void;
+  latestMessageIds?: Set<string>;
 }
 
 // --- Event Type Definitions ---
@@ -184,7 +183,7 @@ const MessagesContextProvider = ({
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [isMessagesLoading, setMessagesLoading] = useState(true);
-  const [preventAutoplay, setPreventAutoplay] = useState(true);
+  const [latestMessageIds, setLatestMessageIds] = useState(new Set<string>());
 
   const apiSource = useRef(axios.CancelToken.source());
   const currentStreamRef = useRef<any>(null);
@@ -200,7 +199,8 @@ const MessagesContextProvider = ({
 
   const initializeQuery = (payload: RequestModel) => {
     if (!payload || isSending || isReceiving) return;
-    setPreventAutoplay(false);
+    // Clear any previously received message IDs when starting a new query
+    setLatestMessageIds(new Set());
     // calls the server and updates the state with user message
     const lastResponse = Array.from(
       messages.values(),
@@ -300,6 +300,12 @@ const MessagesContextProvider = ({
             ...restPayload,
           });
           setIsReceiving(false);
+
+          // Track this as a newly received message for autoplay
+          setLatestMessageIds((prev) =>
+            new Set(prev).add(currentStreamRef.current),
+          );
+
           // update current conversation for every time the stream ends
           const conversationData = {
             id: prevMessage?.conversation_id,
@@ -374,6 +380,8 @@ const MessagesContextProvider = ({
       newMap.set(obj.id, { ...obj });
     });
     setMessages(newMap);
+    // Clear newly received message IDs when loading existing conversations
+    setLatestMessageIds(new Set());
   };
 
   const handleNewConversation = () => {
@@ -395,6 +403,7 @@ const MessagesContextProvider = ({
 
   const purgeMessages = () => {
     setMessages(new Map());
+    setLatestMessageIds(new Set());
     currentConversation.current = {};
   };
 
@@ -440,7 +449,6 @@ const MessagesContextProvider = ({
         currentConversation.current?.id === conversation.id
       )
         return setMessagesLoading(false);
-      setPreventAutoplay(true);
       setMessagesLoading(true);
       const messages = await conversation.getMessages();
       preLoadData(messages);
@@ -451,7 +459,6 @@ const MessagesContextProvider = ({
   );
 
   useEffect(() => {
-    setPreventAutoplay(true);
     if (
       !layoutController?.showNewConversationButton &&
       conversations.length &&
@@ -460,16 +467,8 @@ const MessagesContextProvider = ({
       // Load the latest conversation from DB - initial load
       setActiveConversation(conversations[0]);
     else setMessagesLoading(false);
-    avoidAutoplay();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations]);
-
-  const avoidAutoplay = () => {
-    setPreventAutoplay(true);
-    setTimeout(() => {
-      setPreventAutoplay(false);
-    }, 3000);
-  };
 
   let controllerContext = useController({
     controller,
@@ -492,8 +491,7 @@ const MessagesContextProvider = ({
     setActiveConversation,
     currentConversationId: currentConversation.current?.id || null,
     isMessagesLoading,
-    preventAutoplay,
-    avoidAutoplay,
+    latestMessageIds,
     ...controllerContext,
   };
 
