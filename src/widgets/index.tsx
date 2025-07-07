@@ -7,6 +7,7 @@ import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
 import ChatWidget from "./copilot";
 import { ShadowRootContext } from "src/contexts/ShadowRootContext";
+import * as Sentry from "@sentry/react";
 addInlineStyle(rootStyle);
 
 export function renderCopilotChatWidget(
@@ -56,16 +57,18 @@ export function CopilotChatWidget({
   return (
     <div className="gooey-embed-container" tabIndex={-1}>
       <Styles />
-      <SystemContextProvider config={config} shadowRoot={shadowRoot}>
-        <MessagesContextProvider
-          controller={controller}
-          shadowRoot={shadowRoot}
-        >
-          <ShadowRootContext.Provider value={shadowRoot}>
-            <ChatWidget />
-          </ShadowRootContext.Provider>
-        </MessagesContextProvider>
-      </SystemContextProvider>
+      <Sentry.ErrorBoundary>
+        <SystemContextProvider config={config} shadowRoot={shadowRoot}>
+          <MessagesContextProvider
+            controller={controller}
+            shadowRoot={shadowRoot}
+          >
+            <ShadowRootContext.Provider value={shadowRoot}>
+              <ChatWidget />
+            </ShadowRootContext.Provider>
+          </MessagesContextProvider>
+        </SystemContextProvider>
+      </Sentry.ErrorBoundary>
     </div>
   );
 }
