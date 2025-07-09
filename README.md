@@ -184,21 +184,32 @@ Note: If you want to work with "variables" in payload, refer to our [Advanced pr
    ```bash
    npm run build
    ``` 
-3. Commit your changes
-4. Tag the commit with the new version number:
+3. Commit your changes using comment e.g "build: 2.5.12"
+4. By default we have excluded the `/dist` folder in the commit history. When you make the commit, the local `/dist` will contain the files to be published.
+5. Make a detached hash commit
+```bash
+   git checkout ---detach
+   ```
+6. Force add `/dist` folder
+```bash
+   git add ./dist -f
+   ```
+7. Commit this change using comment "publish: 2.x.x"
+8. Tag the commit with the new version number
    ```bash
    git tag -a 2.x.x
    ```
-5. Push the commit with tags:
+9. Push the commit with tags:
     ```bash
     git push origin master --tags
     ```
-6. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
+10. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
 
+   Now "jsdeliver" will automatically catch the tagged commit by "2.x.x".
    If you want to ensure your clients get the latest version of the lib (ahead of the cache), please specify the version in the URL like so: `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2.x.x/dist/lib.js`
 
    For Gooey Server, update the `WEB_WIDGET_LIB` environment variable.
-7. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
+11. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
 
 
 ## **Notes**
