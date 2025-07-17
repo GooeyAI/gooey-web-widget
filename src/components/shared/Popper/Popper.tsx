@@ -1,8 +1,9 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
 import { createPopper, Placement } from "@popperjs/core";
 import { addInlineStyle } from "src/addStyles";
 import style from "./popper.scss?inline";
+import { ShadowRootContext } from "src/contexts/ShadowRootContext";
 
 addInlineStyle(style);
 
@@ -22,8 +23,14 @@ interface PopperProps extends React.HTMLAttributes<HTMLDivElement> {
 // Map your direction prop to Popper.js placement
 const getPopperPlacement = (direction: PopperDirection): Placement => {
   const { x, y } = direction;
-  if (y === "top") return x === "left" ? "top-start" : x === "right" ? "top-end" : "top";
-  if (y === "bottom") return x === "left" ? "bottom-start" : x === "right" ? "bottom-end" : "bottom";
+  if (y === "top")
+    return x === "left" ? "top-start" : x === "right" ? "top-end" : "top";
+  if (y === "bottom")
+    return x === "left"
+      ? "bottom-start"
+      : x === "right"
+        ? "bottom-end"
+        : "bottom";
   if (x === "left") return "left";
   if (x === "right") return "right";
   if (x === "center") return "top-start";
@@ -54,7 +61,10 @@ const Modal = ({
         placement: getPopperPlacement(direction),
         modifiers: [
           { name: "preventOverflow", options: { padding: 8 } },
-          { name: "flip", options: { fallbackPlacements: ["top", "bottom", "right", "left"] } },
+          {
+            name: "flip",
+            options: { fallbackPlacements: ["top", "bottom", "right", "left"] },
+          },
         ],
       });
       return () => {
@@ -85,12 +95,9 @@ const GooeyPopper = ({
   ...rest
 }: PopperProps) => {
   const refContainer = useRef<HTMLDivElement>(null);
+  const shadowRoot = useContext(ShadowRootContext);
   return (
-    <div
-      className="gooey-clipping-container"
-      ref={refContainer}
-      {...rest}
-    >
+    <div className="gooey-clipping-container" ref={refContainer} {...rest}>
       {children}
       {showModal &&
         createPortal(
@@ -101,7 +108,7 @@ const GooeyPopper = ({
             showModal={showModal}
             {...ModalProps}
           />,
-          gooeyShadowRoot?.querySelector(".gooey-embed-container") || document.body
+          shadowRoot?.querySelector(".gooey-embed-container") || document.body,
         )}
     </div>
   );

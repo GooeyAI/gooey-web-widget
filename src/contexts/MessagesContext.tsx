@@ -166,14 +166,15 @@ export type MessageMishmash = {
 
 const MessagesContextProvider = ({
   controller,
+  shadowRoot,
   children,
 }: {
   controller?: CopilotChatWidgetController;
+  shadowRoot: ShadowRoot | undefined;
   children: React.ReactNode;
 }) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
-  const config = useSystemContext()?.config;
-  const layoutController = useSystemContext()?.layoutController;
+  const { config, layoutController } = useSystemContext();
   const { conversations, handleAddConversation } = useConversations(
     currentUserId,
     config?.integration_id as string,
@@ -397,7 +398,7 @@ const MessagesContextProvider = ({
     setIsReceiving(false);
     setIsSendingMessage(false);
     purgeMessages();
-    const ele = gooeyShadowRoot?.getElementById(CHAT_INPUT_ID);
+    const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
     ele?.focus();
   };
 

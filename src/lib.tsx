@@ -6,10 +6,6 @@ interface CopilotEmbedConfig extends CopilotConfigType {
   target: string;
 }
 
-declare global {
-  var gooeyShadowRoot: ShadowRoot | null;
-}
-
 class GooeyEmbedFactory {
   defaultConfig = {};
   _mounted: { innerDiv: HTMLDivElement; root: any }[] = [];
@@ -36,9 +32,6 @@ class GooeyEmbedFactory {
     targetElem.appendChild(innerDiv);
     const root = renderCopilotChatWidget(innerDiv, config, controller);
     this._mounted.push({ innerDiv, root });
-
-    // Global reference to the inner document
-    globalThis.gooeyShadowRoot = innerDiv?.shadowRoot;
   }
 
   unmount() {

@@ -6,6 +6,7 @@ import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
 import ChatWidget from "./copilot";
+import { ShadowRootContext } from "src/contexts/ShadowRootContext";
 addInlineStyle(rootStyle);
 
 export function renderCopilotChatWidget(
@@ -13,11 +14,15 @@ export function renderCopilotChatWidget(
   config?: any,
   controller?: CopilotChatWidgetController,
 ) {
-  const shadow = elem.attachShadow({ mode: "open", delegatesFocus: true });
-  const root = ReactDOM.createRoot(shadow);
+  const shadowRoot = elem.attachShadow({ mode: "open", delegatesFocus: true });
+  const root = ReactDOM.createRoot(shadowRoot);
   root.render(
     <React.StrictMode>
-      <CopilotChatWidget config={config} controller={controller} />
+      <CopilotChatWidget
+        config={config}
+        controller={controller}
+        shadowRoot={shadowRoot}
+      />
     </React.StrictMode>,
   );
   return root;
@@ -26,9 +31,11 @@ export function renderCopilotChatWidget(
 export function CopilotChatWidget({
   config,
   controller,
+  shadowRoot,
 }: {
   config?: any;
   controller?: CopilotChatWidgetController;
+  shadowRoot?: ShadowRoot;
 }) {
   // apply defaults to the user-provided config
   config = {
@@ -49,9 +56,14 @@ export function CopilotChatWidget({
   return (
     <div className="gooey-embed-container" tabIndex={-1}>
       <Styles />
-      <SystemContextProvider config={config}>
-        <MessagesContextProvider controller={controller}>
-          <ChatWidget />
+      <SystemContextProvider config={config} shadowRoot={shadowRoot}>
+        <MessagesContextProvider
+          controller={controller}
+          shadowRoot={shadowRoot}
+        >
+          <ShadowRootContext.Provider value={shadowRoot}>
+            <ChatWidget />
+          </ShadowRootContext.Provider>
         </MessagesContextProvider>
       </SystemContextProvider>
     </div>

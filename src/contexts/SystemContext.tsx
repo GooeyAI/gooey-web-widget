@@ -4,13 +4,14 @@ import useDeviceWidth from "src/hooks/useDeviceWidth";
 
 // eslint-disable-next-line react-refresh/only-export-components
 const toggleSidebarStyles = (
+  shadowRoot: ShadowRoot | undefined,
   isSidebarOpen: boolean,
   sidebarName: "left" | "right" = "left",
   isMobile: boolean = false,
 ) => {
   if (sidebarName === "right") {
     const sideBarElement: HTMLElement | null | undefined =
-      gooeyShadowRoot?.querySelector("#gooey-right-bar");
+      shadowRoot?.querySelector("#gooey-right-bar");
     if (!sideBarElement) return;
     // set width to 0px if sidebar is closed
     if (!isSidebarOpen) {
@@ -20,7 +21,7 @@ const toggleSidebarStyles = (
     }
   } else {
     const sideBarElement: HTMLElement | null | undefined =
-      gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+      shadowRoot?.querySelector("#gooey-side-navbar");
     if (!sideBarElement) return;
     // set width to 0px if sidebar is closed
     if (!isSidebarOpen) {
@@ -68,9 +69,11 @@ export const SystemContext = createContext<SystemContextType>({});
 const SystemContextProvider = ({
   config,
   children,
+  shadowRoot,
 }: {
   config: CopilotConfigType;
   children: ReactNode;
+  shadowRoot?: ShadowRoot;
 }) => {
   const isInline = config?.mode === "inline" || config?.mode === "fullscreen";
   const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
@@ -91,7 +94,7 @@ const SystemContextProvider = ({
     secondaryDrawerContent: () => null,
   });
   const forceHideSidebar = !layoutState?.showNewConversationButton;
-  const [isMobile, isMobileWindow] = useDeviceWidth("mobile", [
+  const [isMobile, isMobileWindow] = useDeviceWidth(shadowRoot, "mobile", [
     layoutState?.isOpen,
   ]);
 
@@ -121,7 +124,7 @@ const SystemContextProvider = ({
       toggleSidebar: () => {
         if (forceHideSidebar) return;
         setLayoutState((prev: any) => {
-          toggleSidebarStyles(prev.isSidebarOpen);
+          toggleSidebarStyles(shadowRoot, prev.isSidebarOpen);
           return {
             ...prev,
             isSidebarOpen: !prev.isSidebarOpen,
@@ -132,7 +135,7 @@ const SystemContextProvider = ({
       toggleFocusMode: () => {
         setLayoutState((prev) => {
           const sideBarElement: HTMLElement | null | undefined =
-            gooeyShadowRoot?.querySelector("#gooey-side-navbar");
+            shadowRoot?.querySelector("#gooey-side-navbar");
           if (!sideBarElement)
             return { ...prev, isFocusMode: !prev.isFocusMode };
           if (!prev?.isFocusMode) {
@@ -158,13 +161,15 @@ const SystemContextProvider = ({
       },
       toggleSecondaryDrawer: (data = null) => {
         setLayoutState((prev: any) => {
-          if(!data && !prev?.isSecondaryDrawerOpen) return prev;
+          if (!data && !prev?.isSecondaryDrawerOpen) return prev;
           const triggerSidebar =
             data && prev.isSidebarOpen && !prev.isSecondaryDrawerOpen;
-          if (triggerSidebar) toggleSidebarStyles(prev.isSidebarOpen);
+          if (triggerSidebar)
+            toggleSidebarStyles(shadowRoot, prev.isSidebarOpen);
           if ((data && !prev.isSecondaryDrawerOpen) || !data)
             // open / close secondary drawer
             toggleSidebarStyles(
+              shadowRoot,
               prev.isSecondaryDrawerOpen,
               "right",
               prev.isMobile,
@@ -190,7 +195,7 @@ const SystemContextProvider = ({
       },
       ...layoutState,
     }),
-    [setLayoutState, forceHideSidebar, layoutState],
+    [setLayoutState, forceHideSidebar, layoutState, shadowRoot],
   );
 
   useEffect(() => {
