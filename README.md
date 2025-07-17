@@ -1,9 +1,8 @@
 # Gooey Web Widget
 
-A clean, self-hostable web widget for Gooey.AI Copilots, with streaming support with every major LLM, speech-reco, and Text-to-Speech covering 1000+ languages, photo uploads, feedback, and analytics. 
+A clean, self-hostable web widget for Gooey.AI Copilots, with streaming support with every major LLM, speech-reco, and Text-to-Speech covering 1000+ languages, photo uploads, feedback, and analytics.
 
-Fork for customized branding and functionality (or use our hosted version available under Copilot Integrations). 
-
+Fork for customized branding and functionality (or use our hosted version available under Copilot Integrations).
 
 ## Raw Library Usage
 
@@ -15,7 +14,10 @@ If you're new, you should probably head over to [gooey.ai/copilot](https://gooey
 <div id="gooey-embed"></div>
 <script src="https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2/dist/lib.js"></script>
 <script>
-    GooeyEmbed.mount({ target: "#gooey-embed", integration_id: "<Your Integration ID>" });
+  GooeyEmbed.mount({
+    target: "#gooey-embed",
+    integration_id: "<Your Integration ID>",
+  });
 </script>
 ```
 
@@ -28,7 +30,6 @@ If you use the lib.js provided from gooey.ai, the config will be automatically p
 2. Replace `"<Your Integration ID>"` with your Integration's ID, as it appears on the Integration tab.
 
 ## Configuration Options
-
 
 ##### Example:
 
@@ -44,25 +45,27 @@ const config = {
   branding: {
     name: "Farmer.CHAT",
     byLine: "By Digital Green",
-    description: "An AI Assistant designed to help farmer extension agents in India.",
+    description:
+      "An AI Assistant designed to help farmer extension agents in India.",
     conversationStarters: [
       "When should I plant chili?",
       "How can I get rid of black ants on my coffee?",
       "What is the best time to grow pepper in India?",
     ],
     fabLabel: "Help",
-    photoUrl: "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
+    photoUrl:
+      "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
     websiteUrl: "https://digitalgreen.org/",
     showPoweredByGooey: true,
   },
   payload: {
     user_id: "123",
     variables: {
-        "product_id": "sample_id",
-        "product_name": "sample_name"
+      product_id: "sample_id",
+      product_name: "sample_name",
     },
   },
-}
+};
 GooeyEmbed.mount(config);
 ```
 
@@ -90,7 +93,6 @@ Determines how the Gooey widget is displayed on your site:
 
 <img alt="Screenshot 2024-05-25 at 11 33 17 AM" src="https://github.com/GooeyAI/gooey-web-widget/assets/10388784/826dda8d-876e-4d0a-baf6-6bca6f6af75f">
 
-
 ##### `enableAudioMessage: boolean`
 
 A boolean to enable or disable recording and sending audio messages to the bot.
@@ -107,12 +109,11 @@ A boolean to enable or disable the user's conversation history.
 
 A boolean to enable or disable the photo upload button.
 
-
 ##### `enableSourcePreview: boolean;`
 
 A boolean to enable or disable the links & sources preview panel.
 
-#####  `showSources`
+##### `showSources`
 
 A boolean that dictates whether sources of information (if any) should be shown.
 
@@ -129,8 +130,8 @@ Controls visual aspects of the widget and defines the textual content and relate
 - `websiteUrl`: A URL to the bot's or company's homepage, which can be accessed for more information.
 - `showPoweredByGooey`: A boolean to show or hide the "Powered by Gooey" attribution in the widget.
 - `colors`: An object to set the theme colors for widget ( e.g Colored Links, Buttons etc.)
-    - `primary`: string
-    - `secondary`: string
+  - `primary`: string
+  - `secondary`: string
 
 ##### `payload: object`
 
@@ -171,46 +172,29 @@ Note: If you want to work with "variables" in payload, refer to our [Advanced pr
 2. The output will be available in the `dist/` directory.
 3. Test the widget opening `test.html` in your browser.
 4. To test inside other projects, run a python web server:
+
    ```bash
    python -m http.server 9000
    ```
+
    and open [localhost:9000/test.html](http://localhost:9000/test.html) in your browser.
 
    (For the gooey server, set `WEB_WIDGET_LIB=http://localhost:9000/dist/lib.js` )
 
 ## Publishing
 
-1. Build the library:
+1. Update the version in `package.json`, run `npm install` and commit the changes
+
+2. Publish the library:
    ```bash
-   npm run build
-   ``` 
-3. Commit your changes using comment e.g "build: 2.5.12"
-4. By default we have excluded the `/dist` folder in the commit history. When you make the commit, the local `/dist` will contain the files to be published.
-5. Make a detached hash commit
-```bash
-   git checkout ---detach
+   ./scripts/publish.sh 2.x.x
    ```
-6. Force add `/dist` folder
-```bash
-   git add ./dist -f
-   ```
-7. Commit this change using comment "publish: 2.x.x"
-8. Tag the commit with the new version number
-   ```bash
-   git tag -a 2.x.x
-   ```
-9. Push the commit with tags:
-    ```bash
-    git push origin master --tags
-    ```
-10. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
+3. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
 
-   Now "jsdeliver" will automatically catch the tagged commit by "2.x.x".
-   If you want to ensure your clients get the latest version of the lib (ahead of the cache), please specify the version in the URL like so: `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2.x.x/dist/lib.js`
+Now "jsdeliver" will automatically catch the tagged commit by "2.x.x".
+If you want to ensure your clients get the latest version of the lib (ahead of the cache), please specify the version in the URL like so: `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2.x.x/dist/lib.js`
 
-   For Gooey Server, update the `WEB_WIDGET_LIB` environment variable.
-11. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
-
+For Gooey Server, update the `WEB_WIDGET_LIB` environment variable. 11. If you make a major version change, update this README.md and `WEB_WIDGET_LIB` in the Gooey server.
 
 ## **Notes**
 
