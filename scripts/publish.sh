@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-VERSION=$1
-if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version>"
-    exit 1
-fi
+# get version from package.json
+VERSION=$(cat package.json | jq -r '.version')
 
 set -ex
 
