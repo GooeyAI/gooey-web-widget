@@ -187,7 +187,7 @@ Note: If you want to work with "variables" in payload, refer to our [Advanced pr
 
 2. Publish the library:
    ```bash
-   ./scripts/publish.sh 2.x.x
+   ./scripts/publish.sh
    ```
 3. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
 
