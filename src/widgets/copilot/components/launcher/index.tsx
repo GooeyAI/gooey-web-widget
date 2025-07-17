@@ -14,6 +14,7 @@ const Launcher = () => {
       style={{
         bottom: 0,
         right: 0,
+        zIndex: 1000,
       }}
       className="pos-fixed gpb-16 gpr-16"
     >
@@ -21,7 +22,7 @@ const Launcher = () => {
         onClick={layoutController?.toggleOpenClose}
         className={clsx(
           "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
-          config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 "
+          config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 ",
         )}
         style={{ borderRadius: "30px", padding: 0 }}
       >
