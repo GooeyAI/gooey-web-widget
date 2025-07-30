@@ -18,6 +18,7 @@ interface GooeyTextResponseProps {
   showSources?: boolean;
   isStreaming?: boolean;
   id?: string;
+  responseBodyTextModification?: (body: string) => string;
 }
 
 const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
@@ -26,12 +27,14 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   showSources,
   isStreaming,
   id,
+  responseBodyTextModification,
   ...restProps
 }) => {
   const parsedElements = parseResponseBody(
     data,
     linkColor || "",
     showSources || false,
+    responseBodyTextModification,
   );
 
   return (

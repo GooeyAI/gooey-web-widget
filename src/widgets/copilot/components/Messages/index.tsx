@@ -33,8 +33,9 @@ const Responses = (props: any) => {
           key={id}
           id={id}
           showSources={config?.showSources || false}
-          linkColor={config?.branding?.colors?.primary || "initial"}
+          linkColor={config?.branding?.colors?.linkColor || "initial"}
           autoPlay={config?.autoPlayResponses}
+          responseBodyTextModification={config?.branding?.responseBodyTextModification}
         />
       );
     }

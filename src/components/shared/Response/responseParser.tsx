@@ -42,9 +42,14 @@ export const parseResponseBody = (
   data: ResponseData,
   linkColor: string,
   showSources: boolean,
+  responseBodyTextModification?: (body: string) => string
 ): React.ReactNode => {
-  const body = extractOutputText(data);
+  let body = extractOutputText(data);
   if (!body) return "";
+
+  if (typeof responseBodyTextModification === 'function') {
+    body = responseBodyTextModification(body);
+  }
 
   const { processedText, expressions } = latexProcessor.processText(body);
   const rawHtml = marked.parse(processedText, MARKED_OPTIONS);

@@ -202,6 +202,7 @@ const IncomingMsg = memo(
     showSources: boolean;
     linkColor: string;
     autoPlay: boolean | undefined;
+    responseBodyTextModification?: (body: string) => string;
   }) => {
     const {
       output_audio = [],
@@ -231,6 +232,7 @@ const IncomingMsg = memo(
             showSources={props?.showSources}
             isStreaming={isStreaming}
             id={props?.id}
+            responseBodyTextModification={props?.responseBodyTextModification}
           />
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
