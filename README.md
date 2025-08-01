@@ -16,7 +16,7 @@ If you're new, you should probably head over to [gooey.ai/copilot](https://gooey
 <script>
   GooeyEmbed.mount({
     target: "#gooey-embed",
-    integration_id: "<Your Integration ID>",
+    integration_id: "Kbo" # Your Integration ID,
   });
 </script>
 ```
@@ -27,7 +27,7 @@ If you use the lib.js provided from gooey.ai, the config will be automatically p
 <script src="https://gooey.ai/chat/<Name>-<Integration ID>/lib.js"></script>
 ```
 
-2. Replace `"<Your Integration ID>"` with your Integration's ID, as it appears on the Integration tab.
+2. Replace `"Kbo"` with your Integration's ID, as it appears on the Integration tab.
 
 ## Configuration Options
 
@@ -36,7 +36,7 @@ If you use the lib.js provided from gooey.ai, the config will be automatically p
 ```js
 const config = {
   target: "#gooey-embed",
-  integration_id: "MqL",
+  integration_id: "Kbo",
   mode: "popup" | "inline" | "fullscreen",
   enableAudioMessage: true,
   showSources: true,
@@ -57,6 +57,7 @@ const config = {
       "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
     websiteUrl: "https://digitalgreen.org/",
     showPoweredByGooey: true,
+    color: { primary: "purple", "secondary": "blue" },
   },
   payload: {
     user_id: "123",
