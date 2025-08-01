@@ -16,7 +16,7 @@ If you're new, you should probably head over to [gooey.ai/copilot](https://gooey
 <script>
   GooeyEmbed.mount({
     target: "#gooey-embed",
-    integration_id: "Kbo" # Your Integration ID,
+    integration_id: "Kbo", // Your Integration ID,
   });
 </script>
 ```
