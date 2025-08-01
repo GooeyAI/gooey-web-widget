@@ -27,6 +27,7 @@ export interface CopilotConfigType {
     colors?: {
       primary: string;
       secondary: string;
+      linkColor: string;
     };
   };
   payload?: any;
