@@ -18,6 +18,7 @@ import {
   CopilotChatWidgetController,
   useController,
 } from "src/contexts/ControllerUtils";
+import { handleToolCalls } from "./tools";
 
 const CITATION_STYLE = "number";
 
@@ -302,6 +303,12 @@ const MessagesContextProvider = ({
           });
           setIsReceiving(false);
 
+          try {
+            handleToolCalls(output);
+          } catch (e) {
+            console.error("Error handling tool calls", e);
+          }
+
           // Track this as a newly received message for autoplay
           setLatestMessageIds((prev) =>
             new Set(prev).add(currentStreamRef.current),
@@ -347,6 +354,7 @@ const MessagesContextProvider = ({
           });
           return newConversations;
         }
+
         return prev;
       });
       scrollToMessage();

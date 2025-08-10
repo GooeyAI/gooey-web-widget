@@ -11,6 +11,7 @@ set -ex
 git checkout --detach
 
 # Build the library
+npm install
 npm run build
 
 # Add the `/dist` folder to the commit
