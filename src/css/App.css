@@ -90,7 +90,7 @@ pre[class*="language-"] {
     Liberation Mono, monospace !important;
   overflow: auto;
   word-wrap: break-word;
-  padding: 0.8rem;
+  padding: 0.4rem 0.6rem;
   margin: 0 0 0.9rem;
   border-radius: 0 0 8px 8px;
 }

@@ -60,3 +60,57 @@
   grid-auto-flow: row;
   gap: 12px 12px;
 }
+
+// Function call details styling
+.gooey-incomingMsg {
+  details {
+    border: 2px solid $border-color;
+    border-radius: 12px;
+    background-color: $white;
+    margin: 8px 0;
+  }
+
+  summary {
+    background-color: $light;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: $muted;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    display: flex;
+    gap: 0.3em;
+    align-items: center;
+    user-select: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: "▼";
+      color: $muted;
+      font-size: 14px;
+      margin-left: auto;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  details[open] {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+
+  details[open] summary {
+    border-radius: 10px 10px 0 0;
+
+    margin-left: -0.9rem;
+    margin-right: -0.9rem;
+    margin-bottom: 0.9rem;
+
+    &::after {
+      transform: rotate(180deg);
+      color: $muted;
+    }
+  }
+}
