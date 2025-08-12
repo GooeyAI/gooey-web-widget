@@ -256,7 +256,7 @@ const ChatInput = () => {
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <div
         className={clsx(
-          "gooeyChat-chat-input gpr-8 gpl-8 mw-760",
+          "gooeyChat-chat-input gpr-8 mw-760",
           !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
@@ -271,24 +271,10 @@ const ChatInput = () => {
             onCancel={() => setIsRecording(false)}
           />
         ) : (
-          <div className="pos-relative">
-            {/* Typing area */}
-            <textarea
-              value={value}
-              ref={inputRef as any}
-              id={CHAT_INPUT_ID}
-              onChange={handleInputChange}
-              onKeyDown={handlePressEnter}
-              className={clsx(
-                "br-large b-1 font_16_500 bg-white gpt-10 gpb-10 gpr-40 flex-1 gm-0",
-                isLeftButtons ? "gpl-32" : "gpl-12",
-              )}
-              placeholder={"Message"}
-            ></textarea>
-
+          <div className="pos-relative d-flex">
             {/* Left icons */}
             {isLeftButtons && (
-              <div className="input-left-buttons">
+              <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
                 <GooeyPopper
                   showModal={isMenuOpen}
                   direction={{ x: "left", y: "top" }}
@@ -329,7 +315,7 @@ const ChatInput = () => {
                       onClick={() => setIsMenuOpen((v) => !v)}
                       variant="text-alt"
                       isPressed={isMenuOpen}
-                      className={clsx("gp-4", isMenuOpen && "depressed")}
+                      className={clsx("gp-4 h-100", isMenuOpen && "depressed")}
                     >
                       <IconPlus size={18} />
                     </IconButton>
@@ -337,6 +323,19 @@ const ChatInput = () => {
                 </GooeyPopper>
               </div>
             )}
+
+            {/* Typing area */}
+            <textarea
+              value={value}
+              ref={inputRef as any}
+              id={CHAT_INPUT_ID}
+              onChange={handleInputChange}
+              onKeyDown={handlePressEnter}
+              className={clsx(
+                "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
+              )}
+              placeholder={"Message"}
+            ></textarea>
 
             {/* Right icons */}
             <div className="input-right-buttons">
