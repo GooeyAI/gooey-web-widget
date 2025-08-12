@@ -256,7 +256,7 @@ const ChatInput = () => {
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <div
         className={clsx(
-          "gooeyChat-chat-input gpr-8 mw-760",
+          "gooeyChat-chat-input gpl-8 gpr-8 mw-760",
           !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
