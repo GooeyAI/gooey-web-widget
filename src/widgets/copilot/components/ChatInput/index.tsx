@@ -89,15 +89,22 @@ const ChatInput = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
 
-  const resetHeight = () => {
-    const ele: HTMLElement | null = inputRef.current;
-    ele!.style!.height = INPUT_HEIGHT + "px";
-  };
+    const adjustTextareaHeight = () => {
+      const ele: HTMLElement | null = inputRef.current;
+      if (!ele) return;
+
+      // Reset height first to get accurate scrollHeight measurement
+      ele.style.height = INPUT_HEIGHT + "px";
+
+      if (ele.scrollHeight > INPUT_HEIGHT) {
+        ele.style.height = ele.scrollHeight + "px";
+      }
+    };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     setValue(value);
-    if (!value) resetHeight();
+    adjustTextareaHeight();
   };
 
   const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -105,19 +112,7 @@ const ChatInput = () => {
       if (isSending || isReceiving) return;
       e.preventDefault();
       handleSendMessage();
-    } else if (e.keyCode === 13 && e.shiftKey) {
-      handleChangeLine();
     }
-  };
-
-  const handleChangeLine = () => {
-    // increase height by 24px
-    const ele: HTMLElement | null = inputRef.current;
-    if (ele!.scrollHeight > INPUT_HEIGHT)
-      ele?.setAttribute(
-        "style",
-        "height:" + ele.scrollHeight + "px !important",
-      );
   };
 
   const handleSendMessage = () => {
@@ -146,7 +141,7 @@ const ChatInput = () => {
     }
     initializeQuery?.(payload);
     setValue("");
-    resetHeight();
+    adjustTextareaHeight();
   };
 
   const handleCancelSend = () => {
