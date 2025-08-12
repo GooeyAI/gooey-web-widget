@@ -216,7 +216,9 @@ const IncomingMsg = memo(
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
 
-    if (!props.data) return <ResponseLoader show={true} />;
+    if (!props.data || type === STREAM_MESSAGE_TYPES.CONVERSATION_START)
+      return <ResponseLoader show={true} />;
+
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
         <div
