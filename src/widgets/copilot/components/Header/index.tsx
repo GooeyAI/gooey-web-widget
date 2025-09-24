@@ -10,6 +10,7 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
+import { truncateMiddle } from "../Messages/helpers";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
@@ -66,7 +67,9 @@ const Header = () => {
                   }}
                 />
               </div>
-              <p className="font_16_700 text-almostBlack">{branding?.title}</p>
+              <p className="font_16_700 text-almostBlack">
+                {truncateMiddle(branding?.title || "", 25)}
+              </p>
             </div>
           </Button>
         </GooeyTooltip>
