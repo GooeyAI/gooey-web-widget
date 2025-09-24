@@ -19,6 +19,7 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import { handleToolCalls } from "./tools";
+import * as Sentry from "@sentry/react";
 
 const CITATION_STYLE = "number";
 
@@ -378,7 +379,12 @@ const MessagesContextProvider = ({
       );
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
-    } finally {
+    }
+    catch (e) {
+      // report error to Sentry
+      Sentry.captureException(e);
+    }
+    finally {
       setIsSendingMessage(false);
     }
   };
