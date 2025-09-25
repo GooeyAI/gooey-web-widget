@@ -122,9 +122,9 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
             style={{ height: "39px" }}
           >
             <p>Hmm. We need microphone access. </p>
-            <a href="/" className="gpl-4">
-              Reload
-            </a>
+            <button onClick={() => window.location.reload()} className="gpl-4">
+              <a>Reload</a>
+            </button>
           </div>
         ) : (
           <SpinLoader size={43} />
