@@ -25,6 +25,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const [chunks, setChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isLoading, setLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     // timer logic
@@ -51,7 +52,12 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   };
 
   const onError = function (err: any) {
+    setLoading(false);
     console.log("The following error occured: " + err);
+    setIsError(true);
+    setTimeout(() => {
+      onCancel();
+    }, 10000);
   };
 
   const handleStopRecording = () => {
@@ -102,10 +108,27 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   // Seconds calculation
   const seconds = Math.floor((time % 6000) / 100);
 
-  if (isLoading) {
+  if (isLoading || isError) {
     return (
-      <div className={clsx(`gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`, "d-flex align-center justify-center gpb-5 gpt-3 w-100")}>
-        <SpinLoader size={43} />
+      <div
+        className={clsx(
+          `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
+          "d-flex align-center justify-center gpb-5 gpt-3 w-100",
+        )}
+      >
+        {isError ? (
+          <div
+            className="font_14_400 gp-4 b-1 br-large w-100 d-flex align-center justify-center"
+            style={{ height: "39px" }}
+          >
+            <p>Hmm. We need microphone access. </p>
+            <a href="/" className="gpl-4">
+              Reload
+            </a>
+          </div>
+        ) : (
+          <SpinLoader size={43} />
+        )}
       </div>
     );
   }
