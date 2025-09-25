@@ -33,4 +33,4 @@ git checkout -
 curl -I "https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@$VERSION/dist/lib.js"
 curl -I "https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2/dist/lib.js"
 
-echo "Published $VERSION at https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@$VERSION/dist/lib.js"
+echo " ✅ Published $VERSION at https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@$VERSION/dist/lib.js"
