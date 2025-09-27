@@ -42,12 +42,18 @@ interface UploadedFile {
 
 const ChatInput = () => {
   const { config } = useSystemContext();
-  const { messages, initializeQuery, isSending, cancelApiCall, isReceiving } =
-    useMessagesContext();
+  const {
+    messages,
+    initializeQuery,
+    isSending,
+    cancelApiCall,
+    isReceiving,
+    preAttachedFileUsed,
+    setPreAttachedFileUsed,
+  } = useMessagesContext();
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [files, setFiles] = useState<UploadedFile[] | null>(null);
-  const [preAttachedFileUsed, setPreAttachedFileUsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,7 +76,7 @@ const ChatInput = () => {
         return fileObj;
       }),
     );
-    setPreAttachedFileUsed(true);
+    setPreAttachedFileUsed?.(true);
     setFiles(newFiles as [UploadedFile]);
   }, [config?.payload?.input_images, preAttachedFileUsed]);
 

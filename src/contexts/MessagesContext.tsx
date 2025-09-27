@@ -47,6 +47,8 @@ export interface MessagesContextType {
   currentConversationId?: string | null;
   isMessagesLoading?: boolean;
   latestMessageIds?: Set<string>;
+  preAttachedFileUsed?: boolean;
+  setPreAttachedFileUsed?: (used: boolean) => void;
 }
 
 // --- Event Type Definitions ---
@@ -187,6 +189,7 @@ const MessagesContextProvider = ({
   const [isReceiving, setIsReceiving] = useState(false);
   const [isMessagesLoading, setMessagesLoading] = useState(true);
   const [latestMessageIds, setLatestMessageIds] = useState(new Set<string>());
+  const [preAttachedFileUsed, setPreAttachedFileUsed] = useState(false);
 
   const apiSource = useRef(axios.CancelToken.source());
   const currentStreamRef = useRef<any>(null);
@@ -366,12 +369,20 @@ const MessagesContextProvider = ({
   const sendPayload = async (payload: RequestModel) => {
     try {
       await uploadPayloadFiles(payload, config!.apiUrl!);
+
+      // Prepare config payload, removing input_images if pre-attached files have been used
+      const configPayload = { ...config?.payload };
+      if (preAttachedFileUsed && configPayload.input_images) {
+        delete configPayload.input_images;
+      }
+
       payload = {
-        ...config?.payload,
+        ...configPayload,
         integration_id: config?.integration_id,
         user_id: currentUserId,
         ...payload,
       };
+
       const streamUrl = await createStreamApi(
         config!.apiUrl!,
         payload,
@@ -379,12 +390,10 @@ const MessagesContextProvider = ({
       );
       getDataFromStream(streamUrl, updateStreamedMessage);
       // setLoading false in updateStreamedMessage
-    }
-    catch (e) {
+    } catch (e) {
       // report error to Sentry
       Sentry.captureException(e);
-    }
-    finally {
+    } finally {
       setIsSendingMessage(false);
     }
   };
@@ -411,6 +420,7 @@ const MessagesContextProvider = ({
       layoutController?.toggleSidebar();
     setIsReceiving(false);
     setIsSendingMessage(false);
+    setPreAttachedFileUsed(false); // Reset for new conversation
     purgeMessages();
     const ele = shadowRoot?.getElementById(CHAT_INPUT_ID);
     ele?.focus();
@@ -507,6 +517,8 @@ const MessagesContextProvider = ({
     currentConversationId: currentConversation.current?.id || null,
     isMessagesLoading,
     latestMessageIds,
+    preAttachedFileUsed,
+    setPreAttachedFileUsed,
     ...controllerContext,
   };
 
