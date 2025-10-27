@@ -72,7 +72,7 @@
 
   summary {
     background-color: $light;
-    padding: 8px 12px;
+    padding: 4px 8px;
     cursor: pointer;
     color: $muted;
     border: none;
@@ -97,17 +97,17 @@
   }
 
   details[open] {
-    padding-left: 0.9rem;
-    padding-right: 0.9rem;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
   }
 
   details[open] summary {
     border-radius: 10px 10px 0 0;
 
-    margin-left: -0.9rem;
-    margin-right: -0.9rem;
-    margin-bottom: 0.9rem;
-
+    margin-left: -0.6rem;
+    margin-right: -0.6rem;
+    margin-bottom: 0.6rem;
+    
     &::after {
       transform: rotate(180deg);
       color: $muted;
