@@ -59,6 +59,9 @@ const config = {
     showPoweredByGooey: true,
     color: { primary: "purple", "secondary": "blue" },
   },
+  secrets: {
+    GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here",
+  },
   payload: {
     user_id: "123",
     variables: {
@@ -133,7 +136,13 @@ Controls visual aspects of the widget and defines the textual content and relate
 - `colors`: An object to set the theme colors for widget ( e.g Colored Links, Buttons etc.)
   - `primary`: string
   - `secondary`: string
+  - 
+##### `secrets: object`
 
+Contains API keys and other sensitive configuration for third-party services.
+
+- `GOOGLE_MAPS_API_KEY`: Optional Google Maps API key that enables location search with autocomplete and interactive Google Maps for location input. If not provided, the widget falls back to OpenStreetMap (free, manual location selection only).
+  
 ##### `payload: object`
 
 Contains the data sent to the Gooey API.
