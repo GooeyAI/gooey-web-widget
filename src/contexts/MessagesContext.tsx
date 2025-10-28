@@ -181,7 +181,7 @@ const MessagesContextProvider = ({
   const { config, layoutController } = useSystemContext();
   const { conversations, handleAddConversation } = useConversations(
     currentUserId,
-    config?.integration_id as string,
+    config?.deployment_id as string,
   );
 
   const [messages, setMessages] = useState(new Map());
@@ -324,7 +324,7 @@ const MessagesContextProvider = ({
             user_id: prevMessage?.user_id,
             title: payload?.title,
             timestamp: payload?.created_at,
-            bot_id: config?.integration_id,
+            bot_id: config?.deployment_id
           };
           updateCurrentConversation(conversationData);
           handleAddConversation(
@@ -363,7 +363,7 @@ const MessagesContextProvider = ({
       });
       scrollToMessage();
     },
-    [config?.integration_id, handleAddConversation, scrollToMessage],
+    [config?.deployment_id, handleAddConversation, scrollToMessage],
   );
 
   const sendPayload = async (payload: RequestModel) => {
@@ -378,7 +378,7 @@ const MessagesContextProvider = ({
 
       payload = {
         ...configPayload,
-        integration_id: config?.integration_id,
+        deployment_id: config?.deployment_id,
         user_id: currentUserId,
         ...payload,
       };
