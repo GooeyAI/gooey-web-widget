@@ -210,6 +210,7 @@
   -ms-overflow-style: none;
   white-space: nowrap;
   position: relative;
+  max-width: 100%;
 }
 
 @media (max-width: $tablet) {

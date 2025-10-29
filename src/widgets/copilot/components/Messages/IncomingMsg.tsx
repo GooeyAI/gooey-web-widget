@@ -81,7 +81,7 @@ const FeedbackButtons = ({
   });
 
   return (
-    <div>
+    <div className="mw-100">
       {normalButtons.length > 0 && (
         <div className="gooey-scroll-wrapper">
           <div
@@ -94,7 +94,7 @@ const FeedbackButtons = ({
                   <FeedbackButton
                     key={button.id}
                     button={button}
-                    className={clsx("my-1 mx-md-2 w-100")}
+                    className={clsx("my-1 mx-md-2 font_14_600")}
                     onClick={() => {
                       if (button.isPressed) return;
                       if (button.id.includes("send_location")) {
@@ -169,7 +169,10 @@ const FeedbackButton = ({
 
   if (icon) {
     return (
-      <div className={clsx("my-auto", className)}>
+      <div
+        className={clsx("my-auto", className)}
+        style={{ whiteSpace: "nowrap" }}
+      >
         <Button key={button.id} className="text-muted" onClick={onClick}>
           {icon}
         </Button>
