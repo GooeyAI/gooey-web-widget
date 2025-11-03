@@ -19,6 +19,8 @@ const Header = () => {
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
+  console.log(onClose, ">>onClose");
+
   return (
     <div
       className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
