@@ -11,12 +11,14 @@ import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
 import { truncateMiddle } from "../Messages/helpers";
+import IconClose from "src/assets/SvgIcons/IconClose";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
   const { messages, handleNewConversation } = useMessagesContext();
   const isEmpty = !messages?.size;
   const branding = config?.branding;
+  const onClose = config?.onClose;
   return (
     <div
       className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
@@ -122,6 +124,15 @@ const Header = () => {
                 <IconPencilEdit size={22} />
               </IconButton>
             </GooeyTooltip>
+          )}
+          {layoutController?.isInline && onClose && (
+            <IconButton
+              variant="text"
+              className={clsx("gp-8 cr-pointer flex-1")}
+              onClick={onClose}
+            >
+              <IconClose size={22} />
+            </IconButton>
           )}
         </div>
       </div>

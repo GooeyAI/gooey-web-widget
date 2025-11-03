@@ -11,6 +11,7 @@ export interface CopilotConfigType {
   expandedSources: boolean;
   apiUrl?: string;
   enableSourcePreview?: boolean;
+  onClose?: () => void;
   secrets?: {
     GOOGLE_MAPS_API_KEY?: string;
   };
