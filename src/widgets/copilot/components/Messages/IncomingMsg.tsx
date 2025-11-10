@@ -5,13 +5,14 @@ import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import Button from "src/components/shared/Buttons/Button";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import ResponseLoader from "../Loader";
-import { getFeedbackButtonIcon } from "./helpers";
+import { getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip } from "./helpers";
 import style from "./incoming.scss?inline";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import type { LocationModalRef } from "./LocationModal";
 import { MESSAGE_GUTTER } from ".";
 import GooeyTextResponse from "src/components/shared/Response";
+import GooeyTooltip from "src/components/shared/Tooltip";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -69,7 +70,7 @@ const FeedbackButtons = ({
   buttons.forEach((button) => {
     if (
       button.id.includes("thumb") ||
-      getFeedbackButtonIcon(button.id, button.isPressed || false)
+      getFeedbackButtonIconWithTooltip(button.id, button.isPressed || false)
     ) {
       thumbButtons.push(button);
     } else {
@@ -165,18 +166,27 @@ const FeedbackButton = ({
   onClick: () => void;
   className?: string;
 }) => {
-  const icon = getFeedbackButtonIcon(button.id, button.isPressed || false);
+  const icon = getFeedbackButtonIconWithTooltip(
+    button.id,
+    button.isPressed || false,
+  );
 
   if (icon) {
     return (
-      <div
-        className={clsx("my-auto", className)}
-        style={{ whiteSpace: "nowrap" }}
+      <GooeyTooltip
+        text={
+          button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response"
+        }
       >
-        <Button key={button.id} className="text-muted" onClick={onClick}>
-          {icon}
-        </Button>
-      </div>
+        <div
+          className={clsx("my-auto", className)}
+          style={{ whiteSpace: "nowrap" }}
+        >
+          <Button key={button.id} className="text-muted" onClick={onClick}>
+            {icon}
+          </Button>
+        </div>
+      </GooeyTooltip>
     );
   }
 
