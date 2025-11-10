@@ -96,7 +96,7 @@ const OutgoingMsg = memo(
           {input_prompt && (
             <p
               className={clsx(
-                "font_16_400 gooey-outgoing-text gp-8 gpl-12 gpr-12 gm-4 bg-grey br-large",
+                "font_16_400 gooey-outgoing-text gp-8 gpl-12 gpr-12 gm-4 br-large",
                 `gmr-${MESSAGE_GUTTER}`,
               )}
             >
