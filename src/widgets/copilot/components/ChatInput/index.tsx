@@ -95,17 +95,27 @@ const ChatInput = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
 
-    const adjustTextareaHeight = () => {
+  // Reset textarea height when value becomes empty
+  useEffect(() => {
+    if (!value.trim()) {
       const ele: HTMLElement | null = inputRef.current;
-      if (!ele) return;
-
-      // Reset height first to get accurate scrollHeight measurement
-      ele.style.height = INPUT_HEIGHT + "px";
-
-      if (ele.scrollHeight > INPUT_HEIGHT) {
-        ele.style.height = ele.scrollHeight + "px";
+      if (ele) {
+        ele.style.height = INPUT_HEIGHT + "px";
       }
-    };
+    }
+  }, [value]);
+
+  const adjustTextareaHeight = () => {
+    const ele: HTMLElement | null = inputRef.current;
+    if (!ele) return;
+
+    // Reset height first to get accurate scrollHeight measurement
+    ele.style.height = INPUT_HEIGHT + "px";
+
+    if (ele.scrollHeight > INPUT_HEIGHT) {
+      ele.style.height = ele.scrollHeight + "px";
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
