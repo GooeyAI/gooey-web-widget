@@ -1,9 +1,12 @@
 import { addInlineStyle } from "src/addStyles";
 import style from "./outgoing.scss?inline";
-import { memo } from "react";
+import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
 import { MESSAGE_GUTTER } from ".";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import GooeyTooltip from "src/components/shared/Tooltip";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -33,12 +36,50 @@ const OutgoingMsg = memo(
     input_images = [],
     input_documents = [],
   }: OutgoingMsgProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     let mapUrl;
     if (latitude && longitude) {
       mapUrl = buildOpenStreetMapEmbedUrl(latitude, longitude);
     } else {
       input_prompt ||= button_pressed?.button_title || "";
     }
+
+    // Determine if message is large (more than 200 characters or more than 5 lines)
+    const isLargeMessage =
+      input_prompt &&
+      (input_prompt.length > 200 || input_prompt.split("\n").length > 5);
+
+    // Truncate text for collapsed view (first 200 characters or first 3 lines)
+    const getTruncatedText = (text: string): string => {
+      const lines = text.split("\n");
+      // If more than 3 lines, show first 3 lines with ellipsis
+      if (lines.length > 3) {
+        const firstThreeLines = lines.slice(0, 3).join("\n");
+        // Make sure we don't exceed 200 chars even with line breaks
+        if (firstThreeLines.length > 200) {
+          return firstThreeLines.slice(0, 200).trim() + "...";
+        }
+        return firstThreeLines + "...";
+      }
+      // If single line or few lines but long text, truncate to 200 chars
+      if (text.length > 200) {
+        // Try to break at word boundary if possible
+        const truncated = text.slice(0, 200);
+        const lastSpace = truncated.lastIndexOf(" ");
+        // If we find a space near the end (within last 30 chars), break there
+        if (lastSpace > 170) {
+          return truncated.slice(0, lastSpace) + "...";
+        }
+        return truncated.trim() + "...";
+      }
+      return text;
+    };
+
+    const displayText =
+      isLargeMessage && !isExpanded
+        ? getTruncatedText(input_prompt)
+        : input_prompt;
 
     return (
       <div className="d-flex flex-col align-end">
@@ -94,14 +135,53 @@ const OutgoingMsg = memo(
             </div>
           )}
           {input_prompt && (
-            <p
+            <div
               className={clsx(
-                "font_16_400 gooey-outgoing-text gp-8 gpl-12 gpr-12 gm-4 br-large",
+                "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8",
                 `gmr-${MESSAGE_GUTTER}`,
               )}
             >
-              {input_prompt}
-            </p>
+              <p
+                className={clsx(
+                  "font_16_400 gp-4 overflow-hidden",
+                  isLargeMessage &&
+                    !isExpanded &&
+                    "gooey-outgoing-text-collapsed",
+                )}
+              >
+                {displayText}
+              </p>
+              {isLargeMessage && (
+                <div
+                // style={{
+                //   position: "absolute",
+                //   right: "8px",
+                //   top: "4px",
+                //   zIndex: 1000,
+                // }}
+                >
+                  <GooeyTooltip
+                    text={isExpanded ? "Collapse message" : "Expand message"}
+                  >
+                    <IconButton
+                      className="gooey-outgoing-expand-btn gmt-4"
+                      variant="text"
+                      onClick={() => setIsExpanded(!isExpanded)}
+                    >
+                      <IconChevronDown
+                        size={16}
+                        style={{
+                          transform: isExpanded
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                        }}
+                      />
+                    </IconButton>
+                  </GooeyTooltip>
+                </div>
+              )}
+            </div>
           )}
           {latitude && longitude && (
             <div

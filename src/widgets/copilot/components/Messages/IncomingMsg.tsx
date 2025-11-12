@@ -84,37 +84,35 @@ const FeedbackButtons = ({
   return (
     <div className="mw-100">
       {normalButtons.length > 0 && (
-        <div className="gooey-scroll-wrapper">
-          <div
-            className="d-flex flex-col sm-flex-row gooey-scroll-container"
-            style={{ gap: "12px" }}
-          >
-            {normalButtons.map(
-              (button) =>
-                button && (
-                  <FeedbackButton
-                    key={button.id}
-                    button={button}
-                    className={clsx("my-1 mx-md-2 font_14_600")}
-                    onClick={() => {
-                      if (button.isPressed) return;
-                      if (button.id.includes("send_location")) {
-                        locationModalRef.current?.open();
-                      } else {
-                        // Follow up button press
-                        initializeQuery?.({
-                          button_pressed: {
-                            button_id: button.id,
-                            button_title: button.title,
-                            context_msg_id: bot_message_id,
-                          },
-                        });
-                      }
-                    }}
-                  />
-                ),
-            )}
-          </div>
+        <div
+          className="d-flex flex-col sm-flex-row"
+          style={{ gap: "12px", flexWrap: "wrap" }}
+        >
+          {normalButtons.map(
+            (button) =>
+              button && (
+                <FeedbackButton
+                  key={button.id}
+                  button={button}
+                  className={clsx("my-1 mx-md-2 font_14_600")}
+                  onClick={() => {
+                    if (button.isPressed) return;
+                    if (button.id.includes("send_location")) {
+                      locationModalRef.current?.open();
+                    } else {
+                      // Follow up button press
+                      initializeQuery?.({
+                        button_pressed: {
+                          button_id: button.id,
+                          button_title: button.title,
+                          context_msg_id: bot_message_id,
+                        },
+                      });
+                    }
+                  }}
+                />
+              ),
+          )}
         </div>
       )}
       {thumbButtons.length > 0 && (

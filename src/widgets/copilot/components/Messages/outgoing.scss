@@ -12,6 +12,16 @@
   background-color: #f4f4f4;
 }
 
+.gooey-outgoing-text-collapsed {
+  /* Remove height restriction - we handle truncation in JavaScript */
+}
+
+.gooey-outgoing-expand-btn {
+  &:hover {
+    color: #333;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
 .outgoingMsg-image {
   max-width: 200px;
   min-width: 200px;
