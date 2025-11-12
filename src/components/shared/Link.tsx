@@ -6,8 +6,9 @@ const Link = (props: any) => {
 
   const handleClick = () => {
     if (
-      config?.enableSourcePreview !== undefined &&
-      !config?.enableSourcePreview
+      (config?.enableSourcePreview !== undefined &&
+        !config?.enableSourcePreview) ||
+      props?.data?.url?.includes("composio.dev")
     ) {
       window.open(props?.data?.url, "_blank");
     } else {
