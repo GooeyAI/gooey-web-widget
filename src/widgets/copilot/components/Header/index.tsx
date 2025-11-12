@@ -40,15 +40,6 @@ const Header = () => {
             </IconButton>
           </GooeyTooltip>
         )}
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
         <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
           <Button onClick={handleNewConversation} disabled={isEmpty}>
             <div className="d-flex align-center">
@@ -72,12 +63,13 @@ const Header = () => {
                 />
               </div>
               <p className="font_16_700 text-almostBlack">
-                {truncateMiddle(branding?.title || "", 25)}
+                {branding?.title || "New Chat"}
               </p>
             </div>
           </Button>
         </GooeyTooltip>
       </div>
+
       <div>
         <div className="d-flex align-center">
           {/* Focus mode button */}
