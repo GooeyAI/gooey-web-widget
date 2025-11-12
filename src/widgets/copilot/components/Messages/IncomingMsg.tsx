@@ -13,6 +13,8 @@ import type { LocationModalRef } from "./LocationModal";
 import { MESSAGE_GUTTER } from ".";
 import GooeyTextResponse from "src/components/shared/Response";
 import GooeyTooltip from "src/components/shared/Tooltip";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import IconCopy from "src/assets/SvgIcons/IconCopy";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -49,11 +51,13 @@ type ReplyButton = {
 
 const FeedbackButtons = ({
   data,
+  body,
 }: {
   data: {
     buttons: ReplyButton[];
     bot_message_id: string;
   };
+  body: string;
 }) => {
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -120,6 +124,17 @@ const FeedbackButtons = ({
           className="d-flex gmt-2 justify-content-start"
           style={{ gap: "4px" }}
         >
+          {/* Copy Text Message to clipboard */}
+          <GooeyTooltip text="Copy Message">
+            <IconButton
+              onClick={() => {
+                navigator.clipboard.writeText(body);
+              }}
+              className="text-muted"
+            >
+              <IconCopy size={16} />
+            </IconButton>
+          </GooeyTooltip>
           {thumbButtons.map(
             (button) =>
               button && (
@@ -267,7 +282,10 @@ const IncomingMsg = memo(
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (
-            <FeedbackButtons data={props?.data} />
+            <FeedbackButtons
+              data={props?.data}
+              body={props?.data?.output_text}
+            />
           )}
         </div>
         {props.showSources && !!references.length && (
