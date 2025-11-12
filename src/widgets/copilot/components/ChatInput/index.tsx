@@ -345,7 +345,10 @@ const ChatInput = () => {
               className={clsx(
                 "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
               )}
-              placeholder={"Message"}
+              placeholder={
+                config?.branding.inputPlaceholderText ||
+                `Message ${config?.branding.title || ""}`
+              }
             ></textarea>
 
             {/* Right icons */}

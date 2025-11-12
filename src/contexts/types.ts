@@ -29,6 +29,7 @@ export interface CopilotConfigType {
       primary: string;
       secondary: string;
     };
+    inputPlaceholderText?: string;
   };
   payload?: any;
 }
