@@ -16,7 +16,7 @@ If you're new, you should probably head over to [gooey.ai/copilot](https://gooey
 <script>
   GooeyEmbed.mount({
     target: "#gooey-embed",
-    integration_id: "Kbo", // Your Integration ID
+    deployment_id: "Kbo", // Your Deployment ID
   });
 </script>
 ```
@@ -27,7 +27,7 @@ If you use the lib.js provided from gooey.ai, the config will be automatically p
 <script src="https://gooey.ai/chat/<Name>-<Integration ID>/lib.js"></script>
 ```
 
-2. Replace `"Kbo"` with your Integration's ID, as it appears on the Copilot's Integration tab.
+2. Replace `"Kbo"` with your Deployment ID, as it appears on the Copilot's Deploy tab. (Note: `integration_id` is still supported for backwards compatibility but is deprecated.)
 
 ## Configuration Options
 
@@ -36,12 +36,15 @@ If you use the lib.js provided from gooey.ai, the config will be automatically p
 ```js
 const config = {
   target: "#gooey-embed",
-  integration_id: "Kbo",
+  deployment_id: "Kbo",
   mode: "popup" | "inline" | "fullscreen",
   enableAudioMessage: true,
   showSources: true,
   enablePhotoUpload: true,
   enableConversations: true,
+  secrets: {
+    GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here",
+  },
   branding: {
     name: "Farmer.CHAT",
     byLine: "By Digital Green",
@@ -77,9 +80,11 @@ GooeyEmbed.mount(config);
 
 Specifies the [CSS selector](https://www.w3schools.com/css/css_selectors.asp) of the div where the widget will be embedded.
 
-##### `integration_id: string` **Required**
+##### `deployment_id: string` **Required**
 
-The unique identifier for your Gooey Bot Integration. (Note that this is snake_case, to match the Gooey API `payload`)
+The unique identifier for your Gooey Bot Deployment. (Note that this is snake_case, to match the Gooey API `payload`)
+
+**Note:** `integration_id` is deprecated but still supported for backwards compatibility. Please use `deployment_id` going forward.
 
 ##### `mode: string (popup | inline)`
 
@@ -136,13 +141,13 @@ Controls visual aspects of the widget and defines the textual content and relate
 - `colors`: An object to set the theme colors for widget ( e.g Colored Links, Buttons etc.)
   - `primary`: string
   - `secondary`: string
-  - 
+
 ##### `secrets: object`
 
 Contains API keys and other sensitive configuration for third-party services.
 
 - `GOOGLE_MAPS_API_KEY`: Optional Google Maps API key that enables location search with autocomplete and interactive Google Maps for location input. If not provided, the widget falls back to OpenStreetMap (free, manual location selection only).
-  
+
 ##### `payload: object`
 
 Contains the data sent to the Gooey API.

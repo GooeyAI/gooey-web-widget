@@ -44,6 +44,9 @@ export function CopilotChatWidget({
     enableAudioMessage: true,
     showSources: true,
     ...config,
+    // Normalize deployment_id: use deployment_id if present,
+    // otherwise fall back to integration_id for backwards compatibility
+    deployment_id: config?.deployment_id || config?.integration_id || "",
     branding: {
       showPoweredByGooey: true,
       ...config?.branding,

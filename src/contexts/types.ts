@@ -1,6 +1,8 @@
 export interface CopilotConfigType {
   target: string;
-  integration_id: string;
+  deployment_id: string;
+  /** @deprecated Use deployment_id instead. This field will be removed in a future version. */
+  integration_id?: string;
   mode: "popup" | "inline" | "fullscreen";
   enableAudioMessage: boolean;
   enablePhotoUpload: boolean;

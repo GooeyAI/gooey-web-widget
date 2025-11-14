@@ -21,7 +21,7 @@ export const createStreamApi = async (
   body: any,
   cancelToken: any,
 ) => {
-  let url = new URL("/v3/integrations/stream/", apiUrl).toString();
+  let url = new URL("/v3/deployments/stream/", apiUrl).toString();
   const headers = getHeaders();
   const finalBody = {
     citation_style: "number",

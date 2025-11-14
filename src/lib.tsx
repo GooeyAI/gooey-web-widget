@@ -18,9 +18,9 @@ class GooeyEmbedFactory {
         `Target not found: ${config.target}. Please provide a valid "target" selector in the config object.`,
       );
     }
-    if (!config.integration_id) {
+    if (!config.integration_id && !config.deployment_id) {
       throw new Error(
-        `Integration ID is required. Please provide an "integration_id" in the config object.`,
+        `Deployment ID is required. Please provide an "deployment_id" in the config object.`,
       );
     }
 
