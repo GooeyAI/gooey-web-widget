@@ -222,3 +222,7 @@
 .gooey-scroll-container::-webkit-scrollbar {
   display: none;
 }
+
+.messages-scroll-container {
+  scrollbar-gutter: stable;
+}

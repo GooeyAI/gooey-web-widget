@@ -6,7 +6,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
 
-export const MESSAGE_GUTTER = 12;
+export const MESSAGE_GUTTER = 5;
 const Responses = (props: any) => {
   const { config } = useSystemContext();
   const que = useMemo(() => props.queue, [props]);
@@ -58,7 +58,7 @@ const Messages = () => {
     <div
       ref={scrollContainerRef}
       className={clsx(
-        "flex-1 bg-white gpt-16 overflow-y-auto w-100",
+        "flex-1 bg-white gpt-16 overflow-y-auto w-100 messages-scroll-container",
         isEmpty ? "justify-end" : "justify-start",
       )}
     >

@@ -249,7 +249,7 @@ const IncomingMsg = memo(
       <div className="gooey-incomingMsg gpb-12 mw-100">
         <div
           className={clsx(
-            `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
+            `gpl-${MESSAGE_GUTTER + 3} gpr-${MESSAGE_GUTTER + 3}`,
             "mw-100",
           )}
         >
