@@ -18,7 +18,6 @@ const Header = () => {
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
-  console.log(onClose, ">>onClose");
 
   return (
     <div

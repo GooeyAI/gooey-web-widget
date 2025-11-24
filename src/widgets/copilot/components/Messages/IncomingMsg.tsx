@@ -228,6 +228,7 @@ const IncomingMsg = memo(
     showSources: boolean;
     linkColor: string;
     autoPlay: boolean | undefined;
+    showRunLink: boolean;
   }) => {
     const {
       output_audio = [],
@@ -241,7 +242,6 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-
     if (!props.data || type === STREAM_MESSAGE_TYPES.CONVERSATION_START)
       return <ResponseLoader show={true} />;
 
@@ -279,6 +279,17 @@ const IncomingMsg = memo(
                 src={videoTrack}
                 style={{ backgroundColor: "#000" }}
               ></video>
+            </div>
+          )}
+          {props?.showRunLink && props?.data?.web_url && (
+            <div className="gmb-8">
+              <a
+                href={props?.data?.web_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Run Details
+              </a>
             </div>
           )}
           {!isStreaming && props?.data?.buttons && (
