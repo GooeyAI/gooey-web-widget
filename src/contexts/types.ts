@@ -15,6 +15,7 @@ export interface CopilotConfigType {
   secrets?: {
     GOOGLE_MAPS_API_KEY?: string;
   };
+  showRunLink: boolean;
   branding: {
     name?: string;
     title?: string;
