@@ -137,7 +137,7 @@ const OutgoingMsg = memo(
           {input_prompt && (
             <div
               className={clsx(
-                "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8",
+                "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8 gmt-8",
                 `gmr-${MESSAGE_GUTTER}`,
               )}
             >
