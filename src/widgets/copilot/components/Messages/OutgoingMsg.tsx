@@ -84,7 +84,7 @@ const OutgoingMsg = memo(
     return (
       <div className="d-flex flex-col align-end">
         <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
-          {input_images.length > 0 && (
+          {input_images && input_images.length > 0 && (
             <div
               className={clsx(
                 `gpr-${MESSAGE_GUTTER}`,

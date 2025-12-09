@@ -208,14 +208,9 @@ const MessagesContextProvider = ({
     if (!payload || isSending || isReceiving) return;
     // Clear any previously received message IDs when starting a new query
     setLatestMessageIds(new Set());
-    // calls the server and updates the state with user message
-    const lastResponse = Array.from(
-      messages.values(),
-    ).pop() as ConversationStart; // will get the data from last server msg
 
+    // calls the server and updates the state with user message
     const conversationId = currentConversation.current?.id;
-    console.log(conversationId, ">>>conversationId");
-    console.log(currentConversation.current, ">>>currentConversation");
     setIsSendingMessage(true);
     sendPayload({
       ...payload,
