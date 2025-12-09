@@ -49,6 +49,7 @@ export interface MessagesContextType {
   latestMessageIds?: Set<string>;
   preAttachedFileUsed?: boolean;
   setPreAttachedFileUsed?: (used: boolean) => void;
+  handleShareConversation?: () => void;
 }
 
 // --- Event Type Definitions ---
@@ -211,7 +212,10 @@ const MessagesContextProvider = ({
     const lastResponse = Array.from(
       messages.values(),
     ).pop() as ConversationStart; // will get the data from last server msg
-    const conversationId = lastResponse?.conversation_id;
+
+    const conversationId = currentConversation.current?.id;
+    console.log(conversationId, ">>>conversationId");
+    console.log(currentConversation.current, ">>>currentConversation");
     setIsSendingMessage(true);
     sendPayload({
       ...payload,
@@ -401,6 +405,7 @@ const MessagesContextProvider = ({
   const preLoadData = (data: any) => {
     const newMap = new Map();
     data.forEach((obj: any) => {
+      if (!obj.id) obj.id = uuidv4();
       newMap.set(obj.id, { ...obj });
     });
     setMessages(newMap);
@@ -468,14 +473,15 @@ const MessagesContextProvider = ({
   const setActiveConversation = useCallback(
     async (conversation: Conversation) => {
       if (isSending || isReceiving) cancelApiCall();
-      if (
-        !conversation ||
-        !conversation.getMessages ||
-        currentConversation.current?.id === conversation.id
-      )
+      if (!conversation || currentConversation.current?.id === conversation.id)
         return setMessagesLoading(false);
       setMessagesLoading(true);
-      const messages = await conversation.getMessages();
+      let messages = [];
+      if (!conversation.getMessages && conversation.messages) {
+        messages = conversation.messages;
+      } else if (conversation.getMessages) {
+        messages = await conversation.getMessages();
+      }
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
@@ -483,15 +489,31 @@ const MessagesContextProvider = ({
     [cancelApiCall, isReceiving, isSending],
   );
 
+  const handleShareConversation = () => {
+    // copy the conversation to the clipboard
+    // get conversation id
+    const conversationId = currentConversation.current?.id;
+    if (!conversationId) return;
+
+    // get current url and add /share/conversationId
+    const currentUrl = window.location.href;
+    const shareUrl = `${currentUrl}share/${conversationId}`;
+    navigator.clipboard.writeText(shareUrl);
+  };
+
   useEffect(() => {
     if (
       !layoutController?.showNewConversationButton &&
       conversations.length &&
       !messages.size
     )
-      // Load the latest conversation from DB - initial load
+      // Load the latest conversation from DB - initial load when multuiple conversations are disabled
       setActiveConversation(conversations[0]);
-    else setMessagesLoading(false);
+    else if (config?.conversationData) {
+      console.log(config?.conversationData, ">>>");
+      setActiveConversation(config?.conversationData);
+      config.conversationData = null;
+    } else setMessagesLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations]);
 
@@ -519,6 +541,7 @@ const MessagesContextProvider = ({
     latestMessageIds,
     preAttachedFileUsed,
     setPreAttachedFileUsed,
+    handleShareConversation,
     ...controllerContext,
   };
 

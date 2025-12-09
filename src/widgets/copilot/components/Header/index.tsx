@@ -11,10 +11,12 @@ import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
 import IconClose from "src/assets/SvgIcons/IconClose";
+import IconArrowUpBracket from "src/assets/SvgIcons/IconArrowUpBracket";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
-  const { messages, handleNewConversation } = useMessagesContext();
+  const { messages, handleNewConversation, handleShareConversation } =
+    useMessagesContext();
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
@@ -101,6 +103,18 @@ const Header = () => {
                 onClick={layoutController?.toggleOpenClose}
               >
                 <IconChevronDown size={16} />
+              </IconButton>
+            </GooeyTooltip>
+          )}
+          {/* Share conversation button */}
+          {config?.enableShareConversation && !isEmpty && (
+            <GooeyTooltip text="Share Conversation" disabled={isEmpty}>
+              <IconButton
+                variant="text"
+                className={clsx("gp-8 cr-pointer flex-1")}
+                onClick={handleShareConversation}
+              >
+                <IconArrowUpBracket size={22} />
               </IconButton>
             </GooeyTooltip>
           )}

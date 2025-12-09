@@ -139,14 +139,14 @@ export const useConversations = (user_id: string, bot_id: string) => {
       const userConversations = await fetchAllConversations(
         db,
         user_id,
-        bot_id
+        bot_id,
       );
       setConversations(
         userConversations.sort(
           (a: Conversation, b: Conversation) =>
             new Date(b.timestamp as string).getTime() -
-            new Date(a.timestamp as string).getTime()
-        )
+            new Date(a.timestamp as string).getTime(),
+        ),
       );
     };
 
