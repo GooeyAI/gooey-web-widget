@@ -12,10 +12,11 @@ const SideNavbar = () => {
   const {
     conversations,
     setActiveConversation,
-    currentConversationId,
+    currentConversation,
     handleNewConversation,
     messages,
   } = useMessagesContext();
+  const currentConversationId = currentConversation?.id || null;
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
   const conversationsList = React.useMemo(() => {

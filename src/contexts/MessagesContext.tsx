@@ -44,7 +44,7 @@ export interface MessagesContextType {
   isReceiving?: boolean;
   conversations?: Conversation[];
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
-  currentConversationId?: string | null;
+  currentConversation?: Conversation | null;
   isMessagesLoading?: boolean;
   latestMessageIds?: Set<string>;
   preAttachedFileUsed?: boolean;
@@ -518,7 +518,7 @@ const MessagesContextProvider = ({
     isReceiving,
     conversations,
     setActiveConversation,
-    currentConversationId: currentConversation.current?.id || null,
+    currentConversation: currentConversation.current || null,
     isMessagesLoading,
     latestMessageIds,
     preAttachedFileUsed,

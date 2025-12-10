@@ -17,7 +17,7 @@ import ShareDialog from "./ShareDialog";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
-  const { messages, handleNewConversation, currentConversationId } =
+  const { messages, handleNewConversation, currentConversation } =
     useMessagesContext();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -26,8 +26,8 @@ const Header = () => {
   const onClose = config?.onClose;
 
   const conversationTitle = useMemo(
-    () => branding?.title || "Conversation",
-    [branding?.title],
+    () => currentConversation?.title || branding?.title || "Conversation",
+    [currentConversation?.title, branding?.title],
   );
 
   const [firstAssistantMessage, firstUserMessage] = useMemo(() => {
@@ -43,7 +43,7 @@ const Header = () => {
   }, [messages]);
 
   const buildShareUrl = () => {
-    if (!currentConversationId) return "";
+    if (!currentConversation?.id) return "";
     const url = new URL(window.location.href);
     let normalizedPath = url.pathname.endsWith("/")
       ? url.pathname.slice(0, -1)
@@ -51,7 +51,7 @@ const Header = () => {
 
     const regex = /\/share\/.*/;
     normalizedPath = url.pathname.replace(regex, "");
-    url.pathname = `${normalizedPath}/share/${currentConversationId}`;
+    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
     url.hash = "";
     return url.toString();
   };
@@ -192,6 +192,7 @@ const Header = () => {
         onClose={closeShareDialog}
         shareUrl={shareUrl}
         conversationTitle={conversationTitle}
+        botTitle={branding?.title}
         firstAssistantMessage={firstAssistantMessage}
         firstUserMessage={firstUserMessage}
         linkColor={config?.branding?.colors?.primary}

@@ -16,6 +16,7 @@ type ShareDialogProps = {
   linkColor?: string;
   showSources?: boolean;
   firstUserMessage?: any;
+  botTitle?: string | null;
 };
 
 const formatTitle = (title?: string | null) => {
@@ -32,6 +33,7 @@ const ShareDialog = ({
   firstUserMessage,
   linkColor = "#000000",
   showSources = false,
+  botTitle,
 }: ShareDialogProps) => {
   const [copied, setCopied] = useState(false);
 
@@ -78,24 +80,18 @@ const ShareDialog = ({
       open={open}
       onClose={onClose}
       title="Share conversation"
-      subtitle={title}
+      subtitle={botTitle}
       maxWidth="md"
       fullWidth
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-        }}
-      >
+      <div className="d-flex flex-col gap-8">
         <div className="bg-white b-1 br-large gp-16 gmb-12">
-          <div className="d-flex align-center justify-between gmb-12 gap-12">
+          <div className="d-flex align-center justify-between gmb-12 gap-12 flex-wrap">
             <div>
               <p className="font_13_500 text-muted gmb-4">
                 Conversation preview
               </p>
-              <p className="font_16_700 text-almostBlack">{title}</p>
+              <p className="font_16_700 text-almostBlack gmb-12">{title}</p>
             </div>
             <div className="d-flex align-center gap-8">
               <Button
