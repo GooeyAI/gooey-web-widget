@@ -73,13 +73,6 @@ const ShareDialog = ({
     }
   };
 
-  const linkedInHref = shareUrl
-    ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
-    : undefined;
-  const redditHref = shareUrl
-    ? `https://www.reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}`
-    : undefined;
-
   return (
     <GooeyDialog
       open={open}

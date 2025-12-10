@@ -45,9 +45,12 @@ const Header = () => {
   const buildShareUrl = () => {
     if (!currentConversationId) return "";
     const url = new URL(window.location.href);
-    const normalizedPath = url.pathname.endsWith("/")
+    let normalizedPath = url.pathname.endsWith("/")
       ? url.pathname.slice(0, -1)
       : url.pathname;
+
+    const regex = /\/share\/.*/;
+    normalizedPath = url.pathname.replace(regex, "");
     url.pathname = `${normalizedPath}/share/${currentConversationId}`;
     url.hash = "";
     return url.toString();
