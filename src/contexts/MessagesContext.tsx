@@ -49,7 +49,6 @@ export interface MessagesContextType {
   latestMessageIds?: Set<string>;
   preAttachedFileUsed?: boolean;
   setPreAttachedFileUsed?: (used: boolean) => void;
-  handleShareConversation?: () => void;
 }
 
 // --- Event Type Definitions ---
@@ -484,18 +483,6 @@ const MessagesContextProvider = ({
     [cancelApiCall, isReceiving, isSending],
   );
 
-  const handleShareConversation = () => {
-    // copy the conversation to the clipboard
-    // get conversation id
-    const conversationId = currentConversation.current?.id;
-    if (!conversationId) return;
-
-    // get current url and add /share/conversationId
-    const currentUrl = window.location.href;
-    const shareUrl = `${currentUrl}share/${conversationId}`;
-    navigator.clipboard.writeText(shareUrl);
-  };
-
   useEffect(() => {
     if (
       !layoutController?.showNewConversationButton &&
@@ -536,7 +523,6 @@ const MessagesContextProvider = ({
     latestMessageIds,
     preAttachedFileUsed,
     setPreAttachedFileUsed,
-    handleShareConversation,
     ...controllerContext,
   };
 

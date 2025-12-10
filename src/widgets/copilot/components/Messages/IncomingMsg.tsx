@@ -89,7 +89,7 @@ const FeedbackButtons = ({
     <div className="mw-100">
       {normalButtons.length > 0 && (
         <div
-          className="d-flex flex-col sm-flex-row"
+          className="d-flex flex-col sm-flex-row gmt-12"
           style={{ gap: "12px", flexWrap: "wrap" }}
         >
           {normalButtons.map(

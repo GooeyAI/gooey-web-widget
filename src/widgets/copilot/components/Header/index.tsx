@@ -2,6 +2,7 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import clsx from "clsx";
 import { SystemContextType } from "src/contexts/SystemContext";
+import { useMemo, useState } from "react";
 
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
@@ -12,14 +13,55 @@ import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconArrowUpBracket from "src/assets/SvgIcons/IconArrowUpBracket";
+import ShareDialog from "./ShareDialog";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
-  const { messages, handleNewConversation, handleShareConversation } =
+  const { messages, handleNewConversation, currentConversationId } =
     useMessagesContext();
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
+
+  const conversationTitle = useMemo(
+    () => branding?.title || "Conversation",
+    [branding?.title],
+  );
+
+  const [firstAssistantMessage, firstUserMessage] = useMemo(() => {
+    if (!messages?.size) return [null, null];
+    let assistantMessage = null;
+    let userMessage = null;
+    for (const msg of messages.values()) {
+      if (msg?.role === "user") userMessage = msg;
+      else assistantMessage = msg;
+      if (userMessage && assistantMessage) break;
+    }
+    return [assistantMessage, userMessage];
+  }, [messages]);
+
+  const buildShareUrl = () => {
+    if (!currentConversationId) return "";
+    const url = new URL(window.location.href);
+    const normalizedPath = url.pathname.endsWith("/")
+      ? url.pathname.slice(0, -1)
+      : url.pathname;
+    url.pathname = `${normalizedPath}/share/${currentConversationId}`;
+    url.hash = "";
+    return url.toString();
+  };
+
+  const handleShareConversation = () => {
+    const url = buildShareUrl();
+    if (!url) return;
+    setShareUrl(url);
+    setShareDialogOpen(true);
+    navigator.clipboard.writeText(url).catch(() => undefined);
+  };
+
+  const closeShareDialog = () => setShareDialogOpen(false);
 
   return (
     <div
@@ -142,6 +184,16 @@ const Header = () => {
           )}
         </div>
       </div>
+      <ShareDialog
+        open={shareDialogOpen}
+        onClose={closeShareDialog}
+        shareUrl={shareUrl}
+        conversationTitle={conversationTitle}
+        firstAssistantMessage={firstAssistantMessage}
+        firstUserMessage={firstUserMessage}
+        linkColor={config?.branding?.colors?.primary}
+        showSources={config?.showSources}
+      />
     </div>
   );
 };
