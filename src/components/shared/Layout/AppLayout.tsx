@@ -62,14 +62,12 @@ const AppLayout = ({ children }: Props) => {
         ),
       )}
     >
-      <div
-        className="d-flex h-100 pos-relative"
-      >
+      <div className="d-flex h-100 pos-relative">
         <SideNavbar />
         {layoutController?.isSidebarOpen && layoutController?.isMobile && (
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
-        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100 bg-white">
+        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100">
           <Header />
           {children}
         </main>

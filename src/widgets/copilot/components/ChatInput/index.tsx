@@ -263,11 +263,11 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <>
+    <div className="w-100">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       <div
         className={clsx(
-          "gooeyChat-chat-input gpl-8 gpr-8 mw-760",
+          "gooeyChat-chat-input gpl-8 gpr-8 mw-760 gpt-8",
           !config.branding.showPoweredByGooey && "gpb-8",
         )}
       >
@@ -396,7 +396,7 @@ const ChatInput = () => {
           </p>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

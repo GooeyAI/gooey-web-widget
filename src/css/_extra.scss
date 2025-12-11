@@ -211,6 +211,10 @@
   white-space: nowrap;
   position: relative;
   max-width: 100%;
+  }
+  
+  .stable-scroll-container {
+    scrollbar-gutter: stable;
 }
 
 @media (max-width: $tablet) {
