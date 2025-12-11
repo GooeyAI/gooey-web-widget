@@ -2,12 +2,6 @@ import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
-import {
-  STREAM_MESSAGE_TYPES,
-  getDataFromStream,
-  createStreamApi,
-} from "src/api/streaming";
-import { uploadPayloadFiles } from "src/api/file-upload";
 import useConversations, {
   Conversation,
   updateLocalUser,
@@ -18,8 +12,9 @@ import {
   CopilotChatWidgetController,
   useController,
 } from "src/contexts/ControllerUtils";
-import { handleToolCalls } from "./tools";
 import * as Sentry from "@sentry/react";
+import { useMessageStore } from "./messages/useMessageStore";
+import { useStreamingHandler } from "./messages/useStreamingHandler";
 
 const CITATION_STYLE = "number";
 
@@ -184,15 +179,23 @@ const MessagesContextProvider = ({
     config?.integration_id as string,
   );
 
-  const [messages, setMessages] = useState(new Map());
+  const {
+    messages,
+    setMessages,
+    latestMessageIds,
+    setLatestMessageIds,
+    preAttachedFileUsed,
+    setPreAttachedFileUsed,
+    addResponse,
+    preLoadData,
+    purgeMessages: purgeMessagesStore,
+  } = useMessageStore();
   const [isSending, setIsSendingMessage] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [isMessagesLoading, setMessagesLoading] = useState(true);
-  const [latestMessageIds, setLatestMessageIds] = useState(new Set<string>());
-  const [preAttachedFileUsed, setPreAttachedFileUsed] = useState(false);
+  const [isSharedConversation, setIsSharedConversation] = useState(false);
 
   const apiSource = useRef(axios.CancelToken.source());
-  const currentStreamRef = useRef<any>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
 
@@ -209,23 +212,25 @@ const MessagesContextProvider = ({
     setLatestMessageIds(new Set());
 
     // calls the server and updates the state with user message
-    const conversationId = currentConversation.current?.id;
+    const conversationId = isSharedConversation
+      ? undefined
+      : currentConversation.current?.id;
     setIsSendingMessage(true);
-    sendPayload({
-      ...payload,
-      conversation_id: conversationId,
-      citation_style: CITATION_STYLE,
-      user_id: currentUserId,
+    setIsSharedConversation(false); //reset shared conversation flag
+    sendPayload(
+      {
+        ...payload,
+        conversation_id: conversationId,
+        citation_style: CITATION_STYLE,
+        user_id: currentUserId,
+      },
+      { onFinally: () => setIsSendingMessage(false) },
+    ).catch((e) => {
+      // report error to Sentry
+      Sentry.captureException(e);
     });
     const newQuery = createNewQuery(payload);
     addResponse(newQuery);
-  };
-
-  const addResponse = (response: any) => {
-    setMessages((prev: any) => {
-      const newMessages = new Map(prev.set(response.id, response));
-      return newMessages;
-    });
   };
 
   const scrollMessageContainer = useCallback(
@@ -254,158 +259,20 @@ const MessagesContextProvider = ({
     scrollToMessage();
   }, [scrollToMessage]);
 
-  const updateStreamedMessage = useCallback(
-    (payload: any) => {
-      setMessages((prev: any) => {
-        // stream close
-        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
-          const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
-          const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload?.text || "");
-          newMessages.set(lastResponseId, {
-            ...prevMessage,
-            output_text: [text],
-            type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
-            status: "completed",
-          });
-          setIsReceiving(false);
-          return newMessages;
-        }
-
-        // stream start
-        if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
-          setIsSendingMessage(false);
-          setIsReceiving(true);
-          currentStreamRef.current = payload!.bot_message_id;
-          const newMessages = new Map(prev);
-          newMessages.set(payload!.bot_message_id, {
-            id: currentStreamRef.current,
-            ...payload,
-          });
-          updateLocalUser(payload?.user_id);
-          return newMessages;
-        }
-
-        // stream end
-        if (
-          payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-          payload?.status === "completed"
-        ) {
-          const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
-          const prevMessage = prev.get(lastResponseId);
-          const { output, ...restPayload } = payload;
-          newMessages.set(lastResponseId, {
-            ...prevMessage,
-            conversation_id: prevMessage?.conversation_id, // keep the conversation id
-            id: currentStreamRef.current,
-            ...output,
-            ...restPayload,
-          });
-          setIsReceiving(false);
-
-          try {
-            handleToolCalls(output);
-          } catch (e) {
-            console.error("Error handling tool calls", e);
-          }
-
-          // Track this as a newly received message for autoplay
-          setLatestMessageIds((prev) =>
-            new Set(prev).add(currentStreamRef.current),
-          );
-
-          // update current conversation for every time the stream ends
-          const conversationData = {
-            id: prevMessage?.conversation_id,
-            user_id: prevMessage?.user_id,
-            title: payload?.title,
-            timestamp: payload?.created_at,
-            bot_id: config?.integration_id,
-          };
-          updateCurrentConversation(conversationData);
-          handleAddConversation(
-            Object.assign(
-              {},
-              {
-                ...conversationData,
-                messages: Array.from(newMessages.values()),
-              },
-            ),
-          );
-          return newMessages;
-        }
-
-        // streaming data
-        if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-          const newConversations = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
-          const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload.text || "");
-          const buttons = [
-            ...(prevMessage?.buttons || []),
-            ...(payload.buttons || []),
-          ];
-          newConversations.set(lastResponseId, {
-            ...prevMessage,
-            ...payload,
-            id: currentStreamRef.current,
-            text,
-            buttons,
-          });
-          return newConversations;
-        }
-
-        return prev;
-      });
-      scrollToMessage();
-    },
-    [config?.integration_id, handleAddConversation, scrollToMessage],
-  );
-
-  const sendPayload = async (payload: RequestModel) => {
-    try {
-      await uploadPayloadFiles(payload, config!.apiUrl!);
-
-      // Prepare config payload, removing input_images if pre-attached files have been used
-      const configPayload = { ...config?.payload };
-      if (preAttachedFileUsed && configPayload.input_images) {
-        delete configPayload.input_images;
-      }
-
-      payload = {
-        ...configPayload,
-        integration_id: config?.integration_id,
-        user_id: currentUserId,
-        ...payload,
-      };
-
-      const streamUrl = await createStreamApi(
-        config!.apiUrl!,
-        payload,
-        apiSource.current,
-      );
-      getDataFromStream(streamUrl, updateStreamedMessage);
-      // setLoading false in updateStreamedMessage
-    } catch (e) {
-      // report error to Sentry
-      Sentry.captureException(e);
-    } finally {
-      setIsSendingMessage(false);
-    }
-  };
-
-  const preLoadData = (data: any) => {
-    const newMap = new Map();
-    data.forEach((obj: any) => {
-      if (!obj.id) obj.id = uuidv4();
-      newMap.set(obj.id, { ...obj });
-    });
-    setMessages(newMap);
-    // Clear newly received message IDs when loading existing conversations
-    setLatestMessageIds(new Set());
-  };
+  const { sendPayload } = useStreamingHandler({
+    config,
+    handleAddConversation,
+    updateCurrentConversation,
+    scrollToMessage,
+    setIsReceiving,
+    setIsSendingMessage,
+    setLatestMessageIds,
+    setMessages,
+    apiSource,
+    currentUserId,
+    preAttachedFileUsed,
+    updateLocalUser,
+  });
 
   const handleNewConversation = () => {
     if (!isReceiving && !isSending) {
@@ -426,8 +293,7 @@ const MessagesContextProvider = ({
   };
 
   const purgeMessages = () => {
-    setMessages(new Map());
-    setLatestMessageIds(new Set());
+    purgeMessagesStore();
     currentConversation.current = {};
   };
 
@@ -492,10 +358,24 @@ const MessagesContextProvider = ({
       // Load the latest conversation from DB - initial load when multuiple conversations are disabled
       setActiveConversation(conversations[0]);
     else if (config?.conversationData) {
-      console.log(config?.conversationData, ">>>");
-      setActiveConversation(config?.conversationData);
-      config.conversationData = null;
+      // shared conversation preloading logic
+
+      const existingConversation = conversations.find(
+        (conversation) => conversation.id === config?.conversationData?.id,
+      );
+      // checks conversation.id is already in the conversations array, set it as the active conversation
+      if (existingConversation) {
+        setActiveConversation(existingConversation);
+        config.conversationData = null;
+      } else {
+        // new conversation and user
+        setActiveConversation(config?.conversationData);
+        setIsSharedConversation(true); // for new conversation and user
+        config.conversationData = null;
+        setMessagesLoading(false);
+      }
     } else setMessagesLoading(false);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations]);
 
