@@ -25,8 +25,11 @@ const getConversationTitle = (conversation: Conversation) => {
   return conversation?.messages?.[0]?.input_prompt;
 };
 
+let dbPromise: Promise<IDBDatabase> | null = null;
 const initDB = (dbName: string) => {
-  return new Promise<IDBDatabase>((resolve, reject) => {
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(dbName, 1);
 
     request.onupgradeneeded = () => {
@@ -45,6 +48,8 @@ const initDB = (dbName: string) => {
       reject(request.error);
     };
   });
+
+  return dbPromise;
 };
 
 const fetchConversation = (db: IDBDatabase, conversationId: string) => {
@@ -76,7 +81,7 @@ const formatConversation = (conversation: Conversation, db: IDBDatabase) => {
 const fetchAllConversations = (
   db: IDBDatabase,
   user_id: string,
-  bot_id: string
+  bot_id: string,
 ) => {
   return new Promise<Conversation[]>((resolve, reject) => {
     const transaction = db.transaction(["conversations"], "readonly");
@@ -86,7 +91,7 @@ const fetchAllConversations = (
     request.onsuccess = () => {
       const userConversations = request.result
         .filter(
-          (c: Conversation) => c.user_id === user_id && c.bot_id === bot_id
+          (c: Conversation) => c.user_id === user_id && c.bot_id === bot_id,
         )
         .map((c) => formatConversation(c, db));
 
@@ -113,9 +118,9 @@ const addConversation = (db: IDBDatabase, conversation: Conversation) => {
             .filter(
               (c: Conversation) =>
                 c.user_id === conversation.user_id &&
-                c.bot_id === conversation.bot_id
+                c.bot_id === conversation.bot_id,
             )
-            .map((c) => formatConversation(c, db))
+            .map((c) => formatConversation(c, db)),
         );
       };
       allObjectsReq.onerror = () => {
@@ -131,7 +136,9 @@ const addConversation = (db: IDBDatabase, conversation: Conversation) => {
 
 const DB_NAME = "GOOEY_COPILOT_CONVERSATIONS_DB";
 export const useConversations = (user_id: string, bot_id: string) => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[] | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -141,6 +148,7 @@ export const useConversations = (user_id: string, bot_id: string) => {
         user_id,
         bot_id,
       );
+      if (!userConversations.length) setConversations([]);
       setConversations(
         userConversations.sort(
           (a: Conversation, b: Conversation) =>
