@@ -319,7 +319,7 @@ export const SourcesSection = ({
   }, []);
 
   return (
-    <div className="gmb-8">
+    <div className="gmb-8 gmt-8">
       <div
         className={clsx(
           "d-flex align-center gpt-4 gpb-8",
