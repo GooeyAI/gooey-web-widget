@@ -134,7 +134,7 @@ export const FullSourcePreview = (props: any) => {
   return (
     <div className="flex-1 d-flex flex-col">
       <div
-        className="b-lt-1 b-rt-1 b-btm-1 gp-10 w-100 d-flex justify-between align-center bg-white"
+        className="b-lt-1 b-rt-1 b-btm-1 gp-10 w-100 d-flex justify-between align-center bg-background"
         style={{ height: "56px" }}
       >
         <div className="d-flex align-center" style={{ maxWidth: "90%" }}>

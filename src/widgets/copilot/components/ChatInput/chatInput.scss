@@ -2,10 +2,8 @@
 
 .gooeyChat-chat-input {
   width: 100%;
-  background: transparent;
   position: sticky;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
   border-radius: 16px 16px 0 0;
@@ -18,11 +16,11 @@
   height: 44px;
   resize: none;
   position: relative;
-  background-color: #f5f5f5;
+  background-color: $input-surface;
 }
 
 .gooeyChat-chat-input textarea:focus {
-  outline: 1px solid $light;
+  outline: 1px solid $border-color;
 }
 
 .gooeyChat-chat-input textarea::placeholder {
@@ -67,5 +65,5 @@
 }
 
 .gooey-menu-item:hover {
-  background-color: $light;
+  background-color: $surface;
 }

@@ -263,12 +263,7 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div
-      className={clsx(
-        !config.branding.showPoweredByGooey && "gpb-8",
-        "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
-      )}
-    >
+    <div className="w-100 bg-background">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">

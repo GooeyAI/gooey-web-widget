@@ -246,7 +246,7 @@ const IncomingMsg = memo(
       return <ResponseLoader show={true} />;
 
     return (
-      <div className="gooey-incomingMsg gpb-12 mw-100">
+      <div className="gooey-incomingMsg gpb-12 mw-100 text-">
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,

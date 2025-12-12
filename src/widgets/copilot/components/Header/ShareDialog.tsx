@@ -90,7 +90,7 @@ const ShareDialog = ({
       fullWidth
     >
       <div className="d-flex flex-col gap-8">
-        <div className="bg-white b-1 br-large gp-16 gmb-12">
+        <div className="bg-background b-1 br-large gp-16 gmb-12">
           <div className="d-flex align-center justify-between gmb-12 gap-12 flex-wrap">
             <div>
               <p className="font_13_500 text-muted gmb-4">

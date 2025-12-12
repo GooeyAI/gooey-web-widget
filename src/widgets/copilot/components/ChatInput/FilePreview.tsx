@@ -136,7 +136,7 @@ const ImagePreviewItem = ({
           }}
         >
           <IconButton
-            className="bg-white gp-4 b-1"
+            className="bg-background gp-4 b-1"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -176,7 +176,7 @@ export const FilePreviewItem = ({
     ? { mainString: file?.name, extension: file?.name?.split(".")[1] }
     : extractFileDetails(file?.title || file?.url || "");
   const [title] = (mainString || "").split(",");
-  const fileName = file?.name ?file?.name?.split(".")[0] : title;
+  const fileName = file?.name ? file?.name?.split(".")[0] : title;
   const fileExtension = file?.name?.split(".")[1] || extension?.split(".")[1];
   // support both blob and direct urls
 
@@ -214,7 +214,7 @@ export const FilePreviewItem = ({
           }}
         >
           <IconButton
-            className="bg-white gp-2 b-1"
+            className="bg-background gp-2 b-1"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

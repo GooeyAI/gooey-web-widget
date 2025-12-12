@@ -21,7 +21,7 @@ const Launcher = () => {
       <button
         onClick={layoutController?.toggleOpenClose}
         className={clsx(
-          "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-white",
+          "gooeyChat-launchButton hover-grow cr-pointer bx-shadowA button-hover bg-background",
           config?.branding.fabLabel && "gpl-6 gpt-6 gpb-6 ",
         )}
         style={{ borderRadius: "30px", padding: 0 }}

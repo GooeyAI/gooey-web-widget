@@ -38,8 +38,8 @@ const BotProfile = () => {
         </div>
       )}
       <div>
-        <p className="font_24_500 gmb-16">{branding.name}</p>
-        <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
+        <p className="font_24_500 gmb-16 text-primary">{branding.name}</p>
+        <p className="font_12_500 text-secondary gmb-12 d-flex align-center justify-center">
           {branding.byLine}
           {branding.websiteUrl && (
             <span className="gml-4" style={{ marginBottom: "-2px" }}>

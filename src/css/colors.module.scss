@@ -1,34 +1,58 @@
 @import "./_breakpoints.scss";
 @import "./_mixins.scss";
 
-$primary: hsl(169, 55%, 82%);
-$secondary: hsl(12, 100%, 97%);
-$dark-grey: #282626;
-$white: #fff;
-$grey: #f9f9f9;
-$light-grey: #f5f5f5;
-$light: #f0f0f0;
-$border-color: #eee;
-$muted: #6c757d;
-$almost-black: #090909;
-$gooey-danger: #dc3545;
+// MUI-like palette keyed for utility classes and theme variables
+$primary: var(--gooey-accent, hsl(169, 55%, 82%));
+$secondary: var(--gooey-secondary-bg, hsl(12, 100%, 97%));
+$text-primary: var(--gooey-text, #090909);
+$text-secondary: var(--gooey-muted, #6c757d);
+$background: var(--gooey-bg, #fff);
+$surface: var(--gooey-secondary-bg, #f9f9f9);
+$divider: var(--gooey-border, #eee);
+$input-surface: var(--gooey-input-bg, #f5f5f5);
+$error: #dc3545;
+$warning: #f4b300;
+$success: #0f9d58;
+$border-color: $divider; // legacy variable used in shared SCSS
+
+// Utility map driving .bg-*, .text-*, .b-* classes
 $colors: (
+                                                                // core palette
   "primary": $primary,
   "secondary": $secondary,
-  "darkGrey": $dark-grey,
-  "white": $white,
-  "grey": $grey,
-  "light": $light,
-    "lightGrey": $light-grey,
-  "muted": $muted,
-  "almostBlack": $almost-black,
-  "gooeyDanger": $gooey-danger,
+                                                                "textPrimary": $text-primary,
+                                                                "textSecondary": $text-secondary,
+                                                                "background": $background,
+                                                                "surface": $surface,
+                                                                "divider": $divider,
+                                                                "inputSurface": $input-surface,
+                                                                "error": $error,
+                                                                "warning": $warning,
+                                                                "success": $success,
+                                
+                                                                // legacy aliases to reduce breakage while we migrate
+                                                                "almostBlack": $text-primary,
+                                                                "darkGrey": $text-secondary,
+                                                                "white": $background,
+                                                                "grey": $surface,
+                                                                "light": $surface,
+                                                                "lightGrey": $surface,
+                                                                "muted": $text-secondary,
+                                                                "gooeyDanger": $error,
+                                                                "chatInputLegacy": $input-surface,
 );
 
 :export {
   primary: $primary;
   secondary: $secondary;
-  border-color: $border-color;
-  gooeyDanger: $gooey-danger;
-  lightGrey: $light-grey;
+  textPrimary: $text-primary;
+    textSecondary: $text-secondary;
+    background: $background;
+    surface: $surface;
+    divider: $divider;
+    inputSurface: $input-surface;
+    error: $error;
+    warning: $warning;
+    success: $success;
+    border-color: $divider;
 }

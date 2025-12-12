@@ -18,6 +18,15 @@ export interface CopilotConfigType {
   showRunLink: boolean;
   enableShareConversation: boolean;
   conversationData?: any;
+  theme?: {
+    accentColor?: string;
+    primaryBackgroundColor?: string;
+    secondaryBackgroundColor?: string;
+    primaryTextColor?: string;
+    mutedTextColor?: string;
+    borderColor?: string;
+    inputBackgroundColor?: string;
+  };
   branding: {
     name?: string;
     title?: string;

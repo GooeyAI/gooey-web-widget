@@ -25,7 +25,7 @@
 }
 
 .sources-card {
-  background-color: $light;
+  background-color: $surface;
   border-radius: 12px;
   cursor: pointer;
   min-width: 160px;
@@ -36,7 +36,7 @@
 }
 
 .sources-card:hover {
-  border: 1px solid $muted;
+  border: 1px solid $border-color;
 }
 
 .sources-card-disabled:hover {
@@ -66,15 +66,15 @@
   details {
     border: 2px solid $border-color;
     border-radius: 12px;
-    background-color: $white;
+    background-color: $background;
     margin: 8px 0;
   }
 
   summary {
-    background-color: $light;
+    background-color: $surface;
     padding: 4px 8px;
     cursor: pointer;
-    color: $muted;
+    color: $text-secondary;
     border: none;
     border-radius: 10px;
     outline: none;
@@ -89,7 +89,7 @@
 
     &::after {
       content: "▼";
-      color: $muted;
+      color: $text-secondary;
       font-size: 14px;
       margin-left: auto;
       transition: transform 0.2s ease;
@@ -110,7 +110,7 @@
     
     &::after {
       transform: rotate(180deg);
-      color: $muted;
+      color: $text-secondary;
     }
   }
 }
