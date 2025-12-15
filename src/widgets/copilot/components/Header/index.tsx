@@ -51,7 +51,7 @@ const Header = () => {
 
     const regex = /\/share\/.*/;
     normalizedPath = url.pathname.replace(regex, "");
-    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
+    url.pathname = `${normalizedPath}share/${currentConversation?.id}`;
     url.hash = "";
     return url.toString();
   };
