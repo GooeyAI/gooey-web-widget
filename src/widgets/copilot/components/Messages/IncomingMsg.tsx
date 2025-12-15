@@ -299,7 +299,7 @@ const IncomingMsg = memo(
             />
           )}
         </div>
-        {props.showSources && references && references?.length && (
+        {props.showSources && references && !!references?.length && (
           <SourcesSection {...props.data} />
         )}
       </div>

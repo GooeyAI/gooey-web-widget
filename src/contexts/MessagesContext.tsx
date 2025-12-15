@@ -131,6 +131,12 @@ export interface SearchReference {
   score: number;
 }
 
+export interface OpenAPIMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface RequestModel {
   conversation_id?: string;
   user_id?: string;
@@ -148,6 +154,7 @@ export interface RequestModel {
   input_images?: string[];
   input_documents?: string[];
   citation_style?: string;
+  messages?: OpenAPIMessage[];
 }
 
 // This is absolutely disgusting, but it works
@@ -216,6 +223,19 @@ const MessagesContextProvider = ({
       ? undefined
       : currentConversation.current?.id;
     setIsSendingMessage(true);
+    if (!conversationId && isSharedConversation) {
+      // make messages array in payload from messages in currentConversation and add
+      payload.messages = currentConversation.current?.messages?.map(
+        (message) => ({
+          id: message.id,
+          role: message.role,
+          content:
+            message.role === "user"
+              ? message.input_prompt || ""
+              : message.raw_output_text?.[0] || "",
+        }),
+      );
+    }
     setIsSharedConversation(false); //reset shared conversation flag
     sendPayload(
       {
