@@ -37,7 +37,7 @@ export interface MessagesContextType {
   scrollMessageContainer?: (y?: number) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
   isReceiving?: boolean;
-  conversations?: Conversation[];
+  conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
   currentConversation?: Conversation | null;
   isMessagesLoading?: boolean;
