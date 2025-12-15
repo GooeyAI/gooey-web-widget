@@ -17,14 +17,20 @@ import ShareDialog from "./ShareDialog";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
-  const { messages, handleNewConversation, currentConversation } =
-    useMessagesContext();
+  const {
+    messages,
+    handleNewConversation,
+    currentConversation,
+    isSending,
+    isReceiving,
+  } = useMessagesContext();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
 
+  console.log(config, "config");
   const conversationTitle = useMemo(
     () => currentConversation?.title || branding?.title || "Conversation",
     [currentConversation?.title, branding?.title],
@@ -153,18 +159,23 @@ const Header = () => {
           )}
           {/* Share conversation button */}
           {config?.enableShareConversation && !isEmpty && (
-            <GooeyTooltip text="Share Conversation" disabled={isEmpty}>
+            <GooeyTooltip
+              text="Share Conversation"
+              disabled={isSending || isReceiving}
+            >
               <IconButton
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
                 onClick={handleShareConversation}
+                disabled={isSending || isReceiving}
               >
                 <IconArrowUpBracket size={22} />
               </IconButton>
             </GooeyTooltip>
           )}
-          {/* New Chat button */}
-          {layoutController?.isInline && (
+
+          {/* New Chat button - hide when enableShareConversation is false */}
+          {layoutController?.showNewConversationButton && (
             <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
               <IconButton
                 disabled={isEmpty}
