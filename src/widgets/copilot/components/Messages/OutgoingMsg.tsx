@@ -17,7 +17,7 @@ interface ButtonPressed {
 
 interface OutgoingMsgProps {
   input_prompt?: string;
-  input_audio?: Blob;
+  input_audio?: Blob | string | string[];
   input_images?: string[];
   input_documents?: string[];
   button_pressed?: ButtonPressed;
@@ -81,6 +81,8 @@ const OutgoingMsg = memo(
         ? getTruncatedText(input_prompt)
         : input_prompt;
 
+    const input_audio_url = resolveInputAudioUrl(input_audio);
+
     return (
       <div className="d-flex flex-col align-end">
         <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
@@ -117,21 +119,14 @@ const OutgoingMsg = memo(
               />
             </div>
           )}
-          {input_audio && (
+          {input_audio_url && (
             <div
               className={clsx(
                 `gpr-${MESSAGE_GUTTER}`,
                 input_prompt && "gmt-16",
               )}
             >
-              <audio
-                controls
-                src={
-                  typeof input_audio === "string"
-                    ? input_audio
-                    : (URL || webkitURL).createObjectURL(input_audio as Blob)
-                }
-              ></audio>
+              <audio controls src={input_audio_url}></audio>
             </div>
           )}
           {input_prompt && (
@@ -152,14 +147,7 @@ const OutgoingMsg = memo(
                 {displayText}
               </p>
               {isLargeMessage && (
-                <div
-                // style={{
-                //   position: "absolute",
-                //   right: "8px",
-                //   top: "4px",
-                //   zIndex: 1000,
-                // }}
-                >
+                <div>
                   <GooeyTooltip
                     text={isExpanded ? "Collapse message" : "Expand message"}
                   >
@@ -210,6 +198,15 @@ const OutgoingMsg = memo(
 );
 
 export default OutgoingMsg;
+
+function resolveInputAudioUrl(
+  input_audio?: Blob | string | string[],
+): string | undefined {
+  if (!input_audio) return undefined;
+  if (Array.isArray(input_audio)) return input_audio[0];
+  if (typeof input_audio === "string") return input_audio;
+  return (URL || webkitURL).createObjectURL(input_audio as Blob);
+}
 
 function buildOpenStreetMapEmbedUrl(
   latitude: number,
