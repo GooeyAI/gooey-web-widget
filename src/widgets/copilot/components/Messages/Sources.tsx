@@ -346,7 +346,9 @@ export const SourcesSection = ({
           </IconButton>
         </div>
       </div>
-      {isExpanded && <SourcesList sources={references} />}
+      {isExpanded && references && references?.length && (
+        <SourcesList sources={references} />
+      )}
     </div>
   );
 };
@@ -358,7 +360,7 @@ const SourcesList = ({
   sources: SourceData[];
   isInline?: boolean;
 }) => {
-  if (!sources?.length) return null;
+  if (!sources || !sources?.length) return null;
 
   return (
     <div className="text-reveal-container">
