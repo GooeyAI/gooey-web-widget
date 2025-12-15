@@ -30,7 +30,6 @@ const Header = () => {
   const branding = config?.branding;
   const onClose = config?.onClose;
 
-  console.log(config, "config");
   const conversationTitle = useMemo(
     () => currentConversation?.title || branding?.title || "Conversation",
     [currentConversation?.title, branding?.title],
@@ -51,13 +50,13 @@ const Header = () => {
   const buildShareUrl = () => {
     if (!currentConversation?.id) return "";
     const url = new URL(window.location.href);
+
+    const regex = /\/share\/.*/;
     let normalizedPath = url.pathname.endsWith("/")
       ? url.pathname.slice(0, -1)
       : url.pathname;
-
-    const regex = /\/share\/.*/;
-    normalizedPath = url.pathname.replace(regex, "");
-    url.pathname = `${normalizedPath}share/${currentConversation?.id}`;
+    normalizedPath = normalizedPath.replace(regex, "");
+    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
     url.hash = "";
     return url.toString();
   };
