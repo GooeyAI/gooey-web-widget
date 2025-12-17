@@ -21,7 +21,8 @@ interface ResponseData {
 
 // Constants
 const AUDIO_EMOJI_REPLACEMENTS = {
-  "🎧 I heard": "🎙️",
+  "🎧 I heard:": "",
+  "🎧:": "",
 };
 
 // Marked configuration
