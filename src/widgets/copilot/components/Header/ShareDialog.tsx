@@ -6,6 +6,11 @@ import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconArrowUpBracket from "src/assets/SvgIcons/IconArrowUpBracket";
 import IncomingMsg from "../Messages/IncomingMsg";
 import OutgoingMsg from "../Messages/OutgoingMsg";
+import GooeyTooltip from "src/components/shared/Tooltip";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import clsx from "clsx";
+import { Conversation } from "src/contexts/ConversationLayer";
+import { CopilotConfigType } from "src/contexts/types";
 
 type ShareDialogProps = {
   open: boolean;
@@ -201,4 +206,86 @@ const ShareDialog = ({
   );
 };
 
-export default ShareDialog;
+const ShareButton = ({
+  disabled,
+  currentConversation,
+  messages,
+  config,
+}: {
+  disabled: boolean;
+  currentConversation: Conversation | null;
+  messages: Map<string, any>;
+  config: CopilotConfigType;
+}) => {
+  const branding = config?.branding;
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+
+  const conversationTitle = useMemo(
+    () => currentConversation?.title || branding?.title || "Conversation",
+    [currentConversation?.title, branding?.title],
+  );
+
+  const [firstAssistantMessage, firstUserMessage] = useMemo(() => {
+    if (!messages?.size) return [null, null];
+    let assistantMessage = null;
+    let userMessage = null;
+    for (const msg of messages.values()) {
+      if (msg?.role === "user") userMessage = msg;
+      else assistantMessage = msg;
+      if (userMessage && assistantMessage) break;
+    }
+    return [assistantMessage, userMessage];
+  }, [messages]);
+
+  const buildShareUrl = () => {
+    if (!currentConversation?.id) return "";
+    const url = new URL(window.location.href);
+
+    const regex = /\/share\/.*/;
+    let normalizedPath = url.pathname.endsWith("/")
+      ? url.pathname.slice(0, -1)
+      : url.pathname;
+    normalizedPath = normalizedPath.replace(regex, "");
+    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
+    url.hash = "";
+    return url.toString();
+  };
+
+  const handleShareConversation = () => {
+    const url = buildShareUrl();
+    if (!url) return;
+    setShareUrl(url);
+    setShareDialogOpen(true);
+    navigator.clipboard.writeText(url).catch(() => undefined);
+  };
+
+  const closeShareDialog = () => setShareDialogOpen(false);
+
+  return (
+    <>
+      <ShareDialog
+        open={shareDialogOpen}
+        onClose={closeShareDialog}
+        shareUrl={shareUrl}
+        conversationTitle={conversationTitle}
+        botTitle={branding?.title}
+        firstAssistantMessage={firstAssistantMessage}
+        firstUserMessage={firstUserMessage}
+        linkColor={config?.branding?.colors?.primary}
+        showSources={config?.showSources}
+      />
+      <GooeyTooltip text="Share Conversation" disabled={disabled}>
+        <IconButton
+          variant="text"
+          className={clsx("gp-8 cr-pointer flex-1")}
+          onClick={handleShareConversation}
+          disabled={disabled}
+        >
+          <IconArrowUpBracket size={22} />
+        </IconButton>
+      </GooeyTooltip>
+    </>
+  );
+};
+export { ShareButton };

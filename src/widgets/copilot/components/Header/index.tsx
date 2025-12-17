@@ -2,7 +2,6 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import clsx from "clsx";
 import { SystemContextType } from "src/contexts/SystemContext";
-import { useMemo, useState } from "react";
 
 import IconExpand from "src/assets/SvgIcons/IconExpand";
 import IconCollapse from "src/assets/SvgIcons/IconCollapse";
@@ -12,8 +11,7 @@ import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
 import IconClose from "src/assets/SvgIcons/IconClose";
-import IconArrowUpBracket from "src/assets/SvgIcons/IconArrowUpBracket";
-import ShareDialog from "./ShareDialog";
+import { ShareButton } from "./ShareDialog";
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
@@ -24,52 +22,9 @@ const Header = () => {
     isSending,
     isReceiving,
   } = useMessagesContext();
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
-
-  const conversationTitle = useMemo(
-    () => currentConversation?.title || branding?.title || "Conversation",
-    [currentConversation?.title, branding?.title],
-  );
-
-  const [firstAssistantMessage, firstUserMessage] = useMemo(() => {
-    if (!messages?.size) return [null, null];
-    let assistantMessage = null;
-    let userMessage = null;
-    for (const msg of messages.values()) {
-      if (msg?.role === "user") userMessage = msg;
-      else assistantMessage = msg;
-      if (userMessage && assistantMessage) break;
-    }
-    return [assistantMessage, userMessage];
-  }, [messages]);
-
-  const buildShareUrl = () => {
-    if (!currentConversation?.id) return "";
-    const url = new URL(window.location.href);
-
-    const regex = /\/share\/.*/;
-    let normalizedPath = url.pathname.endsWith("/")
-      ? url.pathname.slice(0, -1)
-      : url.pathname;
-    normalizedPath = normalizedPath.replace(regex, "");
-    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
-    url.hash = "";
-    return url.toString();
-  };
-
-  const handleShareConversation = () => {
-    const url = buildShareUrl();
-    if (!url) return;
-    setShareUrl(url);
-    setShareDialogOpen(true);
-    navigator.clipboard.writeText(url).catch(() => undefined);
-  };
-
-  const closeShareDialog = () => setShareDialogOpen(false);
 
   return (
     <div
@@ -156,22 +111,17 @@ const Header = () => {
               </IconButton>
             </GooeyTooltip>
           )}
-          {/* Share conversation button */}
-          {config?.enableShareConversation && !isEmpty && (
-            <GooeyTooltip
-              text="Share Conversation"
-              disabled={isSending || isReceiving}
-            >
-              <IconButton
-                variant="text"
-                className={clsx("gp-8 cr-pointer flex-1")}
-                onClick={handleShareConversation}
-                disabled={isSending || isReceiving}
-              >
-                <IconArrowUpBracket size={22} />
-              </IconButton>
-            </GooeyTooltip>
-          )}
+          {/* Share conversation button - only show in gooey app site mode */}
+          {config?.enableShareConversation &&
+            !isEmpty &&
+            layoutController?.isGooeyChatApp && (
+              <ShareButton
+                currentConversation={currentConversation || null}
+                messages={messages}
+                config={config}
+                disabled={isSending || isReceiving || false}
+              />
+            )}
 
           {/* New Chat button - hide when enableShareConversation is false */}
           {layoutController?.showNewConversationButton && (
@@ -197,17 +147,6 @@ const Header = () => {
           )}
         </div>
       </div>
-      <ShareDialog
-        open={shareDialogOpen}
-        onClose={closeShareDialog}
-        shareUrl={shareUrl}
-        conversationTitle={conversationTitle}
-        botTitle={branding?.title}
-        firstAssistantMessage={firstAssistantMessage}
-        firstUserMessage={firstUserMessage}
-        linkColor={config?.branding?.colors?.primary}
-        showSources={config?.showSources}
-      />
     </div>
   );
 };

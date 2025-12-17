@@ -34,6 +34,12 @@ const toggleSidebarStyles = (
   }
 };
 
+const isGooeyChatAppFromURL = (integrationId: string) => {
+  // match chat/{integartion-name}-{integrationId}/*
+  const regex = new RegExp(`^/chat/[^/]+-${integrationId}(?:/share/[^/]+)?/?$`);
+  return window.location.pathname.match(regex) ? true : false;
+};
+
 interface LayoutController extends LayoutStateType {
   toggleOpenClose: () => void;
   toggleSidebar: () => void;
@@ -47,6 +53,7 @@ type LayoutStateType = {
   isFocusMode: boolean;
   isInline: boolean; // true - when widget is mounted in fullscreen / inline mode
   isMobile: boolean; // true - when widget is <= mobile
+  isGooeyChatApp: boolean; // true - when widget is mounted in gooey chat widget site (chat/name-{integrationId})
 
   isSidebarOpen: boolean;
   isSecondaryDrawerOpen: boolean;
@@ -92,6 +99,7 @@ const SystemContextProvider = ({
     isMobile: false,
     isSecondaryDrawerOpen: false,
     secondaryDrawerContent: () => null,
+    isGooeyChatApp: false,
   });
   const forceHideSidebar = !layoutState?.showNewConversationButton;
   const [isMobile, isMobileWindow] = useDeviceWidth(shadowRoot, "mobile", [
@@ -209,6 +217,7 @@ const SystemContextProvider = ({
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
       isMobileWindow,
+      isGooeyChatApp: isGooeyChatAppFromURL(config?.integration_id || ""),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);

@@ -383,7 +383,7 @@ const MessagesContextProvider = ({
           (conversation) => conversation.id === config?.conversationData?.id,
         );
 
-      // checks conversation.id is already in the conversations array, set it as the active conversation
+      // checks conversation.id is already in the conversations DB, set it as the active conversation
       if (existingConversation) {
         setActiveConversation(existingConversation);
         config.conversationData = null;

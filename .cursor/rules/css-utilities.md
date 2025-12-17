@@ -10,3 +10,5 @@
 - Shadows/animations: `bx-shadowA/B`, `anim-typing`, `anim-blink`, `circular-loader`, `text-reveal-container`; reuse before adding new effects.
 - Layout helpers: `mw-760`, `h-header`, `cr-pointer`, scroll helpers `gooey-scroll-wrapper` / `gooey-scroll-container`.
 - For tooltips, prefer `[data-tooltip]` attribute styling over ad-hoc tooltip CSS.
+- Always reach for existing utility classes documented in `docs/css-utilities.md` before creating new styles.
+- Avoid inline styles; only use them when utilities cannot express a required effect (e.g., complex gradients or bespoke animations).
