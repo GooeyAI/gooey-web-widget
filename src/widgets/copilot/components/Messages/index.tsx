@@ -57,10 +57,12 @@ const Messages = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className={clsx("flex-1 bg-white gpt-16 overflow-y-auto w-100")}
+      className={clsx(
+        "flex-1 bg-white gpt-16 overflow-y-auto w-100 stable-scroll-container",
+      )}
     >
       <div
-        className="mw-760 d-flex flex-col gpl-8 stable-scroll-container"
+        className="mw-760 d-flex flex-col gpl-8"
         style={{ marginLeft: "auto", marginRight: "auto" }}
       >
         <Responses
