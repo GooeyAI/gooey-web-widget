@@ -263,139 +263,137 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div className="w-100">
+    <div
+      className={clsx(
+        !config.branding.showPoweredByGooey && "gpb-8",
+        "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
+      )}
+    >
       {!messages?.size && !isSending && <PlaceholderMessage />}
-      <div
-        className={clsx(
-          "gooeyChat-chat-input gpl-8 gpr-8 mw-760 gpt-8",
-          !config.branding.showPoweredByGooey && "gpb-8",
-        )}
-      >
-        {files && files.length > 0 && (
-          <div className="gp-12 b-1 br-large gmb-12 gm-12">
-            <FilePreview files={files} onRemove={handleRemoveFile} />
-          </div>
-        )}
-        {isRecording ? (
-          <InlineAudioRecorder
-            onSend={handleSendAudio}
-            onCancel={() => setIsRecording(false)}
-          />
-        ) : (
-          <div className="pos-relative d-flex">
-            {/* Left icons */}
-            {isLeftButtons && (
-              <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
-                <GooeyPopper
-                  showModal={isMenuOpen}
-                  direction={{ x: "left", y: "top" }}
-                  ModalContent={() => (
-                    <div className="gp-8">
-                      <Button
-                        className="w-100 text-left"
-                        style={{ minWidth: "100px" }}
-                        variant="text-alt"
-                        onClick={handleFileMenuClick}
-                        LeftIconComponent={() => <IconFile size={16} />}
-                      >
-                        <p className="font_14_500">File</p>
-                      </Button>
-                      <Button
-                        className="w-100 text-left"
-                        variant="text-alt"
-                        onClick={handlePhotoMenuClick}
-                        LeftIconComponent={() => <IconImage size={16} />}
-                      >
-                        <p className="font_14_500">Image or Video </p>
-                      </Button>
-                      {isMobile() && (
-                        <Button
-                          className="w-100 text-left"
-                          variant="text-alt"
-                          onClick={handleTakePhotoClick}
-                          LeftIconComponent={() => <IconCamera size={16} />}
-                        >
-                          <p className="font_14_500">Take Photo</p>
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                >
-                  <div ref={menuButtonRef} style={{ display: "inline-block" }}>
-                    <IconButton
-                      onClick={() => setIsMenuOpen((v) => !v)}
+      {files && files.length > 0 && (
+        <div className="gp-12 b-1 br-large gmb-12 gm-12">
+          <FilePreview files={files} onRemove={handleRemoveFile} />
+        </div>
+      )}
+      {isRecording ? (
+        <InlineAudioRecorder
+          onSend={handleSendAudio}
+          onCancel={() => setIsRecording(false)}
+        />
+      ) : (
+        <div className="pos-relative d-flex">
+          {/* Left icons */}
+          {isLeftButtons && (
+            <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
+              <GooeyPopper
+                showModal={isMenuOpen}
+                direction={{ x: "left", y: "top" }}
+                ModalContent={() => (
+                  <div className="gp-8">
+                    <Button
+                      className="w-100 text-left"
+                      style={{ minWidth: "100px" }}
                       variant="text-alt"
-                      isPressed={isMenuOpen}
-                      className={clsx("gp-4 h-100", isMenuOpen && "depressed")}
+                      onClick={handleFileMenuClick}
+                      LeftIconComponent={() => <IconFile size={16} />}
                     >
-                      <IconPlus size={18} />
-                    </IconButton>
+                      <p className="font_14_500">File</p>
+                    </Button>
+                    <Button
+                      className="w-100 text-left"
+                      variant="text-alt"
+                      onClick={handlePhotoMenuClick}
+                      LeftIconComponent={() => <IconImage size={16} />}
+                    >
+                      <p className="font_14_500">Image or Video </p>
+                    </Button>
+                    {isMobile() && (
+                      <Button
+                        className="w-100 text-left"
+                        variant="text-alt"
+                        onClick={handleTakePhotoClick}
+                        LeftIconComponent={() => <IconCamera size={16} />}
+                      >
+                        <p className="font_14_500">Take Photo</p>
+                      </Button>
+                    )}
                   </div>
-                </GooeyPopper>
-              </div>
-            )}
-
-            {/* Typing area */}
-            <textarea
-              value={value}
-              ref={inputRef as any}
-              id={CHAT_INPUT_ID}
-              onChange={handleInputChange}
-              onKeyDown={handlePressEnter}
-              className={clsx(
-                "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
-              )}
-              placeholder={
-                config?.branding.inputPlaceholderText ||
-                `Message ${config?.branding.title || ""}`
-              }
-            ></textarea>
-
-            {/* Right icons */}
-            <div className="input-right-buttons">
-              {!files?.length &&
-                !showStop &&
-                config?.enableAudioMessage &&
-                !value && (
-                  <IconButton onClick={handleRecordClick} variant="text-alt">
-                    <IconMicrophone size={18} />
-                  </IconButton>
                 )}
-              {/* Send Actions */}
-              {(!!value ||
-                !config?.enableAudioMessage ||
-                showStop ||
-                !!files?.length) && (
-                <IconButton
-                  disabled={disableSend}
-                  variant="text-alt"
-                  className="gp-4"
-                  onClick={showStop ? handleCancelSend : handleSendMessage}
-                  style={{ color: colors?.primary || "default" }}
-                >
-                  {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
+              >
+                <div ref={menuButtonRef} style={{ display: "inline-block" }}>
+                  <IconButton
+                    onClick={() => setIsMenuOpen((v) => !v)}
+                    variant="text-alt"
+                    isPressed={isMenuOpen}
+                    className={clsx("gp-4 h-100", isMenuOpen && "depressed")}
+                  >
+                    <IconPlus size={18} />
+                  </IconButton>
+                </div>
+              </GooeyPopper>
+            </div>
+          )}
+
+          {/* Typing area */}
+          <textarea
+            value={value}
+            ref={inputRef as any}
+            id={CHAT_INPUT_ID}
+            onChange={handleInputChange}
+            onKeyDown={handlePressEnter}
+            className={clsx(
+              "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
+            )}
+            placeholder={
+              config?.branding.inputPlaceholderText ||
+              `Message ${config?.branding.title || ""}`
+            }
+          ></textarea>
+
+          {/* Right icons */}
+          <div className="input-right-buttons">
+            {!files?.length &&
+              !showStop &&
+              config?.enableAudioMessage &&
+              !value && (
+                <IconButton onClick={handleRecordClick} variant="text-alt">
+                  <IconMicrophone size={18} />
                 </IconButton>
               )}
-            </div>
+            {/* Send Actions */}
+            {(!!value ||
+              !config?.enableAudioMessage ||
+              showStop ||
+              !!files?.length) && (
+              <IconButton
+                disabled={disableSend}
+                variant="text-alt"
+                className="gp-4"
+                onClick={showStop ? handleCancelSend : handleSendMessage}
+                style={{ color: colors?.primary || "default" }}
+              >
+                {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
+              </IconButton>
+            )}
           </div>
-        )}
-        {/* Gooey Branding */}
-        {!!config.branding.showPoweredByGooey && (
-          <p
-            className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
-            style={{ fontSize: "8px" }}
+        </div>
+      )}
+      {/* Gooey Branding */}
+      {!!config.branding.showPoweredByGooey && (
+        <p
+          className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
+          style={{ fontSize: "8px" }}
+        >
+          Powered by{" "}
+          <a
+            href="https://gooey.ai/copilot/"
+            target="_ablank"
+            className="text-darkGrey text-underline"
           >
-            Powered by{" "}
-            <a
-              href="https://gooey.ai/copilot/"
-              target="_ablank"
-              className="text-darkGrey text-underline"
-            >
-              Gooey.AI
-            </a>
-          </p>
-        )}
-      </div>
+            Gooey.AI
+          </a>
+        </p>
+      )}
     </div>
   );
 };
