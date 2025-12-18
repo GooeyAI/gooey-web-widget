@@ -67,7 +67,7 @@ const AppLayout = ({ children }: Props) => {
         {layoutController?.isSidebarOpen && layoutController?.isMobile && (
           <ClickAwayListener onClick={layoutController?.toggleSidebar} />
         )}
-        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100">
+        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100 bg-white">
           <Header />
           {children}
         </main>
