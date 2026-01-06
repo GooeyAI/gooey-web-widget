@@ -112,6 +112,22 @@
   align-items: stretch !important;
 }
 
+// gap utilities (both axes and all) use shared spacing scale
+$gap-values: $space-values !default;
+
+@each $value in $gap-values {
+  .gap-#{$value} {
+    gap: #{$value}px !important;
+  }
+
+  .gap-x-#{$value} {
+    column-gap: #{$value}px !important;
+  }
+
+  .gap-y-#{$value} {
+    row-gap: #{$value}px !important;
+  }
+}
 @each $breakpoint in map-keys($grid-breakpoints) {
   @include media-breakpoint-up($breakpoint) {
     $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
@@ -192,6 +208,19 @@
       align-items: unset !important;
     }
 
+        @each $value in $gap-values {
+          .#{$infix}-gap-#{$value} {
+            gap: #{$value}px !important;
+          }
+    
+          .#{$infix}-gap-x-#{$value} {
+            column-gap: #{$value}px !important;
+          }
+    
+          .#{$infix}-gap-y-#{$value} {
+            row-gap: #{$value}px !important;
+          }
+        }
     .#{$infix}-justify-start {
       justify-self: flex-start !important;
     }
