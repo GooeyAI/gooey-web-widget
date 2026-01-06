@@ -24,6 +24,9 @@ type GooeyDialogProps = {
   disableBackdropClick?: boolean;
   className?: string;
   bodyClassName?: string;
+  variant?: "default" | "bare";
+  leftActions?: ReactNode;
+  rightActions?: ReactNode;
 };
 
 const GooeyDialog = ({
@@ -39,18 +42,26 @@ const GooeyDialog = ({
   disableBackdropClick = false,
   className = "",
   bodyClassName = "",
+  variant = "default",
+  leftActions,
+  rightActions,
 }: GooeyDialogProps) => {
   const shadowRoot = useContext(ShadowRootContext);
   const container =
     shadowRoot?.querySelector(".gooey-embed-container") || document.body;
 
   const titleId = useMemo(
-    () => (title ? `gooey-dialog-title-${Math.random().toString(36).slice(2)}` : undefined),
+    () =>
+      title
+        ? `gooey-dialog-title-${Math.random().toString(36).slice(2)}`
+        : undefined,
     [title],
   );
   const subtitleId = useMemo(
     () =>
-      subtitle ? `gooey-dialog-subtitle-${Math.random().toString(36).slice(2)}` : undefined,
+      subtitle
+        ? `gooey-dialog-subtitle-${Math.random().toString(36).slice(2)}`
+        : undefined,
     [subtitle],
   );
 
@@ -67,18 +78,31 @@ const GooeyDialog = ({
 
   if (!open) return null;
 
+  const isBare = variant === "bare";
+  const showHeader = !isBare && (title || subtitle);
+
   const dialogContent = (
     <div
       className="gooey-dialog-backdrop d-flex align-center justify-center gp-16"
       role="presentation"
       onClick={!disableBackdropClick ? onClose : undefined}
     >
+      {isBare && (leftActions || rightActions) && (
+        <div
+          className="gooey-dialog-bare-actions d-flex justify-between align-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="d-flex align-center gap-8">{leftActions}</div>
+          <div className="d-flex align-center gap-8">{rightActions}</div>
+        </div>
+      )}
       <div
         className={clsx(
           "gooey-dialog-paper d-flex flex-col w-100",
           `max-${maxWidth}`,
           fullWidth && "full-width",
           fullScreen && "full-screen",
+          isBare && "bare",
           className,
         )}
         role="dialog"
@@ -87,16 +111,22 @@ const GooeyDialog = ({
         aria-describedby={subtitleId}
         onClick={(e) => e.stopPropagation()}
       >
-        {(title || subtitle) && (
+        {showHeader && (
           <div className="gooey-dialog-header d-flex justify-between align-start gpt-20 gpb-12 gpl-24 gpr-24 gap-12">
             <div className="gooey-dialog-header-text flex-1">
               {title && (
-                <div id={titleId} className="gooey-dialog-title font_20_700 text-almostBlack">
+                <div
+                  id={titleId}
+                  className="gooey-dialog-title font_20_700 text-almostBlack"
+                >
                   {title}
                 </div>
               )}
               {subtitle && (
-                <div id={subtitleId} className="gooey-dialog-subtitle font_14_500 text-muted gmt-4">
+                <div
+                  id={subtitleId}
+                  className="gooey-dialog-subtitle font_14_500 text-muted gmt-4"
+                >
                   {subtitle}
                 </div>
               )}
@@ -112,11 +142,17 @@ const GooeyDialog = ({
           </div>
         )}
 
-        <div className={clsx("gooey-dialog-body gpl-24 gpr-24 gpb-20 overflow-y-auto flex-1", bodyClassName)}>
+        <div
+          className={clsx(
+            "gooey-dialog-body overflow-y-auto flex-1",
+            isBare ? "gp-0" : "gpl-24 gpr-24 gpb-20",
+            bodyClassName,
+          )}
+        >
           {children}
         </div>
 
-        {actions && (
+        {!isBare && actions && (
           <div className="gooey-dialog-actions d-flex justify-end align-center gap-12 gpt-16 gpb-20 gpl-24 gpr-24">
             {actions}
           </div>
