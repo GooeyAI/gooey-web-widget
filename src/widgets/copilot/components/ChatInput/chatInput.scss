@@ -25,6 +25,19 @@
   outline: 1px solid $light;
 }
 
+.gooeyChat-chat-input textarea::placeholder {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gooeyChat-chat-input textarea:placeholder-shown {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
 .input-left-buttons {
   position: relative;
   left: 4px;
