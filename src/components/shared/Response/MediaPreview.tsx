@@ -209,7 +209,12 @@ const MediaPreview = ({
     const commonStyle =
       variant === "inline"
         ? { maxWidth: "100%", height: "auto", display: "block" }
-        : { maxWidth: "90vw", maxHeight: "85vh", width: "100%", height: "100%" };
+        : {
+            maxWidth: "90vw",
+            maxHeight: "85vh",
+            width: "100%",
+            height: "100%",
+          };
 
     if (resolvedType === "video") {
       return (

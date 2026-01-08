@@ -12,6 +12,7 @@ import {
   isGoogleDocsEmbeddable,
   truncateMiddle,
 } from "../Messages/helpers";
+import MediaPreview from "src/components/shared/Response/MediaPreview";
 
 const FilePreview = ({
   files,
@@ -35,7 +36,7 @@ const FilePreview = ({
       openInSidebar({ url: fileURL, title: file.name });
     } else if (
       file?.data?.type?.includes("json") ||
-      file?.data?.type?.includes("image") || 
+      file?.data?.type?.includes("image") ||
       file?.url
     ) {
       openInSidebar({
@@ -67,7 +68,6 @@ const FilePreview = ({
                   onRemove?.(file?.id);
                 }}
                 fileURL={fileURL}
-                onClick={() => handleFileClick(file)}
                 isUploading={isUploading}
                 isRemovable={!!onRemove}
               />
@@ -96,20 +96,15 @@ const ImagePreviewItem = ({
   onRemove,
   fileURL,
   isUploading,
-  onClick,
   isRemovable,
 }: {
   onRemove: () => void;
   fileURL: string;
   isUploading: boolean;
-  onClick: (e: SyntheticEvent) => void;
   isRemovable: boolean;
 }) => {
   return (
-    <div
-      className={clsx("file-preview-box br-large pos-relative cr-pointer")}
-      onClick={onClick}
-    >
+    <div className={clsx("file-preview-box br-large pos-relative")}>
       {isUploading && (
         <div
           style={{
@@ -150,10 +145,16 @@ const ImagePreviewItem = ({
       <div
         className={clsx(
           isUploading && "uploading-box",
-          "overflow-hidden file-preview-box",
+          "overflow-hidden file-preview-box br-large b-1",
         )}
+        style={{
+          width: "100px",
+          height: "60px",
+          overflow: "hidden",
+          objectFit: "cover",
+        }}
       >
-        <img src={fileURL} alt={`preview-${name}`} className={"br-large b-1"} />
+        <MediaPreview src={fileURL} alt="preview" />
       </div>
     </div>
   );
