@@ -7,7 +7,7 @@ import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
 import Sources from "../../../widgets/copilot/components/Messages/Sources";
 import { extractLastPathSegment } from "../../../widgets/copilot/components/Messages/helpers";
 import { LaTeXExpression, latexProcessor } from "./latexProcessor";
-import MediaPreview from "./MediaPreview";
+import MediaPreview, { getMediaTypeFromUrl } from "./MediaPreview";
 
 // Types
 export interface DomNode {
@@ -144,6 +144,15 @@ export class DomNodeHandlers {
     if (domNode.name !== "a" || !domNode.attribs?.href) return;
 
     const href = domNode.attribs.href;
+
+    // Check if the link is a media URL - render as MediaPreview instead
+    const mediaType = getMediaTypeFromUrl(href);
+    if (mediaType) {
+      const linkText =
+        domNode.children?.[0]?.data || extractLastPathSegment(href);
+      return <MediaPreview src={href} alt={linkText} mediaType={mediaType} />;
+    }
+
     const source =
       this.findSourceByUrl(href, data) ||
       this.createSourceFromNode(domNode, href);

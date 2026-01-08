@@ -15,7 +15,7 @@ type MediaPreviewProps = {
   showActions?: boolean;
 };
 
-const videoExtensions = new Set([
+export const videoExtensions = new Set([
   "mp4",
   "webm",
   "ogg",
@@ -25,10 +25,41 @@ const videoExtensions = new Set([
   "mkv",
 ]);
 
+export const imageExtensions = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "svg",
+  "bmp",
+  "ico",
+]);
+
+/**
+ * Extract file extension from a URL (handles query params)
+ */
+const getExtensionFromUrl = (url: string): string | undefined => {
+  return url.split("?")[0]?.split(".").pop()?.toLowerCase();
+};
+
+/**
+ * Detect media type from URL - returns null if not a recognized media URL
+ */
+export const getMediaTypeFromUrl = (url: string): MediaType | null => {
+  const ext = getExtensionFromUrl(url);
+  if (!ext) return null;
+  if (videoExtensions.has(ext)) return "video";
+  if (imageExtensions.has(ext)) return "image";
+  return null;
+};
+
+/**
+ * Infer media type with fallback to image (for use when media type is expected)
+ */
 const inferMediaType = (src: string, explicit?: MediaType): MediaType => {
   if (explicit) return explicit;
-  const ext = src.split("?")[0]?.split(".").pop()?.toLowerCase();
-  return ext && videoExtensions.has(ext) ? "video" : "image";
+  return getMediaTypeFromUrl(src) ?? "image";
 };
 
 const styleContent = `
