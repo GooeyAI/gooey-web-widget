@@ -128,7 +128,11 @@ const replaceDomNode = (
   const imageResult = domHandlers.handleImage(domNode);
   if (imageResult) return imageResult;
 
-  // 5. Handle links
+  // 5. Handle videos
+  const videoResult = domHandlers.handleVideo(domNode);
+  if (videoResult) return videoResult;
+
+  // 6. Handle links
   const linkResult = domHandlers.handleLink(domNode, data, createParserOptions);
   if (linkResult) return linkResult;
 

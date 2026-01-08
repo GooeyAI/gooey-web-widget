@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { domToReact } from "html-react-parser";
 import CodeBlock from "src/components/shared/CodeBlock";
 import LaTeX from "src/components/shared/LaTeX";
@@ -7,12 +7,7 @@ import CollapsibleButton from "src/components/shared/Buttons/CollapisbleButton";
 import Sources from "../../../widgets/copilot/components/Messages/Sources";
 import { extractLastPathSegment } from "../../../widgets/copilot/components/Messages/helpers";
 import { LaTeXExpression, latexProcessor } from "./latexProcessor";
-import GooeyDialog from "src/components/shared/Dialog";
-import IconClose from "src/assets/SvgIcons/IconClose";
-import Button from "../Buttons/Button";
-import IconButton from "../Buttons/IconButton";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
-import IconDownload from "src/assets/SvgIcons/IconDownload";
+import MediaPreview from "./MediaPreview";
 
 // Types
 export interface DomNode {
@@ -43,125 +38,6 @@ export interface ProcessingData {
 
 // Constants
 const NUMBER_REFERENCE_REGEX = /\[\d+(,\s*\d+)*\]/g;
-
-const ImagePreview = ({ src, alt }: { src: string; alt?: string }) => {
-  const [open, setOpen] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(src);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 1500);
-  };
-
-  const handleDownload = async () => {
-    // Use fetch + blob to avoid browsers opening a new tab for cross-origin assets
-    try {
-      const response = await fetch(src, { mode: "cors" });
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      const filename = alt || src.split("/").pop()?.split("?")[0] || "image";
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    } catch (_err) {
-      // Fallback to opening in a new tab if download is blocked
-      window.open(src, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      setIsCopied(false);
-    };
-  }, []);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        style={{
-          padding: 0,
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          lineHeight: 0,
-        }}
-        aria-label={alt ? `Open image: ${alt}` : "Open image"}
-      >
-        <img
-          src={src}
-          alt={alt}
-          style={{ maxWidth: "100%", height: "auto", display: "block" }}
-        />
-      </button>
-
-      <GooeyDialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="xl"
-        fullWidth
-        variant="bare"
-        leftActions={
-          <IconButton
-            variant="filled"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-            }}
-            aria-label="Close dialog"
-          >
-            <IconClose size={18} />
-          </IconButton>
-        }
-        rightActions={
-          <>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownload();
-              }}
-              aria-label="Copy image link"
-              variant="filled"
-            >
-              <div className="d-flex align-center gap-8">
-                <span>Download</span>
-                <IconDownload size={18} />
-              </div>
-            </Button>
-            <Button
-              type="button"
-              className="gooey-dialog-bare-action-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopyLink();
-              }}
-              aria-label="Download image"
-              variant="filled"
-            >
-              <div className="d-flex align-center gap-8">
-                <span>{isCopied ? "Copied!" : "Copy link"}</span>
-                <IconCopy size={18} />
-              </div>
-            </Button>
-          </>
-        }
-        bodyClassName="d-flex align-center justify-center"
-      >
-        <img
-          src={src}
-          alt={alt}
-          style={{ maxWidth: "100%", height: "auto" }}
-          loading="lazy"
-        />
-      </GooeyDialog>
-    </>
-  );
-};
 
 export class DomNodeHandlers {
   public handleCodeBlock(
@@ -248,7 +124,16 @@ export class DomNodeHandlers {
     if (domNode.name !== "img" || !domNode.attribs?.src) return;
 
     const { src, alt } = domNode.attribs;
-    return <ImagePreview src={src} alt={alt} />;
+    return <MediaPreview src={src} alt={alt} />;
+  }
+
+  public handleVideo(domNode: DomNode): React.ReactElement | undefined {
+    if (domNode.name !== "video" || !domNode.attribs?.src) return;
+
+    const { src, alt, poster } = domNode.attribs;
+    return (
+      <MediaPreview src={src} alt={alt} poster={poster} mediaType="video" />
+    );
   }
 
   public handleLink(
