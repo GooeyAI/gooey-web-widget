@@ -123,16 +123,18 @@ const Header = () => {
               />
             )}
 
-          <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
-            <IconButton
-              disabled={isEmpty}
-              variant="text"
-              className={clsx("gp-8 cr-pointer flex-1")}
-              onClick={handleNewConversation}
-            >
-              <IconPencilEdit size={22} />
-            </IconButton>
-          </GooeyTooltip>
+          {layoutController?.isInline && (
+            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+              <IconButton
+                disabled={isEmpty}
+                variant="text"
+                className={clsx("gp-8 cr-pointer flex-1")}
+                onClick={handleNewConversation}
+              >
+                <IconPencilEdit size={22} />
+              </IconButton>
+            </GooeyTooltip>
+          )}
 
           {!!onClose && (
             <IconButton
