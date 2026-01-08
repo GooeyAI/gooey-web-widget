@@ -98,7 +98,6 @@ const styleContent = `
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    border: 1px solid rgba(255, 255, 255, 0.06);
   }
   .gw-media-content {
     flex: 1;
@@ -157,6 +156,42 @@ const styleContent = `
     border-radius: 8px;
     object-fit: contain;
     background: #000;
+  }
+  .gw-media-inline-wrapper {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+  }
+  .gw-media-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 8px;
+  }
+  .gw-media-play-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+  .gw-media-inline-btn:hover .gw-media-play-icon {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  .gw-media-play-icon svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 3px;
+    fill: #fff;
   }
 `;
 
@@ -248,11 +283,12 @@ const MediaPreview = ({
           };
 
     if (resolvedType === "video") {
-      return (
+      const videoElement = (
         <video
           style={commonStyle}
           controls={variant === "dialog"}
           muted={variant === "inline"}
+          autoPlay={variant === "dialog"}
           playsInline
           preload="metadata"
           poster={poster}
@@ -261,6 +297,29 @@ const MediaPreview = ({
           Your browser does not support the video tag.
         </video>
       );
+
+      // Add play button overlay for inline videos
+      if (variant === "inline") {
+        return (
+          <div className="gw-media-inline-wrapper">
+            {videoElement}
+            <div className="gw-media-play-overlay">
+              <div className="gw-media-play-icon">
+                <svg
+                  width={30}
+                  height={30}
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M8 5.14v14l11-7-11-7z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return videoElement;
     }
 
     return (
@@ -329,9 +388,7 @@ const MediaPreview = ({
 
   return (
     <>
-      <style>
-        {styleContent}
-      </style>
+      <style>{styleContent}</style>
       <button
         type="button"
         className="gw-media-inline-btn"
