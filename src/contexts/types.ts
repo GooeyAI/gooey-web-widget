@@ -6,9 +6,11 @@ export interface CopilotConfigType {
   enablePhotoUpload: boolean;
   enableLipsyncVideo: boolean;
   enableConversations: boolean;
+  enableShareConversation: boolean;
   autoPlayResponses: boolean;
   showSources: boolean;
   expandedSources: boolean;
+  currentRunPath?: string;
   apiUrl?: string;
   enableSourcePreview?: boolean;
   onClose?: () => void;
@@ -16,7 +18,6 @@ export interface CopilotConfigType {
     GOOGLE_MAPS_API_KEY?: string;
   };
   showRunLink: boolean;
-  enableShareConversation: boolean;
   conversationData?: any;
   branding: {
     name?: string;

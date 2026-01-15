@@ -179,7 +179,9 @@ const ShareDialog = ({
               style={{
                 flex: 1,
                 minWidth: 220,
+                wordBreak: "break-all",
               }}
+              className="gpr-8"
             >
               <p className="font_13_500 text-muted gmb-4">Shareable link</p>
               <p className="font_14_600 text-almostBlack gmb-4">
@@ -240,16 +242,22 @@ const ShareButton = ({
 
   const buildShareUrl = () => {
     if (!currentConversation?.id) return "";
-    const url = new URL(window.location.href);
+    const url = new URL(config?.currentRunPath || window.location.href);
 
-    const regex = /\/share\/.*/;
-    let normalizedPath = url.pathname.endsWith("/")
-      ? url.pathname.slice(0, -1)
-      : url.pathname;
-    normalizedPath = normalizedPath.replace(regex, "");
-    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
-    url.hash = "";
-    return url.toString();
+    if (config?.currentRunPath) {
+      const builderRunRoute = `${config?.currentRunPath}&botBuilder=true&conversationId=${currentConversation?.id}`;
+      url.hash = "";
+      return builderRunRoute;
+    } else {
+      let normalizedPath = url.pathname.endsWith("/")
+        ? url.pathname.slice(0, -1)
+        : url.pathname;
+      const regex = /\/share\/.*/;
+      normalizedPath = normalizedPath.replace(regex, "");
+      url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
+      url.hash = "";
+      return url.toString();
+    }
   };
 
   const handleShareConversation = () => {

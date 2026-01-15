@@ -217,7 +217,9 @@ const SystemContextProvider = ({
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
       isMobileWindow,
-      isGooeyChatApp: isGooeyChatAppFromURL(config?.integration_id || ""),
+      isGooeyChatApp: config?.currentRunPath
+        ? true
+        : isGooeyChatAppFromURL(config?.integration_id || ""),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
