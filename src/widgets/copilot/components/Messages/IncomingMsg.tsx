@@ -98,7 +98,7 @@ const FeedbackButtons = ({
                 <FeedbackButton
                   key={button.id}
                   button={button}
-                  className={clsx("my-1 mx-md-2 font_14_600")}
+                  className={clsx("my-1 mx-md-2 gp-6 font_12_600")}
                   onClick={() => {
                     if (button.isPressed) return;
                     if (button.id.includes("send_location")) {
@@ -195,7 +195,12 @@ const FeedbackButton = ({
           className={clsx("my-auto", className)}
           style={{ whiteSpace: "nowrap" }}
         >
-          <Button key={button.id} className="text-muted" onClick={onClick}>
+          <Button
+            key={button.id}
+            className="text-muted bg-surface"
+            variant="filled"
+            onClick={onClick}
+          >
             {icon}
           </Button>
         </div>
@@ -211,8 +216,8 @@ const FeedbackButton = ({
   return (
     <Button
       key={button.id}
-      className={clsx("text-left", className)}
-      variant="outlined"
+      className={clsx("text-left bg-surface", className)}
+      variant="filled"
       onClick={onClick}
       hideOverflow={false}
     >

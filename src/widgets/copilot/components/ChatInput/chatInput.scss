@@ -16,7 +16,8 @@
   height: 44px;
   resize: none;
   position: relative;
-  background-color: $input-surface;
+  background-color: var(--gooey-input-bg, #f5f5f5);
+  color: var(--gooey-text, #090909);
 }
 
 .gooeyChat-chat-input textarea:focus {

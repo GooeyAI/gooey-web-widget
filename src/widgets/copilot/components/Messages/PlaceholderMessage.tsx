@@ -21,8 +21,13 @@ const BotProfile = () => {
     <div className="d-flex flex-col justify-center align-center text-center">
       {branding.photoUrl && (
         <div
-          className="bot-avatar gmr-8 gmb-24 bg-primary"
-          style={{ width: "128px", height: "128px", borderRadius: "100%" }}
+          className="bot-avatar gmr-8 gmb-24 bg-background"
+          style={{
+            width: "128px",
+            height: "128px",
+            borderRadius: "100%",
+            boxShadow: "0 0 4px 1px $border-color",
+          }}
         >
           {" "}
           <img
@@ -73,9 +78,9 @@ const PlaceholderMessage = () => {
         {conversationStarters?.map((que) => (
           <Button
             key={que}
-            variant="outlined"
             onClick={() => initializeQuery?.({ input_prompt: que })}
             className={clsx("text-left font_12_500 w-100")}
+            variant="text-alt"
           >
             {que}
           </Button>

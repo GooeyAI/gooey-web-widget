@@ -17,29 +17,29 @@ $border-color: $divider; // legacy variable used in shared SCSS
 
 // Utility map driving .bg-*, .text-*, .b-* classes
 $colors: (
-                                                                // core palette
+  // core palette
   "primary": $primary,
   "secondary": $secondary,
-                                                                "textPrimary": $text-primary,
-                                                                "textSecondary": $text-secondary,
-                                                                "background": $background,
-                                                                "surface": $surface,
-                                                                "divider": $divider,
-                                                                "inputSurface": $input-surface,
-                                                                "error": $error,
-                                                                "warning": $warning,
-                                                                "success": $success,
-                                
-                                                                // legacy aliases to reduce breakage while we migrate
-                                                                "almostBlack": $text-primary,
-                                                                "darkGrey": $text-secondary,
-                                                                "white": $background,
-                                                                "grey": $surface,
-                                                                "light": $surface,
-                                                                "lightGrey": $surface,
-                                                                "muted": $text-secondary,
-                                                                "gooeyDanger": $error,
-                                                                "chatInputLegacy": $input-surface,
+  "textPrimary": $text-primary,
+  "textSecondary": $text-secondary,
+  "background": $background,
+  "surface": $surface,
+  "divider": $divider,
+  "inputSurface": $input-surface,
+  "error": $error,
+  "warning": $warning,
+  "success": $success,
+
+  // legacy aliases to reduce breakage while we migrate
+  "almostBlack": $text-primary,
+  "darkGrey": $text-secondary,
+  "white": $background,
+  "grey": $surface,
+  "light": $surface,
+  "lightGrey": $surface,
+  "muted": $text-secondary,
+  "gooeyDanger": $error,
+  "chatInputLegacy": $input-surface,
 );
 
 :export {

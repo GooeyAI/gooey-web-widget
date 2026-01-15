@@ -263,7 +263,7 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div className="w-100 bg-background">
+    <div className="w-100 bg-background gp-8">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
@@ -292,7 +292,7 @@ const ChatInput = () => {
                       onClick={handleFileMenuClick}
                       LeftIconComponent={() => <IconFile size={16} />}
                     >
-                      <p className="font_14_500">File</p>
+                      <p className="font_14_500 text-primary">File</p>
                     </Button>
                     <Button
                       className="w-100 text-left"
@@ -300,7 +300,9 @@ const ChatInput = () => {
                       onClick={handlePhotoMenuClick}
                       LeftIconComponent={() => <IconImage size={16} />}
                     >
-                      <p className="font_14_500">Image or Video </p>
+                      <p className="font_14_500 text-primary">
+                        Image or Video{" "}
+                      </p>
                     </Button>
                     {isMobile() && (
                       <Button
@@ -339,6 +341,10 @@ const ChatInput = () => {
             className={clsx(
               "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
             )}
+            style={{
+              backgroundColor: "var(--gooey-input-bg, #f5f5f5)",
+              color: "var(--gooey-text, #090909)",
+            }}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`
