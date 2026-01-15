@@ -245,19 +245,21 @@ const ShareButton = ({
     const url = new URL(config?.currentRunPath || window.location.href);
 
     if (config?.currentRunPath) {
-      const builderRunRoute = `${config?.currentRunPath}&botBuilder=true&conversationId=${currentConversation?.id}`;
-      url.hash = "";
-      return builderRunRoute;
-    } else {
-      let normalizedPath = url.pathname.endsWith("/")
-        ? url.pathname.slice(0, -1)
-        : url.pathname;
-      const regex = /\/share\/.*/;
-      normalizedPath = normalizedPath.replace(regex, "");
-      url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
-      url.hash = "";
-      return url.toString();
+      const builderUrl = new URL(config.currentRunPath);
+      builderUrl.searchParams.set("botBuilder", "true");
+      builderUrl.searchParams.set("conversationId", currentConversation.id);
+      builderUrl.hash = "";
+      return builderUrl.toString();
     }
+
+    let normalizedPath = url.pathname.endsWith("/")
+      ? url.pathname.slice(0, -1)
+      : url.pathname;
+    const regex = /\/share\/.*/;
+    normalizedPath = normalizedPath.replace(regex, "");
+    url.pathname = `${normalizedPath}/share/${currentConversation?.id}`;
+    url.hash = "";
+    return url.toString();
   };
 
   const handleShareConversation = () => {
