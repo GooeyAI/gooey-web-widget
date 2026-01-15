@@ -246,8 +246,8 @@ const ShareButton = ({
 
     if (config?.currentRunPath) {
       const builderUrl = new URL(config.currentRunPath);
-      builderUrl.searchParams.set("botBuilder", "true");
-      builderUrl.searchParams.set("conversationId", currentConversation.id);
+      builderUrl.searchParams.set("bot_builder", "true");
+      builderUrl.searchParams.set("conversation_id", currentConversation.id);
       builderUrl.hash = "";
       return builderUrl.toString();
     }
