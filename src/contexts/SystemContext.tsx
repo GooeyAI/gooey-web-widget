@@ -244,9 +244,7 @@ const SystemContextProvider = ({
       :host {
         --gooey-accent: ${t.accentColor ?? "hsl(169, 55%, 82%)"};
         --gooey-bg: ${t.primaryBackgroundColor ?? "#fff"};
-        --gooey-secondary-bg: ${
-          t.secondaryBackgroundColor ?? "hsl(12, 100%, 97%)"
-        };
+        --gooey-secondary-bg: ${t.secondaryBackgroundColor ?? "#f9f9f9"};
         --gooey-text: ${t.primaryTextColor ?? "#090909"};
         --gooey-muted: ${t.mutedTextColor ?? "#6c757d"};
         --gooey-border: ${t.borderColor ?? "#eee"};

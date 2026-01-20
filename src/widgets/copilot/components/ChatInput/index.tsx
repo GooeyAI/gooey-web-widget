@@ -263,7 +263,7 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div className="w-100 bg-background gp-8">
+    <div className="w-100 bg-background gp-8 mw-760">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
@@ -279,7 +279,7 @@ const ChatInput = () => {
         <div className="pos-relative d-flex">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
+            <div className="input-left-buttons h-100 gmr-12 bg-surafce rounded-lg br-large">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}
@@ -288,7 +288,7 @@ const ChatInput = () => {
                     <Button
                       className="w-100 text-left"
                       style={{ minWidth: "100px" }}
-                      variant="text-alt"
+                      variant="text"
                       onClick={handleFileMenuClick}
                       LeftIconComponent={() => <IconFile size={16} />}
                     >
@@ -296,7 +296,7 @@ const ChatInput = () => {
                     </Button>
                     <Button
                       className="w-100 text-left"
-                      variant="text-alt"
+                      variant="text"
                       onClick={handlePhotoMenuClick}
                       LeftIconComponent={() => <IconImage size={16} />}
                     >

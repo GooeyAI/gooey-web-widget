@@ -28,7 +28,7 @@ const Header = () => {
 
   return (
     <div
-      className="bg-surface b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
+      className="bg-background b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
       style={{ zIndex: 1 }}
     >
       <div className="d-flex align-center">
@@ -46,7 +46,11 @@ const Header = () => {
           </GooeyTooltip>
         )}
         <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
-          <Button onClick={handleNewConversation} disabled={isEmpty}>
+          <Button
+            onClick={handleNewConversation}
+            disabled={isEmpty}
+            variant="text"
+          >
             <div className="d-flex align-center">
               <div
                 className="bot-avatar bg-primary gmr-8"
@@ -67,7 +71,7 @@ const Header = () => {
                   }}
                 />
               </div>
-              <p className="font_16_700 text-almostBlack">
+              <p className="font_16_700 text-primary">
                 {branding?.title || "New Chat"}
               </p>
             </div>

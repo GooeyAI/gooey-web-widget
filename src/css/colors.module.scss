@@ -3,7 +3,7 @@
 
 // MUI-like palette keyed for utility classes and theme variables
 $primary: var(--gooey-accent, hsl(169, 55%, 82%));
-$secondary: var(--gooey-secondary-bg, hsl(12, 100%, 97%));
+$secondary: var(--gooey-secondary-bg, #eee);
 $text-primary: var(--gooey-text, #090909);
 $text-secondary: var(--gooey-muted, #6c757d);
 $background: var(--gooey-bg, #fff);

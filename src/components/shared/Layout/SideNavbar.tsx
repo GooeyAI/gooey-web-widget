@@ -170,7 +170,7 @@ const SideNavbar = () => {
                   <p
                     className={clsx(
                       "font_16_600 text-left",
-                      isEmpty ? "text-muted" : "text-almostBlack",
+                      isEmpty ? "text-muted" : "text-primary",
                     )}
                     style={{
                       maxWidth: "70%",

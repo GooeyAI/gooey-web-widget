@@ -89,6 +89,11 @@ button.depressed {
 }
 
 // Variant - TEXT
+.button-text:disabled {
+  color: $text-secondary !important;
+  background-color: transparent;
+}
+
 .button-text:disabled:hover {
   border: 1px solid transparent;
   background-color: transparent;
