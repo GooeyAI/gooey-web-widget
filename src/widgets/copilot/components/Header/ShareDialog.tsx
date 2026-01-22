@@ -242,14 +242,13 @@ const ShareButton = ({
 
   const buildShareUrl = () => {
     if (!currentConversation?.id) return "";
-    const url = new URL(config?.currentRunPath || window.location.href);
+    const url = new URL(window.location.href);
 
-    if (config?.currentRunPath) {
-      const builderUrl = new URL(config.currentRunPath);
-      builderUrl.searchParams.set("bot_builder", "true");
-      builderUrl.searchParams.set("conversation_id", currentConversation.id);
-      builderUrl.hash = "";
-      return builderUrl.toString();
+    if (config?.isBotBuilder) {
+      url.searchParams.set("bot_builder", "true");
+      url.searchParams.set("conversation_id", currentConversation.id);
+      url.hash = "";
+      return url.toString();
     }
 
     let normalizedPath = url.pathname.endsWith("/")

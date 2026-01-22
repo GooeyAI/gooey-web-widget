@@ -82,7 +82,6 @@ const SystemContextProvider = ({
   children: ReactNode;
   shadowRoot?: ShadowRoot;
 }) => {
-  console.log("config>>>", config);
   const isInline = config?.mode === "inline" || config?.mode === "fullscreen";
   const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
   const [layoutState, setLayoutState] = useState<LayoutStateType>({
@@ -218,7 +217,7 @@ const SystemContextProvider = ({
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
       isMobileWindow,
-      isGooeyChatApp: config?.currentRunPath
+      isGooeyChatApp: config?.isBotBuilder
         ? true
         : isGooeyChatAppFromURL(config?.integration_id || ""),
     }));

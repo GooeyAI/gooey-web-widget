@@ -10,7 +10,6 @@ export interface CopilotConfigType {
   autoPlayResponses: boolean;
   showSources: boolean;
   expandedSources: boolean;
-  currentRunPath?: string;
   apiUrl?: string;
   enableSourcePreview?: boolean;
   onClose?: () => void;
@@ -19,6 +18,7 @@ export interface CopilotConfigType {
   };
   showRunLink: boolean;
   conversationData?: any;
+  isBotBuilder?: boolean;
   userIdSuffix?: string;
   theme?: {
     accentColor?: string;
