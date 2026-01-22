@@ -194,12 +194,7 @@ const FeedbackButton = ({
           className={clsx("my-auto", className)}
           style={{ whiteSpace: "nowrap" }}
         >
-          <Button
-            key={button.id}
-            className="text-muted bg-surface"
-            variant="filled"
-            onClick={onClick}
-          >
+          <Button key={button.id} variant="filled" onClick={onClick}>
             {icon}
           </Button>
         </div>
@@ -215,7 +210,7 @@ const FeedbackButton = ({
   return (
     <Button
       key={button.id}
-      className={clsx("text-left bg-surface", className)}
+      className={clsx("text-left", className)}
       variant="filled"
       onClick={onClick}
       hideOverflow={false}
