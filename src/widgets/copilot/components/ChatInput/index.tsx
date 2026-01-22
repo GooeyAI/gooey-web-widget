@@ -276,7 +276,7 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex">
+        <div className="pos-relative d-flex gooey-chat-input-container">
           {/* Left icons */}
           {isLeftButtons && (
             <div className="input-left-buttons h-100 gmr-12 bg-surafce rounded-lg br-large">
@@ -341,10 +341,6 @@ const ChatInput = () => {
             className={clsx(
               "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
             )}
-            style={{
-              backgroundColor: "var(--gooey-input-bg, #f5f5f5)",
-              color: "var(--gooey-text, #090909)",
-            }}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`

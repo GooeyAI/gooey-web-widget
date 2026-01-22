@@ -1,6 +1,6 @@
 @import "src/css/colors.module.scss";
 
-.gooeyChat-chat-input {
+.gooey-chat-input-container {
   width: 100%;
   position: sticky;
   bottom: 0;
@@ -9,22 +9,22 @@
   border-radius: 16px 16px 0 0;
 }
 
-.gooeyChat-chat-input textarea {
+.gooey-chat-input-container textarea {
   width: 100%;
   outline: none;
   max-height: 200px;
   height: 44px;
-  resize: none;
   position: relative;
   background-color: var(--gooey-input-bg, #f5f5f5);
   color: var(--gooey-text, #090909);
+  resize: none !important;
 }
 
-.gooeyChat-chat-input textarea:focus {
+.gooey-chat-input-container textarea:focus {
   outline: 1px solid $border-color;
 }
 
-.gooeyChat-chat-input textarea::placeholder {
+.gooey-chat-input-container textarea::placeholder {
   display: block;
   width: 100%;
   white-space: nowrap;
@@ -32,7 +32,7 @@
   text-overflow: ellipsis;
 }
 
-.gooeyChat-chat-input textarea:placeholder-shown {
+.gooey-chat-input-container textarea:placeholder-shown {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
