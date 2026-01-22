@@ -178,6 +178,7 @@ const ChatInput = () => {
   const handleSendAudio = (blob: Blob) => {
     initializeQuery?.({ input_audio: blob });
     setIsRecording(false);
+    removeFocusFromInput();
   };
 
   const handleRemoveFile = (id: string) => {
@@ -270,7 +271,7 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div className="w-100 bg-background gp-8 mw-760">
+    <div className="w-100 bg-background gp-8 mw-760 gooey-chat-input-container">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
@@ -283,7 +284,7 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex align-center gap-8 gooey-chat-input-container">
+        <div className="pos-relative d-flex align-center gap-8">
           {/* Left icons */}
           {isLeftButtons && (
             <div className="rounded-lg br-large">
