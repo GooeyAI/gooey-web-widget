@@ -37,10 +37,11 @@ ul {
 .gooey-embed-container {
   height: 100%;
   position: relative;
+  color: var(--gooey-text, #090909) !important;
 }
 
 .gooey-embed-container p {
-  color: unset;
+  color: var(--gooey-text, #090909) !important;
 }
 
 .gooey-embed-container a {

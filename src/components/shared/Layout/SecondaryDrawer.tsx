@@ -118,7 +118,7 @@ const SecondaryDrawer = () => {
               width: "5px",
               height: "100%",
             }}
-            className="bg-white b-lt-1 b-rt-1 drawer-resize-bar"
+            className="bg-background b-lt-1 b-rt-1 drawer-resize-bar"
           />
         </div>
       )}

@@ -128,6 +128,8 @@ const ChatInput = () => {
       if (isSending || isReceiving) return;
       e.preventDefault();
       handleSendMessage();
+      //remove focus from textarea
+      removeFocusFromInput();
     }
   };
 
@@ -158,10 +160,15 @@ const ChatInput = () => {
     initializeQuery?.(payload);
     setValue("");
     adjustTextareaHeight();
+    removeFocusFromInput();
   };
 
+  const removeFocusFromInput = () => {
+    inputRef.current?.blur();
+  };
   const handleCancelSend = () => {
     cancelApiCall?.();
+    removeFocusFromInput();
   };
 
   const handleRecordClick = () => {
@@ -171,6 +178,7 @@ const ChatInput = () => {
   const handleSendAudio = (blob: Blob) => {
     initializeQuery?.({ input_audio: blob });
     setIsRecording(false);
+    removeFocusFromInput();
   };
 
   const handleRemoveFile = (id: string) => {
@@ -263,12 +271,7 @@ const ChatInput = () => {
     [config?.enablePhotoUpload],
   );
   return (
-    <div
-      className={clsx(
-        !config.branding.showPoweredByGooey && "gpb-8",
-        "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
-      )}
-    >
+    <div className="w-100 bg-background gp-8 mw-760 gooey-chat-input-container">
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gp-12 b-1 br-large gmb-12 gm-12">
@@ -281,10 +284,10 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex">
+        <div className="pos-relative d-flex align-center gap-8">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
+            <div className="rounded-lg br-large">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}
@@ -293,19 +296,21 @@ const ChatInput = () => {
                     <Button
                       className="w-100 text-left"
                       style={{ minWidth: "100px" }}
-                      variant="text-alt"
+                      variant="text"
                       onClick={handleFileMenuClick}
                       LeftIconComponent={() => <IconFile size={16} />}
                     >
-                      <p className="font_14_500">File</p>
+                      <p className="font_14_500 text-primary">File</p>
                     </Button>
                     <Button
                       className="w-100 text-left"
-                      variant="text-alt"
+                      variant="text"
                       onClick={handlePhotoMenuClick}
                       LeftIconComponent={() => <IconImage size={16} />}
                     >
-                      <p className="font_14_500">Image or Video </p>
+                      <p className="font_14_500 text-primary">
+                        Image or Video{" "}
+                      </p>
                     </Button>
                     {isMobile() && (
                       <Button
@@ -341,9 +346,7 @@ const ChatInput = () => {
             id={CHAT_INPUT_ID}
             onChange={handleInputChange}
             onKeyDown={handlePressEnter}
-            className={clsx(
-              "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
-            )}
+            className={clsx("br-large b-1 font_16_500 gp-8 flex-1")}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`

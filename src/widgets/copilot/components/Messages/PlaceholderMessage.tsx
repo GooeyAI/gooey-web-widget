@@ -21,8 +21,13 @@ const BotProfile = () => {
     <div className="d-flex flex-col justify-center align-center text-center">
       {branding.photoUrl && (
         <div
-          className="bot-avatar gmr-8 gmb-24 bg-primary"
-          style={{ width: "128px", height: "128px", borderRadius: "100%" }}
+          className="bot-avatar gmr-8 gmb-24 bg-background"
+          style={{
+            width: "128px",
+            height: "128px",
+            borderRadius: "100%",
+            boxShadow: "0 0 4px 1px $border-color",
+          }}
         >
           {" "}
           <img
@@ -38,8 +43,8 @@ const BotProfile = () => {
         </div>
       )}
       <div>
-        <p className="font_24_500 gmb-16">{branding.name}</p>
-        <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
+        <p className="font_24_500 gmb-16 text-primary">{branding.name}</p>
+        <p className="font_12_500 text-secondary gmb-12 d-flex align-center justify-center">
           {branding.byLine}
           {branding.websiteUrl && (
             <span className="gml-4" style={{ marginBottom: "-2px" }}>
@@ -65,7 +70,7 @@ const PlaceholderMessage = () => {
   const conversationStarters = config?.branding.conversationStarters ?? [];
   return (
     <div
-      className="pos-sticky no-scroll-bar w-100 gpl-8 gpr-8 gpb-12 mw-760"
+      className="pos-sticky no-scroll-bar w-100 gpb-12 mw-760"
       style={{ bottom: "60px", overflow: "auto" }}
     >
       <BotProfile />
@@ -73,9 +78,9 @@ const PlaceholderMessage = () => {
         {conversationStarters?.map((que) => (
           <Button
             key={que}
-            variant="outlined"
             onClick={() => initializeQuery?.({ input_prompt: que })}
             className={clsx("text-left font_12_500 w-100")}
+            variant="text-alt"
           >
             {que}
           </Button>

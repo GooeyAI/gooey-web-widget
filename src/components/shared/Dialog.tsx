@@ -91,12 +91,18 @@ const GooeyDialog = ({
           <div className="gooey-dialog-header d-flex justify-between align-start gpt-20 gpb-12 gpl-24 gpr-24 gap-12">
             <div className="gooey-dialog-header-text flex-1">
               {title && (
-                <div id={titleId} className="gooey-dialog-title font_20_700 text-almostBlack">
+                <div
+                  id={titleId}
+                  className="gooey-dialog-title font_20_700 text-primary"
+                >
                   {title}
                 </div>
               )}
               {subtitle && (
-                <div id={subtitleId} className="gooey-dialog-subtitle font_14_500 text-muted gmt-4">
+                <div
+                  id={subtitleId}
+                  className="gooey-dialog-subtitle font_14_500 text-muted gmt-4"
+                >
                   {subtitle}
                 </div>
               )}
@@ -112,7 +118,12 @@ const GooeyDialog = ({
           </div>
         )}
 
-        <div className={clsx("gooey-dialog-body gpl-24 gpr-24 gpb-20 overflow-y-auto flex-1", bodyClassName)}>
+        <div
+          className={clsx(
+            "gooey-dialog-body gpl-24 gpr-24 gpb-20 overflow-y-auto flex-1",
+            bodyClassName,
+          )}
+        >
           {children}
         </div>
 

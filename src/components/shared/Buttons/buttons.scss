@@ -12,13 +12,13 @@ button {
   align-items: center;
   border-radius: 8px;
   padding: 8px;
-  color: $almost-black;
+  color: $text-primary;
   width: fit-content;
 }
 
 button:disabled {
-  color: $muted !important;
-  fill: $light;
+  color: $text-secondary !important;
+  background-color: $surface;
   cursor: unset;
 }
 
@@ -48,39 +48,65 @@ button:hover .icon-hover {
 }
 
 button.depressed {
-  background-color: $light;
+  background-color: $surface;
 }
 
 // Variant - FILLED
 .button-filled {
-  background-color: #eee;
+  background-color: $border-color;
+  border: 1px solid $border-color;
+  color: $text-primary;
 }
+
 .button-filled:hover {
-  border: 1px solid #0d0d0d;
+  border: 1px solid $border-color;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06) inset;
+}
+
+.button-filled:disabled {
+  background-color: $border-color;
+  border: 1px solid $border-color;
+  color: $text-secondary !important;
 }
 
 // Variant - OUTLINED
 .button-outlined {
+  border: 1px solid $border-color;
   border-radius: 12px;
-  background-color: #f5f5f5;
+  background-color: transparent;
+  color: $text-primary;
 }
 
 .button-outlined:hover:not(:disabled) {
-  background-color: $light;
+  background-color: $surface;
+  border-color: $text-primary;
+}
+
+.button-outlined:disabled {
+  color: $text-secondary !important;
+  border-color: $border-color;
+  background-color: transparent;
 }
 
 // Variant - TEXT
+.button-text:disabled {
+  color: $text-secondary !important;
+  background-color: transparent;
+}
+
 .button-text:disabled:hover {
   border: 1px solid transparent;
+  background-color: transparent;
 }
 
 .button-text:hover {
-  border: 1px solid #eee;
+  border: 1px solid $border-color;
+  background-color: $border-color;
 }
 
 .button-text:active:not(:disabled) {
-  background-color: #eee;
-  color: #0d0d0d !important;
+  background-color: $divider;
+  color: $text-primary !important;
 }
 
 #expand-collapse-button svg {
@@ -102,8 +128,15 @@ button.depressed {
   transition: transform 0.3s ease;
 }
 
+.button-text-alt {
+  background-color: $surface;
+  border: 1px solid $surface;
+  color: $text-primary;
+}
+
 .button-text-alt:hover {
-  background-color: $light;
+  background-color: $border-color;
+  border: 1px solid $border-color;
 }
 
 .collapsed-area {

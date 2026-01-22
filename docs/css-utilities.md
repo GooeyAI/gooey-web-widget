@@ -49,7 +49,7 @@ Lightweight utility classes sourced from `src/css/root.scss` and its includes. B
 - `[data-tooltip]` base plus hover styles built in. Set `data-tooltip="Hint"` on element; positioning left-of element.
 
 ### Usage Patterns
-- Compose utilities in JSX className strings: `className="d-flex flex-col gp-16 bg-white br-default bx-shadowA"`.
+- Compose utilities in JSX className strings: `className="d-flex flex-col gp-16 bg-background br-default bx-shadowA"`.
 - Prefer responsive prefixes for layout shifts instead of custom media queries.
 - Colors use design tokens from `colors.module.scss`; align new components to these tokens before adding new colors.
 

@@ -82,6 +82,7 @@ const SystemContextProvider = ({
   children: ReactNode;
   shadowRoot?: ShadowRoot;
 }) => {
+  console.log("config>>>", config);
   const isInline = config?.mode === "inline" || config?.mode === "fullscreen";
   const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
   const [layoutState, setLayoutState] = useState<LayoutStateType>({
@@ -223,6 +224,40 @@ const SystemContextProvider = ({
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
+
+  useEffect(() => {
+    if (!shadowRoot) return;
+
+    const themeId = "gooey-theme";
+    const t = config?.theme || {};
+    const themeStyle = shadowRoot.querySelector(
+      `style[data-id="${themeId}"]`,
+    ) as HTMLStyleElement | null;
+    const styleEl =
+      themeStyle ||
+      (() => {
+        const el = document.createElement("style");
+        el.setAttribute("data-id", themeId);
+        shadowRoot.appendChild(el);
+        return el;
+      })();
+
+    const css = `
+      :host {
+        --gooey-accent: ${t.accentColor ?? "hsl(169, 55%, 82%)"};
+        --gooey-bg: ${t.primaryBackgroundColor ?? "#fff"};
+        --gooey-secondary-bg: ${t.secondaryBackgroundColor ?? "#f9f9f9"};
+        --gooey-text: ${t.primaryTextColor ?? "#090909"};
+        --gooey-muted: ${t.mutedTextColor ?? "#6c757d"};
+        --gooey-border: ${t.borderColor ?? "#eee"};
+        --gooey-input-bg: ${
+          t.inputBackgroundColor ?? "var(--gooey-secondary-bg, #f5f5f5)"
+        };
+      }
+    `;
+
+    styleEl.textContent = css;
+  }, [config?.theme, shadowRoot]);
 
   const value: SystemContextType = {
     config: config,

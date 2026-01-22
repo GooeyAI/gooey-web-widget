@@ -1,0 +1,12 @@
+@import "src/css/_breakpoints.scss";
+
+.gooey-messages-container {
+  padding-left: 8px;
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: $tablet) {
+  .gooey-messages-container {
+    padding-right: 8px;
+  }
+}

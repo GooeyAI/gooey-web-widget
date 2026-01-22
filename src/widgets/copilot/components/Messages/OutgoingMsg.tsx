@@ -3,7 +3,6 @@ import style from "./outgoing.scss?inline";
 import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
-import { MESSAGE_GUTTER } from ".";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTooltip from "src/components/shared/Tooltip";
@@ -87,12 +86,7 @@ const OutgoingMsg = memo(
       <div className="d-flex flex-col align-end">
         <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
           {input_images && input_images.length > 0 && (
-            <div
-              className={clsx(
-                `gpr-${MESSAGE_GUTTER}`,
-                input_prompt && "gmt-16",
-              )}
-            >
+            <div className={clsx(input_prompt && "gmt-16")}>
               <FilePreview
                 files={input_images.map((url: string) => ({
                   url,
@@ -104,12 +98,7 @@ const OutgoingMsg = memo(
             </div>
           )}
           {input_documents.length > 0 && (
-            <div
-              className={clsx(
-                `gpr-${MESSAGE_GUTTER}`,
-                input_prompt && "gmt-16",
-              )}
-            >
+            <div className={clsx(input_prompt && "gmt-16")}>
               <FilePreview
                 files={input_documents.map((url: string) => ({
                   url,
@@ -120,12 +109,7 @@ const OutgoingMsg = memo(
             </div>
           )}
           {input_audio_url && (
-            <div
-              className={clsx(
-                `gpr-${MESSAGE_GUTTER}`,
-                input_prompt && "gmt-16",
-              )}
-            >
+            <div className={clsx(input_prompt && "gmt-16")}>
               <audio controls src={input_audio_url}></audio>
             </div>
           )}
@@ -133,7 +117,6 @@ const OutgoingMsg = memo(
             <div
               className={clsx(
                 "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8 gmt-8",
-                `gmr-${MESSAGE_GUTTER}`,
               )}
             >
               <p
@@ -172,12 +155,7 @@ const OutgoingMsg = memo(
             </div>
           )}
           {latitude && longitude && (
-            <div
-              className={clsx(
-                `gpr-${MESSAGE_GUTTER}`,
-                input_prompt && "gmt-16",
-              )}
-            >
+            <div className={clsx(input_prompt && "gmt-16")}>
               <iframe
                 width="100%"
                 height="200px"

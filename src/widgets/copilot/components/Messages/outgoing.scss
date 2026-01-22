@@ -1,3 +1,4 @@
+@import "src/css/colors.module.scss";
 .gooey-outgoingMsg {
   max-width: 80%;
   animation: fade-in-A 0.4s;
@@ -9,19 +10,19 @@
 .gooey-outgoing-text {
   white-space: break-spaces !important;
   word-break: break-word !important;
-  background-color: #f4f4f4;
+  background-color: $surface;
 }
 
 .gooey-outgoing-expand-btn {
   &:hover {
-    color: #333;
+    color: $text-primary;
     background-color: rgba(0, 0, 0, 0.05);
   }
 }
 .outgoingMsg-image {
   max-width: 200px;
   min-width: 200px;
-  background-color: #eee;
+  background-color: $surface;
   animation: fade-in-A 0.4s;
   height: 100px;
   object-fit: cover;

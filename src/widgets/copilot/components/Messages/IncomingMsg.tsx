@@ -10,7 +10,6 @@ import style from "./incoming.scss?inline";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import type { LocationModalRef } from "./LocationModal";
-import { MESSAGE_GUTTER } from ".";
 import GooeyTextResponse from "src/components/shared/Response";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import IconButton from "src/components/shared/Buttons/IconButton";
@@ -98,7 +97,7 @@ const FeedbackButtons = ({
                 <FeedbackButton
                   key={button.id}
                   button={button}
-                  className={clsx("my-1 mx-md-2 font_14_600")}
+                  className={clsx("my-1 mx-md-2 gp-6 font_12_600")}
                   onClick={() => {
                     if (button.isPressed) return;
                     if (button.id.includes("send_location")) {
@@ -195,7 +194,7 @@ const FeedbackButton = ({
           className={clsx("my-auto", className)}
           style={{ whiteSpace: "nowrap" }}
         >
-          <Button key={button.id} className="text-muted" onClick={onClick}>
+          <Button key={button.id} variant="filled" onClick={onClick}>
             {icon}
           </Button>
         </div>
@@ -212,7 +211,7 @@ const FeedbackButton = ({
     <Button
       key={button.id}
       className={clsx("text-left", className)}
-      variant="outlined"
+      variant="filled"
       onClick={onClick}
       hideOverflow={false}
     >
@@ -246,13 +245,8 @@ const IncomingMsg = memo(
       return <ResponseLoader show={true} />;
 
     return (
-      <div className="gooey-incomingMsg gpb-12 mw-100">
-        <div
-          className={clsx(
-            `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
-            "mw-100",
-          )}
-        >
+      <div className="gooey-incomingMsg gpb-12 mw-100 text-">
+        <div className={clsx("mw-100")}>
           <GooeyTextResponse
             data={props.data}
             linkColor={props?.linkColor}
