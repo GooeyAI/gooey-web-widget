@@ -19,6 +19,7 @@ export interface CopilotConfigType {
   };
   showRunLink: boolean;
   conversationData?: any;
+  userIdSuffix?: string;
   theme?: {
     accentColor?: string;
     primaryBackgroundColor?: string;

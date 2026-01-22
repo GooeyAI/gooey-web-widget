@@ -179,8 +179,10 @@ const MessagesContextProvider = ({
   shadowRoot: ShadowRoot | undefined;
   children: React.ReactNode;
 }) => {
-  const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const { config, layoutController } = useSystemContext();
+  const currentUserId =
+    localStorage.getItem(USER_ID_LS_KEY) +
+    (config?.userIdSuffix ? `-${config?.userIdSuffix}` : "");
   const { conversations, handleAddConversation } = useConversations(
     currentUserId,
     config?.integration_id as string,
