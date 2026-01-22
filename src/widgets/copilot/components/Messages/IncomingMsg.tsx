@@ -10,7 +10,6 @@ import style from "./incoming.scss?inline";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import type { LocationModalRef } from "./LocationModal";
-import { MESSAGE_GUTTER } from ".";
 import GooeyTextResponse from "src/components/shared/Response";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import IconButton from "src/components/shared/Buttons/IconButton";
@@ -252,12 +251,7 @@ const IncomingMsg = memo(
 
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100 text-">
-        <div
-          className={clsx(
-            `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
-            "mw-100",
-          )}
-        >
+        <div className={clsx("mw-100")}>
           <GooeyTextResponse
             data={props.data}
             linkColor={props?.linkColor}

@@ -128,6 +128,8 @@ const ChatInput = () => {
       if (isSending || isReceiving) return;
       e.preventDefault();
       handleSendMessage();
+      //remove focus from textarea
+      removeFocusFromInput();
     }
   };
 
@@ -158,10 +160,15 @@ const ChatInput = () => {
     initializeQuery?.(payload);
     setValue("");
     adjustTextareaHeight();
+    removeFocusFromInput();
   };
 
+  const removeFocusFromInput = () => {
+    inputRef.current?.blur();
+  };
   const handleCancelSend = () => {
     cancelApiCall?.();
+    removeFocusFromInput();
   };
 
   const handleRecordClick = () => {
@@ -276,10 +283,10 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex gooey-chat-input-container">
+        <div className="pos-relative d-flex align-center gap-8 gooey-chat-input-container">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons h-100 gmr-12 bg-surafce rounded-lg br-large">
+            <div className="rounded-lg br-large">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}
@@ -338,9 +345,7 @@ const ChatInput = () => {
             id={CHAT_INPUT_ID}
             onChange={handleInputChange}
             onKeyDown={handlePressEnter}
-            className={clsx(
-              "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
-            )}
+            className={clsx("br-large b-1 font_16_500 gp-8 flex-1")}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`

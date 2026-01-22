@@ -18,6 +18,7 @@
   background-color: var(--gooey-input-bg, #f5f5f5);
   color: var(--gooey-text, #090909);
   resize: none !important;
+  line-height: 1.5;
 }
 
 .gooey-chat-input-container textarea:focus {
@@ -36,11 +37,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-.input-left-buttons {
-  position: relative;
-  left: 4px;
-  top: 7px;
 }
 
 .input-right-buttons {

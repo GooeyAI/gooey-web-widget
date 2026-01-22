@@ -79,77 +79,75 @@ const Header = () => {
         </GooeyTooltip>
       </div>
 
-      <div>
-        <div className="d-flex align-center">
-          {/* Focus mode button */}
-          {layoutController?.showFocusModeButton && (
-            <GooeyTooltip
-              text={
-                layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
-              }
-              direction="bottom"
+      <div className="d-flex align-center">
+        {/* Focus mode button */}
+        {layoutController?.showFocusModeButton && (
+          <GooeyTooltip
+            text={
+              layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
+            }
+            direction="bottom"
+          >
+            <IconButton
+              variant="text"
+              className="cr-pointer"
+              onClick={layoutController?.toggleFocusMode}
+              style={{ transform: "rotate(90deg)" }}
             >
-              <IconButton
-                variant="text"
-                className="cr-pointer"
-                onClick={layoutController?.toggleFocusMode}
-                style={{ transform: "rotate(90deg)" }}
-              >
-                {layoutController.isFocusMode ? (
-                  <IconCollapse size={16} />
-                ) : (
-                  <IconExpand size={16} />
-                )}
-              </IconButton>
-            </GooeyTooltip>
-          )}
-          {/* Close / minimize button */}
-          {layoutController?.showCloseButton && (
-            <GooeyTooltip text="Close" direction="left">
-              <IconButton
-                variant="text"
-                className={clsx("gp-8 cr-pointer flex-1")}
-                onClick={layoutController?.toggleOpenClose}
-              >
-                <IconChevronDown size={16} />
-              </IconButton>
-            </GooeyTooltip>
-          )}
-          {/* Share conversation button - only show in gooey app site mode */}
-          {config?.enableShareConversation &&
-            !isEmpty &&
-            layoutController?.isGooeyChatApp && (
-              <ShareButton
-                currentConversation={currentConversation || null}
-                messages={messages}
-                config={config}
-                disabled={isSending || isReceiving || false}
-              />
-            )}
-
-          {layoutController?.isInline && (
-            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
-              <IconButton
-                disabled={isEmpty}
-                variant="text"
-                className={clsx("gp-8 cr-pointer flex-1")}
-                onClick={handleNewConversation}
-              >
-                <IconPencilEdit size={22} />
-              </IconButton>
-            </GooeyTooltip>
-          )}
-
-          {!!onClose && (
+              {layoutController.isFocusMode ? (
+                <IconCollapse size={16} />
+              ) : (
+                <IconExpand size={16} />
+              )}
+            </IconButton>
+          </GooeyTooltip>
+        )}
+        {/* Close / minimize button */}
+        {layoutController?.showCloseButton && (
+          <GooeyTooltip text="Close" direction="left">
             <IconButton
               variant="text"
               className={clsx("gp-8 cr-pointer flex-1")}
-              onClick={onClose}
+              onClick={layoutController?.toggleOpenClose}
             >
-              <IconClose size={22} />
+              <IconChevronDown size={16} />
             </IconButton>
+          </GooeyTooltip>
+        )}
+        {/* Share conversation button - only show in gooey app site mode */}
+        {config?.enableShareConversation &&
+          !isEmpty &&
+          layoutController?.isGooeyChatApp && (
+            <ShareButton
+              currentConversation={currentConversation || null}
+              messages={messages}
+              config={config}
+              disabled={isSending || isReceiving || false}
+            />
           )}
-        </div>
+
+        {layoutController?.isInline && (
+          <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+            <IconButton
+              disabled={isEmpty}
+              variant="text"
+              className={clsx("gp-8 cr-pointer flex-1")}
+              onClick={handleNewConversation}
+            >
+              <IconPencilEdit size={22} />
+            </IconButton>
+          </GooeyTooltip>
+        )}
+
+        {!!onClose && (
+          <IconButton
+            variant="text"
+            className={clsx("gp-8 cr-pointer flex-1")}
+            onClick={onClose}
+          >
+            <IconClose size={22} />
+          </IconButton>
+        )}
       </div>
     </div>
   );

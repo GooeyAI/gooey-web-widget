@@ -70,7 +70,7 @@ const PlaceholderMessage = () => {
   const conversationStarters = config?.branding.conversationStarters ?? [];
   return (
     <div
-      className="pos-sticky no-scroll-bar w-100 gpl-8 gpr-8 gpb-12 mw-760"
+      className="pos-sticky no-scroll-bar w-100 gpb-12 mw-760"
       style={{ bottom: "60px", overflow: "auto" }}
     >
       <BotProfile />

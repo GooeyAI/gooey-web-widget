@@ -21,7 +21,6 @@ import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconBooks from "src/assets/SvgIcons/IconBooks";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
-import { MESSAGE_GUTTER } from ".";
 
 // Types
 interface SourceData {
@@ -320,12 +319,7 @@ export const SourcesSection = ({
 
   return (
     <div className="gmb-8 gmt-8">
-      <div
-        className={clsx(
-          "d-flex align-center gpt-4 gpb-8",
-          `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
-        )}
-      >
+      <div className={clsx("d-flex align-center gpt-4 gpb-8")}>
         <span
           style={{ height: "24px", width: "24px" }}
           className="d-flex justify-center align-center gmr-8"

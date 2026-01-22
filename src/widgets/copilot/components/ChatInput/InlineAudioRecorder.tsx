@@ -6,7 +6,6 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import SpinLoader from "src/components/shared/SpinLoader";
-import { MESSAGE_GUTTER } from "../Messages";
 
 interface InlineAudioRecorderProps {
   onCancel: () => void;
@@ -111,10 +110,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   if (isLoading || isError) {
     return (
       <div
-        className={clsx(
-          `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
-          "d-flex align-center justify-center gpb-5 gpt-3 w-100",
-        )}
+        className={clsx("d-flex align-center justify-center gpb-5 gpt-3 w-100")}
       >
         {isError ? (
           <div

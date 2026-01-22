@@ -5,8 +5,10 @@ import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
+import style from "./messages.scss?inline";
+import { addInlineStyle } from "src/addStyles";
+addInlineStyle(style);
 
-export const MESSAGE_GUTTER = 0;
 const Responses = (props: any) => {
   const { config } = useSystemContext();
   const que = useMemo(() => props.queue, [props]);
@@ -57,10 +59,12 @@ const Messages = () => {
   return (
     <div
       ref={scrollContainerRef}
-      className={clsx("flex-1 bg-background gpt-16 overflow-y-auto w-100")}
+      className={clsx(
+        "flex-1 bg-background gpt-16 overflow-y-auto w-100 gooey-messages-container",
+      )}
     >
       <div
-        className="mw-760 d-flex flex-col gpl-8"
+        className="mw-760 d-flex flex-col"
         style={{ marginLeft: "auto", marginRight: "auto" }}
       >
         <Responses
