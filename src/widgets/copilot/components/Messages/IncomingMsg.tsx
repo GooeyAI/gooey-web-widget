@@ -15,6 +15,7 @@ import GooeyTextResponse from "src/components/shared/Response";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconBug from "src/assets/SvgIcons/IconBug";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -52,12 +53,15 @@ type ReplyButton = {
 const FeedbackButtons = ({
   data,
   body,
+  showRunLink,
 }: {
   data: {
     buttons: ReplyButton[];
     bot_message_id: string;
+    web_url?: string;
   };
   body: string;
+  showRunLink: boolean;
 }) => {
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -130,7 +134,7 @@ const FeedbackButtons = ({
               onClick={() => {
                 navigator.clipboard.writeText(body);
               }}
-              className="text-muted"
+              className="text-muted d-flex justify-content-center align-items-center h-100"
             >
               <IconCopy size={16} />
             </IconButton>
@@ -153,6 +157,13 @@ const FeedbackButtons = ({
                   }}
                 />
               ),
+          )}
+          {showRunLink && data?.web_url && (
+            <a href={data?.web_url} target="_blank" rel="noopener noreferrer">
+              <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
+                <IconBug size={12} />
+              </IconButton>
+            </a>
           )}
         </div>
       )}
@@ -195,7 +206,7 @@ const FeedbackButton = ({
           className={clsx("my-auto", className)}
           style={{ whiteSpace: "nowrap" }}
         >
-          <Button key={button.id} className="text-muted" onClick={onClick}>
+          <Button key={button.id} className="text-muted d-flex justify-content-center align-items-center h-100" onClick={onClick}>
             {icon}
           </Button>
         </div>
@@ -281,21 +292,11 @@ const IncomingMsg = memo(
               ></video>
             </div>
           )}
-          {props?.showRunLink && props?.data?.web_url && (
-            <div className="gmb-8">
-              <a
-                href={props?.data?.web_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Run Details
-              </a>
-            </div>
-          )}
           {!isStreaming && props?.data?.buttons && (
             <FeedbackButtons
               data={props?.data}
               body={props?.data?.output_text}
+              showRunLink={props.showRunLink}
             />
           )}
         </div>
