@@ -63,6 +63,16 @@ export interface RunStart {
   // status_url?: string;
 }
 
+export interface ToolCall {
+  id: string | number;
+  title: string;
+  url: string;
+  inputs: Record<string, any>;
+  return_value: any;
+  is_running: boolean;
+  icon?: string;
+}
+
 export interface MessagePart {
   type: "message_part";
   status: string; // or a specific enum type if you have one
@@ -73,6 +83,7 @@ export interface MessagePart {
   video?: string;
   buttons?: ReplyButton[];
   documents?: string[];
+  tool_calls?: ToolCall[];
 }
 
 export interface FinalResponse {
