@@ -60,6 +60,7 @@ const Messages = () => {
       className={clsx(
         "flex-1 bg-white gpt-16 overflow-y-auto w-100 stable-scroll-container",
       )}
+      style={{ paddingLeft: "6px" }}
     >
       <div
         className="mw-760 d-flex flex-col gpl-8"
