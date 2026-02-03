@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { ToolCall } from "src/contexts/MessagesContext";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
+import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 
 interface ToolCallsProps {
   toolCalls: ToolCall[];
@@ -35,7 +38,7 @@ const extractArgumentSummary = (inputs: Record<string, any>): string | null => {
 };
 
 const ToolCallCard: React.FC<{ toolCall: ToolCall }> = ({ toolCall }) => {
-  const { title, inputs, return_value, is_running, icon } = toolCall;
+  const { title, inputs, return_value, is_running, icon, url } = toolCall;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const argumentSummary = extractArgumentSummary(inputs || {});
@@ -59,26 +62,28 @@ const ToolCallCard: React.FC<{ toolCall: ToolCall }> = ({ toolCall }) => {
           style={{
             backgroundColor: "transparent",
             display: "flex",
-            alignItems: "center",
+            alignItems: "baseline",
             gap: "6px",
             listStyle: "none",
           }}
         >
-          {icon && (
+          {icon ? (
             icon.startsWith('http') || icon.startsWith('/') ? (
               <img
                 src={icon}
                 alt=""
                 style={{
-                  width: "16px",
-                  height: "16px",
+                  width: "14px",
+                  height: "14px",
                   objectFit: "contain",
                   flexShrink: 0,
                 }}
               />
             ) : (
-              <span style={{ fontSize: "16px", flexShrink: 0 }}>{icon}</span>
+              <span style={{ fontSize: "12px", flexShrink: 0 }}>{icon}</span>
             )
+          ) : (
+            <span style={{ fontSize: "12px", flexShrink: 0 }}>🛠️</span>
           )}
           <div
             style={{
@@ -89,15 +94,15 @@ const ToolCallCard: React.FC<{ toolCall: ToolCall }> = ({ toolCall }) => {
               flex: 1,
             }}
           >
-            <span className="font_14_600">{title}</span>
+            <span className="font_12_600">{title}</span>
             {argumentSummary && (
               <>
-                <span className="font_14_600"> - </span>
-                <span className="font_14_400 text-muted">{argumentSummary}</span>
+                <span className="font_12_600"> - </span>
+                <span className="font_12_400 text-muted">{argumentSummary}</span>
               </>
             )}
             {is_running && (
-              <span className="font_12_400 text-muted"> Running...</span>
+              <span className="font_11_400 text-muted"> Running...</span>
             )}
           </div>
           <div
@@ -114,25 +119,63 @@ const ToolCallCard: React.FC<{ toolCall: ToolCall }> = ({ toolCall }) => {
           />
           <div
             style={{
-              fontSize: "10px",
               color: "#6c757d",
               flexShrink: 0,
-              transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s ease",
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            ▼
+            {isExpanded ? (
+              <IconCaretUp size={10} />
+            ) : (
+              <IconChevronDown size={10} />
+            )}
           </div>
         </summary>
 
         <div style={{ padding: "8px 0" }}>
           {inputs && Object.keys(inputs).length > 0 && (
             <div className="mb-3">
-              <div className="font_14_600 text-dark mb-2">Inputs</div>
               <div
-                className="font_12_400"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "8px",
+                  width: "100%"
+                }}
+              >
+                <div className="font_12_600 text-dark">Inputs</div>
+                {url && (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "11px",
+                      textDecoration: "none",
+                      gap: "4px",
+                      color: "#6c757d",
+                      marginLeft: "auto"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.textDecoration = "underline";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.textDecoration = "none";
+                    }}
+                  >
+                    <IconExternalLink size={10} />
+                    View Tool Call
+                  </a>
+                )}
+              </div>
+              <div
                 style={{
                   fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace",
+                  fontSize: "10px",
                   backgroundColor: "#f8f9fa",
                   border: "1px solid #e9ecef",
                   padding: "12px",
@@ -150,11 +193,11 @@ const ToolCallCard: React.FC<{ toolCall: ToolCall }> = ({ toolCall }) => {
 
           {!is_running && return_value && (
             <div>
-              <div className="font_14_600 text-dark mb-2">Return value</div>
+              <div className="font_12_600 text-dark mb-2">Output</div>
               <div
-                className="font_12_400"
                 style={{
                   fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace",
+                  fontSize: "10px",
                   backgroundColor: "#f8f9fa",
                   border: "1px solid #e9ecef",
                   padding: "12px",
