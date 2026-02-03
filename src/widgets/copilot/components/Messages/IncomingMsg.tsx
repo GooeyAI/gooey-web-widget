@@ -15,6 +15,7 @@ import GooeyTextResponse from "src/components/shared/Response";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
+import ToolCalls from "src/components/shared/ToolCalls";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -253,6 +254,14 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
+          {props?.data?.tool_calls && (
+            <div className="gmb-12">
+              <ToolCalls
+                toolCalls={props.data.tool_calls}
+                className="mw-100"
+              />
+            </div>
+          )}
           <GooeyTextResponse
             data={props.data}
             linkColor={props?.linkColor}
