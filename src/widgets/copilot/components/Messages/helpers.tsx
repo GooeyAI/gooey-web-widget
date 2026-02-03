@@ -1,7 +1,5 @@
 import axios from "axios";
 import IconThumbsUp from "src/assets/SvgIcons/IconThumbsUp";
-import IconThumbsUpFilled from "src/assets/SvgIcons/IconThumbsUpFilled";
-import IconThumbsDownFilled from "src/assets/SvgIcons/IconThumbsDownFilled";
 import IconThumbsDown from "src/assets/SvgIcons/IconThumbsDown";
 import IconSheets from "src/assets/SvgIcons/IconSheets";
 import IconGoogleDocs from "src/assets/SvgIcons/IconGoogleDocs";
@@ -123,18 +121,15 @@ export const fetchUrlMeta = async (url: string) => {
 
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
+  const size = 12; // Consistent size for feedback buttons
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
-      return isFilled ? (
-        <IconThumbsUpFilled size={12} className="text-muted" />
-      ) : (
-        <IconThumbsUp size={12} className="text-muted" />
+      return (
+        <IconThumbsUp size={size} className={isFilled ? "text-primary" : "text-muted"} />
       );
     case "FEEDBACK_THUMBS_DOWN":
-      return isFilled ? (
-        <IconThumbsDownFilled size={12} className="text-muted" />
-      ) : (
-        <IconThumbsDown size={12} className="text-muted" />
+      return (
+        <IconThumbsDown size={size} className={isFilled ? "text-primary" : "text-muted"} />
       );
     default:
       return null;

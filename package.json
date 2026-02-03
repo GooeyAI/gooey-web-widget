@@ -9,7 +9,11 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite build --watch"
   },
+  "peerDependencies": {},
   "dependencies": {
+    "@awesome.me/kit-c729b8511a": "^1.0.2",
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/react-fontawesome": "^3.1.1",
     "@popperjs/core": "^2.11.8",
     "@sentry/react": "^9.1.0",
     "@sentry/tracing": "^7.120.3",
@@ -27,7 +31,6 @@
     "react-leaflet": "4.2.1",
     "uuid": "^9.0.1"
   },
-  "peerDependencies": {},
   "devDependencies": {
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@types/leaflet": "^1.9.17",
