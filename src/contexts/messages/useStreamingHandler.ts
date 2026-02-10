@@ -136,6 +136,7 @@ export const useStreamingHandler = ({
             id: currentStreamRef.current,
             text,
             buttons,
+            tool_calls: payload.tool_calls || prevMessage?.tool_calls || [],
           });
           return newConversations;
         }
