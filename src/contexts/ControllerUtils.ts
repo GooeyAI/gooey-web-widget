@@ -5,12 +5,14 @@ import type {
   MessagesContextType,
   RequestModel,
 } from "./MessagesContext";
+import type { CopilotConfigType } from "./types";
 
 export type CopilotChatWidgetController = {
   messages: MessageMishmash[];
   onSendMessage: (payload: RequestModel) => void;
   onNewConversation: () => void;
   setMessages?: (messages: MessageMishmash[]) => void;
+  updateConfig?: (config: CopilotConfigType) => void;
 };
 
 export function useController({

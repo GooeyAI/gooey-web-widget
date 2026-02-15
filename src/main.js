@@ -26,4 +26,4 @@ const defaultConfig = {
 };
 
 GooeyEmbed.mount({ target: "#popup", mode: "popup", ...defaultConfig });
-GooeyEmbed.mount({ target: "#inline", mode: "inline", ...defaultConfig });
+GooeyEmbed.mount({ target: "#inline", mode: "inline", fillParent: true, ...defaultConfig });

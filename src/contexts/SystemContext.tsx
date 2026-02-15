@@ -1,6 +1,13 @@
-import { ReactNode, createContext, useEffect, useMemo, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { CopilotConfigType } from "./types";
 import useDeviceWidth from "src/hooks/useDeviceWidth";
+import type { CopilotChatWidgetController } from "./ControllerUtils";
 
 // eslint-disable-next-line react-refresh/only-export-components
 const toggleSidebarStyles = (
@@ -77,12 +84,16 @@ const SystemContextProvider = ({
   config,
   children,
   shadowRoot,
+  controller,
 }: {
   config: CopilotConfigType;
   children: ReactNode;
   shadowRoot?: ShadowRoot;
+  controller?: CopilotChatWidgetController;
 }) => {
-  const isInline = config?.mode === "inline" || config?.mode === "fullscreen";
+  const [configState, setConfigState] = useState<CopilotConfigType>(config);
+  const isInline =
+    configState?.mode === "inline" || configState?.mode === "fullscreen";
   const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
   const [layoutState, setLayoutState] = useState<LayoutStateType>({
     isOpen: isInline || false,
@@ -93,9 +104,9 @@ const SystemContextProvider = ({
     showSidebarButton: false,
     showFocusModeButton: !isInline || false,
     showNewConversationButton:
-      config?.enableConversations === undefined
+      configState?.enableConversations === undefined
         ? true
-        : config?.enableConversations,
+        : configState?.enableConversations,
     isMobile: false,
     isSecondaryDrawerOpen: false,
     secondaryDrawerContent: () => null,
@@ -217,13 +228,26 @@ const SystemContextProvider = ({
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
       isMobile,
       isMobileWindow,
-      isGooeyChatApp: isGooeyChatAppFromURL(config?.integration_id || ""),
+      isGooeyChatApp: isGooeyChatAppFromURL(
+        configState?.integration_id || "",
+      ),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
 
+  if (controller) controller.updateConfig = (next: CopilotConfigType) => {
+    setConfigState((prev) => ({
+      ...prev,
+      ...next,
+      branding: {
+        ...(prev.branding || {}),
+        ...(next.branding || {}),
+      },
+    }));
+  };
+
   const value: SystemContextType = {
-    config: config,
+    config: configState,
     setTempStoreValue,
     getTempStoreValue,
     layoutController: LayoutController,

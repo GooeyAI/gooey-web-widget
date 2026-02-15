@@ -58,7 +58,11 @@ export function CopilotChatWidget({
     <div className="gooey-embed-container" tabIndex={-1}>
       <Styles />
       <Sentry.ErrorBoundary>
-        <SystemContextProvider config={config} shadowRoot={shadowRoot}>
+        <SystemContextProvider
+          config={config}
+          shadowRoot={shadowRoot}
+          controller={controller}
+        >
           <MessagesContextProvider
             controller={controller}
             shadowRoot={shadowRoot}
