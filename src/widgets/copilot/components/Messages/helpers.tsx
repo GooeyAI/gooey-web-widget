@@ -121,16 +121,12 @@ export const fetchUrlMeta = async (url: string) => {
 
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
-  const size = 12; // Consistent size for feedback buttons
+  let size = 12;
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
-      return (
-        <IconThumbsUp size={size} className={isFilled ? "text-primary" : "text-muted"} />
-      );
+      return <IconThumbsUp size={size} className="text-muted" isFilled={isFilled} />;
     case "FEEDBACK_THUMBS_DOWN":
-      return (
-        <IconThumbsDown size={size} className={isFilled ? "text-primary" : "text-muted"} />
-      );
+      return <IconThumbsDown size={size} className="text-muted" isFilled={isFilled} />;
     default:
       return null;
   }
