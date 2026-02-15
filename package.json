@@ -11,9 +11,6 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "@awesome.me/kit-c729b8511a": "^1.0.2",
-    "@fortawesome/fontawesome-svg-core": "^7.1.0",
-    "@fortawesome/react-fontawesome": "^3.1.1",
     "@popperjs/core": "^2.11.8",
     "@sentry/react": "^9.1.0",
     "@sentry/tracing": "^7.120.3",

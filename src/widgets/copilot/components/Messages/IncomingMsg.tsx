@@ -136,7 +136,7 @@ const FeedbackButtons = ({
               }}
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
-              <IconCopy size={12} />
+              <IconCopy size={14} />
             </IconButton>
           </GooeyTooltip>
           {thumbButtons.map(
