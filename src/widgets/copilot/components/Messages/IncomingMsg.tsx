@@ -252,7 +252,7 @@ const IncomingMsg = memo(
     const isAutoPlay = props.autoPlay === false ? false : isNewlyReceived;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
-    const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE && type !== STREAM_MESSAGE_TYPES.ERROR;
     if (!props.data || type === STREAM_MESSAGE_TYPES.CONVERSATION_START)
       return <ResponseLoader show={true} />;
 
