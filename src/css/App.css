@@ -61,18 +61,6 @@ div:focus-visible {
   outline: none;
 }
 
-::-webkit-scrollbar {
-background: transparent;
-  color: white;
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 0;
-}
-
 code,
 code[class*="language-"] {
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
