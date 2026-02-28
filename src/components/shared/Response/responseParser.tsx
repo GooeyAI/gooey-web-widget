@@ -76,10 +76,10 @@ const extractOutputText = (data: ResponseData): string => {
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
     output = text || detail || "";
   } else if (
-    type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-    status === "completed"
+   ( type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE || type === STREAM_MESSAGE_TYPES.ERROR) &&
+    (status === "completed" || status === "failed")
   ) {
-    output = output_text[0] || raw_output_text[0] || "";
+    output = output_text[0] || raw_output_text[0] || detail || "";
   }
 
   return replaceAudioEmojis(output);

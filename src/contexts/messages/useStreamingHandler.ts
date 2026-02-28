@@ -75,7 +75,7 @@ export const useStreamingHandler = ({
         // stream end
         if (
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-          payload?.status === "completed"
+          (payload?.status === "completed" || payload?.status === "failed")
         ) {
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
