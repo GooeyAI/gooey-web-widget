@@ -2,21 +2,21 @@ import clsx from "clsx";
 import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import GooeyTextResponse from "src/components/shared/Response";
+import ToolCalls from "src/components/shared/ToolCalls";
+import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import { MESSAGE_GUTTER } from ".";
 import ResponseLoader from "../Loader";
 import { getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip } from "./helpers";
 import style from "./incoming.scss?inline";
+import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
-import type { LocationModalRef } from "./LocationModal";
-import { MESSAGE_GUTTER } from ".";
-import GooeyTextResponse from "src/components/shared/Response";
-import GooeyTooltip from "src/components/shared/Tooltip";
-import IconButton from "src/components/shared/Buttons/IconButton";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
-import ToolCalls from "src/components/shared/ToolCalls";
-import IconBug from "src/assets/SvgIcons/IconBug";
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -265,12 +265,9 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
-          {props?.data?.tool_calls && (
+          {props?.data?.final_prompt && (
             <div className="gmb-12">
-              <ToolCalls
-                toolCalls={props.data.tool_calls}
-                className="mw-100"
-              />
+              <ToolCalls final_prompt={props?.data?.final_prompt} />
             </div>
           )}
           <GooeyTextResponse
