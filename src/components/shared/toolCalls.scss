@@ -1,0 +1,103 @@
+@import "src/css/colors.module.scss";
+
+.tool-call-card {
+  border-radius: 12px;
+  margin: 8px 0;
+  background-color: transparent;
+  border: 1px solid #e9ecef;
+}
+
+.tool-call-card summary {
+  padding: 4px 8px;
+  cursor: pointer;
+  background-color: transparent;
+  color: $muted;
+  border-radius: 10px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.tool-call-card[open] {
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.tool-call-card[open] summary {
+  margin-left: -0.6rem;
+  margin-right: -0.6rem;
+}
+
+
+.tool-call-icon-image {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tool-call-icon-emoji {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.tool-call-summary-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+  gap: 4px;
+  margin-top: -3px;
+}
+
+.tool-call-summary-toggle {
+  color: #6c757d;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.tool-call-body {
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+
+.tool-call-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.tool-call-link {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  text-decoration: none;
+  gap: 4px;
+  color: #6c757d;
+  margin-left: auto;
+}
+
+.tool-call-link:hover {
+  text-decoration: underline;
+}
+
+.tool-call-json-block {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",
+    "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 8px;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}

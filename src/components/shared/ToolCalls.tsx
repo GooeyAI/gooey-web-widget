@@ -1,9 +1,13 @@
 import clsx from "clsx";
 import { useState } from "react";
+import { addInlineStyle } from "src/addStyles";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import SpinLoader from "./SpinLoader";
+import style from "./toolCalls.scss?inline";
+
+addInlineStyle(style);
 
 export interface ToolCall {
   id: string | number;
@@ -41,58 +45,23 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
     <details
       open={isExpanded}
       onToggle={(e) => setIsExpanded((e.target as HTMLDetailsElement).open)}
-      style={{
-        backgroundColor: "transparent",
-        border: "1px solid #e9ecef",
-      }}
+      className="tool-call-card"
     >
-      <style>{`
-        .tool-call-summary::after {
-          display: none !important;
-        }
-      `}</style>
-      <summary
-        className="tool-call-summary"
-        style={{
-          backgroundColor: "transparent",
-          display: "flex",
-          alignItems: "baseline",
-          gap: "8px",
-          listStyle: "none",
-          marginBottom: "2px",
-        }}
-      >
+      <summary>
         {is_running ? (
-          <div style={{ height: "11px" }}>
+          <div className="tool-call-loader">
             <SpinLoader size={13} />
           </div>
         ) : icon ? (
           icon.startsWith("http") || icon.startsWith("/") ? (
-            <img
-              src={icon}
-              alt=""
-              style={{
-                width: "14px",
-                height: "14px",
-                objectFit: "contain",
-                flexShrink: 0,
-              }}
-            />
+            <img src={icon} alt="" className="tool-call-icon-image" />
           ) : (
-            <span style={{ fontSize: "12px", flexShrink: 0 }}>{icon}</span>
+            <span className="tool-call-icon-emoji">{icon}</span>
           )
         ) : (
-          <span style={{ fontSize: "12px", flexShrink: 0 }}>🛠️</span>
+          <span className="tool-call-icon-emoji">🛠️</span>
         )}
-        <div
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            minWidth: 0,
-            flex: 1,
-          }}
-        >
+        <div className="tool-call-summary-content">
           <span className="font_12_600">{label}</span>
           {argumentSummary && (
             <>
@@ -101,14 +70,7 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
             </>
           )}
         </div>
-        <div
-          style={{
-            color: "#6c757d",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <div className="tool-call-summary-toggle">
           {isExpanded ? (
             <IconCaretUp size={10} />
           ) : (
@@ -117,60 +79,24 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
         </div>
       </summary>
 
-      <div style={{ padding: "8px 0" }}>
+      <div className="tool-call-body">
         {inputs && Object.keys(inputs).length > 0 && (
           <div className="mb-3">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "8px",
-                width: "100%",
-              }}
-            >
+            <div className="tool-call-section-header">
               <div className="font_12_600 text-dark">Inputs</div>
               {run_url && (
                 <a
                   href={run_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "11px",
-                    textDecoration: "none",
-                    gap: "4px",
-                    color: "#6c757d",
-                    marginLeft: "auto",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = "underline";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = "none";
-                  }}
+                  className="tool-call-link"
                 >
                   <IconExternalLink size={10} />
                   View Tool Call
                 </a>
               )}
             </div>
-            <div
-              style={{
-                fontFamily:
-                  "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace",
-                fontSize: "10px",
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                padding: "12px",
-                borderRadius: "6px",
-                maxHeight: "200px",
-                overflow: "auto",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.4",
-              }}
-            >
+            <div className="tool-call-json-block">
               {JSON.stringify(inputs, null, 2)}
             </div>
           </div>
@@ -178,22 +104,8 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
 
         {!is_running && (
           <div>
-            <div className="font_12_600 text-dark mb-2">Output</div>
-            <div
-              style={{
-                fontFamily:
-                  "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace",
-                fontSize: "10px",
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-                padding: "12px",
-                borderRadius: "6px",
-                maxHeight: "200px",
-                overflow: "auto",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.4",
-              }}
-            >
+            <div className="font_12_600 text-dark gmt-6 gmb-6">Output</div>
+            <div className="tool-call-json-block">
               {typeof return_value === "string"
                 ? return_value
                 : JSON.stringify(return_value, null, 2)}
@@ -205,10 +117,10 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
   );
 }
 
-const extractArgumentSummary = (obj: any, maxLength = 50): string | null => {
+const extractArgumentSummary = (obj: any, maxLength = 250): string | null => {
   if (typeof obj === "string") {
     if (obj.length > maxLength) {
-      obj = obj.substring(0, maxLength) + "...";
+      obj = obj.substring(0, maxLength) + "…";
     }
     return obj;
   }
