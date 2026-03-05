@@ -97,7 +97,9 @@ export const useStreamingHandler = ({
           }
 
           // Track this as a newly received message for autoplay
-          setLatestMessageIds((prev) => new Set(prev).add(currentStreamRef.current));
+          setLatestMessageIds((prev) =>
+            new Set(prev).add(currentStreamRef.current),
+          );
 
           // update current conversation for every time the stream ends
           const conversationData = {
@@ -130,13 +132,19 @@ export const useStreamingHandler = ({
             ...(prevMessage?.buttons || []),
             ...(payload.buttons || []),
           ];
+          let final_prompt = prevMessage.final_prompt || [];
+          for (let [idx, value] of Object.entries(
+            payload.prompt_chunks || {},
+          )) {
+            final_prompt[idx] = value;
+          }
           newConversations.set(lastResponseId, {
             ...prevMessage,
             ...payload,
             id: currentStreamRef.current,
             text,
             buttons,
-            tool_calls: payload.tool_calls || prevMessage?.tool_calls || [],
+            final_prompt,
           });
           return newConversations;
         }
