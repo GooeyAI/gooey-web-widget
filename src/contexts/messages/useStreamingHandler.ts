@@ -6,7 +6,7 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadPayloadFiles } from "src/api/file-upload";
-import { handleToolCalls } from "../tools";
+import { handleToolCall } from "../tools";
 
 type StreamingHandlerParams = {
   config: any;
@@ -90,12 +90,6 @@ export const useStreamingHandler = ({
           });
           setIsReceiving(false);
 
-          try {
-            handleToolCalls(output);
-          } catch (e) {
-            console.error("Error handling tool calls", e);
-          }
-
           // Track this as a newly received message for autoplay
           setLatestMessageIds((prev) =>
             new Set(prev).add(currentStreamRef.current),
@@ -137,6 +131,11 @@ export const useStreamingHandler = ({
             payload.prompt_chunks || {},
           )) {
             final_prompt[idx] = value;
+            try {
+              handleToolCall(value);
+            } catch (e) {
+              console.error(`Error handling tool call ${value}`, e);
+            }
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,
