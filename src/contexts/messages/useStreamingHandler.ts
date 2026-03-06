@@ -127,9 +127,7 @@ export const useStreamingHandler = ({
             ...(payload.buttons || []),
           ];
           let final_prompt = prevMessage.final_prompt || [];
-          for (let [idx, value] of Object.entries(
-            payload.prompt_chunks || {},
-          )) {
+          for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
             final_prompt[idx] = value;
             try {
               handleToolCall(value);

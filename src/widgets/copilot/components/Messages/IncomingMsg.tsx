@@ -17,6 +17,7 @@ import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
+
 addInlineStyle(style);
 
 export const BotMessageLayout = (props: Record<string, any>) => {
@@ -207,7 +208,11 @@ const FeedbackButton = ({
           className={clsx("my-auto", className)}
           style={{ whiteSpace: "nowrap" }}
         >
-          <Button key={button.id} className="text-muted d-flex justify-content-center align-items-center h-100" onClick={onClick}>
+          <Button
+            key={button.id}
+            className="text-muted d-flex justify-content-center align-items-center h-100"
+            onClick={onClick}
+          >
             {icon}
           </Button>
         </div>
