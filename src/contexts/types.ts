@@ -16,6 +16,7 @@ export interface CopilotConfigType {
     GOOGLE_MAPS_API_KEY?: string;
   };
   showRunLink: boolean;
+  showToolCalls: boolean;
   enableShareConversation: boolean;
   conversationData?: any;
   branding: {

@@ -160,6 +160,7 @@ const ShareDialog = ({
                 data={firstAssistantMessage}
                 autoPlay={false}
                 showRunLink={false}
+                showToolCalls={false}
                 id={firstAssistantMessage.id}
                 showSources={showSources}
                 linkColor={linkColor}

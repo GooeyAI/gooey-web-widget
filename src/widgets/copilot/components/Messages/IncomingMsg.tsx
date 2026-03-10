@@ -246,6 +246,7 @@ const IncomingMsg = memo(
     linkColor: string;
     autoPlay: boolean | undefined;
     showRunLink: boolean;
+    showToolCalls: boolean;
   }) => {
     const {
       output_audio = [],
@@ -270,7 +271,7 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
-          {props?.data?.final_prompt && (
+          {props?.data?.final_prompt && props?.showToolCalls && (
             <div className="gmb-12">
               <ToolCalls final_prompt={props?.data?.final_prompt} />
             </div>
