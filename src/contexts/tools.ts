@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-export function handleToolCall(entry: any) {
+export function handleToolCall(entry: any, conversationId?: string) {
   if (!entry) return;
 
   let update_gui_state = {};
@@ -28,6 +28,12 @@ export function handleToolCall(entry: any) {
   }
 
   if (Object.keys(update_gui_state).length) {
-    window.gui?.update_session_state?.({ update_gui_state });
+    window.gui?.update_session_state?.({
+      update_gui_state,
+      // conversation_id is a hashid string; the Python side will decode it to the integer DB id
+      ...(conversationId != null && {
+        __gooey_builder_conversation_id: conversationId,
+      }),
+    });
   }
 }
