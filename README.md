@@ -121,6 +121,11 @@ A boolean to enable or disable the links & sources preview panel.
 
 A boolean that dictates whether sources of information (if any) should be shown.
 
+##### `showToolCalls`
+
+A boolean that dictates whether to show deatils of functions/tools called by LLM.
+
+
 ##### `branding: object`
 
 Controls visual aspects of the widget and defines the textual content and related URLs for the bot's appearance and initial interaction prompts.
