@@ -367,22 +367,19 @@ const MessagesContextProvider = ({
   );
 
   useEffect(() => {
-    if (
+    let loadLatestConversation =
       !layoutController?.showNewConversationButton &&
-      conversations &&
-      conversations.length &&
-      !messages.size
-    )
-      // Load the latest conversation from DB - initial load when multuiple conversations are disabled
+      (config?.enableLastConversation ?? true);
+
+    if (loadLatestConversation && conversations?.length && !messages.size)
+      // Load the latest conversation from DB - initial load when multiple conversations are disabled
       setActiveConversation(conversations[0]);
     else if (config?.conversationData) {
       if (!conversations) return;
       // shared conversation preloading logic
-      const existingConversation =
-        conversations &&
-        conversations.find(
-          (conversation) => conversation.id === config?.conversationData?.id,
-        );
+      const existingConversation = conversations.find(
+        (conversation) => conversation.id === config?.conversationData?.id,
+      );
 
       // checks conversation.id is already in the conversations DB, set it as the active conversation
       if (existingConversation) {
