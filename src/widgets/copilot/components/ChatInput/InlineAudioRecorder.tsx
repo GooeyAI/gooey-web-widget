@@ -24,6 +24,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const [send, setSend] = useState<boolean>(false);
   const [chunks, setChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -38,12 +39,10 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   }, [isRunning, time]);
 
   const onSuccess = (stream: MediaStream) => {
+    streamRef.current = stream;
     const mediaRecorder = new MediaRecorder(stream);
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
-    mediaRecorder.onstop = function () {
-      stream?.getTracks().forEach((track) => track?.stop());
-    };
     mediaRecorder.ondataavailable = function (e) {
       setChunks((prev) => [...prev, e.data]);
     };
@@ -60,13 +59,24 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
     }, 10000);
   };
 
+  const stopStream = () => {
+    const stream = streamRef.current;
+    if (!stream) return;
+    stream.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  };
+
   const handleStopRecording = () => {
     if (!mediaRecorderRef.current) return;
-    mediaRecorderRef.current.stop();
+    stopStream(); // release mic indicator immediately
+    if (mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
     setIsRunning(false);
   };
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     // try to support various browsers
     navigator.mediaDevices.getUserMedia =
@@ -78,7 +88,21 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       console.error("The mediaDevices.getUserMedia() method is not supported.");
       return;
     }
-    navigator?.mediaDevices?.getUserMedia(constraints).then(onSuccess, onError);
+    navigator?.mediaDevices?.getUserMedia(constraints).then((stream) => {
+      if (cancelled) {
+        // React StrictMode runs effects twice in dev — stop any orphaned stream immediately
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      onSuccess(stream);
+    }, onError);
+    return () => {
+      cancelled = true;
+      stopStream();
+      if (mediaRecorderRef.current?.state !== "inactive") {
+        mediaRecorderRef.current?.stop();
+      }
+    };
   }, []);
 
   useEffect(() => {
