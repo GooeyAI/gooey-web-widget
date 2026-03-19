@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-export function handleToolCall(entry: any, conversationId?: string) {
+export function handleToolCall(entry: any, lastMessageId?: string) {
   if (!entry) return;
 
   let update_gui_state = {};
@@ -17,7 +17,11 @@ export function handleToolCall(entry: any, conversationId?: string) {
         // sometimes the state is nested in a `state` key
         state = state["state"] || state;
         // collate all the state updates in a single object
-        update_gui_state = { ...update_gui_state, ...state };
+        update_gui_state = {
+          ...update_gui_state,
+          ...state,
+          last_message_id: lastMessageId,
+        };
         break;
       case "run_js": {
         const { js_code } = JSON.parse(toolCall.function.arguments);
@@ -30,10 +34,6 @@ export function handleToolCall(entry: any, conversationId?: string) {
   if (Object.keys(update_gui_state).length) {
     window.gui?.update_session_state?.({
       update_gui_state,
-      // conversation_id is a hashid string; the Python side will decode it to the integer DB id
-      ...(conversationId != null && {
-        __gooey_builder_conversation_id: conversationId,
-      }),
     });
   }
 }

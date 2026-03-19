@@ -130,7 +130,7 @@ export const useStreamingHandler = ({
           for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
             final_prompt[idx] = value;
             try {
-              handleToolCall(value, prevMessage?.conversation_id);
+              handleToolCall(value, lastResponseId);
             } catch (e) {
               console.error(`Error handling tool call ${value}`, e);
             }
