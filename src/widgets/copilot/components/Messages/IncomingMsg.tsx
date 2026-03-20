@@ -125,7 +125,7 @@ const FeedbackButtons = ({
           )}
         </div>
       )}
-      {thumbButtons.length > 0 && (
+      {(thumbButtons.length > 0 || showRunLink) && (
         <div
           className="d-flex gmt-2 justify-content-start"
           style={{ gap: "4px" }}
@@ -141,25 +141,26 @@ const FeedbackButtons = ({
               <IconCopy size={14} />
             </IconButton>
           </GooeyTooltip>
-          {thumbButtons.map(
-            (button) =>
-              button && (
-                <FeedbackButton
-                  key={button.id}
-                  button={button}
-                  onClick={() => {
-                    if (button.isPressed) return;
-                    initializeQuery?.({
-                      button_pressed: {
-                        button_id: button.id,
-                        button_title: button.title,
-                        context_msg_id: bot_message_id,
-                      },
-                    });
-                  }}
-                />
-              ),
-          )}
+          {thumbButtons &&
+            thumbButtons.map(
+              (button) =>
+                button && (
+                  <FeedbackButton
+                    key={button.id}
+                    button={button}
+                    onClick={() => {
+                      if (button.isPressed) return;
+                      initializeQuery?.({
+                        button_pressed: {
+                          button_id: button.id,
+                          button_title: button.title,
+                          context_msg_id: bot_message_id,
+                        },
+                      });
+                    }}
+                  />
+                ),
+            )}
           {showRunLink && data?.web_url && (
             <a href={data?.web_url} target="_blank" rel="noopener noreferrer">
               <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">

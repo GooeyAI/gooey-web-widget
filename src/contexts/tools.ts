@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-export function handleToolCall(entry: any, lastMessageId?: string) {
+export function handleToolCall(entry: any, web_url?: string) {
   if (!entry) return;
 
   let update_gui_state = {};
@@ -20,7 +20,7 @@ export function handleToolCall(entry: any, lastMessageId?: string) {
         update_gui_state = {
           ...update_gui_state,
           ...state,
-          last_message_id: lastMessageId,
+          gooey_builder_web_url: web_url,
         };
         break;
       case "run_js": {

@@ -72,6 +72,19 @@ export const useStreamingHandler = ({
           return newMessages;
         }
 
+        // run started
+        if (payload?.type === STREAM_MESSAGE_TYPES.RUN_START) {
+          const newMessages = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop();
+          const prevMessage = prev.get(lastResponseId);
+          if (!prevMessage) return prev;
+          newMessages.set(lastResponseId, {
+            ...prevMessage,
+            ...payload,
+          });
+          return newMessages;
+        }
+
         // stream end
         if (
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
@@ -121,16 +134,17 @@ export const useStreamingHandler = ({
           const newConversations = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last messages id
           const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload.text || "");
+          if (!prevMessage) return prev;
+          const text = (prevMessage.text || "") + (payload.text || "");
           const buttons = [
-            ...(prevMessage?.buttons || []),
+            ...(prevMessage.buttons || []),
             ...(payload.buttons || []),
           ];
           let final_prompt = prevMessage.final_prompt || [];
           for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
             final_prompt[idx] = value;
             try {
-              handleToolCall(value, lastResponseId);
+              handleToolCall(value, prevMessage.web_url);
             } catch (e) {
               console.error(`Error handling tool call ${value}`, e);
             }
