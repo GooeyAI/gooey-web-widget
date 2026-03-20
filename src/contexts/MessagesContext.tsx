@@ -59,8 +59,10 @@ export interface ConversationStart {
 
 export interface RunStart {
   type: "run_start";
-  // Add any additional fields as needed
-  // status_url?: string;
+  run_id: string;
+  web_url: string;
+  created_at: string;
+  status_url: string;
 }
 
 export interface MessagePart {
@@ -78,6 +80,11 @@ export interface MessagePart {
 
 export interface FinalResponse {
   type: "final_response";
+
+  run_id?: string;
+  web_url?: string;
+  created_at?: string;
+  status_url?: string;
 
   run_time_sec?: number;
   status?: string;
@@ -397,6 +404,9 @@ const MessagesContextProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations]);
 
+  if (controller) {
+    controller.setMessages = preLoadData;
+  }
   let controllerContext = useController({
     controller,
     apiUrl: config!.apiUrl!,

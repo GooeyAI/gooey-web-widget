@@ -8,9 +8,9 @@ import type {
 import type { CopilotConfigType } from "./types";
 
 export type CopilotChatWidgetController = {
-  messages: MessageMishmash[];
-  onSendMessage: (payload: RequestModel) => void;
-  onNewConversation: () => void;
+  messages?: MessageMishmash[];
+  onSendMessage?: (payload: RequestModel) => void;
+  onNewConversation?: () => void;
   setMessages?: (messages: MessageMishmash[]) => void;
   updateConfig?: (config: CopilotConfigType) => void;
 };
@@ -31,23 +31,34 @@ export function useController({
   let [messages, setMessages] = useState<Map<string, MessageMishmash>>(
     msgArrayToMap(controller?.messages || []),
   );
-  if (!controller) return {};
-  controller.setMessages = (entries: MessageMishmash[]) => {
-    let newMessages = msgArrayToMap(entries);
-    if (!isMapEqual(messages, newMessages)) {
-      setMessages(newMessages);
-      scrollToMessage();
-    }
-  };
-  return {
-    messages,
-    async initializeQuery(payload: RequestModel) {
+  let ctx: MessagesContextType = {};
+
+  if (!controller) return ctx;
+
+  if (typeof controller.messages !== "undefined") {
+    ctx.messages = messages;
+    controller.setMessages = (entries: MessageMishmash[]) => {
+      let newMessages = msgArrayToMap(entries);
+      if (!isMapEqual(messages, newMessages)) {
+        setMessages(newMessages);
+        scrollToMessage();
+      }
+    };
+  }
+
+  if (controller.onSendMessage) {
+    ctx.initializeQuery = async (payload: RequestModel) => {
       if (!payload || isSending || isReceiving) return;
       await uploadPayloadFiles(payload, apiUrl);
-      controller?.onSendMessage(payload);
-    },
-    handleNewConversation: controller?.onNewConversation,
-  };
+      controller.onSendMessage(payload);
+    };
+  }
+
+  if (controller.onNewConversation) {
+    ctx.handleNewConversation = controller.onNewConversation;
+  }
+
+  return ctx;
 }
 
 function msgArrayToMap(
