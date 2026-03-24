@@ -231,7 +231,7 @@ const MessagesContextProvider = ({
       ? undefined
       : currentConversation.current?.id;
     setIsSendingMessage(true);
-    if (!conversationId && isSharedConversation) {
+    if (!conversationId && currentConversation.current?.messages) {
       // make messages array in payload from messages in currentConversation and add
       payload.messages = currentConversation.current?.messages?.map(
         (message) => ({
@@ -405,8 +405,19 @@ const MessagesContextProvider = ({
   }, [conversations]);
 
   if (controller) {
-    controller.setMessages = preLoadData;
+    controller.setConversationData = async (conversation: Conversation) => {
+      if (isSending || isReceiving) return;
+      currentConversation.current = conversation;
+      if (
+        conversation.messages &&
+        messagesChanged(Array.from(messages.values()), conversation.messages)
+      ) {
+        console.log("preLoadData", conversation.messages);
+        preLoadData(conversation.messages);
+      }
+    };
   }
+
   let controllerContext = useController({
     controller,
     apiUrl: config!.apiUrl!,
@@ -442,3 +453,15 @@ const MessagesContextProvider = ({
 };
 
 export default MessagesContextProvider;
+
+function messagesChanged(array1: any[], array2: any[]): boolean {
+  if (array1.length !== array2.length) return true;
+  for (let i = 0; i < array1.length; i++) {
+    if (
+      JSON.stringify(array1[i]?.content) !== JSON.stringify(array2[i]?.content)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
