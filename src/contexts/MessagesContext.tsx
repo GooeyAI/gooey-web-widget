@@ -412,7 +412,6 @@ const MessagesContextProvider = ({
         conversation.messages &&
         messagesChanged(Array.from(messages.values()), conversation.messages)
       ) {
-        console.log("preLoadData", conversation.messages);
         preLoadData(conversation.messages);
       }
     };
@@ -455,13 +454,25 @@ const MessagesContextProvider = ({
 export default MessagesContextProvider;
 
 function messagesChanged(array1: any[], array2: any[]): boolean {
-  if (array1.length !== array2.length) return true;
+  if (array1.length !== array2.length) {
+    return true;
+  }
   for (let i = 0; i < array1.length; i++) {
+    // compare the content of the messages, ignore the id
     if (
-      JSON.stringify(array1[i]?.content) !== JSON.stringify(array2[i]?.content)
+      JSON.stringify(array1[i], removeMsgId) !==
+      JSON.stringify(array2[i], removeMsgId)
     ) {
       return true;
     }
   }
   return false;
+}
+
+function removeMsgId(key: string, value: any) {
+  if (key === "id") {
+    return undefined;
+  } else {
+    return value;
+  }
 }
