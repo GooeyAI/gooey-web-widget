@@ -6,6 +6,7 @@ import type {
   RequestModel,
 } from "./MessagesContext";
 import type { CopilotConfigType } from "./types";
+import { Conversation } from "./ConversationLayer";
 
 export type CopilotChatWidgetController = {
   messages?: MessageMishmash[];
@@ -13,6 +14,7 @@ export type CopilotChatWidgetController = {
   onNewConversation?: () => void;
   setMessages?: (messages: MessageMishmash[]) => void;
   updateConfig?: (config: CopilotConfigType) => void;
+  setConversationData?: (conversation: Conversation) => void;
 };
 
 export function useController({
@@ -31,11 +33,11 @@ export function useController({
   let [messages, setMessages] = useState<Map<string, MessageMishmash>>(
     msgArrayToMap(controller?.messages || []),
   );
-  let ctx: MessagesContextType = {};
 
+  let ctx: MessagesContextType = {};
   if (!controller) return ctx;
 
-  if (typeof controller.messages !== "undefined") {
+  if (controller.messages) {
     ctx.messages = messages;
     controller.setMessages = (entries: MessageMishmash[]) => {
       let newMessages = msgArrayToMap(entries);
@@ -50,7 +52,7 @@ export function useController({
     ctx.initializeQuery = async (payload: RequestModel) => {
       if (!payload || isSending || isReceiving) return;
       await uploadPayloadFiles(payload, apiUrl);
-      controller.onSendMessage(payload);
+      controller.onSendMessage?.(payload);
     };
   }
 
@@ -73,10 +75,7 @@ function msgArrayToMap(
   return ret;
 }
 
-function isMapEqual(
-  map1: Map<string, MessageMishmash>,
-  map2: Map<string, MessageMishmash>,
-) {
+function isMapEqual(map1: Map<string, any>, map2: Map<string, any>) {
   if (map1.size !== map2.size) return false;
   return JSON.stringify([...map1]) === JSON.stringify([...map2]);
 }
