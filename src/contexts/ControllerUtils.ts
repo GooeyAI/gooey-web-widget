@@ -15,6 +15,7 @@ export type CopilotChatWidgetController = {
   setMessages?: (messages: MessageMishmash[]) => void;
   updateConfig?: (config: CopilotConfigType) => void;
   setConversationData?: (conversation: Conversation) => void;
+  onConversationChange?: (conversationId: string) => void;
 };
 
 export function useController({

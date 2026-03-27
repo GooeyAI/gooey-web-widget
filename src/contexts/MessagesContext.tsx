@@ -213,6 +213,11 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
+  const controllerRef = useRef(controller);
+
+  useEffect(() => {
+    controllerRef.current = controller;
+  }, [controller]);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -357,6 +362,8 @@ const MessagesContextProvider = ({
   const setActiveConversation = useCallback(
     async (conversation: Conversation) => {
       if (isSending || isReceiving) cancelApiCall();
+      if (conversation.id && controllerRef.current?.onConversationChange)
+        return controllerRef.current?.onConversationChange?.(conversation.id);
       if (!conversation || currentConversation.current?.id === conversation.id)
         return setMessagesLoading(false);
       setMessagesLoading(true);
@@ -374,9 +381,7 @@ const MessagesContextProvider = ({
   );
 
   useEffect(() => {
-    let loadLatestConversation =
-      !layoutController?.showNewConversationButton &&
-      (config?.enableLastConversation ?? true);
+    let loadLatestConversation = !layoutController?.showNewConversationButton;
 
     if (loadLatestConversation && conversations?.length && !messages.size)
       // Load the latest conversation from DB - initial load when multiple conversations are disabled
