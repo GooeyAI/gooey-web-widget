@@ -362,8 +362,7 @@ const MessagesContextProvider = ({
   const setActiveConversation = useCallback(
     async (conversation: Conversation) => {
       if (isSending || isReceiving) cancelApiCall();
-      if (conversation.id && controllerRef.current?.onConversationChange)
-        return controllerRef.current?.onConversationChange?.(conversation.id);
+
       if (!conversation || currentConversation.current?.id === conversation.id)
         return setMessagesLoading(false);
       setMessagesLoading(true);
@@ -373,6 +372,8 @@ const MessagesContextProvider = ({
       } else if (conversation.getMessages) {
         messages = await conversation.getMessages();
       }
+      if (conversation.id && controllerRef.current?.onConversationChange)
+        controllerRef.current?.onConversationChange?.(conversation.id);
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
