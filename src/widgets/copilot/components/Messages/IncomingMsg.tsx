@@ -54,16 +54,16 @@ type ReplyButton = {
 
 const FeedbackButtons = ({
   data,
-  body,
   showRunLink,
+  messageId,
 }: {
   data: {
     buttons: ReplyButton[];
     bot_message_id: string;
     web_url?: string;
   };
-  body: string;
   showRunLink: boolean;
+  messageId: string;
 }) => {
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -133,8 +133,33 @@ const FeedbackButtons = ({
           {/* Copy Text Message to clipboard */}
           <GooeyTooltip text="Copy Message">
             <IconButton
-              onClick={() => {
-                navigator.clipboard.writeText(body);
+              onClick={async (e) => {
+                // Copy the "final output" as rendered in the widget, not the raw markdown.
+                // Note: since this widget is rendered inside a Shadow DOM, we must query via getRootNode().
+                const rootNode = e.currentTarget.getRootNode();
+                const el =
+                  (rootNode as ShadowRoot | Document).getElementById?.(
+                    messageId,
+                  ) || document.getElementById(messageId);
+                if (!el) return;
+
+                try {
+                  await navigator.clipboard.write([
+                    new ClipboardItem({
+                      "text/html": new Blob([el.innerHTML], {
+                        type: "text/html",
+                      }),
+                      "text/plain": new Blob([el.innerText], {
+                        type: "text/plain",
+                      }),
+                    }),
+                  ]);
+                } catch {
+                  // fallback for browsers/contexts without clipboard API permissions
+                  navigator.clipboard.writeText(el.innerText).catch((err) => {
+                    console.error("Failed to copy to clipboard", err);
+                  });
+                }
               }}
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
@@ -316,6 +341,7 @@ const IncomingMsg = memo(
               data={props?.data}
               body={props?.data?.output_text}
               showRunLink={props.showRunLink}
+              messageId={props.id}
             />
           )}
         </div>
