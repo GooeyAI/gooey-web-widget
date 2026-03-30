@@ -44,7 +44,7 @@ export class DomNodeHandlers {
     domNode: DomNode,
     createParserOptions: Function,
   ): React.ReactElement | undefined {
-    if (!domNode.attribs || !domNode.children?.length) return;
+    if (domNode.name !== "pre" || !domNode.attribs || !domNode.children?.length) return;
 
     const codeChild = domNode.children[0];
     const isCodeBlock =
@@ -77,14 +77,20 @@ export class DomNodeHandlers {
     const { placeholder, expression } = result;
     const parts = domNode.data.split(placeholder);
     if (parts.length === 2) {
+      const before = parts[0]
+        ? this.handleLatexExpression({ ...domNode, data: parts[0] }, data) ?? parts[0]
+        : null;
+      const after = parts[1]
+        ? this.handleLatexExpression({ ...domNode, data: parts[1] }, data) ?? parts[1]
+        : null;
+
       return (
         <React.Fragment>
-          {parts[0]}
-          {this.handleLatexExpression({ ...domNode, data: parts[0] }, data)}
+          {before}
           <LaTeX displayMode={expression.displayMode}>
             {expression.content}
           </LaTeX>
-          {this.handleLatexExpression({ ...domNode, data: parts[1] }, data)}
+          {after}
         </React.Fragment>
       );
     }
@@ -111,7 +117,7 @@ export class DomNodeHandlers {
     return (
       <React.Fragment>
         {cleanText}{" "}
-        {data.references?.length && (
+        {!!data.references?.length && (
           <CollapsibleButton>
             <Sources sources={sources} isInline />
           </CollapsibleButton>
@@ -167,7 +173,9 @@ export class DomNodeHandlers {
   // Helper methods
   private extractReferenceNumbers(text: string): number[] {
     const matches = text.match(NUMBER_REFERENCE_REGEX) || [];
-    const numbers = matches.map((match) => parseInt(match.slice(1, -1), 10));
+    const numbers = matches.flatMap((match) =>
+      match.slice(1, -1).split(",").map((s) => parseInt(s.trim(), 10))
+    ).filter((n) => !isNaN(n));
     return [...new Set(numbers)]; // Remove duplicates
   }
 
