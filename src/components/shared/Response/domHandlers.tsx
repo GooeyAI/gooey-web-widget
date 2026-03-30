@@ -183,13 +183,9 @@ export class DomNodeHandlers {
     referenceNumbers: number[],
     references: Reference[],
   ): Reference[] {
-    if (referenceNumbers.length === 0) return [];
-
-    const startIndex = referenceNumbers[0] - 1;
-    const endIndex = referenceNumbers[referenceNumbers.length - 1];
-    const count = endIndex - referenceNumbers[0] + 1;
-
-    return references.slice(startIndex, startIndex + count);
+    return referenceNumbers
+      .filter((n) => n >= 1 && n <= references.length)
+      .map((n) => references[n - 1]);
   }
 
   private cleanTextFromReferences(text: string): string {
