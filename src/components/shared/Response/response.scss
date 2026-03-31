@@ -36,17 +36,6 @@
   display: list-item;
 }
 
-.markdown li > p {
-  /* Marked often wraps list item content in <p>; avoid double-spacing (li + p). */
-  margin: 0;
-  padding: 0;
-}
-
-.markdown li > p + p {
-  /* Restore spacing between multiple paragraphs within the same <li>. */
-  margin-top: 12px; /* matches `.markdown p { margin-bottom: 12px; }` */
-}
-
 .markdown h2 {
   font-weight: 600;
   margin-bottom: 1rem;
