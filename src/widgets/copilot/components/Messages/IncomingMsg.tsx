@@ -144,22 +144,39 @@ const FeedbackButtons = ({
                 if (!el) return;
 
                 try {
-                  await navigator.clipboard.write([
-                    new ClipboardItem({
-                      "text/html": new Blob([el.innerHTML], {
-                        type: "text/html",
+                  if (
+                    navigator.clipboard?.write &&
+                    typeof ClipboardItem !== "undefined"
+                  ) {
+                    await navigator.clipboard.write([
+                      new ClipboardItem({
+                        "text/html": new Blob([el.innerHTML], {
+                          type: "text/html",
+                        }),
+                        "text/plain": new Blob([el.innerText], {
+                          type: "text/plain",
+                        }),
                       }),
-                      "text/plain": new Blob([el.innerText], {
-                        type: "text/plain",
-                      }),
-                    }),
-                  ]);
-                } catch {
-                  // fallback for browsers/contexts without clipboard API permissions
-                  navigator.clipboard.writeText(el.innerText).catch((err) => {
-                    console.error("Failed to copy to clipboard", err);
-                  });
+                    ]);
+                    return;
+                  }
+
+                  if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(el.innerText);
+                    return;
+                  }
+                } catch (err) {
+                  if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(el.innerText).catch(
+                      (fallbackErr) => {
+                        console.error("Failed to copy to clipboard", fallbackErr);
+                      },
+                    );
+                    return;
+                  }
+                  console.error("Failed to copy to clipboard", err);
                 }
+              }}
               }}
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
