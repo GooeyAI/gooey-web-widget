@@ -12,7 +12,10 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { MESSAGE_GUTTER } from ".";
 import ResponseLoader from "../Loader";
-import { getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip } from "./helpers";
+import {
+  copyRenderedMessageToClipboard,
+  getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
+} from "./helpers";
 import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
@@ -133,51 +136,12 @@ const FeedbackButtons = ({
           {/* Copy Text Message to clipboard */}
           <GooeyTooltip text="Copy Message">
             <IconButton
-              onClick={async (e) => {
-                // Copy the "final output" as rendered in the widget, not the raw markdown.
-                // Note: since this widget is rendered inside a Shadow DOM, we must query via getRootNode().
-                const rootNode = e.currentTarget.getRootNode();
-                const el =
-                  (rootNode as ShadowRoot | Document).getElementById?.(
-                    messageId,
-                  ) || document.getElementById(messageId);
-                if (!el) return;
-
-                try {
-                  if (
-                    navigator.clipboard?.write &&
-                    typeof ClipboardItem !== "undefined"
-                  ) {
-                    await navigator.clipboard.write([
-                      new ClipboardItem({
-                        "text/html": new Blob([el.innerHTML], {
-                          type: "text/html",
-                        }),
-                        "text/plain": new Blob([el.innerText], {
-                          type: "text/plain",
-                        }),
-                      }),
-                    ]);
-                    return;
-                  }
-
-                  if (navigator.clipboard?.writeText) {
-                    await navigator.clipboard.writeText(el.innerText);
-                    return;
-                  }
-                } catch (err) {
-                  if (navigator.clipboard?.writeText) {
-                    await navigator.clipboard.writeText(el.innerText).catch(
-                      (fallbackErr) => {
-                        console.error("Failed to copy to clipboard", fallbackErr);
-                      },
-                    );
-                    return;
-                  }
-                  console.error("Failed to copy to clipboard", err);
-                }
-              }}
-              }}
+              onClick={async (e) =>
+                await copyRenderedMessageToClipboard({
+                  currentTarget: e.currentTarget,
+                  messageId,
+                })
+              }
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
               <IconCopy size={14} />

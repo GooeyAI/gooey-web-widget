@@ -267,3 +267,53 @@ export const isMobile = () =>
   /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
     navigator.userAgent,
   );
+
+export async function copyRenderedMessageToClipboard({
+  currentTarget,
+  messageId,
+}: {
+  currentTarget: HTMLElement;
+  messageId: string;
+}) {
+  if (!currentTarget) return;
+  // Copy the "final output" as rendered in the widget, not the raw markdown.
+  // Note: since this widget is rendered inside a Shadow DOM, we must query via getRootNode().
+  const rootNode = currentTarget?.getRootNode();
+  const el =
+    (rootNode as ShadowRoot | Document)?.getElementById?.(messageId) ||
+    document.getElementById(messageId);
+  if (!el) return;
+
+  try {
+    if (
+      navigator.clipboard?.write &&
+      typeof ClipboardItem !== "undefined" &&
+      el.innerHTML
+    ) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([el.innerHTML], {
+            type: "text/html",
+          }),
+          "text/plain": new Blob([el.innerText], {
+            type: "text/plain",
+          }),
+        }),
+      ]);
+      return;
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(el.innerText);
+      return;
+    }
+  } catch (err) {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(el.innerText).catch((fallbackErr) => {
+        console.error("Failed to copy to clipboard", fallbackErr);
+      });
+      return;
+    }
+    console.error("Failed to copy to clipboard", err);
+  }
+}
