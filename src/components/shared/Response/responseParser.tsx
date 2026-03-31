@@ -29,14 +29,9 @@ const AUDIO_EMOJI_REPLACEMENTS = {
 const MARKED_OPTIONS = {
   async: false,
   breaks: true,
-  extensions: null,
   gfm: true,
-  hooks: null,
   pedantic: false,
   silent: false,
-  tokenizer: null,
-  walkTokens: null,
-  smartLists: true,
 } as const;
 
 export const parseResponseBody = (

@@ -12,7 +12,10 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { MESSAGE_GUTTER } from ".";
 import ResponseLoader from "../Loader";
-import { getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip } from "./helpers";
+import {
+  copyRenderedMessageToClipboard,
+  getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
+} from "./helpers";
 import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
@@ -54,16 +57,16 @@ type ReplyButton = {
 
 const FeedbackButtons = ({
   data,
-  body,
   showRunLink,
+  messageId,
 }: {
   data: {
     buttons: ReplyButton[];
     bot_message_id: string;
     web_url?: string;
   };
-  body: string;
   showRunLink: boolean;
+  messageId: string;
 }) => {
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -133,9 +136,12 @@ const FeedbackButtons = ({
           {/* Copy Text Message to clipboard */}
           <GooeyTooltip text="Copy Message">
             <IconButton
-              onClick={() => {
-                navigator.clipboard.writeText(body);
-              }}
+              onClick={async (e) =>
+                await copyRenderedMessageToClipboard({
+                  currentTarget: e.currentTarget,
+                  messageId,
+                })
+              }
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
               <IconCopy size={14} />
@@ -314,8 +320,8 @@ const IncomingMsg = memo(
           {!isStreaming && props?.data?.buttons && (
             <FeedbackButtons
               data={props?.data}
-              body={props?.data?.output_text}
               showRunLink={props.showRunLink}
+              messageId={props.id}
             />
           )}
         </div>
