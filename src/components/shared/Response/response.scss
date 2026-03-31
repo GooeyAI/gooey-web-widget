@@ -42,6 +42,11 @@
   padding: 0;
 }
 
+.markdown li > p + p {
+  /* Restore spacing between multiple paragraphs within the same <li>. */
+  margin-top: 12px; /* matches `.markdown p { margin-bottom: 12px; }` */
+}
+
 .markdown h2 {
   font-weight: 600;
   margin-bottom: 1rem;

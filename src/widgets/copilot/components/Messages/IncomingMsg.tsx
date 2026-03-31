@@ -320,7 +320,6 @@ const IncomingMsg = memo(
           {!isStreaming && props?.data?.buttons && (
             <FeedbackButtons
               data={props?.data}
-              body={props?.data?.output_text}
               showRunLink={props.showRunLink}
               messageId={props.id}
             />
