@@ -42,10 +42,7 @@ const ErrorMessage = ({ errorDetail }: { errorDetail?: string }) => {
             >
               {expanded ? "Hide" : "Show"} details
               <span
-                className="gooey-error-chevron d-inline-block"
-                style={{
-                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-                }}
+                className={`gooey-error-chevron d-inline-block${expanded ? " gooey-error-chevron--expanded" : ""}`}
               >
                 <IconChevronDown size={12} />
               </span>
