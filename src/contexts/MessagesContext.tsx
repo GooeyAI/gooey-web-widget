@@ -225,6 +225,12 @@ const MessagesContextProvider = ({
   };
 
   const handleSendError = (e: any) => {
+    // User-initiated cancellation is not an error — don't report or render
+    if (axios.isCancel(e)) {
+      setIsReceiving(false);
+      setIsSendingMessage(false);
+      return;
+    }
     Sentry.captureException(e);
     const errorDetail =
       e?.response?.data?.detail || e?.message || "Unknown error";
