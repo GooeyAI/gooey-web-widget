@@ -43,11 +43,11 @@ export const useStreamingHandler = ({
     (payload: any) => {
       setMessages((prev: any) => {
         // stream close
-        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        if (!payload) {
           const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
+          const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload?.text || "");
+          const text = prevMessage?.text || "";
           newMessages.set(lastResponseId, {
             ...prevMessage,
             output_text: [text],
@@ -56,6 +56,26 @@ export const useStreamingHandler = ({
           });
           setIsReceiving(false);
           return newMessages;
+        }
+
+        // helper to mark the last message as errored and stop receiving
+        const markLastAsError = (errorDetail: string) => {
+          const newMessages = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop();
+          const prevMessage = prev.get(lastResponseId);
+          newMessages.set(lastResponseId, {
+            ...prevMessage,
+            type: STREAM_MESSAGE_TYPES.ERROR,
+            error_detail: errorDetail,
+            status: "errored",
+          });
+          setIsReceiving(false);
+          return newMessages;
+        };
+
+        // stream error
+        if (payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+          return markLastAsError(payload.detail || "");
         }
 
         // stream start
@@ -127,6 +147,14 @@ export const useStreamingHandler = ({
             ),
           );
           return newMessages;
+        }
+
+        // message_part with status=failed is an error
+        if (
+          payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
+          payload?.status === "failed"
+        ) {
+          return markLastAsError(payload.text || payload.detail || "");
         }
 
         // streaming data

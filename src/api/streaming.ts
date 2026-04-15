@@ -50,21 +50,20 @@ export const getDataFromStream = (sseUrl: string, setterFn: any) => {
   });
 
   evtSource.addEventListener("error", (event: MessageEvent) => {
-    let errMsg;
-    if (event.data) {
-      // parse the error message as JSON
-      let { detail } = JSON.parse(event.data);
-      errMsg = detail;
-    } else {
-      errMsg =
-        "⚠️ Sorry, I ran into an error while processing your request. Please try again.";
+    let detail = "";
+    try {
+      if (event.data) {
+        const parsed = JSON.parse(event.data);
+        detail = parsed.detail || JSON.stringify(parsed);
+      }
+    } catch {
+      detail = event.data || "";
     }
-    // display the error message
+
     setterFn({
       type: STREAM_MESSAGE_TYPES.ERROR,
-      text: `<p className="text-gooeyDanger font_14_400">${errMsg}</p>`,
+      detail,
     });
-    // close the event source
     evtSource.close();
   });
 

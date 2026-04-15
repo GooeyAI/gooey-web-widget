@@ -13,6 +13,7 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
 
@@ -32,6 +33,7 @@ export interface MessagesContextType {
   messages?: Map<string, MessageMishmash>;
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
+  retryLastQuery?: () => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   scrollMessageContainer?: (y?: number) => void;
@@ -213,6 +215,7 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
+  const lastPayloadRef = useRef<RequestModel | null>(null);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -221,8 +224,29 @@ const MessagesContextProvider = ({
     };
   };
 
+  const handleSendError = (e: any) => {
+    Sentry.captureException(e);
+    const errorDetail =
+      e?.response?.data?.detail || e?.message || "Unknown error";
+    setMessages((prev: Map<string, any>) => {
+      const newMessages = new Map(prev);
+      const errorId = uuidv4();
+      newMessages.set(errorId, {
+        id: errorId,
+        role: "assistant",
+        type: STREAM_MESSAGE_TYPES.ERROR,
+        error_detail: errorDetail,
+        status: "errored",
+      });
+      return newMessages;
+    });
+    setIsReceiving(false);
+    setIsSendingMessage(false);
+  };
+
   const initializeQuery = (payload: RequestModel) => {
     if (!payload || isSending || isReceiving) return;
+    lastPayloadRef.current = payload;
     // Clear any previously received message IDs when starting a new query
     setLatestMessageIds(new Set());
 
@@ -253,12 +277,36 @@ const MessagesContextProvider = ({
         user_id: currentUserId,
       },
       { onFinally: () => setIsSendingMessage(false) },
-    ).catch((e) => {
-      // report error to Sentry
-      Sentry.captureException(e);
-    });
+    ).catch(handleSendError);
     const newQuery = createNewQuery(payload);
     addResponse(newQuery);
+  };
+
+  const retryLastQuery = () => {
+    if (!lastPayloadRef.current || isSending || isReceiving) return;
+    const payload = lastPayloadRef.current;
+
+    // Remove the errored bot message, keep the user message
+    setMessages((prev: Map<string, any>) => {
+      const newMessages = new Map(prev);
+      const lastKey = Array.from(prev.keys()).pop();
+      if (lastKey && prev.get(lastKey)?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        newMessages.delete(lastKey);
+      }
+      return newMessages;
+    });
+
+    // Re-send the same payload without adding a new user message
+    setIsSendingMessage(true);
+    sendPayload(
+      {
+        ...payload,
+        conversation_id: currentConversation.current?.id,
+        citation_style: CITATION_STYLE,
+        user_id: currentUserId,
+      },
+      { onFinally: () => setIsSendingMessage(false) },
+    ).catch(handleSendError);
   };
 
   const scrollMessageContainer = useCallback(
@@ -429,6 +477,7 @@ const MessagesContextProvider = ({
     messages,
     isSending,
     initializeQuery,
+    retryLastQuery,
     handleNewConversation,
     cancelApiCall,
     scrollMessageContainer,
