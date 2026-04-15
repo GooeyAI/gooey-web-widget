@@ -1,8 +1,8 @@
 @import "src/css/colors.module.scss";
 
 .gooey-error-message {
-  border: 1px solid #f5c6cb;
-  background-color: #fff5f5;
+  border: 1px solid rgba($gooey-danger, 0.3);
+  background-color: rgba($gooey-danger, 0.04);
 }
 
 .gooey-error-icon {
@@ -33,10 +33,14 @@
 
 .gooey-error-chevron {
   transition: transform 0.2s ease;
+
+  &--expanded {
+    transform: rotate(180deg);
+  }
 }
 
 .gooey-error-details {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba($almost-black, 0.04);
   border-radius: 6px;
 
   code {
