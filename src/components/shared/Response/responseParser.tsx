@@ -68,7 +68,10 @@ const extractOutputText = (data: ResponseData): string => {
 
   let output = "";
 
-  if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
+  if (
+    type === STREAM_MESSAGE_TYPES.MESSAGE_PART ||
+    type === STREAM_MESSAGE_TYPES.ERROR
+  ) {
     output = text || detail || "";
   } else if (
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
