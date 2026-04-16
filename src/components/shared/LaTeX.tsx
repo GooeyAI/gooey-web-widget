@@ -1,5 +1,6 @@
 import React from "react";
 import katex from "katex";
+import * as Sentry from "@sentry/react";
 import { addInlineStyle } from "src/addStyles";
 
 import katexCss from "katex/dist/katex.min.css?inline";
@@ -34,7 +35,7 @@ const LaTeX: React.FC<LaTeXProps> = ({
       />
     );
   } catch (error) {
-    console.warn("LaTeX render error:", error);
+    Sentry.captureException(error, { extra: { latex: children } });
     return (
       <span className={`latex-error ${className}`}>
         {displayMode ? `[${children}]` : `(${children})`}

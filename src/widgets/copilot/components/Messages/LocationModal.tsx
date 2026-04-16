@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import * as Sentry from "@sentry/react";
 import leafletStyle from "leaflet/dist/leaflet.css?inline";
 import {
   forwardRef,
@@ -330,7 +331,7 @@ function GoogleMapView({
         document.head.removeChild(style);
       };
     } catch (error) {
-      console.error("Error initializing Autocomplete:", error);
+      Sentry.captureException(error);
     }
   }, [googleMapRef.current, isLoaded]);
 
