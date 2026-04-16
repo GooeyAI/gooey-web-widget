@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import * as Sentry from "@sentry/react";
 import { getDataFromStream, createStreamApi } from "src/api/streaming";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { uploadPayloadFiles } from "src/api/file-upload";
@@ -179,7 +180,7 @@ export const useStreamingHandler = ({
             try {
               handleToolCall(value, prevMessage.web_url);
             } catch (e) {
-              console.error(`Error handling tool call ${value}`, e);
+              Sentry.captureException(e, { extra: { toolCallValue: value } });
             }
           }
           newConversations.set(lastResponseId, {
