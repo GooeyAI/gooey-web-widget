@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import * as Sentry from "@sentry/react";
 import GooeyDialog from "src/components/shared/Dialog";
 import Button from "src/components/shared/Buttons/Button";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
@@ -57,7 +58,7 @@ const ShareDialog = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
-      console.error("Failed to copy", err);
+      Sentry.captureException(err);
     }
   };
 
@@ -74,9 +75,10 @@ const ShareDialog = ({
         text: "Check out this conversation",
         url: shareUrl,
       });
-    } catch (err) {
-      // Ignore user cancellations or unsupported cases silently
-      console.debug("Share canceled or failed", err);
+    } catch (err: any) {
+      // AbortError is the user canceling the native share sheet — not an error.
+      if (err?.name === "AbortError") return;
+      Sentry.captureException(err);
     }
   };
 
