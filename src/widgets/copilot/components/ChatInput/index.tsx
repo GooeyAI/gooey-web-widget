@@ -178,7 +178,7 @@ const ChatInput = () => {
 
   const processFiles = (files: Array<any>): Array<UploadedFile | undefined> => {
     if (!files || !files.length) return [];
-    return files.map((file: any) => ({
+    return files.filter(Boolean).map((file: any) => ({
       id: uuidv4(),
       name: file.name,
       type: file.type.split("/")[0],
