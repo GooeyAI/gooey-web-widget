@@ -24,5 +24,9 @@ export const uploadFileToGooey = async (apiUrl: string, file: File) => {
       "Content-Type": "multipart/form-data",
     },
   });
-  return res?.data?.url;
+  const uploadedUrl = res?.data?.url;
+  if (typeof uploadedUrl !== "string" || !uploadedUrl) {
+    throw new Error("File upload succeeded but response had no url");
+  }
+  return uploadedUrl;
 };
