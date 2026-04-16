@@ -1,7 +1,7 @@
 import parse, { HTMLReactParserOptions } from "html-react-parser";
 import React from "react";
 import { marked } from "marked";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
