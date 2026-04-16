@@ -7,6 +7,7 @@ import {
 } from "src/api/streaming";
 import { uploadPayloadFiles } from "src/api/file-upload";
 import { handleToolCall } from "../tools";
+import { buildAssistantErrorMessage } from "./errorHandling";
 
 type StreamingHandlerParams = {
   config: any;
@@ -58,17 +59,24 @@ export const useStreamingHandler = ({
           return newMessages;
         }
 
-        // helper to mark the last message as errored and stop receiving
+        // helper to mark the last message as errored and stop receiving.
+        // if the last message is the user's message (no bot message yet),
+        // append a new assistant error message instead of overwriting it.
         const markLastAsError = (errorDetail: string) => {
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
-          newMessages.set(lastResponseId, {
-            ...prevMessage,
-            type: STREAM_MESSAGE_TYPES.ERROR,
-            error_detail: errorDetail,
-            status: "errored",
-          });
+          if (!prevMessage || prevMessage.role === "user") {
+            const errorMessage = buildAssistantErrorMessage(errorDetail);
+            newMessages.set(errorMessage.id, errorMessage);
+          } else {
+            newMessages.set(lastResponseId, {
+              ...prevMessage,
+              type: STREAM_MESSAGE_TYPES.ERROR,
+              error_detail: errorDetail,
+              status: "errored",
+            });
+          }
           setIsReceiving(false);
           return newMessages;
         };
