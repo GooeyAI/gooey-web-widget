@@ -54,6 +54,16 @@ export function useController({
       await uploadPayloadFiles(payload, apiUrl);
       controller.onSendMessage?.(payload);
     };
+
+    ctx.retryLastQuery = () => {
+      if (isSending || isReceiving) return;
+      const lastUserMessage = [...messages.values()]
+        .reverse()
+        .find((m) => m.role === "user");
+      if (!lastUserMessage) return;
+      const { id, role, ...rest } = lastUserMessage;
+      controller.onSendMessage?.(rest as RequestModel);
+    };
   }
 
   if (controller.onNewConversation) {
