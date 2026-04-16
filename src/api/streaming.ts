@@ -83,9 +83,10 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
       },
     });
   } catch (e: any) {
-    if (abortController.signal.aborted && !(e instanceof FatalStreamError)) {
-      return;
-    }
+    // A DOMException with name "AbortError" is thrown when we abort on
+    // FINAL_RESPONSE, the "close" event, or a user-initiated cancel —
+    // none of those are real errors.
+    if (e?.name === "AbortError") return;
     setterFn({
       type: STREAM_MESSAGE_TYPES.ERROR,
       detail: e?.message || ERROR_MESSAGES.STREAM_CONNECTION_FAILED,
