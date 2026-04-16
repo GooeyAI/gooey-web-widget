@@ -6,6 +6,7 @@ export const ERROR_MESSAGES = {
   UNKNOWN: "Unknown error",
   REQUEST_TIMEOUT: "Request timed out",
   NETWORK_UNREACHABLE_SERVER: "Network error — unable to reach server",
+  STREAM_CONNECTION_FAILED: "Stream connection failed",
 } as const;
 
 const TIMEOUT_AXIOS_CODES = ["ECONNABORTED", "ETIMEDOUT"];
@@ -52,6 +53,22 @@ export const extractErrorDetail = (e: any): string => {
     return ERROR_MESSAGES.NETWORK_UNREACHABLE_SERVER;
   }
   return e.message || ERROR_MESSAGES.UNKNOWN;
+};
+
+// Extracts a human-readable detail from a failed fetch Response (non-2xx).
+export const extractFetchErrorDetail = async (
+  res: Response,
+): Promise<string> => {
+  const statusLine = `${res.status} ${res.statusText}`.trim();
+  const body = await res.text().catch(() => "");
+  if (!body) return statusLine || ERROR_MESSAGES.STREAM_CONNECTION_FAILED;
+  try {
+    const parsed = JSON.parse(body);
+    const msg = pickFirstKey(parsed);
+    return msg ? `${statusLine}: ${msg}` : statusLine;
+  } catch {
+    return `${statusLine}: ${body}`;
+  }
 };
 
 export const buildAssistantErrorMessage = (errorDetail: string) => {
