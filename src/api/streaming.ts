@@ -69,6 +69,11 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
           // ignore malformed frames
         }
       },
+      onclose: () => {
+        // Server closed the connection without an explicit "close" frame.
+        // Unwind state so the UI doesn't hang in a "receiving" mode.
+        setterFn(null);
+      },
       onerror: (err) => {
         // Throwing aborts the auto-retry loop.
         throw err;
