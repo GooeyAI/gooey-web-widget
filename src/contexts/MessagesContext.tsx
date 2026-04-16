@@ -13,7 +13,7 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
 import {

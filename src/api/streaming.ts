@@ -7,8 +7,6 @@ import {
   extractFetchErrorDetail,
 } from "src/contexts/messages/errorHandling";
 
-export { STREAM_MESSAGE_TYPES } from "./streaming-types";
-
 const getHeaders = () => {
   return {
     "Content-Type": "application/json",

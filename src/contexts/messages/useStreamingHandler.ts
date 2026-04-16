@@ -1,10 +1,7 @@
 import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import {
-  STREAM_MESSAGE_TYPES,
-  getDataFromStream,
-  createStreamApi,
-} from "src/api/streaming";
+import { getDataFromStream, createStreamApi } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { uploadPayloadFiles } from "src/api/file-upload";
 import { handleToolCall } from "../tools";
 import { buildAssistantErrorMessage } from "./errorHandling";

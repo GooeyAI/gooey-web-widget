@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
