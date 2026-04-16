@@ -34,7 +34,20 @@ export const createStreamApi = async (
 };
 
 // Thrown from onopen to signal a non-retryable HTTP error (4xx/5xx).
-class FatalStreamError extends Error {}
+// Keeps the Response metadata so downstream reporters (Sentry) see the
+// status code and URL, not just the flattened message.
+class FatalStreamError extends Error {
+  readonly status: number;
+  readonly statusText: string;
+  readonly url: string;
+  constructor(message: string, response: Response) {
+    super(message);
+    this.name = "FatalStreamError";
+    this.status = response.status;
+    this.statusText = response.statusText;
+    this.url = response.url;
+  }
+}
 
 export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
   const abortController = new AbortController();
@@ -48,7 +61,16 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
       openWhenHidden: true,
       onopen: async (response) => {
         if (!response.ok) {
-          throw new FatalStreamError(await extractFetchErrorDetail(response));
+          const detail = await extractFetchErrorDetail(response);
+          const fatal = new FatalStreamError(detail, response);
+          Sentry.captureException(fatal, {
+            extra: {
+              status: fatal.status,
+              statusText: fatal.statusText,
+              url: fatal.url,
+            },
+          });
+          throw fatal;
         }
       },
       onmessage: (msg) => {
