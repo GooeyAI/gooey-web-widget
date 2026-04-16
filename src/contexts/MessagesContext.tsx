@@ -166,8 +166,8 @@ export interface RequestModel {
   };
   input_prompt?: string;
   input_audio?: Blob | string;
-  input_images?: string[];
-  input_documents?: string[];
+  input_images?: (string | File)[];
+  input_documents?: (string | File)[];
   citation_style?: string;
   messages?: OpenAPIMessage[];
 }
