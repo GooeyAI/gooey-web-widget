@@ -259,7 +259,6 @@ const MessagesContextProvider = ({
 
   const initializeQuery = (payload: RequestModel) => {
     if (!payload || isSending || isReceiving) return;
-    lastPayloadRef.current = payload;
     // Clear any previously received message IDs when starting a new query
     setLatestMessageIds(new Set());
 
@@ -282,10 +281,16 @@ const MessagesContextProvider = ({
       );
     }
     setIsSharedConversation(false); //reset shared conversation flag
+
+    // Preserve the computed conversation_id on the stored payload so retry
+    // reuses the original intent — shared conversations must retry as a
+    // fresh fork (undefined) rather than replying to the shared id still
+    // sitting on currentConversation.current.
+    lastPayloadRef.current = { ...payload, conversation_id: conversationId };
+
     sendPayload(
       {
-        ...payload,
-        conversation_id: conversationId,
+        ...lastPayloadRef.current,
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
       },
@@ -309,12 +314,12 @@ const MessagesContextProvider = ({
       return newMessages;
     });
 
-    // Re-send the same payload without adding a new user message
+    // Re-send the same payload without adding a new user message;
+    // conversation_id is carried through from initializeQuery.
     setIsSendingMessage(true);
     sendPayload(
       {
         ...payload,
-        conversation_id: currentConversation.current?.id,
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
       },
