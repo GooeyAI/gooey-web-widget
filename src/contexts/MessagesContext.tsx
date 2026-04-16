@@ -24,9 +24,19 @@ import {
 
 const CITATION_STYLE = "number";
 
+// Files in input_images/input_documents are uploaded at send time; the
+// stored user message needs displayable URLs, not raw Files, so the
+// message renderer can treat all entries as strings.
+const toDisplayUrls = (items?: (string | File)[]): string[] | undefined =>
+  items?.map((item) =>
+    item instanceof File ? URL.createObjectURL(item) : item,
+  );
+
 const createNewQuery = (payload: RequestModel) => {
   return {
     ...payload,
+    input_images: toDisplayUrls(payload.input_images),
+    input_documents: toDisplayUrls(payload.input_documents),
     id: uuidv4(),
     role: "user",
   };
