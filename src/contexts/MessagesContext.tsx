@@ -396,18 +396,31 @@ const MessagesContextProvider = ({
     if (!isReceiving && !isSending) {
       apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     }
-    // delete last message from the state
+
     const newMessages = new Map(messages);
     const idsArray = Array.from(messages.keys());
-    // check if state is loading then remove the last one
+
     if (isSending) {
+      // No bot response started yet — drop the pending user message
       newMessages.delete(idsArray.pop());
       setMessages(newMessages);
-    }
-
-    if (isReceiving) {
-      newMessages.delete(idsArray.pop()); // delete server message
-      newMessages.delete(idsArray.pop()); // delete user message
+    } else if (isReceiving) {
+      const lastId = idsArray[idsArray.length - 1];
+      const botMessage = newMessages.get(lastId);
+      const partialText = botMessage?.text || "";
+      if (partialText) {
+        // Preserve the partial response as if the server completed the reply
+        newMessages.set(lastId, {
+          ...botMessage,
+          output_text: [partialText],
+          type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
+          status: "completed",
+        });
+      } else {
+        // Empty bot placeholder — drop it along with the user message
+        newMessages.delete(idsArray.pop()); // bot placeholder
+        newMessages.delete(idsArray.pop()); // user message
+      }
       setMessages(newMessages);
     }
 
