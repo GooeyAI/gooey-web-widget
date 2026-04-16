@@ -14,6 +14,12 @@ const NETWORK_AXIOS_CODE = "ERR_NETWORK";
 const NETWORK_AXIOS_MESSAGE = "Network Error";
 
 const ERROR_BODY_KEYS = ["detail", "message", "error"] as const;
+const MAX_ERROR_DETAIL_LENGTH = 500;
+
+const truncateDetail = (s: string): string =>
+  s.length > MAX_ERROR_DETAIL_LENGTH
+    ? `${s.slice(0, MAX_ERROR_DETAIL_LENGTH)}…`
+    : s;
 
 const pickFirstKey = (value: unknown): string => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return "";
@@ -46,7 +52,9 @@ export const extractErrorDetail = (e: any): string => {
       bodyDetail = pickFirstKey(data) || JSON.stringify(data);
     }
     const statusLine = `${status} ${statusText}`.trim();
-    return bodyDetail ? `${statusLine}: ${bodyDetail}` : statusLine;
+    return truncateDetail(
+      bodyDetail ? `${statusLine}: ${bodyDetail}` : statusLine,
+    );
   }
 
   if (TIMEOUT_AXIOS_CODES.includes(e.code)) {
@@ -55,7 +63,7 @@ export const extractErrorDetail = (e: any): string => {
   if (e.code === NETWORK_AXIOS_CODE || e.message === NETWORK_AXIOS_MESSAGE) {
     return ERROR_MESSAGES.NETWORK_UNREACHABLE_SERVER;
   }
-  return e.message || ERROR_MESSAGES.UNKNOWN;
+  return truncateDetail(e.message || ERROR_MESSAGES.UNKNOWN);
 };
 
 // Extracts a human-readable detail from a failed fetch Response (non-2xx).
@@ -68,9 +76,9 @@ export const extractFetchErrorDetail = async (
   try {
     const parsed = JSON.parse(body);
     const msg = pickFirstKey(parsed);
-    return msg ? `${statusLine}: ${msg}` : statusLine;
+    return truncateDetail(msg ? `${statusLine}: ${msg}` : statusLine);
   } catch {
-    return `${statusLine}: ${body}`;
+    return truncateDetail(`${statusLine}: ${body}`);
   }
 };
 
