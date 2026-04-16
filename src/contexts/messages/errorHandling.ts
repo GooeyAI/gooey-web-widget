@@ -15,9 +15,12 @@ const NETWORK_AXIOS_MESSAGE = "Network Error";
 
 const ERROR_BODY_KEYS = ["detail", "message", "error"] as const;
 
-const pickFirstKey = (obj: Record<string, any>): string => {
+const pickFirstKey = (value: unknown): string => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+  const obj = value as Record<string, unknown>;
   for (const key of ERROR_BODY_KEYS) {
-    if (obj?.[key]) return obj[key];
+    const candidate = obj[key];
+    if (typeof candidate === "string" && candidate) return candidate;
   }
   return "";
 };
