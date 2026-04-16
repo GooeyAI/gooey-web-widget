@@ -86,10 +86,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       navigator?.mediaDevices?.mozGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.msGetUserMedia;
     if (!navigator?.mediaDevices?.getUserMedia) {
-      Sentry.captureMessage(
-        "mediaDevices.getUserMedia() not supported in this browser",
-        "warning",
-      );
+      setLoading(false);
       return;
     }
     navigator?.mediaDevices?.getUserMedia(constraints).then((stream) => {
