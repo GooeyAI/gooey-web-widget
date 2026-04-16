@@ -55,14 +55,16 @@ export function useController({
       controller.onSendMessage?.(payload);
     };
 
-    ctx.retryLastQuery = () => {
+    ctx.retryLastQuery = async () => {
       if (isSending || isReceiving) return;
       const lastUserMessage = [...messages.values()]
         .reverse()
         .find((m) => m.role === "user");
       if (!lastUserMessage) return;
       const { id, role, ...rest } = lastUserMessage;
-      controller.onSendMessage?.(rest as RequestModel);
+      const payload = rest as RequestModel;
+      await uploadPayloadFiles(payload, apiUrl);
+      controller.onSendMessage?.(payload);
     };
   }
 
