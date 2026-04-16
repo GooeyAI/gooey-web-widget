@@ -1,4 +1,9 @@
 import axios from "axios";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+import {
+  ERROR_MESSAGES,
+  extractFetchErrorDetail,
+} from "src/contexts/messages/errorHandling";
 
 const getHeaders = () => {
   return {
@@ -36,46 +41,53 @@ export const createStreamApi = async (
   return response.headers.get("Location");
 };
 
-export const getDataFromStream = (sseUrl: string, setterFn: any) => {
-  const evtSource = new EventSource(sseUrl);
+// Thrown from onopen to signal a non-retryable HTTP error (4xx/5xx).
+class FatalStreamError extends Error {}
+
+export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
+  const abortController = new AbortController();
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  window.GooeyEventSource = evtSource;
+  // @ts-expect-error — exposed globally so cancelApiCall() can abort the stream
+  window.GooeyEventSource = { close: () => abortController.abort() };
 
-  evtSource.addEventListener("close", () => {
-    // close the event source
-    evtSource.close();
-    // set the state to null
-    setterFn(null);
-  });
-
-  evtSource.addEventListener("error", (event: MessageEvent) => {
-    let detail = "";
-    try {
-      if (event.data) {
-        const parsed = JSON.parse(event.data);
-        detail = parsed.detail || JSON.stringify(parsed);
-      }
-    } catch {
-      detail = event.data || "";
+  try {
+    await fetchEventSource(sseUrl, {
+      signal: abortController.signal,
+      openWhenHidden: true,
+      onopen: async (response) => {
+        if (!response.ok) {
+          throw new FatalStreamError(await extractFetchErrorDetail(response));
+        }
+      },
+      onmessage: (msg) => {
+        if (msg.event === "close") {
+          setterFn(null);
+          abortController.abort();
+          return;
+        }
+        if (!msg.data) return;
+        try {
+          const parsed = JSON.parse(msg.data);
+          setterFn(parsed);
+          if (parsed.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
+            abortController.abort();
+          }
+        } catch {
+          // ignore malformed frames
+        }
+      },
+      onerror: (err) => {
+        // Throwing aborts the auto-retry loop.
+        throw err;
+      },
+    });
+  } catch (e: any) {
+    if (abortController.signal.aborted && !(e instanceof FatalStreamError)) {
+      return;
     }
-
     setterFn({
       type: STREAM_MESSAGE_TYPES.ERROR,
-      detail,
+      detail: e?.message || ERROR_MESSAGES.STREAM_CONNECTION_FAILED,
     });
-    evtSource.close();
-  });
-
-  evtSource.onmessage = (event) => {
-    // parse the message as JSON
-    const data = JSON.parse(event.data);
-    // update the state with the streamed message
-    setterFn(data);
-    // check if the message is the final response
-    if (data.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
-      // close the stream
-      evtSource.close();
-    }
-  };
+  }
 };
