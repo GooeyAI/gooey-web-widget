@@ -1,6 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 
 export const ERROR_MESSAGES = {
   UNKNOWN: "Unknown error",

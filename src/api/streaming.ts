@@ -1,24 +1,17 @@
 import axios from "axios";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { STREAM_MESSAGE_TYPES } from "./streaming-types";
 import {
   ERROR_MESSAGES,
   extractFetchErrorDetail,
 } from "src/contexts/messages/errorHandling";
 
+export { STREAM_MESSAGE_TYPES } from "./streaming-types";
+
 const getHeaders = () => {
   return {
     "Content-Type": "application/json",
   };
-};
-
-export const STREAM_MESSAGE_TYPES = {
-  CONVERSATION_START: "conversation_start",
-  FINAL_RESPONSE: "final_response",
-  RUN_START: "run_start",
-  RUNNING: "running",
-  COMPLETED: "completed",
-  MESSAGE_PART: "message_part",
-  ERROR: "error",
 };
 
 export const createStreamApi = async (
