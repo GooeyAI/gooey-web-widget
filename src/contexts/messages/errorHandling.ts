@@ -40,16 +40,18 @@ export const extractErrorDetail = (e: any): string => {
 
   if (e.response) {
     const { status, statusText = "", data } = e.response;
+    // Only surface whitelisted message fields; raw bodies can contain
+    // stack traces, internal IDs, or signed URLs. The full error is
+    // captured via Sentry.captureException in the caller.
     let bodyDetail = "";
     if (typeof data === "string") {
       try {
-        const parsed = JSON.parse(data);
-        bodyDetail = pickFirstKey(parsed) || data;
+        bodyDetail = pickFirstKey(JSON.parse(data));
       } catch {
-        bodyDetail = data;
+        // non-JSON body — do not echo to UI
       }
     } else if (data && typeof data === "object") {
-      bodyDetail = pickFirstKey(data) || JSON.stringify(data);
+      bodyDetail = pickFirstKey(data);
     }
     const statusLine = `${status} ${statusText}`.trim();
     return truncateDetail(
@@ -66,20 +68,32 @@ export const extractErrorDetail = (e: any): string => {
   return truncateDetail(e.message || ERROR_MESSAGES.UNKNOWN);
 };
 
-// Extracts a human-readable detail from a failed fetch Response (non-2xx).
+// Extracts a UI-safe detail from a failed fetch Response (non-2xx).
+// Returns both the sanitized UI string and the raw body so the caller can
+// forward the full payload to telemetry without exposing it to users.
 export const extractFetchErrorDetail = async (
   res: Response,
-): Promise<string> => {
+): Promise<{ uiDetail: string; rawBody: string }> => {
   const statusLine = `${res.status} ${res.statusText}`.trim();
   const body = await res.text().catch(() => "");
-  if (!body) return statusLine || ERROR_MESSAGES.STREAM_CONNECTION_FAILED;
-  try {
-    const parsed = JSON.parse(body);
-    const msg = pickFirstKey(parsed);
-    return truncateDetail(msg ? `${statusLine}: ${msg}` : statusLine);
-  } catch {
-    return truncateDetail(`${statusLine}: ${body}`);
+  if (!body) {
+    return {
+      uiDetail: statusLine || ERROR_MESSAGES.STREAM_CONNECTION_FAILED,
+      rawBody: "",
+    };
   }
+  let safeDetail = "";
+  try {
+    safeDetail = pickFirstKey(JSON.parse(body));
+  } catch {
+    // non-JSON body — do not echo to UI
+  }
+  return {
+    uiDetail: truncateDetail(
+      safeDetail ? `${statusLine}: ${safeDetail}` : statusLine,
+    ),
+    rawBody: body,
+  };
 };
 
 export const buildAssistantErrorMessage = (errorDetail: string) => {

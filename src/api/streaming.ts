@@ -61,13 +61,14 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
       openWhenHidden: true,
       onopen: async (response) => {
         if (!response.ok) {
-          const detail = await extractFetchErrorDetail(response);
-          const fatal = new FatalStreamError(detail, response);
+          const { uiDetail, rawBody } = await extractFetchErrorDetail(response);
+          const fatal = new FatalStreamError(uiDetail, response);
           Sentry.captureException(fatal, {
             extra: {
               status: fatal.status,
               statusText: fatal.statusText,
               url: fatal.url,
+              body: rawBody,
             },
           });
           throw fatal;
