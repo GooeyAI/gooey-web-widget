@@ -16,6 +16,11 @@ import * as Sentry from "@sentry/react";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
+import {
+  buildAssistantErrorMessage,
+  extractErrorDetail,
+  isUserCancellation,
+} from "./messages/errorHandling";
 
 const CITATION_STYLE = "number";
 
@@ -226,24 +231,16 @@ const MessagesContextProvider = ({
 
   const handleSendError = (e: any) => {
     // User-initiated cancellation is not an error — don't report or render
-    if (axios.isCancel(e)) {
+    if (isUserCancellation(e)) {
       setIsReceiving(false);
       setIsSendingMessage(false);
       return;
     }
     Sentry.captureException(e);
-    const errorDetail =
-      e?.response?.data?.detail || e?.message || "Unknown error";
+    const errorMessage = buildAssistantErrorMessage(extractErrorDetail(e));
     setMessages((prev: Map<string, any>) => {
       const newMessages = new Map(prev);
-      const errorId = uuidv4();
-      newMessages.set(errorId, {
-        id: errorId,
-        role: "assistant",
-        type: STREAM_MESSAGE_TYPES.ERROR,
-        error_detail: errorDetail,
-        status: "errored",
-      });
+      newMessages.set(errorMessage.id, errorMessage);
       return newMessages;
     });
     setIsReceiving(false);
