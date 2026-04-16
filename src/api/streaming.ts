@@ -1,5 +1,6 @@
 import axios from "axios";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import * as Sentry from "@sentry/react";
 import { STREAM_MESSAGE_TYPES } from "./streaming-types";
 import {
   ERROR_MESSAGES,
@@ -65,8 +66,12 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
           if (parsed.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
             abortController.abort();
           }
-        } catch {
-          // ignore malformed frames
+        } catch (err) {
+          // Malformed frame — report and continue so one bad chunk
+          // doesn't take down the rest of the stream.
+          Sentry.captureException(err, {
+            extra: { sseData: msg.data, sseEvent: msg.event },
+          });
         }
       },
       onclose: () => {
