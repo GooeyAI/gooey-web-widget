@@ -126,7 +126,7 @@ const OutgoingMsg = memo(
                 input_prompt && "gmt-16",
               )}
             >
-              <audio controls src={input_audio_url}></audio>
+              <AudioPlayer url={input_audio_url} />
             </div>
           )}
           {input_prompt && (
@@ -206,6 +206,43 @@ function resolveInputAudioUrl(
   if (Array.isArray(input_audio)) return input_audio[0];
   if (typeof input_audio === "string") return input_audio;
   return (URL || webkitURL).createObjectURL(input_audio as Blob);
+}
+
+function AudioPlayer({ url }: { url: string }) {
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/);
+  if (driveMatch) {
+    const [loaded, setLoaded] = useState(false);
+    return (
+      <div style={{ position: "relative", width: 300, height: 80 }}>
+        {!loaded && (
+          <p
+            className="font_14_400 text-muted"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            Loading audio...
+          </p>
+        )}
+        <iframe
+          src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
+          width="300"
+          height="80"
+          allow="autoplay"
+          onLoad={() => setLoaded(true)}
+          style={{
+            border: "none",
+            borderRadius: "8px",
+            opacity: loaded ? 1 : 0,
+          }}
+        />
+      </div>
+    );
+  }
+  return <audio controls src={url}></audio>;
 }
 
 function buildOpenStreetMapEmbedUrl(
