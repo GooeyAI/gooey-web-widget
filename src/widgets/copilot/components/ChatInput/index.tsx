@@ -26,8 +26,7 @@ addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
 const INPUT_HEIGHT = 44;
-const acceptedFileTypes =
-  "application/*, text/*, application/pdf, text/plain, application/json, text/json, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.presentationml.presentation";
+const acceptedFileTypes = "application/*, text/*, audio/*";
 const acceptedImageTypes = "image/*, video/*,";
 
 // Define a type for file state
@@ -142,6 +141,7 @@ const ChatInput = () => {
       );
       const images = files.filter((file) => file.type === "image");
       const videos = files.filter((file) => file.type === "video");
+      const audios = files.filter((file) => file.type === "audio");
 
       // attach to payload for server to process
       if (documents.length)
@@ -153,6 +153,7 @@ const ChatInput = () => {
           ...(payload.input_documents || []),
           ...videos.map((file) => file.gooeyUrl),
         ];
+      if (audios.length) payload.input_audio = audios[0].gooeyUrl;
       setFiles([]);
     }
     initializeQuery?.(payload);
