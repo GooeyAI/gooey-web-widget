@@ -13,14 +13,30 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
+import {
+  buildAssistantErrorMessage,
+  extractErrorDetail,
+  isUserCancellation,
+} from "./messages/errorHandling";
 
 const CITATION_STYLE = "number";
+
+// Files in input_images/input_documents are uploaded at send time; the
+// stored user message needs displayable URLs, not raw Files, so the
+// message renderer can treat all entries as strings.
+const toDisplayUrls = (items?: (string | File)[]): string[] | undefined =>
+  items?.map((item) =>
+    item instanceof File ? URL.createObjectURL(item) : item,
+  );
 
 const createNewQuery = (payload: RequestModel) => {
   return {
     ...payload,
+    input_images: toDisplayUrls(payload.input_images),
+    input_documents: toDisplayUrls(payload.input_documents),
     id: uuidv4(),
     role: "user",
   };
@@ -32,6 +48,7 @@ export interface MessagesContextType {
   messages?: Map<string, MessageMishmash>;
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
+  retryLastQuery?: () => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   scrollMessageContainer?: (y?: number) => void;
@@ -159,8 +176,8 @@ export interface RequestModel {
   };
   input_prompt?: string;
   input_audio?: Blob | string;
-  input_images?: string[];
-  input_documents?: string[];
+  input_images?: (string | File)[];
+  input_documents?: (string | File)[];
   citation_style?: string;
   messages?: OpenAPIMessage[];
 }
@@ -213,12 +230,31 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
+  const lastPayloadRef = useRef<RequestModel | null>(null);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
       ...currentConversation.current,
       ...conversation,
     };
+  };
+
+  const handleSendError = (e: any) => {
+    // User-initiated cancellation is not an error — don't report or render
+    if (isUserCancellation(e)) {
+      setIsReceiving(false);
+      setIsSendingMessage(false);
+      return;
+    }
+    Sentry.captureException(e);
+    const errorMessage = buildAssistantErrorMessage(extractErrorDetail(e));
+    setMessages((prev: Map<string, any>) => {
+      const newMessages = new Map(prev);
+      newMessages.set(errorMessage.id, errorMessage);
+      return newMessages;
+    });
+    setIsReceiving(false);
+    setIsSendingMessage(false);
   };
 
   const initializeQuery = (payload: RequestModel) => {
@@ -245,20 +281,50 @@ const MessagesContextProvider = ({
       );
     }
     setIsSharedConversation(false); //reset shared conversation flag
+
+    // Preserve the computed conversation_id on the stored payload so retry
+    // reuses the original intent — shared conversations must retry as a
+    // fresh fork (undefined) rather than replying to the shared id still
+    // sitting on currentConversation.current.
+    lastPayloadRef.current = { ...payload, conversation_id: conversationId };
+
     sendPayload(
       {
-        ...payload,
-        conversation_id: conversationId,
+        ...lastPayloadRef.current,
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
       },
       { onFinally: () => setIsSendingMessage(false) },
-    ).catch((e) => {
-      // report error to Sentry
-      Sentry.captureException(e);
-    });
+    ).catch(handleSendError);
     const newQuery = createNewQuery(payload);
     addResponse(newQuery);
+  };
+
+  const retryLastQuery = () => {
+    if (!lastPayloadRef.current || isSending || isReceiving) return;
+    const payload = lastPayloadRef.current;
+
+    // Remove the errored bot message, keep the user message
+    setMessages((prev: Map<string, any>) => {
+      const newMessages = new Map(prev);
+      const lastKey = Array.from(prev.keys()).pop();
+      if (lastKey && prev.get(lastKey)?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        newMessages.delete(lastKey);
+      }
+      return newMessages;
+    });
+
+    // Re-send the same payload without adding a new user message;
+    // conversation_id is carried through from initializeQuery.
+    setIsSendingMessage(true);
+    sendPayload(
+      {
+        ...payload,
+        citation_style: CITATION_STYLE,
+        user_id: currentUserId,
+      },
+      { onFinally: () => setIsSendingMessage(false) },
+    ).catch(handleSendError);
   };
 
   const scrollMessageContainer = useCallback(
@@ -429,6 +495,7 @@ const MessagesContextProvider = ({
     messages,
     isSending,
     initializeQuery,
+    retryLastQuery,
     handleNewConversation,
     cancelApiCall,
     scrollMessageContainer,

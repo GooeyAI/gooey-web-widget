@@ -11,7 +11,6 @@ import InlineAudioRecorder from "./InlineAudioRecorder";
 import { addInlineStyle } from "src/addStyles";
 import style from "./chatInput.scss?inline";
 import FilePreview from "./FilePreview";
-import { uploadFileToGooey } from "src/api/file-upload";
 import IconPlus from "src/assets/SvgIcons/IconPlus";
 import GooeyPopper from "src/components/shared/Popper/Popper";
 import Button from "src/components/shared/Buttons/Button";
@@ -29,14 +28,13 @@ const INPUT_HEIGHT = 44;
 const acceptedFileTypes = "application/*, text/*, audio/*";
 const acceptedImageTypes = "image/*, video/*,";
 
-// Define a type for file state
+// Local file state before send. The File blob is uploaded by
+// uploadPayloadFiles once the user actually sends.
 interface UploadedFile {
   id: string;
   name: string;
   type: string;
   data: File;
-  gooeyUrl: string;
-  isUploading: boolean;
 }
 
 const ChatInput = () => {
@@ -143,15 +141,16 @@ const ChatInput = () => {
       const videos = files.filter((file) => file.type === "video");
       const audios = files.filter((file) => file.type === "audio");
 
-      // attach to payload for server to process
+      // attach raw Files to payload — uploadPayloadFiles will upload
+      // them at send time and replace each entry with the returned URL
       if (documents.length)
-        payload.input_documents = documents.map((file) => file.gooeyUrl);
+        payload.input_documents = documents.map((file) => file.data);
       if (images.length)
-        payload.input_images = images.map((file) => file.gooeyUrl);
+        payload.input_images = images.map((file) => file.data);
       if (videos.length)
         payload.input_documents = [
           ...(payload.input_documents || []),
-          ...videos.map((file) => file.gooeyUrl),
+          ...videos.map((file) => file.data),
         ];
       if (audios.length) payload.input_audio = audios[0].gooeyUrl;
       setFiles([]);
@@ -180,39 +179,12 @@ const ChatInput = () => {
 
   const processFiles = (files: Array<any>): Array<UploadedFile | undefined> => {
     if (!files || !files.length) return [];
-    return files.map((file: any) => {
-      const id = uuidv4();
-      try {
-        if (!config || !config.apiUrl) return;
-        uploadFileToGooey(config.apiUrl, file).then((url) => {
-          setFiles((prev: any) => {
-            const idx = prev.findIndex((f: any) => f.id === id);
-            if (idx === -1) return prev; // if photo removed before upload completed
-            // @TODO: cancel upload if file removed
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              isUploading: false,
-              gooeyUrl: url,
-            };
-            return updated;
-          });
-        });
-      } catch (err) {
-        console.error(err);
-        setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
-        // TODO: show error toast
-      }
-
-      return {
-        id,
-        name: file.name,
-        type: file.type.split("/")[0],
-        data: file,
-        gooeyUrl: "",
-        isUploading: true,
-      } as UploadedFile;
-    });
+    return files.filter(Boolean).map((file: any) => ({
+      id: uuidv4(),
+      name: file.name,
+      type: file.type.split("/")[0],
+      data: file,
+    }));
   };
 
   const onFileAdded = (e: any) => {
@@ -257,8 +229,7 @@ const ChatInput = () => {
   const { colors } = config?.branding || {};
   const showStop = isSending || isReceiving;
   const disableSend =
-    (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
-    files?.some((file) => file.isUploading);
+    !showStop && !isSending && value.trim().length === 0 && !files?.length;
   const isLeftButtons = useMemo(
     () => config?.enablePhotoUpload,
     [config?.enablePhotoUpload],

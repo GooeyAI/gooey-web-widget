@@ -4,6 +4,7 @@ import {
   attributesToProps,
 } from "html-react-parser";
 import { Highlight, themes } from "prism-react-renderer";
+import * as Sentry from "@sentry/react";
 import Button from "./Buttons/Button";
 import { useState } from "react";
 
@@ -32,7 +33,7 @@ const CodeHeader = ({ body = "", language = "" }) => {
         setButtonText("Copy");
       }, 5000); // Reset button text after 5 seconds
     } catch (err) {
-      console.error("Failed to copy: ", err);
+      Sentry.captureException(err);
     }
   };
 

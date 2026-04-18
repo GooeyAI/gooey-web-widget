@@ -1,12 +1,11 @@
 import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import {
-  STREAM_MESSAGE_TYPES,
-  getDataFromStream,
-  createStreamApi,
-} from "src/api/streaming";
+import * as Sentry from "@sentry/react";
+import { getDataFromStream, createStreamApi } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import { uploadPayloadFiles } from "src/api/file-upload";
 import { handleToolCall } from "../tools";
+import { buildAssistantErrorMessage } from "./errorHandling";
 
 type StreamingHandlerParams = {
   config: any;
@@ -43,11 +42,11 @@ export const useStreamingHandler = ({
     (payload: any) => {
       setMessages((prev: any) => {
         // stream close
-        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        if (!payload) {
           const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
+          const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload?.text || "");
+          const text = prevMessage?.text || "";
           newMessages.set(lastResponseId, {
             ...prevMessage,
             output_text: [text],
@@ -56,6 +55,33 @@ export const useStreamingHandler = ({
           });
           setIsReceiving(false);
           return newMessages;
+        }
+
+        // helper to mark the last message as errored and stop receiving.
+        // if the last message is the user's message (no bot message yet),
+        // append a new assistant error message instead of overwriting it.
+        const markLastAsError = (errorDetail: string) => {
+          const newMessages = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop();
+          const prevMessage = prev.get(lastResponseId);
+          if (!prevMessage || prevMessage.role === "user") {
+            const errorMessage = buildAssistantErrorMessage(errorDetail);
+            newMessages.set(errorMessage.id, errorMessage);
+          } else {
+            newMessages.set(lastResponseId, {
+              ...prevMessage,
+              type: STREAM_MESSAGE_TYPES.ERROR,
+              error_detail: errorDetail,
+              status: "errored",
+            });
+          }
+          setIsReceiving(false);
+          return newMessages;
+        };
+
+        // stream error
+        if (payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+          return markLastAsError(payload.detail || "");
         }
 
         // stream start
@@ -129,6 +155,14 @@ export const useStreamingHandler = ({
           return newMessages;
         }
 
+        // message_part with status=failed is an error
+        if (
+          payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
+          payload?.status === "failed"
+        ) {
+          return markLastAsError(payload.text || payload.detail || "");
+        }
+
         // streaming data
         if (payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
           const newConversations = new Map(prev);
@@ -146,7 +180,7 @@ export const useStreamingHandler = ({
             try {
               handleToolCall(value, prevMessage.web_url);
             } catch (e) {
-              console.error(`Error handling tool call ${value}`, e);
+              Sentry.captureException(e, { extra: { toolCallValue: value } });
             }
           }
           newConversations.set(lastResponseId, {
