@@ -145,14 +145,13 @@ const ChatInput = () => {
       // them at send time and replace each entry with the returned URL
       if (documents.length)
         payload.input_documents = documents.map((file) => file.data);
-      if (images.length)
-        payload.input_images = images.map((file) => file.data);
+      if (images.length) payload.input_images = images.map((file) => file.data);
       if (videos.length)
         payload.input_documents = [
           ...(payload.input_documents || []),
           ...videos.map((file) => file.data),
         ];
-      if (audios.length) payload.input_audio = audios[0].gooeyUrl;
+      if (audios.length) payload.input_audio = audios[0].data;
       setFiles([]);
     }
     initializeQuery?.(payload);
