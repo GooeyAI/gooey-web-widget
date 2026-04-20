@@ -12,8 +12,10 @@ import { buildAssistantErrorMessage } from "./errorHandling";
 
 type StreamingHandlerParams = {
   config: any;
-  handleAddConversation: (conversation: any) => void;
-  updateCurrentConversation: (conversation: any) => void;
+  finalizeConversation: (
+    messages: Map<string, any>,
+    metadata?: { title?: string; timestamp?: string },
+  ) => void;
   setIsReceiving: (value: boolean) => void;
   setIsSendingMessage: (value: boolean) => void;
   setLatestMessageIds: Dispatch<SetStateAction<Set<string>>>;
@@ -26,8 +28,7 @@ type StreamingHandlerParams = {
 
 export const useStreamingHandler = ({
   config,
-  handleAddConversation,
-  updateCurrentConversation,
+  finalizeConversation,
   setIsReceiving,
   setIsSendingMessage,
   setLatestMessageIds,
@@ -131,7 +132,7 @@ export const useStreamingHandler = ({
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
           payload?.status === STREAM_MESSAGE_STATUS.COMPLETED
         ) {
-          const newMessages = new Map(prev);
+          const newMessages: Map<string, any> = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
@@ -150,23 +151,10 @@ export const useStreamingHandler = ({
           );
 
           // update current conversation for every time the stream ends
-          const conversationData = {
-            id: prevMessage?.conversation_id,
-            user_id: prevMessage?.user_id,
+          finalizeConversation(newMessages, {
             title: payload?.title,
             timestamp: payload?.created_at,
-            bot_id: config?.integration_id,
-          };
-          updateCurrentConversation(conversationData);
-          handleAddConversation(
-            Object.assign(
-              {},
-              {
-                ...conversationData,
-                messages: Array.from(newMessages.values()),
-              },
-            ),
-          );
+          });
           return newMessages;
         }
 
@@ -205,13 +193,11 @@ export const useStreamingHandler = ({
       });
     },
     [
-      config?.integration_id,
-      handleAddConversation,
+      finalizeConversation,
       setIsReceiving,
       setIsSendingMessage,
       setLatestMessageIds,
       setMessages,
-      updateCurrentConversation,
       updateLocalUser,
     ],
   );
