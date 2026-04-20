@@ -76,15 +76,9 @@ div:focus-visible {
 
 code,
 code[class*="language-"] {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    Liberation Mono,
-    monospace !important;
-  font-size: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace !important;
+  font-size: 12px;
   color: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
