@@ -79,7 +79,7 @@ export const useStreamingHandler = ({
               ...prevMessage,
               type: STREAM_MESSAGE_TYPES.ERROR,
               error_detail: errorDetail,
-              status: "falied",
+              status: STREAM_MESSAGE_STATUS.FAILED,
             });
           }
           setIsReceiving(false);
