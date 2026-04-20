@@ -13,7 +13,10 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
+import {
+  STREAM_MESSAGE_STATUS,
+  STREAM_MESSAGE_TYPES,
+} from "src/api/streaming-types";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
 import {
@@ -276,7 +279,10 @@ const MessagesContextProvider = ({
           content:
             message.role === "user"
               ? message.input_prompt || ""
-              : message.raw_output_text?.[0] || "",
+              : message?.raw_output_text?.[0] ||
+                message?.output_text?.[0] ||
+                message?.text ||
+                "",
         }),
       );
     }
@@ -353,10 +359,35 @@ const MessagesContextProvider = ({
     scrollToMessage();
   }, [scrollToMessage]);
 
+  const finalizeConversation = useCallback(
+    (
+      messages: Map<string, any>,
+      metadata?: { title?: string; timestamp?: string },
+    ) => {
+      // Find a message with conversation metadata (from conversation_start)
+      const lastBotMessage = Array.from(messages.values())
+        .reverse()
+        .find((m: any) => m.conversation_id);
+
+      const conversationData = {
+        id: lastBotMessage?.conversation_id,
+        user_id: lastBotMessage?.user_id,
+        title: metadata?.title,
+        timestamp: metadata?.timestamp || new Date().toISOString(),
+        bot_id: config?.integration_id,
+      };
+      updateCurrentConversation(conversationData);
+      handleAddConversation({
+        ...conversationData,
+        messages: Array.from(messages.values()),
+      });
+    },
+    [config?.integration_id, handleAddConversation],
+  );
+
   const { sendPayload } = useStreamingHandler({
     config,
-    handleAddConversation,
-    updateCurrentConversation,
+    finalizeConversation,
     scrollToMessage,
     setIsReceiving,
     setIsSendingMessage,
@@ -414,7 +445,7 @@ const MessagesContextProvider = ({
           ...botMessage,
           output_text: [partialText],
           type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
-          status: "completed",
+          status: STREAM_MESSAGE_STATUS.COMPLETED,
         });
       } else {
         // Empty bot placeholder — drop it along with the user message
@@ -424,9 +455,7 @@ const MessagesContextProvider = ({
       setMessages(newMessages);
     }
 
-    updateCurrentConversation({
-      messages: Array.from(newMessages.values()),
-    });
+    finalizeConversation(newMessages);
 
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsReceiving(false);
