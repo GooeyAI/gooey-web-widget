@@ -2,7 +2,10 @@ import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import * as Sentry from "@sentry/react";
 import { getDataFromStream, createStreamApi } from "src/api/streaming";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
+import {
+  STREAM_MESSAGE_STATUS,
+  STREAM_MESSAGE_TYPES,
+} from "src/api/streaming-types";
 import { uploadPayloadFiles } from "src/api/file-upload";
 import { handleToolCall } from "../tools";
 import { buildAssistantErrorMessage } from "./errorHandling";
@@ -35,12 +38,14 @@ export const useStreamingHandler = ({
   updateLocalUser,
 }: StreamingHandlerParams) => {
   const currentStreamRef = useRef<any>(null);
+  const hasErrorRef = useRef(false);
 
   const updateStreamedMessage = useCallback(
     (payload: any) => {
       setMessages((prev: any) => {
-        // stream close
+        // stream close — skip if already errored
         if (!payload) {
+          if (hasErrorRef.current) return prev;
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
@@ -49,7 +54,7 @@ export const useStreamingHandler = ({
             ...prevMessage,
             output_text: [text],
             type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
-            status: "completed",
+            status: STREAM_MESSAGE_STATUS.COMPLETED,
           });
           setIsReceiving(false);
           return newMessages;
@@ -59,6 +64,7 @@ export const useStreamingHandler = ({
         // if the last message is the user's message (no bot message yet),
         // append a new assistant error message instead of overwriting it.
         const markLastAsError = (errorDetail: string) => {
+          hasErrorRef.current = true;
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
@@ -70,7 +76,7 @@ export const useStreamingHandler = ({
               ...prevMessage,
               type: STREAM_MESSAGE_TYPES.ERROR,
               error_detail: errorDetail,
-              status: "errored",
+              status: "falied",
             });
           }
           setIsReceiving(false);
@@ -81,6 +87,17 @@ export const useStreamingHandler = ({
         if (payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
           return markLastAsError(payload.detail || "");
         }
+
+        // message_part with status=failed is an error
+        if (
+          payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
+          payload?.status === STREAM_MESSAGE_STATUS.FAILED
+        ) {
+          return markLastAsError(payload.text || payload.detail || "");
+        }
+
+        // once errored, ignore all further stream messages
+        if (hasErrorRef.current) return prev;
 
         // stream start
         if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
@@ -112,7 +129,7 @@ export const useStreamingHandler = ({
         // stream end
         if (
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-          payload?.status === "completed"
+          payload?.status === STREAM_MESSAGE_STATUS.COMPLETED
         ) {
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
@@ -151,14 +168,6 @@ export const useStreamingHandler = ({
             ),
           );
           return newMessages;
-        }
-
-        // message_part with status=failed is an error
-        if (
-          payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
-          payload?.status === "failed"
-        ) {
-          return markLastAsError(payload.text || payload.detail || "");
         }
 
         // streaming data
@@ -209,6 +218,7 @@ export const useStreamingHandler = ({
 
   const sendPayload = useCallback(
     async (payload: any, callbacks?: { onFinally?: () => void }) => {
+      hasErrorRef.current = false;
       try {
         await uploadPayloadFiles(payload, config!.apiUrl!);
 
