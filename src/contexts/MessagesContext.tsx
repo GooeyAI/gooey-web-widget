@@ -369,6 +369,8 @@ const MessagesContextProvider = ({
         .reverse()
         .find((m: any) => m.conversation_id);
 
+      if (!lastBotMessage) return;
+
       const conversationData = {
         id: lastBotMessage?.conversation_id,
         user_id: lastBotMessage?.user_id,
