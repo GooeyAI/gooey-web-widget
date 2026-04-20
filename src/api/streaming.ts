@@ -1,19 +1,16 @@
 import axios from "axios";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+import * as Sentry from "@sentry/react";
+import { STREAM_MESSAGE_TYPES } from "./streaming-types";
+import {
+  ERROR_MESSAGES,
+  extractFetchErrorDetail,
+} from "src/contexts/messages/errorHandling";
 
 const getHeaders = () => {
   return {
     "Content-Type": "application/json",
   };
-};
-
-export const STREAM_MESSAGE_TYPES = {
-  CONVERSATION_START: "conversation_start",
-  FINAL_RESPONSE: "final_response",
-  RUN_START: "run_start",
-  RUNNING: "running",
-  COMPLETED: "completed",
-  MESSAGE_PART: "message_part",
-  ERROR: "error",
 };
 
 export const createStreamApi = async (
@@ -36,47 +33,86 @@ export const createStreamApi = async (
   return response.headers.get("Location");
 };
 
-export const getDataFromStream = (sseUrl: string, setterFn: any) => {
-  const evtSource = new EventSource(sseUrl);
+// Thrown from onopen to signal a non-retryable HTTP error (4xx/5xx).
+// Keeps the Response metadata so downstream reporters (Sentry) see the
+// status code and URL, not just the flattened message.
+class FatalStreamError extends Error {
+  readonly status: number;
+  readonly statusText: string;
+  readonly url: string;
+  constructor(message: string, response: Response) {
+    super(message);
+    this.name = "FatalStreamError";
+    this.status = response.status;
+    this.statusText = response.statusText;
+    this.url = response.url;
+  }
+}
+
+export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
+  const abortController = new AbortController();
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  window.GooeyEventSource = evtSource;
+  // @ts-expect-error — exposed globally so cancelApiCall() can abort the stream
+  window.GooeyEventSource = { close: () => abortController.abort() };
 
-  evtSource.addEventListener("close", () => {
-    // close the event source
-    evtSource.close();
-    // set the state to null
-    setterFn(null);
-  });
-
-  evtSource.addEventListener("error", (event: MessageEvent) => {
-    let errMsg;
-    if (event.data) {
-      // parse the error message as JSON
-      let { detail } = JSON.parse(event.data);
-      errMsg = detail;
-    } else {
-      errMsg =
-        "⚠️ Sorry, I ran into an error while processing your request. Please try again.";
-    }
-    // display the error message
+  try {
+    await fetchEventSource(sseUrl, {
+      signal: abortController.signal,
+      openWhenHidden: true,
+      onopen: async (response) => {
+        if (!response.ok) {
+          const { uiDetail, rawBody } = await extractFetchErrorDetail(response);
+          const fatal = new FatalStreamError(uiDetail, response);
+          Sentry.captureException(fatal, {
+            extra: {
+              status: fatal.status,
+              statusText: fatal.statusText,
+              url: fatal.url,
+              body: rawBody,
+            },
+          });
+          throw fatal;
+        }
+      },
+      onmessage: (msg) => {
+        if (msg.event === "close") {
+          setterFn(null);
+          abortController.abort();
+          return;
+        }
+        if (!msg.data) return;
+        try {
+          const parsed = JSON.parse(msg.data);
+          setterFn(parsed);
+          if (parsed.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
+            abortController.abort();
+          }
+        } catch (err) {
+          // Malformed frame — report and continue so one bad chunk
+          // doesn't take down the rest of the stream.
+          Sentry.captureException(err, {
+            extra: { sseData: msg.data, sseEvent: msg.event },
+          });
+        }
+      },
+      onclose: () => {
+        // Server closed the connection without an explicit "close" frame.
+        // Unwind state so the UI doesn't hang in a "receiving" mode.
+        setterFn(null);
+      },
+      onerror: (err) => {
+        // Throwing aborts the auto-retry loop.
+        throw err;
+      },
+    });
+  } catch (e: any) {
+    // A DOMException with name "AbortError" is thrown when we abort on
+    // FINAL_RESPONSE, the "close" event, or a user-initiated cancel —
+    // none of those are real errors.
+    if (e?.name === "AbortError") return;
     setterFn({
       type: STREAM_MESSAGE_TYPES.ERROR,
-      text: `<p className="text-gooeyDanger font_14_400">${errMsg}</p>`,
+      detail: e?.message || ERROR_MESSAGES.STREAM_CONNECTION_FAILED,
     });
-    // close the event source
-    evtSource.close();
-  });
-
-  evtSource.onmessage = (event) => {
-    // parse the message as JSON
-    const data = JSON.parse(event.data);
-    // update the state with the streamed message
-    setterFn(data);
-    // check if the message is the final response
-    if (data.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE) {
-      // close the stream
-      evtSource.close();
-    }
-  };
+  }
 };

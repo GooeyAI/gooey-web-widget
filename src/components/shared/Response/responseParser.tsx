@@ -1,7 +1,10 @@
 import parse, { HTMLReactParserOptions } from "html-react-parser";
 import React from "react";
 import { marked } from "marked";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import {
+  STREAM_MESSAGE_STATUS,
+  STREAM_MESSAGE_TYPES,
+} from "src/api/streaming-types";
 import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
@@ -68,11 +71,14 @@ const extractOutputText = (data: ResponseData): string => {
 
   let output = "";
 
-  if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
+  if (
+    type === STREAM_MESSAGE_TYPES.MESSAGE_PART ||
+    type === STREAM_MESSAGE_TYPES.ERROR
+  ) {
     output = text || detail || "";
   } else if (
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-    status === "completed"
+    status === STREAM_MESSAGE_STATUS.COMPLETED
   ) {
     output = output_text[0] || raw_output_text[0] || "";
   }

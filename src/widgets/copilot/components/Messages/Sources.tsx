@@ -15,6 +15,7 @@ import {
   renderImageInIframe,
   truncateMiddle,
 } from "./helpers";
+import * as Sentry from "@sentry/react";
 import { useSystemContext } from "src/contexts/hooks";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -59,7 +60,7 @@ const useMetadata = (url: string) => {
         }
       })
       .catch((err) => {
-        console.log("error fetching url meta", err);
+        Sentry.captureException(err, { extra: { url } });
       });
   }, [url, metadata, getTempStoreValue, setTempStoreValue]);
 

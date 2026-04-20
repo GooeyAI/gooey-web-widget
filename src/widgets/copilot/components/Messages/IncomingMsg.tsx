@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
@@ -19,6 +19,7 @@ import {
 import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
+import ErrorMessage from "./ErrorMessage";
 import { SourcesSection } from "./Sources";
 
 addInlineStyle(style);
@@ -274,6 +275,31 @@ const IncomingMsg = memo(
       type === STREAM_MESSAGE_TYPES.RUN_START
     ) {
       return <ResponseLoader show={true} />;
+    }
+
+    if (type === STREAM_MESSAGE_TYPES.ERROR) {
+      return (
+        <div className="gooey-incomingMsg gpb-12 mw-100">
+          <div
+            className={clsx(
+              `gpl-${MESSAGE_GUTTER + 2} gpr-${MESSAGE_GUTTER}`,
+              "mw-100",
+            )}
+          >
+            {/* Show any partial response that was streamed before the error */}
+            {props.data.text && (
+              <GooeyTextResponse
+                data={props.data}
+                linkColor={props?.linkColor}
+                showSources={props?.showSources}
+                isStreaming={false}
+                id={props?.id}
+              />
+            )}
+            <ErrorMessage errorDetail={props.data.error_detail} />
+          </div>
+        </div>
+      );
     }
 
     return (

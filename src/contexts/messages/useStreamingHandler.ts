@@ -1,17 +1,21 @@
 import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import * as Sentry from "@sentry/react";
+import { getDataFromStream, createStreamApi } from "src/api/streaming";
 import {
+  STREAM_MESSAGE_STATUS,
   STREAM_MESSAGE_TYPES,
-  getDataFromStream,
-  createStreamApi,
-} from "src/api/streaming";
+} from "src/api/streaming-types";
 import { uploadPayloadFiles } from "src/api/file-upload";
 import { handleToolCall } from "../tools";
+import { buildAssistantErrorMessage } from "./errorHandling";
 
 type StreamingHandlerParams = {
   config: any;
-  handleAddConversation: (conversation: any) => void;
-  updateCurrentConversation: (conversation: any) => void;
+  finalizeConversation: (
+    messages: Map<string, any>,
+    metadata?: { title?: string; timestamp?: string },
+  ) => void;
   scrollToMessage: () => void;
   setIsReceiving: (value: boolean) => void;
   setIsSendingMessage: (value: boolean) => void;
@@ -25,8 +29,7 @@ type StreamingHandlerParams = {
 
 export const useStreamingHandler = ({
   config,
-  handleAddConversation,
-  updateCurrentConversation,
+  finalizeConversation,
   scrollToMessage,
   setIsReceiving,
   setIsSendingMessage,
@@ -38,25 +41,66 @@ export const useStreamingHandler = ({
   updateLocalUser,
 }: StreamingHandlerParams) => {
   const currentStreamRef = useRef<any>(null);
+  const hasErrorRef = useRef(false);
 
   const updateStreamedMessage = useCallback(
     (payload: any) => {
       setMessages((prev: any) => {
-        // stream close
-        if (!payload || payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+        // stream close — skip if already errored
+        if (!payload) {
+          if (hasErrorRef.current) return prev;
           const newMessages = new Map(prev);
-          const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
+          const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
-          const text = (prevMessage?.text || "") + (payload?.text || "");
+          const text = prevMessage?.text || "";
           newMessages.set(lastResponseId, {
             ...prevMessage,
             output_text: [text],
             type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
-            status: "completed",
+            status: STREAM_MESSAGE_STATUS.COMPLETED,
           });
           setIsReceiving(false);
           return newMessages;
         }
+
+        // helper to mark the last message as errored and stop receiving.
+        // if the last message is the user's message (no bot message yet),
+        // append a new assistant error message instead of overwriting it.
+        const markLastAsError = (errorDetail: string) => {
+          hasErrorRef.current = true;
+          const newMessages = new Map(prev);
+          const lastResponseId: any = Array.from(prev.keys()).pop();
+          const prevMessage = prev.get(lastResponseId);
+          if (!prevMessage || prevMessage.role === "user") {
+            const errorMessage = buildAssistantErrorMessage(errorDetail);
+            newMessages.set(errorMessage.id, errorMessage);
+          } else {
+            newMessages.set(lastResponseId, {
+              ...prevMessage,
+              type: STREAM_MESSAGE_TYPES.ERROR,
+              error_detail: errorDetail,
+              status: STREAM_MESSAGE_STATUS.FAILED,
+            });
+          }
+          setIsReceiving(false);
+          return newMessages;
+        };
+
+        // stream error
+        if (payload?.type === STREAM_MESSAGE_TYPES.ERROR) {
+          return markLastAsError(payload.detail || "");
+        }
+
+        // message_part with status=failed is an error
+        if (
+          payload?.type === STREAM_MESSAGE_TYPES.MESSAGE_PART &&
+          payload?.status === STREAM_MESSAGE_STATUS.FAILED
+        ) {
+          return markLastAsError(payload.text || payload.detail || "");
+        }
+
+        // once errored, ignore all further stream messages
+        if (hasErrorRef.current) return prev;
 
         // stream start
         if (payload?.type === STREAM_MESSAGE_TYPES.CONVERSATION_START) {
@@ -88,9 +132,9 @@ export const useStreamingHandler = ({
         // stream end
         if (
           payload?.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-          payload?.status === "completed"
+          payload?.status === STREAM_MESSAGE_STATUS.COMPLETED
         ) {
-          const newMessages = new Map(prev);
+          const newMessages: Map<string, any> = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
@@ -109,23 +153,10 @@ export const useStreamingHandler = ({
           );
 
           // update current conversation for every time the stream ends
-          const conversationData = {
-            id: prevMessage?.conversation_id,
-            user_id: prevMessage?.user_id,
+          finalizeConversation(newMessages, {
             title: payload?.title,
             timestamp: payload?.created_at,
-            bot_id: config?.integration_id,
-          };
-          updateCurrentConversation(conversationData);
-          handleAddConversation(
-            Object.assign(
-              {},
-              {
-                ...conversationData,
-                messages: Array.from(newMessages.values()),
-              },
-            ),
-          );
+          });
           return newMessages;
         }
 
@@ -146,7 +177,7 @@ export const useStreamingHandler = ({
             try {
               handleToolCall(value, prevMessage.web_url);
             } catch (e) {
-              console.error(`Error handling tool call ${value}`, e);
+              Sentry.captureException(e, { extra: { toolCallValue: value } });
             }
           }
           newConversations.set(lastResponseId, {
@@ -165,20 +196,19 @@ export const useStreamingHandler = ({
       scrollToMessage();
     },
     [
-      config?.integration_id,
-      handleAddConversation,
+      finalizeConversation,
       scrollToMessage,
       setIsReceiving,
       setIsSendingMessage,
       setLatestMessageIds,
       setMessages,
-      updateCurrentConversation,
       updateLocalUser,
     ],
   );
 
   const sendPayload = useCallback(
     async (payload: any, callbacks?: { onFinally?: () => void }) => {
+      hasErrorRef.current = false;
       try {
         await uploadPayloadFiles(payload, config!.apiUrl!);
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
+import * as Sentry from "@sentry/react";
 import CircleUP from "src/assets/SvgIcons/CircleUP";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
@@ -52,7 +53,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
 
   const onError = function (err: any) {
     setLoading(false);
-    console.log("The following error occured: " + err);
+    Sentry.captureException(err);
     setIsError(true);
     setTimeout(() => {
       onCancel();
@@ -85,7 +86,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       navigator?.mediaDevices?.mozGetUserMedia || // @ts-expect-error
       navigator?.mediaDevices?.msGetUserMedia;
     if (!navigator?.mediaDevices?.getUserMedia) {
-      console.error("The mediaDevices.getUserMedia() method is not supported.");
+      setLoading(false);
       return;
     }
     navigator?.mediaDevices?.getUserMedia(constraints).then((stream) => {
