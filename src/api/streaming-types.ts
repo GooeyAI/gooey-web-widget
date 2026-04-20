@@ -7,3 +7,11 @@ export const STREAM_MESSAGE_TYPES = {
   MESSAGE_PART: "message_part",
   ERROR: "error",
 } as const;
+
+export const STREAM_MESSAGE_STATUS = {
+  STANDBY: "standby",
+  STARTING: "starting",
+  RUNNING: "running",
+  COMPLETED: "completed",
+  FAILED: "failed",
+} as const;
