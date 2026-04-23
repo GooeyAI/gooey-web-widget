@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 
 export const MESSAGE_GUTTER = 8;
 const Responses = (props: any) => {
@@ -54,6 +55,7 @@ const Messages = () => {
     showScrollToBottom,
     scrollToBottom,
     handleScrollContainerScroll,
+    isReceiving,
   } = useMessagesContext();
 
   if (isMessagesLoading) {
@@ -92,7 +94,11 @@ const Messages = () => {
           pointerEvents: showScrollToBottom ? "auto" : "none",
         }}
       >
-        <IconChevronDown size={16} />
+        {isReceiving ? (
+          <CircleBeat className="anim-blink" size={12} />
+        ) : (
+          <IconChevronDown size={16} />
+        )}
       </IconButton>
     </div>
   );
