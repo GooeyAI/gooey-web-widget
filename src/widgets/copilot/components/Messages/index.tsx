@@ -5,6 +5,9 @@ import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 
 export const MESSAGE_GUTTER = 8;
 const Responses = (props: any) => {
@@ -44,8 +47,16 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading } =
-    useMessagesContext();
+  const {
+    messages,
+    isSending,
+    scrollContainerRef,
+    isMessagesLoading,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
+    isReceiving,
+  } = useMessagesContext();
 
   if (isMessagesLoading) {
     return (
@@ -58,6 +69,7 @@ const Messages = () => {
   return (
     <div
       ref={scrollContainerRef}
+      onScroll={handleScrollContainerScroll}
       className={clsx(
         "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
       )}
@@ -72,6 +84,21 @@ const Messages = () => {
         />
         <ResponseLoader show={isSending} />
       </div>
+      <IconButton
+        className={clsx(
+          "gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center",
+          showScrollToBottom ? "visible" : "invisible",
+        )}
+        onClick={scrollToBottom}
+        aria-label="Scroll to bottom"
+        variant="text"
+      >
+        {isReceiving ? (
+          <CircleBeat className="anim-blink" size={12} />
+        ) : (
+          <IconChevronDown size={16} />
+        )}
+      </IconButton>
     </div>
   );
 };
