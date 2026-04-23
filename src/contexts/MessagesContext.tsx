@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useRef, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -15,6 +15,7 @@ import {
 import * as Sentry from "@sentry/react";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
+import { useScrollManager } from "./messages/useScrollManager";
 
 const CITATION_STYLE = "number";
 
@@ -214,8 +215,15 @@ const MessagesContextProvider = ({
   const [isSharedConversation, setIsSharedConversation] = useState(false);
 
   const apiSource = useRef(axios.CancelToken.source());
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
+
+  const {
+    scrollContainerRef,
+    scrollMessageContainer,
+    scrollToBottom,
+    showScrollToBottom,
+    handleScrollContainerScroll,
+  } = useScrollManager(isMessagesLoading);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -263,67 +271,6 @@ const MessagesContextProvider = ({
     const newQuery = createNewQuery(payload);
     addResponse(newQuery);
   };
-
-  const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
-      // scroll to y position
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: y,
-          behavior: "smooth",
-        });
-      }
-    },
-    [scrollContainerRef],
-  );
-
-  const isAtBottomRef = useRef(true);
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-
-  const scrollToBottomIfNeeded = useCallback(() => {
-    if (!isAtBottomRef.current) return;
-    setTimeout(() => {
-      scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number,
-      );
-    }, 10);
-  }, [scrollMessageContainer]);
-
-  const scrollToBottom = useCallback(() => {
-    isAtBottomRef.current = true;
-    scrollMessageContainer(
-      scrollContainerRef?.current?.scrollHeight as number,
-    );
-  }, [scrollMessageContainer]);
-
-  const checkScrollPosition = useCallback(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
-    isAtBottomRef.current = atBottom;
-    setShowScrollToBottom(!atBottom);
-  }, []);
-
-  const scrollThrottleRef = useRef<number | null>(null);
-  const handleScrollContainerScroll = useCallback(() => {
-    if (scrollThrottleRef.current) return;
-    scrollThrottleRef.current = window.setTimeout(() => {
-      scrollThrottleRef.current = null;
-      checkScrollPosition();
-    }, 100);
-  }, [checkScrollPosition]);
-
-  useEffect(() => {
-    scrollToBottomIfNeeded();
-  }, [scrollToBottomIfNeeded]);
-
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const observer = new MutationObserver(checkScrollPosition);
-    observer.observe(el, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
-  }, [checkScrollPosition, isMessagesLoading]);
 
   const { sendPayload } = useStreamingHandler({
     config,
