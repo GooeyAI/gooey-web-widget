@@ -12,7 +12,6 @@ type StreamingHandlerParams = {
   config: any;
   handleAddConversation: (conversation: any) => void;
   updateCurrentConversation: (conversation: any) => void;
-  scrollToBottomIfNeeded: () => void;
   setIsReceiving: (value: boolean) => void;
   setIsSendingMessage: (value: boolean) => void;
   setLatestMessageIds: Dispatch<SetStateAction<Set<string>>>;
@@ -27,7 +26,6 @@ export const useStreamingHandler = ({
   config,
   handleAddConversation,
   updateCurrentConversation,
-  scrollToBottomIfNeeded,
   setIsReceiving,
   setIsSendingMessage,
   setLatestMessageIds,
@@ -162,12 +160,10 @@ export const useStreamingHandler = ({
 
         return prev;
       });
-      scrollToBottomIfNeeded();
     },
     [
       config?.integration_id,
       handleAddConversation,
-      scrollToBottomIfNeeded,
       setIsReceiving,
       setIsSendingMessage,
       setLatestMessageIds,

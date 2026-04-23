@@ -296,28 +296,39 @@ const MessagesContextProvider = ({
     );
   }, [scrollMessageContainer]);
 
+  const checkScrollPosition = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+    isAtBottomRef.current = atBottom;
+    setShowScrollToBottom(!atBottom);
+  }, []);
+
   const scrollThrottleRef = useRef<number | null>(null);
   const handleScrollContainerScroll = useCallback(() => {
     if (scrollThrottleRef.current) return;
     scrollThrottleRef.current = window.setTimeout(() => {
       scrollThrottleRef.current = null;
-      const el = scrollContainerRef.current;
-      if (!el) return;
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
-      isAtBottomRef.current = atBottom;
-      setShowScrollToBottom(!atBottom);
+      checkScrollPosition();
     }, 100);
-  }, []);
+  }, [checkScrollPosition]);
 
   useEffect(() => {
     scrollToBottomIfNeeded();
   }, [scrollToBottomIfNeeded]);
 
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const observer = new MutationObserver(checkScrollPosition);
+    observer.observe(el, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [checkScrollPosition, isMessagesLoading]);
+
   const { sendPayload } = useStreamingHandler({
     config,
     handleAddConversation,
     updateCurrentConversation,
-    scrollToBottomIfNeeded,
     setIsReceiving,
     setIsSendingMessage,
     setLatestMessageIds,
@@ -448,7 +459,6 @@ const MessagesContextProvider = ({
     apiUrl: config!.apiUrl!,
     isSending,
     isReceiving,
-    scrollToBottomIfNeeded,
   });
 
   let context: MessagesContextType = {
