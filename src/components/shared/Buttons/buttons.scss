@@ -124,10 +124,7 @@ button.depressed {
 }
 
 .gooey-scroll-to-bottom-btn {
-  position: sticky;
   bottom: 8px;
-  margin-left: auto;
-  margin-right: auto;
   z-index: 2;
   transition: opacity 0.15s ease;
 }

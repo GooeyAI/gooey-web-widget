@@ -85,14 +85,13 @@ const Messages = () => {
         <ResponseLoader show={isSending} />
       </div>
       <IconButton
-        className="gooey-scroll-to-bottom-btn br-circle bg-white b-1 bx-shadowA justify-center"
+        className={clsx(
+          "gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center",
+          showScrollToBottom ? "visible" : "invisible",
+        )}
         onClick={scrollToBottom}
         aria-label="Scroll to bottom"
         variant="text"
-        style={{
-          opacity: showScrollToBottom ? 1 : 0,
-          pointerEvents: showScrollToBottom ? "auto" : "none",
-        }}
       >
         {isReceiving ? (
           <CircleBeat className="anim-blink" size={12} />
