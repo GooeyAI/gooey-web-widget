@@ -122,3 +122,13 @@ button.depressed {
   padding: 1px !important;
   max-height: 16px;
 }
+
+.gooey-scroll-to-bottom-btn {
+  position: sticky;
+  bottom: 8px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 10;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}

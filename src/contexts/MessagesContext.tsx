@@ -36,6 +36,9 @@ export interface MessagesContextType {
   cancelApiCall?: () => void;
   scrollMessageContainer?: (y?: number) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
+  showScrollToBottom?: boolean;
+  scrollToBottom?: () => void;
+  handleScrollContainerScroll?: () => void;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -274,8 +277,11 @@ const MessagesContextProvider = ({
     [scrollContainerRef],
   );
 
-  const scrollToMessage = useCallback(() => {
-    // scroll to the last message
+  const isAtBottomRef = useRef(true);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+
+  const scrollToBottomIfNeeded = useCallback(() => {
+    if (!isAtBottomRef.current) return;
     setTimeout(() => {
       scrollMessageContainer(
         scrollContainerRef?.current?.scrollHeight as number,
@@ -283,15 +289,35 @@ const MessagesContextProvider = ({
     }, 10);
   }, [scrollMessageContainer]);
 
+  const scrollToBottom = useCallback(() => {
+    isAtBottomRef.current = true;
+    scrollMessageContainer(
+      scrollContainerRef?.current?.scrollHeight as number,
+    );
+  }, [scrollMessageContainer]);
+
+  const scrollThrottleRef = useRef<number | null>(null);
+  const handleScrollContainerScroll = useCallback(() => {
+    if (scrollThrottleRef.current) return;
+    scrollThrottleRef.current = window.setTimeout(() => {
+      scrollThrottleRef.current = null;
+      const el = scrollContainerRef.current;
+      if (!el) return;
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
+      isAtBottomRef.current = atBottom;
+      setShowScrollToBottom(!atBottom);
+    }, 100);
+  }, []);
+
   useEffect(() => {
-    scrollToMessage();
-  }, [scrollToMessage]);
+    scrollToBottomIfNeeded();
+  }, [scrollToBottomIfNeeded]);
 
   const { sendPayload } = useStreamingHandler({
     config,
     handleAddConversation,
     updateCurrentConversation,
-    scrollToMessage,
+    scrollToBottomIfNeeded,
     setIsReceiving,
     setIsSendingMessage,
     setLatestMessageIds,
@@ -422,7 +448,7 @@ const MessagesContextProvider = ({
     apiUrl: config!.apiUrl!,
     isSending,
     isReceiving,
-    scrollToMessage,
+    scrollToBottomIfNeeded,
   });
 
   let context: MessagesContextType = {
@@ -433,6 +459,9 @@ const MessagesContextProvider = ({
     cancelApiCall,
     scrollMessageContainer,
     scrollContainerRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
     isReceiving,
     conversations,
     setActiveConversation,

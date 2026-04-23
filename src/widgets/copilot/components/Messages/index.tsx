@@ -5,6 +5,8 @@ import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconButton from "src/components/shared/Buttons/IconButton";
 
 export const MESSAGE_GUTTER = 8;
 const Responses = (props: any) => {
@@ -44,8 +46,15 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading } =
-    useMessagesContext();
+  const {
+    messages,
+    isSending,
+    scrollContainerRef,
+    isMessagesLoading,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
+  } = useMessagesContext();
 
   if (isMessagesLoading) {
     return (
@@ -58,6 +67,7 @@ const Messages = () => {
   return (
     <div
       ref={scrollContainerRef}
+      onScroll={handleScrollContainerScroll}
       className={clsx(
         "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
       )}
@@ -72,6 +82,18 @@ const Messages = () => {
         />
         <ResponseLoader show={isSending} />
       </div>
+      <IconButton
+        className="gooey-scroll-to-bottom-btn br-circle bg-white b-1 bx-shadowA justify-center"
+        onClick={scrollToBottom}
+        aria-label="Scroll to bottom"
+        variant="text"
+        style={{
+          opacity: showScrollToBottom ? 1 : 0,
+          pointerEvents: showScrollToBottom ? "auto" : "none",
+        }}
+      >
+        <IconChevronDown size={16} />
+      </IconButton>
     </div>
   );
 };

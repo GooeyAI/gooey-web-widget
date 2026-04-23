@@ -12,7 +12,8 @@ const ResponseLoader = (props: any) => {
       const offsetTop = LoaderRef?.current?.offsetTop;
       scrollMessageContainer?.(offsetTop);
     }
-  }, [props.show, scrollMessageContainer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.show]);
   if (!props.show) return null;
   return (
     <div ref={LoaderRef} className="gpl-16">
