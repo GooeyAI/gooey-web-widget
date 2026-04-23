@@ -73,8 +73,32 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
       }, 100);
     });
     observer.observe(el, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (mutationThrottleRef.current) {
+        clearTimeout(mutationThrottleRef.current);
+        mutationThrottleRef.current = null;
+      }
+    };
   }, [checkScrollPosition, isMessagesLoading]);
+
+  // Clear all pending timers on unmount
+  useEffect(() => {
+    return () => {
+      if (showButtonTimerRef.current) {
+        clearTimeout(showButtonTimerRef.current);
+        showButtonTimerRef.current = null;
+      }
+      if (scrollThrottleRef.current) {
+        clearTimeout(scrollThrottleRef.current);
+        scrollThrottleRef.current = null;
+      }
+      if (mutationThrottleRef.current) {
+        clearTimeout(mutationThrottleRef.current);
+        mutationThrottleRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     scrollContainerRef,
