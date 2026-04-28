@@ -6,23 +6,27 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
+    (y: number = 0, behavior: "smooth" | "instant" = "smooth") => {
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scroll({
           top: y,
-          behavior: "smooth",
+          behavior,
         });
       }
     },
     [],
   );
 
-  const scrollToBottom = useCallback(() => {
-    isAtBottomRef.current = true;
-    scrollMessageContainer(
-      scrollContainerRef?.current?.scrollHeight as number,
-    );
-  }, [scrollMessageContainer]);
+  const scrollToBottom = useCallback(
+    (behavior: "smooth" | "instant" = "smooth") => {
+      isAtBottomRef.current = true;
+      scrollMessageContainer(
+        scrollContainerRef?.current?.scrollHeight as number,
+        behavior,
+      );
+    },
+    [scrollMessageContainer],
+  );
 
   const showButtonTimerRef = useRef<number | null>(null);
   const checkScrollPosition = useCallback(() => {
@@ -57,7 +61,7 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
   useEffect(() => {
     isAtBottomRef.current = true;
     setShowScrollToBottom(false);
-    requestAnimationFrame(() => scrollToBottom());
+    requestAnimationFrame(() => scrollToBottom("instant"));
   }, [scrollToBottom, isMessagesLoading]);
 
   // Detect content growth via MutationObserver

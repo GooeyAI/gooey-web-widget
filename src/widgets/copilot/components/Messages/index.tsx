@@ -89,7 +89,7 @@ const Messages = () => {
           "gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center",
           showScrollToBottom ? "visible" : "invisible",
         )}
-        onClick={scrollToBottom}
+        onClick={() => scrollToBottom?.()}
         aria-label="Scroll to bottom"
         variant="text"
       >
