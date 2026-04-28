@@ -8,6 +8,9 @@ import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import { addInlineStyle } from "src/addStyles";
+import messagesStyle from "./messages.scss?inline";
+addInlineStyle(messagesStyle);
 
 export const MESSAGE_GUTTER = 8;
 const Responses = (props: any) => {
@@ -83,6 +86,7 @@ const Messages = () => {
           data={messages ?? new Map()}
         />
         <ResponseLoader show={isSending} />
+        <div className="gooey-scroll-spacer" aria-hidden="true" />
       </div>
       <IconButton
         className={clsx(

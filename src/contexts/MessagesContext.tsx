@@ -223,7 +223,7 @@ const MessagesContextProvider = ({
     scrollToBottom,
     showScrollToBottom,
     handleScrollContainerScroll,
-  } = useScrollManager(isMessagesLoading);
+  } = useScrollManager(isMessagesLoading, isSending, isReceiving);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
