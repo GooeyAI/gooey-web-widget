@@ -223,14 +223,24 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
 
+  let controllerContext = useController({
+    controller,
+    apiUrl: config!.apiUrl!,
+    isSending,
+    isReceiving,
+  });
+
+  // Track whichever messages map actually renders so the scroll manager
+  // reacts to controller-mode sends as well as native sends.
+  const effectiveMessages = controllerContext.messages ?? messages;
   const latestUserMsgId = useMemo(() => {
-    if (!messages) return undefined;
+    if (!effectiveMessages) return undefined;
     let id: string | undefined;
-    for (const [k, v] of messages) {
+    for (const [k, v] of effectiveMessages) {
       if (v?.role === "user") id = k;
     }
     return id;
-  }, [messages]);
+  }, [effectiveMessages]);
 
   const {
     scrollContainerRef,
@@ -414,13 +424,6 @@ const MessagesContextProvider = ({
       }
     };
   }
-
-  let controllerContext = useController({
-    controller,
-    apiUrl: config!.apiUrl!,
-    isSending,
-    isReceiving,
-  });
 
   let context: MessagesContextType = {
     messages,
