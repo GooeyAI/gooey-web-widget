@@ -1,4 +1,11 @@
-import { createContext, useCallback, useRef, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -35,7 +42,6 @@ export interface MessagesContextType {
   initializeQuery?: (payload: RequestModel) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
-  scrollMessageContainer?: (y?: number) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
   showScrollToBottom?: boolean;
   scrollToBottom?: () => void;
@@ -217,13 +223,21 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
 
+  const latestUserMsgId = useMemo(() => {
+    if (!messages) return undefined;
+    let id: string | undefined;
+    for (const [k, v] of messages) {
+      if (v?.role === "user") id = k;
+    }
+    return id;
+  }, [messages]);
+
   const {
     scrollContainerRef,
-    scrollMessageContainer,
     scrollToBottom,
     showScrollToBottom,
     handleScrollContainerScroll,
-  } = useScrollManager(isMessagesLoading, isSending, isReceiving);
+  } = useScrollManager(isMessagesLoading, latestUserMsgId);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -414,7 +428,6 @@ const MessagesContextProvider = ({
     initializeQuery,
     handleNewConversation,
     cancelApiCall,
-    scrollMessageContainer,
     scrollContainerRef,
     showScrollToBottom,
     scrollToBottom,

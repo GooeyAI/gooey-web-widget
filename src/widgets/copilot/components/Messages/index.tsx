@@ -24,6 +24,7 @@ const Responses = (props: any) => {
       return (
         <OutgoingMsg
           key={id}
+          id={id}
           input_prompt={responseData.input_prompt}
           input_audio={responseData.input_audio}
           input_images={responseData.input_images}
