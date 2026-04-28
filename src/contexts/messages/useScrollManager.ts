@@ -28,6 +28,20 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
     [scrollMessageContainer],
   );
 
+  const scrollToLatestUserMessage = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const userMessages = el.querySelectorAll<HTMLElement>(".gooey-outgoingMsg");
+    const last = userMessages[userMessages.length - 1];
+    if (!last) {
+      el.scrollTop = 0;
+      return;
+    }
+    const containerRect = el.getBoundingClientRect();
+    const targetRect = last.getBoundingClientRect();
+    el.scrollTop += targetRect.top - containerRect.top;
+  }, []);
+
   const showButtonTimerRef = useRef<number | null>(null);
   const checkScrollPosition = useCallback(() => {
     const el = scrollContainerRef.current;
@@ -57,12 +71,12 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
     }, 100);
   }, [checkScrollPosition]);
 
-  // Scroll to bottom on mount and conversation switch
+  // Anchor the latest user message at the top of the viewport on load
   useEffect(() => {
     isAtBottomRef.current = true;
     setShowScrollToBottom(false);
-    requestAnimationFrame(() => scrollToBottom("instant"));
-  }, [scrollToBottom, isMessagesLoading]);
+    requestAnimationFrame(() => scrollToLatestUserMessage());
+  }, [scrollToLatestUserMessage, isMessagesLoading]);
 
   // Detect content growth via MutationObserver
   const mutationThrottleRef = useRef<number | null>(null);
