@@ -27,10 +27,7 @@ const Header = () => {
   const onClose = config?.onClose;
 
   return (
-    <div
-      className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
-      style={{ zIndex: 5 }}
-    >
+    <div className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header">
       <div className="d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
