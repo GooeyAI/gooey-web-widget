@@ -68,6 +68,13 @@ $space-prefixes: (
   "px"
 );
 
+.ml-auto {
+  margin-left: auto;
+}
+.mr-auto {
+  margin-right: auto;
+}
+
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;

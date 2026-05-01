@@ -16,6 +16,7 @@ interface ButtonPressed {
 }
 
 interface OutgoingMsgProps {
+  id: string;
   input_prompt?: string;
   input_audio?: Blob | string | string[];
   input_images?: string[];
@@ -29,6 +30,7 @@ interface OutgoingMsgProps {
 
 const OutgoingMsg = memo(
   ({
+    id,
     input_prompt = "",
     input_audio = undefined,
     button_pressed = undefined,
@@ -85,7 +87,10 @@ const OutgoingMsg = memo(
 
     return (
       <div className="d-flex flex-col align-end">
-        <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
+        <div
+          className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end"
+          id={id}
+        >
           {input_images && input_images.length > 0 && (
             <div
               className={clsx(

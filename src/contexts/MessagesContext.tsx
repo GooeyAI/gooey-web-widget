@@ -1,4 +1,11 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -15,6 +22,7 @@ import {
 import * as Sentry from "@sentry/react";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
+import { useScrollManager } from "./messages/useScrollManager";
 
 const CITATION_STYLE = "number";
 
@@ -34,8 +42,10 @@ export interface MessagesContextType {
   initializeQuery?: (payload: RequestModel) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
-  scrollMessageContainer?: (y?: number) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
+  showScrollToBottom?: boolean;
+  scrollToBottom?: () => void;
+  handleScrollContainerScroll?: () => void;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -211,13 +221,38 @@ const MessagesContextProvider = ({
   const [isSharedConversation, setIsSharedConversation] = useState(false);
 
   const apiSource = useRef(axios.CancelToken.source());
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
   const controllerRef = useRef(controller);
 
   useEffect(() => {
     controllerRef.current = controller;
   }, [controller]);
+
+  let controllerContext = useController({
+    controller,
+    apiUrl: config!.apiUrl!,
+    isSending,
+    isReceiving,
+  });
+
+  // Track whichever messages map actually renders so the scroll manager
+  // reacts to controller-mode sends as well as native sends.
+  const effectiveMessages = controllerContext.messages ?? messages;
+  const latestUserMsgId = useMemo(() => {
+    if (!effectiveMessages) return undefined;
+    let id: string | undefined;
+    for (const [k, v] of effectiveMessages) {
+      if (v?.role === "user") id = k;
+    }
+    return id;
+  }, [effectiveMessages]);
+
+  const {
+    scrollContainerRef,
+    scrollToBottom,
+    showScrollToBottom,
+    handleScrollContainerScroll,
+  } = useScrollManager(isMessagesLoading, latestUserMsgId);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -266,37 +301,10 @@ const MessagesContextProvider = ({
     addResponse(newQuery);
   };
 
-  const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
-      // scroll to y position
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: y,
-          behavior: "smooth",
-        });
-      }
-    },
-    [scrollContainerRef],
-  );
-
-  const scrollToMessage = useCallback(() => {
-    // scroll to the last message
-    setTimeout(() => {
-      scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number,
-      );
-    }, 10);
-  }, [scrollMessageContainer]);
-
-  useEffect(() => {
-    scrollToMessage();
-  }, [scrollToMessage]);
-
   const { sendPayload } = useStreamingHandler({
     config,
     handleAddConversation,
     updateCurrentConversation,
-    scrollToMessage,
     setIsReceiving,
     setIsSendingMessage,
     setLatestMessageIds,
@@ -423,22 +431,16 @@ const MessagesContextProvider = ({
     };
   }
 
-  let controllerContext = useController({
-    controller,
-    apiUrl: config!.apiUrl!,
-    isSending,
-    isReceiving,
-    scrollToMessage,
-  });
-
   let context: MessagesContextType = {
     messages,
     isSending,
     initializeQuery,
     handleNewConversation,
     cancelApiCall,
-    scrollMessageContainer,
     scrollContainerRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
     isReceiving,
     conversations,
     setActiveConversation,

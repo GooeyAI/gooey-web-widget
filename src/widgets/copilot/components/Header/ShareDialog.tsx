@@ -147,6 +147,7 @@ const ShareDialog = ({
           >
             {firstUserMessage ? (
               <OutgoingMsg
+                id={firstUserMessage.id}
                 input_prompt={firstUserMessage.input_prompt}
                 input_audio={firstUserMessage.input_audio}
                 input_images={firstUserMessage.input_images}
