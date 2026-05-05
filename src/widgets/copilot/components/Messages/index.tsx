@@ -17,6 +17,7 @@ const Responses = (props: any) => {
   const { config } = useSystemContext();
   const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
+  const latestUserKey = props.latestUserKey;
 
   return que?.map((id: string) => {
     const responseData = msgs.get(id);
@@ -24,13 +25,13 @@ const Responses = (props: any) => {
       return (
         <OutgoingMsg
           key={id}
-          id={id}
           input_prompt={responseData.input_prompt}
           input_audio={responseData.input_audio}
           input_images={responseData.input_images}
           button_pressed={responseData.button_pressed}
           input_location={responseData.input_location}
           input_documents={responseData.input_documents}
+          isLatestUserMessage={id === latestUserKey}
         />
       );
     } else {
@@ -62,6 +63,18 @@ const Messages = () => {
     isReceiving,
   } = useMessagesContext();
 
+  const queue = useMemo(
+    () => Array.from(messages?.keys() ?? []),
+    [messages],
+  );
+  const latestUserKey = useMemo(() => {
+    if (!messages) return undefined;
+    for (let i = queue.length - 1; i >= 0; i--) {
+      if (messages.get(queue[i])?.role === "user") return queue[i];
+    }
+    return undefined;
+  }, [queue, messages]);
+
   if (isMessagesLoading) {
     return (
       <div className="d-flex h-100 w-100 align-center justify-center">
@@ -83,27 +96,27 @@ const Messages = () => {
         style={{ marginLeft: "auto", marginRight: "auto" }}
       >
         <Responses
-          queue={Array.from(messages?.keys() ?? [])}
+          queue={queue}
           data={messages ?? new Map()}
+          latestUserKey={latestUserKey}
         />
         <ResponseLoader show={isSending} />
         <div className="gooey-scroll-spacer" aria-hidden="true" />
       </div>
-      <IconButton
-        className={clsx(
-          "gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center",
-          showScrollToBottom ? "visible" : "invisible",
-        )}
-        onClick={() => scrollToBottom?.()}
-        aria-label="Scroll to bottom"
-        variant="text"
-      >
-        {isReceiving ? (
-          <CircleBeat className="anim-blink" size={12} />
-        ) : (
-          <IconChevronDown size={16} />
-        )}
-      </IconButton>
+      {showScrollToBottom && (
+        <IconButton
+          className="gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center"
+          onClick={() => scrollToBottom?.()}
+          aria-label="Scroll to bottom"
+          variant="text"
+        >
+          {isReceiving ? (
+            <CircleBeat className="anim-blink" size={12} />
+          ) : (
+            <IconChevronDown size={16} />
+          )}
+        </IconButton>
+      )}
     </div>
   );
 };

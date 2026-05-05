@@ -16,7 +16,6 @@ interface ButtonPressed {
 }
 
 interface OutgoingMsgProps {
-  id: string;
   input_prompt?: string;
   input_audio?: Blob | string | string[];
   input_images?: string[];
@@ -26,17 +25,18 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  isLatestUserMessage?: boolean;
 }
 
 const OutgoingMsg = memo(
   ({
-    id,
     input_prompt = "",
     input_audio = undefined,
     button_pressed = undefined,
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    isLatestUserMessage = false,
   }: OutgoingMsgProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -89,7 +89,7 @@ const OutgoingMsg = memo(
       <div className="d-flex flex-col align-end">
         <div
           className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end"
-          id={id}
+          data-gooey-latest-user-message={isLatestUserMessage ? "true" : undefined}
         >
           {input_images && input_images.length > 0 && (
             <div

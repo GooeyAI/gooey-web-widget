@@ -1,20 +1,83 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-export const useScrollManager = (
-  isMessagesLoading: boolean,
-  latestUserMsgId?: string,
+const LATEST_USER_MSG_SELECTOR = '[data-gooey-latest-user-message="true"]';
+
+type Timers = {
+  showButton: number | null;
+  scrollThrottle: number | null;
+};
+
+const findLatestUserMsg = (container: HTMLElement | null) => {
+  if (!container) return null;
+  return container.querySelector<HTMLElement>(LATEST_USER_MSG_SELECTOR);
+};
+
+const scrollToUserMsg = (
+  container: HTMLElement | null,
+  target: HTMLElement | null,
+  behavior: ScrollBehavior = "instant",
 ) => {
+  if (!container) return;
+  if (!target) {
+    container.scrollTop = 0;
+    return;
+  }
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  container.scroll({
+    top: container.scrollTop + (targetRect.top - containerRect.top),
+    behavior,
+  });
+};
+
+const recomputeSpacerHeight = (
+  container: HTMLElement | null,
+  target: HTMLElement | null,
+) => {
+  if (!container) return;
+  const spacer = container.querySelector<HTMLElement>(".gooey-scroll-spacer");
+  if (!spacer) return;
+  if (!target) {
+    spacer.style.height = "0px";
+    return;
+  }
+  const distance =
+    spacer.getBoundingClientRect().top - target.getBoundingClientRect().top;
+  spacer.style.height = `${Math.max(0, container.clientHeight - distance)}px`;
+};
+
+const checkScrollPosition = (
+  container: HTMLElement | null,
+  timers: Timers,
+  setShowScrollToBottom: (v: boolean) => void,
+) => {
+  if (!container) return;
+  const atBottom =
+    container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+  if (atBottom) {
+    if (timers.showButton) {
+      clearTimeout(timers.showButton);
+      timers.showButton = null;
+    }
+    setShowScrollToBottom(false);
+  } else if (!timers.showButton) {
+    timers.showButton = window.setTimeout(() => {
+      timers.showButton = null;
+      setShowScrollToBottom(true);
+    }, 300);
+  }
+};
+
+export const useScrollManager = (isMessagesLoading: boolean) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
-  // Spacer is sized only after a new user message is detected.
-  // On conversation load it stays at its natural 0 height.
   const isInSendCycleRef = useRef(false);
-  const lastSeenUserMsgIdRef = useRef<string | undefined>(latestUserMsgId);
-  const timersRef = useRef({
-    showButton: null as number | null,
-    scrollThrottle: null as number | null,
-    mutationThrottle: null as number | null,
+  const latestUserMsgRef = useRef<HTMLElement | null>(null);
+  const wasMessagesLoadingRef = useRef(isMessagesLoading);
+  const timersRef = useRef<Timers>({
+    showButton: null,
+    scrollThrottle: null,
   });
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -23,142 +86,76 @@ export const useScrollManager = (
     el.scroll({ top: el.scrollHeight, behavior });
   }, []);
 
-  const findUserMsg = useCallback((id: string | undefined) => {
-    const el = scrollContainerRef.current;
-    if (!el || !id) return null;
-    return el.querySelector<HTMLElement>(`[id="${id}"]`);
-  }, []);
-
-  const scrollToUserMsg = useCallback(
-    (id: string | undefined, behavior: ScrollBehavior = "instant") => {
-      const el = scrollContainerRef.current;
-      if (!el) return;
-      const target = findUserMsg(id);
-      if (!target) {
-        el.scrollTop = 0;
-        return;
-      }
-      const containerRect = el.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      el.scroll({
-        top: el.scrollTop + (targetRect.top - containerRect.top),
-        behavior,
-      });
-    },
-    [findUserMsg],
-  );
-
-  const recomputeSpacerHeight = useCallback(
-    (id: string | undefined) => {
-      const el = scrollContainerRef.current;
-      if (!el) return;
-      const spacer = el.querySelector<HTMLElement>(".gooey-scroll-spacer");
-      if (!spacer) return;
-      const target = findUserMsg(id);
-      if (!target) {
-        spacer.style.height = "0px";
-        return;
-      }
-      // Height of all real content from the top of the latest user message
-      // down to the start of the spacer.
-      const distance =
-        spacer.getBoundingClientRect().top - target.getBoundingClientRect().top;
-      spacer.style.height = `${Math.max(0, el.clientHeight - distance)}px`;
-    },
-    [findUserMsg],
-  );
-
-  const checkScrollPosition = useCallback(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const t = timersRef.current;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 50;
-    if (atBottom) {
-      if (t.showButton) {
-        clearTimeout(t.showButton);
-        t.showButton = null;
-      }
-      setShowScrollToBottom(false);
-    } else if (!t.showButton) {
-      t.showButton = window.setTimeout(() => {
-        t.showButton = null;
-        setShowScrollToBottom(true);
-      }, 300);
-    }
-  }, []);
-
   const handleScrollContainerScroll = useCallback(() => {
     const t = timersRef.current;
     if (t.scrollThrottle) return;
     t.scrollThrottle = window.setTimeout(() => {
       t.scrollThrottle = null;
-      checkScrollPosition();
+      checkScrollPosition(
+        scrollContainerRef.current,
+        timersRef.current,
+        setShowScrollToBottom,
+      );
     }, 100);
-  }, [checkScrollPosition]);
+  }, []);
 
-  // Conversation load: anchor at top instantly, hide button, drop spacer cycle.
-  // latestUserMsgId is intentionally not a dep — load only fires on isMessagesLoading.
-  useEffect(() => {
-    setShowScrollToBottom(false);
-    isInSendCycleRef.current = false;
-    lastSeenUserMsgIdRef.current = latestUserMsgId;
-    requestAnimationFrame(() => scrollToUserMsg(latestUserMsgId));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMessagesLoading, scrollToUserMsg]);
+  // Single render-driven sync.
+  // - On isMessagesLoading falling edge: anchor instantly, sync marker ref, no send cycle.
+  // - When the marker element identity changes (renderer mounted a new latest user bubble): smooth-scroll spacer cycle.
+  // - Otherwise (e.g. streaming chunks growing the assistant reply): keep spacer + button state in sync.
+  useLayoutEffect(() => {
+    const justLoaded =
+      wasMessagesLoadingRef.current && !isMessagesLoading;
+    wasMessagesLoadingRef.current = isMessagesLoading;
+    if (isMessagesLoading) return;
 
-  // New send: latestUserMsgId changed and wasn't just absorbed by the load effect.
-  useEffect(() => {
-    if (latestUserMsgId === lastSeenUserMsgIdRef.current) return;
-    lastSeenUserMsgIdRef.current = latestUserMsgId;
-    if (!latestUserMsgId) return;
-    isInSendCycleRef.current = true;
-    requestAnimationFrame(() => {
-      recomputeSpacerHeight(latestUserMsgId);
-      scrollToUserMsg(latestUserMsgId, "smooth");
-    });
-  }, [latestUserMsgId, recomputeSpacerHeight, scrollToUserMsg]);
+    const container = scrollContainerRef.current;
+    const target = findLatestUserMsg(container);
 
-  // Watch container content changes (streaming response) to keep spacer sized
-  // and the scroll-to-bottom button correct.
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const observer = new MutationObserver(() => {
-      const t = timersRef.current;
-      if (t.mutationThrottle) return;
-      t.mutationThrottle = window.setTimeout(() => {
-        t.mutationThrottle = null;
-        if (isInSendCycleRef.current) {
-          recomputeSpacerHeight(lastSeenUserMsgIdRef.current);
-        }
-        checkScrollPosition();
-      }, 100);
-    });
-    observer.observe(el, { childList: true, subtree: true });
-    return () => {
-      observer.disconnect();
-      const t = timersRef.current;
-      if (t.mutationThrottle) {
-        clearTimeout(t.mutationThrottle);
-        t.mutationThrottle = null;
+    if (justLoaded) {
+      latestUserMsgRef.current = target;
+      isInSendCycleRef.current = false;
+      setShowScrollToBottom(false);
+      requestAnimationFrame(() =>
+        scrollToUserMsg(container, target, "instant"),
+      );
+      return;
+    }
+
+    if (target !== latestUserMsgRef.current) {
+      latestUserMsgRef.current = target;
+      if (target) {
+        isInSendCycleRef.current = true;
+        requestAnimationFrame(() => {
+          recomputeSpacerHeight(container, target);
+          scrollToUserMsg(container, target, "smooth");
+        });
+      } else {
+        isInSendCycleRef.current = false;
       }
-    };
-  }, [checkScrollPosition, recomputeSpacerHeight, isMessagesLoading]);
+      return;
+    }
 
-  // Container resize during cycle.
+    if (isInSendCycleRef.current) {
+      recomputeSpacerHeight(container, target);
+    }
+    checkScrollPosition(container, timersRef.current, setShowScrollToBottom);
+  });
+
+  // Container resize during a send cycle.
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
     const observer = new ResizeObserver(() => {
       if (isInSendCycleRef.current) {
-        recomputeSpacerHeight(lastSeenUserMsgIdRef.current);
+        recomputeSpacerHeight(el, latestUserMsgRef.current);
       }
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [recomputeSpacerHeight, isMessagesLoading]);
+  }, [isMessagesLoading]);
 
-  // Clear standalone (non-effect-owned) timers on unmount.
+  // Clear standalone timers on unmount.
   useEffect(
     () => () => {
       const t = timersRef.current;

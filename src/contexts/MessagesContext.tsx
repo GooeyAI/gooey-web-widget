@@ -3,7 +3,6 @@ import {
   useCallback,
   useRef,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -230,24 +229,12 @@ const MessagesContextProvider = ({
     isReceiving,
   });
 
-  // Track whichever messages map actually renders so the scroll manager
-  // reacts to controller-mode sends as well as native sends.
-  const effectiveMessages = controllerContext.messages ?? messages;
-  const latestUserMsgId = useMemo(() => {
-    if (!effectiveMessages) return undefined;
-    let id: string | undefined;
-    for (const [k, v] of effectiveMessages) {
-      if (v?.role === "user") id = k;
-    }
-    return id;
-  }, [effectiveMessages]);
-
   const {
     scrollContainerRef,
     scrollToBottom,
     showScrollToBottom,
     handleScrollContainerScroll,
-  } = useScrollManager(isMessagesLoading, latestUserMsgId);
+  } = useScrollManager(isMessagesLoading);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
