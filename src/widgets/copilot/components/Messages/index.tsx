@@ -4,6 +4,7 @@ import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
+import { useScrollManager } from "src/contexts/messages/useScrollManager";
 import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconButton from "src/components/shared/Buttons/IconButton";
@@ -55,13 +56,16 @@ const Messages = () => {
   const {
     messages,
     isSending,
-    scrollContainerRef,
     isMessagesLoading,
+    isReceiving,
+  } = useMessagesContext();
+
+  const {
+    scrollContainerRef,
     showScrollToBottom,
     scrollToBottom,
     handleScrollContainerScroll,
-    isReceiving,
-  } = useMessagesContext();
+  } = useScrollManager(isMessagesLoading ?? false);
 
   const queue = useMemo(
     () => Array.from(messages?.keys() ?? []),

@@ -21,7 +21,6 @@ import {
 import * as Sentry from "@sentry/react";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
-import { useScrollManager } from "./messages/useScrollManager";
 
 const CITATION_STYLE = "number";
 
@@ -41,10 +40,6 @@ export interface MessagesContextType {
   initializeQuery?: (payload: RequestModel) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
-  scrollContainerRef?: React.RefObject<HTMLDivElement>;
-  showScrollToBottom?: boolean;
-  scrollToBottom?: () => void;
-  handleScrollContainerScroll?: () => void;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -229,13 +224,6 @@ const MessagesContextProvider = ({
     isReceiving,
   });
 
-  const {
-    scrollContainerRef,
-    scrollToBottom,
-    showScrollToBottom,
-    handleScrollContainerScroll,
-  } = useScrollManager(isMessagesLoading);
-
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
       ...currentConversation.current,
@@ -418,10 +406,6 @@ const MessagesContextProvider = ({
     initializeQuery,
     handleNewConversation,
     cancelApiCall,
-    scrollContainerRef,
-    showScrollToBottom,
-    scrollToBottom,
-    handleScrollContainerScroll,
     isReceiving,
     conversations,
     setActiveConversation,
