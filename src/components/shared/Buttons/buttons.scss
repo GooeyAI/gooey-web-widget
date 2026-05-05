@@ -125,6 +125,7 @@ button.depressed {
 
 .gooey-scroll-to-bottom-btn {
   bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 2;
-  transition: opacity 0.15s ease;
 }

@@ -130,10 +130,12 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
           recomputeSpacerHeight(container, target);
           scrollToUserMsg(container, target, "smooth");
         });
-      } else {
-        isInSendCycleRef.current = false;
+        return;
       }
-      return;
+      // No marker — purge / cancel-retry / new chat. Reset spacer so the
+      // container shrinks back; checkScrollPosition below clears the button.
+      isInSendCycleRef.current = false;
+      recomputeSpacerHeight(container, null);
     }
 
     if (isInSendCycleRef.current) {

@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
@@ -88,28 +87,28 @@ const Messages = () => {
   }
 
   return (
-    <div
-      ref={scrollContainerRef}
-      onScroll={handleScrollContainerScroll}
-      className={clsx(
-        "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
-      )}
-    >
+    <div className="gooey-messages-overlay-wrapper pos-relative flex-1 d-flex flex-col w-100">
       <div
-        className="mw-760 d-flex flex-col"
-        style={{ marginLeft: "auto", marginRight: "auto" }}
+        ref={scrollContainerRef}
+        onScroll={handleScrollContainerScroll}
+        className="flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container"
       >
-        <Responses
-          queue={queue}
-          data={messages ?? new Map()}
-          latestUserKey={latestUserKey}
-        />
-        <ResponseLoader show={isSending} />
-        <div className="gooey-scroll-spacer" aria-hidden="true" />
+        <div
+          className="mw-760 d-flex flex-col"
+          style={{ marginLeft: "auto", marginRight: "auto" }}
+        >
+          <Responses
+            queue={queue}
+            data={messages ?? new Map()}
+            latestUserKey={latestUserKey}
+          />
+          <ResponseLoader show={isSending} />
+          <div className="gooey-scroll-spacer" aria-hidden="true" />
+        </div>
       </div>
       {showScrollToBottom && (
         <IconButton
-          className="gooey-scroll-to-bottom-btn mr-auto ml-auto pos-sticky br-circle bg-white b-1 bx-shadowA justify-center"
+          className="gooey-scroll-to-bottom-btn pos-absolute br-circle bg-white b-1 bx-shadowA justify-center"
           onClick={() => scrollToBottom?.()}
           aria-label="Scroll to bottom"
           variant="text"
