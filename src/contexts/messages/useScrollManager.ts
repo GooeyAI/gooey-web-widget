@@ -80,13 +80,13 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
     scrollThrottle: null,
   });
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     const el = scrollContainerRef.current;
     if (!el) return;
     el.scroll({ top: el.scrollHeight, behavior });
-  }, []);
+  };
 
-  const handleScrollContainerScroll = useCallback(() => {
+  const handleScrollContainerScroll = () => {
     const t = timersRef.current;
     if (t.scrollThrottle) return;
     t.scrollThrottle = window.setTimeout(() => {
@@ -97,7 +97,7 @@ export const useScrollManager = (isMessagesLoading: boolean) => {
         setShowScrollToBottom,
       );
     }, 100);
-  }, []);
+  };
 
   // Single render-driven sync.
   // - On isMessagesLoading falling edge: anchor instantly, sync marker ref, no send cycle.
