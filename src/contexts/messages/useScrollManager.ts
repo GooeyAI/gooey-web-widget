@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const LATEST_USER_MSG_SELECTOR = '[data-gooey-latest-user-message="true"]';
 
