@@ -25,6 +25,7 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  isLatestUserMessage?: boolean;
 }
 
 const OutgoingMsg = memo(
@@ -35,6 +36,7 @@ const OutgoingMsg = memo(
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    isLatestUserMessage = false,
   }: OutgoingMsgProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -85,7 +87,10 @@ const OutgoingMsg = memo(
 
     return (
       <div className="d-flex flex-col align-end">
-        <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
+        <div
+          className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end"
+          data-gooey-latest-user-message={isLatestUserMessage ? "true" : undefined}
+        >
           {input_images && input_images.length > 0 && (
             <div
               className={clsx(

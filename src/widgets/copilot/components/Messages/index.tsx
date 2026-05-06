@@ -1,19 +1,37 @@
-import clsx from "clsx";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useMemo } from "react";
+import { useScrollManager } from "src/contexts/messages/useScrollManager";
 import SpinLoader from "src/components/shared/SpinLoader";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import { addInlineStyle } from "src/addStyles";
+import messagesStyle from "./messages.scss?inline";
+addInlineStyle(messagesStyle);
 
 export const MESSAGE_GUTTER = 8;
-const Responses = (props: any) => {
+const Responses = ({
+  queue,
+  data,
+}: {
+  queue: string[];
+  data: Map<string, any>;
+}) => {
   const { config } = useSystemContext();
-  const que = useMemo(() => props.queue, [props]);
-  const msgs = props.data;
+  let latestUserMessageIndex = -1;
+  for (let i = queue.length - 1; i >= 0; i--) {
+    if (data.get(queue[i])?.role === "user") {
+      latestUserMessageIndex = i;
+      break;
+    }
+  }
 
-  return que?.map((id: string) => {
-    const responseData = msgs.get(id);
+  return queue?.map((id: string, index: number) => {
+    const responseData = data.get(id);
+    if (!responseData) return null;
     if (responseData.role === "user") {
       return (
         <OutgoingMsg
@@ -24,6 +42,7 @@ const Responses = (props: any) => {
           button_pressed={responseData.button_pressed}
           input_location={responseData.input_location}
           input_documents={responseData.input_documents}
+          isLatestUserMessage={index === latestUserMessageIndex}
         />
       );
     } else {
@@ -44,8 +63,21 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading } =
-    useMessagesContext();
+  const {
+    messages,
+    isSending,
+    isMessagesLoading,
+    isReceiving,
+  } = useMessagesContext();
+
+  const {
+    scrollContainerRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
+  } = useScrollManager(isMessagesLoading ?? false);
+
+  const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
 
   if (isMessagesLoading) {
     return (
@@ -56,22 +88,35 @@ const Messages = () => {
   }
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className={clsx(
-        "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
-      )}
-    >
+    <div className="gooey-messages-overlay-wrapper pos-relative flex-1 d-flex flex-col w-100">
       <div
-        className="mw-760 d-flex flex-col"
-        style={{ marginLeft: "auto", marginRight: "auto" }}
+        ref={scrollContainerRef}
+        onScroll={handleScrollContainerScroll}
+        className="flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container"
       >
-        <Responses
-          queue={Array.from(messages?.keys() ?? [])}
-          data={messages ?? new Map()}
-        />
-        <ResponseLoader show={isSending} />
+        <div
+          className="mw-760 d-flex flex-col"
+          style={{ marginLeft: "auto", marginRight: "auto" }}
+        >
+          <Responses queue={queue} data={messages ?? new Map()} />
+          <ResponseLoader show={isSending} />
+          <div className="gooey-scroll-spacer" aria-hidden="true" />
+        </div>
       </div>
+      {showScrollToBottom && (
+        <IconButton
+          className="gooey-scroll-to-bottom-btn pos-absolute br-circle bg-white b-1 bx-shadowA justify-center"
+          onClick={() => scrollToBottom?.()}
+          aria-label="Scroll to bottom"
+          variant="text"
+        >
+          {isReceiving ? (
+            <CircleBeat className="anim-blink" size={12} />
+          ) : (
+            <IconChevronDown size={16} />
+          )}
+        </IconButton>
+      )}
     </div>
   );
 };

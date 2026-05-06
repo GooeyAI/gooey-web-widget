@@ -167,6 +167,14 @@
 .cr-pointer {
   cursor: pointer;
 }
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.invisible {
+  opacity: 0;
+  pointer-events: none;
+}
 .stroke-white {
   stroke: white !important;
 }
@@ -211,10 +219,10 @@
   white-space: nowrap;
   position: relative;
   max-width: 100%;
-  }
-  
-  .stable-scroll-container {
-    scrollbar-gutter: stable;
+}
+
+.stable-scroll-container {
+  scrollbar-gutter: stable;
 }
 
 @media (max-width: $tablet) {

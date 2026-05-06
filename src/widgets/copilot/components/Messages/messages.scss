@@ -1,0 +1,11 @@
+.gooey-scroll-spacer {
+  flex-shrink: 0;
+}
+
+// Wrapper around the scroll container needs an explicit min-height: 0 so
+// the flex layout lets the inner scroll container shrink and clip overflow.
+// (Browsers auto-set min-height: 0 only on flex children that are themselves
+// scroll containers; a plain flex-col wrapper does not get that treatment.)
+.gooey-messages-overlay-wrapper {
+  min-height: 0;
+}
