@@ -13,14 +13,25 @@ import messagesStyle from "./messages.scss?inline";
 addInlineStyle(messagesStyle);
 
 export const MESSAGE_GUTTER = 8;
-const Responses = (props: any) => {
+const Responses = ({
+  queue,
+  data,
+}: {
+  queue: string[];
+  data: Map<string, any>;
+}) => {
   const { config } = useSystemContext();
-  const que = useMemo(() => props.queue, [props]);
-  const msgs = props.data;
-  const latestUserKey = props.latestUserKey;
+  let latestUserMessageIndex = -1;
+  for (let i = queue.length - 1; i >= 0; i--) {
+    if (data.get(queue[i])?.role === "user") {
+      latestUserMessageIndex = i;
+      break;
+    }
+  }
 
-  return que?.map((id: string) => {
-    const responseData = msgs.get(id);
+  return queue?.map((id: string, index: number) => {
+    const responseData = data.get(id);
+    if (!responseData) return null;
     if (responseData.role === "user") {
       return (
         <OutgoingMsg
@@ -31,7 +42,7 @@ const Responses = (props: any) => {
           button_pressed={responseData.button_pressed}
           input_location={responseData.input_location}
           input_documents={responseData.input_documents}
-          isLatestUserMessage={id === latestUserKey}
+          isLatestUserMessage={index === latestUserMessageIndex}
         />
       );
     } else {
@@ -66,17 +77,7 @@ const Messages = () => {
     handleScrollContainerScroll,
   } = useScrollManager(isMessagesLoading ?? false);
 
-  const queue = useMemo(
-    () => Array.from(messages?.keys() ?? []),
-    [messages],
-  );
-  const latestUserKey = useMemo(() => {
-    if (!messages) return undefined;
-    for (let i = queue.length - 1; i >= 0; i--) {
-      if (messages.get(queue[i])?.role === "user") return queue[i];
-    }
-    return undefined;
-  }, [queue, messages]);
+  const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
 
   if (isMessagesLoading) {
     return (
@@ -97,11 +98,7 @@ const Messages = () => {
           className="mw-760 d-flex flex-col"
           style={{ marginLeft: "auto", marginRight: "auto" }}
         >
-          <Responses
-            queue={queue}
-            data={messages ?? new Map()}
-            latestUserKey={latestUserKey}
-          />
+          <Responses queue={queue} data={messages ?? new Map()} />
           <ResponseLoader show={isSending} />
           <div className="gooey-scroll-spacer" aria-hidden="true" />
         </div>
