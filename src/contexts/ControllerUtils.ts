@@ -23,13 +23,11 @@ export function useController({
   apiUrl,
   isSending,
   isReceiving,
-  scrollToMessage,
 }: {
   controller?: CopilotChatWidgetController;
   apiUrl: string;
   isSending: boolean;
   isReceiving: boolean;
-  scrollToMessage: () => void;
 }): MessagesContextType {
   let [messages, setMessages] = useState<Map<string, MessageMishmash>>(
     msgArrayToMap(controller?.messages || []),
@@ -44,7 +42,6 @@ export function useController({
       let newMessages = msgArrayToMap(entries);
       if (!isMapEqual(messages, newMessages)) {
         setMessages(newMessages);
-        scrollToMessage();
       }
     };
   }

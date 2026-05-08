@@ -1,0 +1,95 @@
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type { MessageMishmash } from "src/contexts/MessagesContext";
+
+const SCROLL_TO_BOTTOM_THRESHOLD_PX = 24;
+
+interface UseMessagesScrollArgs {
+  messages?: Map<string, MessageMishmash>;
+  latestUserId: string | null;
+  isMessagesLoading?: boolean;
+}
+
+export function useMessagesScroll({
+  messages,
+  latestUserId,
+  isMessagesLoading,
+}: UseMessagesScrollArgs) {
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const lastAnchoredIdRef = useRef<string | null>(null);
+  const wasLoadingRef = useRef<boolean>(true);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+
+  // Pin the latest user message to the top of the viewport on send / load.
+  // Layout itself is CSS-driven (.gooey-anchor-pair has min-height: 100%);
+  // this effect only triggers the scroll.
+  useLayoutEffect(() => {
+    const wasLoading = wasLoadingRef.current;
+    wasLoadingRef.current = !!isMessagesLoading;
+    if (isMessagesLoading) {
+      lastAnchoredIdRef.current = null;
+      return;
+    }
+    if (!latestUserId) return;
+    if (latestUserId === lastAnchoredIdRef.current) return;
+    lastAnchoredIdRef.current = latestUserId;
+    anchorRef.current?.scrollIntoView({
+      behavior: wasLoading ? "instant" : "smooth",
+      block: "start",
+    });
+  }, [latestUserId, isMessagesLoading]);
+
+  // Real content end = bottom of the last actual element inside the anchor
+  // wrapper. Skips the empty min-height tail so the button only appears when
+  // there's real content below the viewport.
+  const measureRealContentEnd = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const realLast = anchorRef.current?.lastElementChild as HTMLElement | null;
+    if (!container || !realLast) return null;
+    const containerRect = container.getBoundingClientRect();
+    const realLastRect = realLast.getBoundingClientRect();
+    return realLastRect.bottom - containerRect.top + container.scrollTop;
+  }, []);
+
+  const updateBottomButton = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const realEnd = measureRealContentEnd();
+    if (!container || realEnd === null) {
+      setShowScrollToBottom(false);
+      return;
+    }
+    const distance = realEnd - container.scrollTop - container.clientHeight;
+    setShowScrollToBottom(distance > SCROLL_TO_BOTTOM_THRESHOLD_PX);
+  }, [measureRealContentEnd]);
+
+  // Refresh button as content streams in (discrete reaction to message-map
+  // changes — no observer).
+  useEffect(() => {
+    if (isMessagesLoading) return;
+    updateBottomButton();
+  }, [messages, isMessagesLoading, updateBottomButton]);
+
+  const scrollToBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const realEnd = measureRealContentEnd();
+    if (!container || realEnd === null) return;
+    container.scrollTo({
+      top: Math.max(0, realEnd - container.clientHeight),
+      behavior: "smooth",
+    });
+  }, [measureRealContentEnd]);
+
+  return {
+    scrollContainerRef,
+    anchorRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScroll: updateBottomButton,
+  };
+}
