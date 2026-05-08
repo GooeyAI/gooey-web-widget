@@ -1,0 +1,140 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MessageMishmash } from "src/contexts/MessagesContext";
+
+const SCROLL_TO_BOTTOM_THRESHOLD_PX = 24;
+const SCROLL_MARGIN_TOP_PX = 16;
+const LATEST_USER_SELECTOR = '[data-gooey-latest-user-message="true"]';
+const ANCHOR_GAP_VAR = "--gooey-anchor-gap";
+
+interface UseMessagesScrollArgs {
+  messages?: Map<string, MessageMishmash>;
+  isMessagesLoading?: boolean;
+}
+
+export function useMessagesScroll({
+  messages,
+  isMessagesLoading,
+}: UseMessagesScrollArgs) {
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const scrollContentRef = useRef<HTMLDivElement | null>(null);
+  const lastAnchoredIdRef = useRef<string | null>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+
+  const latestUserMessageId = useMemo(() => {
+    if (!messages || messages.size === 0) return null;
+    let last: string | null = null;
+    messages.forEach((msg, id) => {
+      if (msg.role === "user") last = id;
+    });
+    return last;
+  }, [messages]);
+
+  const setAnchorGap = useCallback((px: number) => {
+    const content = scrollContentRef.current;
+    if (!content) return;
+    content.style.setProperty(ANCHOR_GAP_VAR, `${px}px`);
+  }, []);
+
+  const computeAnchorGap = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const content = scrollContentRef.current;
+    if (!container || !content) return;
+    const target = content.querySelector<HTMLElement>(LATEST_USER_SELECTOR);
+    if (!target) {
+      setAnchorGap(0);
+      return;
+    }
+    const targetRect = target.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const userMsgTopY =
+      targetRect.top - containerRect.top + container.scrollTop;
+    const viewportH = container.clientHeight;
+    const currentGap =
+      parseFloat(content.style.getPropertyValue(ANCHOR_GAP_VAR)) || 0;
+    const naturalScrollHeight = container.scrollHeight - currentGap;
+    const requiredGap = Math.max(
+      0,
+      userMsgTopY - SCROLL_MARGIN_TOP_PX + viewportH - naturalScrollHeight,
+    );
+    setAnchorGap(requiredGap);
+  }, [setAnchorGap]);
+
+  const updateBottomButton = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      setShowScrollToBottom(false);
+      return;
+    }
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    setShowScrollToBottom(distanceFromBottom > SCROLL_TO_BOTTOM_THRESHOLD_PX);
+  }, []);
+
+  const handleScrollContainerScroll = useCallback(() => {
+    updateBottomButton();
+  }, [updateBottomButton]);
+
+  const scrollToBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, []);
+
+  // Anchor latest user message on send / conversation load.
+  // Loading=true invalidates the anchored id so a re-load (or switch back to
+  // the same conversation) re-anchors when loading flips false.
+  useEffect(() => {
+    if (isMessagesLoading) {
+      lastAnchoredIdRef.current = null;
+      return;
+    }
+    if (!latestUserMessageId) {
+      setAnchorGap(0);
+      return;
+    }
+    if (latestUserMessageId === lastAnchoredIdRef.current) return;
+    lastAnchoredIdRef.current = latestUserMessageId;
+
+    let raf2: number | null = null;
+    const raf1 = requestAnimationFrame(() => {
+      computeAnchorGap();
+      raf2 = requestAnimationFrame(() => {
+        const target = scrollContentRef.current?.querySelector<HTMLElement>(
+          LATEST_USER_SELECTOR,
+        );
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
+  }, [latestUserMessageId, isMessagesLoading, computeAnchorGap, setAnchorGap]);
+
+  // Recompute gap + bottom button when viewport or content geometry changes.
+  useEffect(() => {
+    if (isMessagesLoading) return;
+    const container = scrollContainerRef.current;
+    const content = scrollContentRef.current;
+    if (!container || !content) return;
+    const onChange = () => {
+      computeAnchorGap();
+      updateBottomButton();
+    };
+    const observer = new ResizeObserver(onChange);
+    observer.observe(container);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [isMessagesLoading, computeAnchorGap, updateBottomButton]);
+
+  return {
+    scrollContainerRef,
+    scrollContentRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScrollContainerScroll,
+  };
+}

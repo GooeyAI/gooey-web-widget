@@ -34,8 +34,6 @@ export interface MessagesContextType {
   initializeQuery?: (payload: RequestModel) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
-  scrollMessageContainer?: (y?: number) => void;
-  scrollContainerRef?: React.RefObject<HTMLDivElement>;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -211,7 +209,6 @@ const MessagesContextProvider = ({
   const [isSharedConversation, setIsSharedConversation] = useState(false);
 
   const apiSource = useRef(axios.CancelToken.source());
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const currentConversation = useRef<Conversation | null>(null);
   const controllerRef = useRef(controller);
 
@@ -266,37 +263,10 @@ const MessagesContextProvider = ({
     addResponse(newQuery);
   };
 
-  const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
-      // scroll to y position
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: y,
-          behavior: "smooth",
-        });
-      }
-    },
-    [scrollContainerRef],
-  );
-
-  const scrollToMessage = useCallback(() => {
-    // scroll to the last message
-    setTimeout(() => {
-      scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number,
-      );
-    }, 10);
-  }, [scrollMessageContainer]);
-
-  useEffect(() => {
-    scrollToMessage();
-  }, [scrollToMessage]);
-
   const { sendPayload } = useStreamingHandler({
     config,
     handleAddConversation,
     updateCurrentConversation,
-    scrollToMessage,
     setIsReceiving,
     setIsSendingMessage,
     setLatestMessageIds,
@@ -428,7 +398,6 @@ const MessagesContextProvider = ({
     apiUrl: config!.apiUrl!,
     isSending,
     isReceiving,
-    scrollToMessage,
   });
 
   let context: MessagesContextType = {
@@ -437,8 +406,6 @@ const MessagesContextProvider = ({
     initializeQuery,
     handleNewConversation,
     cancelApiCall,
-    scrollMessageContainer,
-    scrollContainerRef,
     isReceiving,
     conversations,
     setActiveConversation,

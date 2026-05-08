@@ -1,0 +1,31 @@
+.gooey-messages-root {
+  min-height: 0;
+}
+
+.gooey-messages-content {
+  padding-bottom: var(--gooey-anchor-gap, 0px);
+}
+
+[data-gooey-latest-user-message="true"] {
+  scroll-margin-top: 16px;
+}
+
+.gooey-scroll-to-bottom-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: #f4f4f4;
+  }
+}

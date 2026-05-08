@@ -25,6 +25,7 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  isLatest?: boolean;
 }
 
 const OutgoingMsg = memo(
@@ -35,6 +36,7 @@ const OutgoingMsg = memo(
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    isLatest = false,
   }: OutgoingMsgProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -84,7 +86,10 @@ const OutgoingMsg = memo(
     const input_audio_url = resolveInputAudioUrl(input_audio);
 
     return (
-      <div className="d-flex flex-col align-end">
+      <div
+        className="d-flex flex-col align-end"
+        data-gooey-latest-user-message={isLatest ? "true" : undefined}
+      >
         <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
           {input_images && input_images.length > 0 && (
             <div
