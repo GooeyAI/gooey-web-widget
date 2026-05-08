@@ -9,6 +9,7 @@ import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import { addInlineStyle } from "src/addStyles";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 
 addInlineStyle(messagesStyle);
 
@@ -50,7 +51,8 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, isMessagesLoading } = useMessagesContext();
+  const { messages, isSending, isMessagesLoading, isReceiving } =
+    useMessagesContext();
 
   const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
   const lastUserIdx = useMemo(() => {
@@ -111,7 +113,11 @@ const Messages = () => {
           onClick={scrollToBottom}
           aria-label="Scroll to bottom"
         >
-          <IconChevronDown size={16} />
+          {isReceiving ? (
+            <CircleBeat size={12} className="anim-blink" />
+          ) : (
+            <IconChevronDown size={16} />
+          )}
         </button>
       )}
     </div>
