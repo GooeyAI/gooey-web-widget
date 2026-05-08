@@ -1,15 +1,9 @@
 .gooey-messages-root {
   min-height: 0;
+  min-width: 0;
 }
 
 // Wraps the latest user message + everything after it.
-// `min-height: 100%` resolves against the scroll container's visible height,
-// so this section is always at least one viewport tall while the latest pair
-// is in play. That guarantees enough scrollable space for `scrollIntoView
-// ({block:"start"})` on this wrapper to pin the latest user msg to the top.
-// When the assistant reply exceeds one viewport, the wrapper grows to its
-// natural height and there's no excess space below — purely a CSS reaction
-// to content size, no JS recompute needed.
 .gooey-anchor-pair {
   min-height: 100%;
   display: flex;

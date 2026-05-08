@@ -27,7 +27,6 @@ export function useMessagesScroll({
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   // Pin the latest user message to the top of the viewport on send / load.
-  // Layout itself is CSS-driven (.gooey-anchor-pair has min-height: 100%);
   // this effect only triggers the scroll.
   useLayoutEffect(() => {
     const wasLoading = wasLoadingRef.current;
@@ -46,8 +45,6 @@ export function useMessagesScroll({
   }, [latestUserId, isMessagesLoading]);
 
   // Real content end = bottom of the last actual element inside the anchor
-  // wrapper. Skips the empty min-height tail so the button only appears when
-  // there's real content below the viewport.
   const measureRealContentEnd = useCallback(() => {
     const container = scrollContainerRef.current;
     const realLast = anchorRef.current?.lastElementChild as HTMLElement | null;
@@ -69,7 +66,6 @@ export function useMessagesScroll({
   }, [measureRealContentEnd]);
 
   // Refresh button as content streams in (discrete reaction to message-map
-  // changes — no observer).
   useEffect(() => {
     if (isMessagesLoading) return;
     updateBottomButton();
