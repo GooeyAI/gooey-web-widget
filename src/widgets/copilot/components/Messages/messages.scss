@@ -12,8 +12,9 @@
 
 .gooey-scroll-to-bottom-btn {
   position: absolute;
-  right: 16px;
+  left: 50%;
   bottom: 16px;
+  transform: translateX(-50%);
   width: 32px;
   height: 32px;
   border-radius: 50%;
