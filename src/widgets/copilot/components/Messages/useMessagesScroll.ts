@@ -70,16 +70,29 @@ export function useMessagesScroll({
     setAnchorGap(requiredGap);
   }, [setAnchorGap]);
 
+  // The "real" content end is below the last real message but above the
+  // anchor gap. The bottom button + its target both measure against this,
+  // so an empty anchor gap doesn't trick us into thinking there's more
+  // content below.
+  const getRealContentEnd = useCallback(() => {
+    const container = scrollContainerRef.current;
+    const content = scrollContentRef.current;
+    if (!container || !content) return null;
+    const currentGap =
+      parseFloat(content.style.getPropertyValue(ANCHOR_GAP_VAR)) || 0;
+    return container.scrollHeight - currentGap;
+  }, []);
+
   const updateBottomButton = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container) {
+    const realEnd = getRealContentEnd();
+    if (!container || realEnd === null) {
       setShowScrollToBottom(false);
       return;
     }
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-    setShowScrollToBottom(distanceFromBottom > SCROLL_TO_BOTTOM_THRESHOLD_PX);
-  }, []);
+    const distance = realEnd - container.scrollTop - container.clientHeight;
+    setShowScrollToBottom(distance > SCROLL_TO_BOTTOM_THRESHOLD_PX);
+  }, [getRealContentEnd]);
 
   const handleScrollContainerScroll = useCallback(() => {
     updateBottomButton();
@@ -88,11 +101,12 @@ export function useMessagesScroll({
   const scrollToBottom = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
+    const realEnd = getRealContentEnd() ?? container.scrollHeight;
     container.scrollTo({
-      top: container.scrollHeight,
+      top: Math.max(0, realEnd - container.clientHeight),
       behavior: "smooth",
     });
-  }, []);
+  }, [getRealContentEnd]);
 
   // Anchor latest user message on send / conversation load.
   //  - send (latest user id changed mid-session): pin user msg at top, add
