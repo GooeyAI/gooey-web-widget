@@ -125,9 +125,10 @@ export function useMessagesScroll({
         const target = scrollContentRef.current?.querySelector<HTMLElement>(
           LATEST_USER_SELECTOR,
         );
+        const isLoad = anchorModeRef.current === "load";
         target?.scrollIntoView({
-          behavior: "smooth",
-          block: anchorModeRef.current === "load" ? "nearest" : "start",
+          behavior: isLoad ? "instant" : "smooth",
+          block: "start",
         });
       });
     });
