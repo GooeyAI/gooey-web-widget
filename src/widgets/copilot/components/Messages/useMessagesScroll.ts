@@ -11,6 +11,8 @@ interface UseMessagesScrollArgs {
   isMessagesLoading?: boolean;
 }
 
+type AnchorMode = "send" | "load" | null;
+
 export function useMessagesScroll({
   messages,
   isMessagesLoading,
@@ -18,6 +20,8 @@ export function useMessagesScroll({
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollContentRef = useRef<HTMLDivElement | null>(null);
   const lastAnchoredIdRef = useRef<string | null>(null);
+  const anchorModeRef = useRef<AnchorMode>(null);
+  const wasLoadingRef = useRef<boolean>(true);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const latestUserMessageId = useMemo(() => {
@@ -39,6 +43,13 @@ export function useMessagesScroll({
     const container = scrollContainerRef.current;
     const content = scrollContentRef.current;
     if (!container || !content) return;
+    // Only "send" mode adds a gap so the user msg can pin to the top while
+    // the assistant streams below it. "load" / null modes leave the layout
+    // alone — the user msg just needs to be in view.
+    if (anchorModeRef.current !== "send") {
+      setAnchorGap(0);
+      return;
+    }
     const target = content.querySelector<HTMLElement>(LATEST_USER_SELECTOR);
     if (!target) {
       setAnchorGap(0);
@@ -84,19 +95,28 @@ export function useMessagesScroll({
   }, []);
 
   // Anchor latest user message on send / conversation load.
-  // Loading=true invalidates the anchored id so a re-load (or switch back to
-  // the same conversation) re-anchors when loading flips false.
+  //  - send (latest user id changed mid-session): pin user msg at top, add
+  //    a bottom gap so streaming reply has room beneath it.
+  //  - load (transition out of isMessagesLoading): just bring user msg into
+  //    view; no gap, no forced top-pin.
+  // Loading=true invalidates the anchored id so a re-load (or switch back
+  // to the same conversation) re-anchors when loading flips false.
   useEffect(() => {
+    const wasLoading = wasLoadingRef.current;
+    wasLoadingRef.current = !!isMessagesLoading;
+
     if (isMessagesLoading) {
       lastAnchoredIdRef.current = null;
       return;
     }
     if (!latestUserMessageId) {
+      anchorModeRef.current = null;
       setAnchorGap(0);
       return;
     }
     if (latestUserMessageId === lastAnchoredIdRef.current) return;
     lastAnchoredIdRef.current = latestUserMessageId;
+    anchorModeRef.current = wasLoading ? "load" : "send";
 
     let raf2: number | null = null;
     const raf1 = requestAnimationFrame(() => {
@@ -105,7 +125,10 @@ export function useMessagesScroll({
         const target = scrollContentRef.current?.querySelector<HTMLElement>(
           LATEST_USER_SELECTOR,
         );
-        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        target?.scrollIntoView({
+          behavior: "smooth",
+          block: anchorModeRef.current === "load" ? "nearest" : "start",
+        });
       });
     });
     return () => {
