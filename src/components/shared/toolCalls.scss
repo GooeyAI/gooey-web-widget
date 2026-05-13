@@ -30,7 +30,6 @@
   margin-right: -0.6rem;
 }
 
-
 .tool-call-icon-image {
   width: 14px;
   height: 14px;
@@ -87,6 +86,20 @@
   text-decoration: underline;
 }
 
+.tool-call-thinking-body {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",
+    "Roboto Mono", Consolas, "Courier New", monospace;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 8px;
+  border-radius: 6px;
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  margin-bottom: .6rem;
+}
 .tool-call-json-block {
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",

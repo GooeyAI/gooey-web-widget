@@ -41,6 +41,16 @@ export const parseResponseBody = (
 ): React.ReactNode => {
   const body = extractOutputText(data);
   if (!body) return "";
+  return parseTextBody(body, data, linkColor, showSources);
+};
+
+export const parseTextBody = (
+  body: string,
+  data: ResponseData,
+  linkColor: string,
+  showSources: boolean,
+): React.ReactNode => {
+  if (!body) return "";
 
   const { processedText, expressions } = latexProcessor.processText(body);
   const rawHtml = marked.parse(processedText, MARKED_OPTIONS);
@@ -56,7 +66,7 @@ export const parseResponseBody = (
   return parse(rawHtml as string, parserOptions);
 };
 
-const extractOutputText = (data: ResponseData): string => {
+export const extractOutputText = (data: ResponseData): string => {
   const {
     type = "",
     status = "",
