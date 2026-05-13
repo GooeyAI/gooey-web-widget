@@ -16,51 +16,32 @@ const CLOSE = "</think>";
 
 export function splitThinkSegments(text: string): Segment[] {
   const segments: Segment[] = [];
-  let i = 0;
-  let answerStart = 0;
-  let thinkStart = -1;
-  let depth = 0;
-
-  while (i < text.length) {
-    if (text.startsWith(OPEN, i)) {
-      if (thinkStart === -1) {
-        if (i > answerStart) {
-          segments.push({ kind: "answer", body: text.slice(answerStart, i) });
-        }
-        thinkStart = i + OPEN.length;
-      } else {
-        depth++;
-      }
-      i += OPEN.length;
-      continue;
+  let pos = 0;
+  while (pos < text.length) {
+    const openIdx = text.indexOf(OPEN, pos);
+    if (openIdx === -1) {
+      segments.push({ kind: "answer", body: text.slice(pos) });
+      return segments;
     }
-    if (text.startsWith(CLOSE, i) && thinkStart !== -1) {
-      if (depth === 0) {
-        segments.push({
-          kind: "think",
-          body: text.slice(thinkStart, i),
-          closed: true,
-        });
-        i += CLOSE.length;
-        thinkStart = -1;
-        answerStart = i;
-      } else {
-        depth--;
-        i += CLOSE.length;
-      }
-      continue;
+    if (openIdx > pos) {
+      segments.push({ kind: "answer", body: text.slice(pos, openIdx) });
     }
-    i++;
-  }
-
-  if (thinkStart !== -1) {
+    const bodyStart = openIdx + OPEN.length;
+    const closeIdx = text.indexOf(CLOSE, bodyStart);
+    if (closeIdx === -1) {
+      segments.push({
+        kind: "think",
+        body: text.slice(bodyStart),
+        closed: false,
+      });
+      return segments;
+    }
     segments.push({
       kind: "think",
-      body: text.slice(thinkStart),
-      closed: false,
+      body: text.slice(bodyStart, closeIdx),
+      closed: true,
     });
-  } else if (answerStart < text.length) {
-    segments.push({ kind: "answer", body: text.slice(answerStart) });
+    pos = closeIdx + CLOSE.length;
   }
   return segments;
 }
