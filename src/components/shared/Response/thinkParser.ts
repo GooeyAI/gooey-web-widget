@@ -17,32 +17,50 @@ const CLOSE = "</think>";
 export function splitThinkSegments(text: string): Segment[] {
   const segments: Segment[] = [];
   let i = 0;
+  let answerStart = 0;
+  let thinkStart = -1;
+  let depth = 0;
+
   while (i < text.length) {
-    const openIdx = text.indexOf(OPEN, i);
-    if (openIdx === -1) {
-      const rest = text.slice(i);
-      if (rest) segments.push({ kind: "answer", body: rest });
-      break;
+    if (text.startsWith(OPEN, i)) {
+      if (thinkStart === -1) {
+        if (i > answerStart) {
+          segments.push({ kind: "answer", body: text.slice(answerStart, i) });
+        }
+        thinkStart = i + OPEN.length;
+      } else {
+        depth++;
+      }
+      i += OPEN.length;
+      continue;
     }
-    if (openIdx > i) {
-      segments.push({ kind: "answer", body: text.slice(i, openIdx) });
+    if (text.startsWith(CLOSE, i) && thinkStart !== -1) {
+      if (depth === 0) {
+        segments.push({
+          kind: "think",
+          body: text.slice(thinkStart, i),
+          closed: true,
+        });
+        i += CLOSE.length;
+        thinkStart = -1;
+        answerStart = i;
+      } else {
+        depth--;
+        i += CLOSE.length;
+      }
+      continue;
     }
-    const bodyStart = openIdx + OPEN.length;
-    const closeIdx = text.indexOf(CLOSE, bodyStart);
-    if (closeIdx === -1) {
-      segments.push({
-        kind: "think",
-        body: text.slice(bodyStart),
-        closed: false,
-      });
-      break;
-    }
+    i++;
+  }
+
+  if (thinkStart !== -1) {
     segments.push({
       kind: "think",
-      body: text.slice(bodyStart, closeIdx),
-      closed: true,
+      body: text.slice(thinkStart),
+      closed: false,
     });
-    i = closeIdx + CLOSE.length;
+  } else if (answerStart < text.length) {
+    segments.push({ kind: "answer", body: text.slice(answerStart) });
   }
   return segments;
 }
