@@ -119,14 +119,21 @@ export const fetchUrlMeta = async (url: string) => {
   return response?.data || {};
 };
 
-
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   let size = 12;
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
-      return <IconThumbsUp size={size} className="text-muted" isFilled={isFilled} />;
+      return (
+        <IconThumbsUp size={size} className="text-muted" isFilled={isFilled} />
+      );
     case "FEEDBACK_THUMBS_DOWN":
-      return <IconThumbsDown size={size} className="text-muted" isFilled={isFilled} />;
+      return (
+        <IconThumbsDown
+          size={size}
+          className="text-muted"
+          isFilled={isFilled}
+        />
+      );
     default:
       return null;
   }
@@ -218,6 +225,18 @@ export const getEmbedUrl = (url: string) => {
       return `https://www.youtube.com/embed/${match[1]}`;
     }
 
+    // gview ignores #page=N in the encoded url param; native PDF viewer does not
+    try {
+      const parsed = new URL(url);
+      const pageMatch = parsed.hash.match(/^#?page=(\d+)$/i);
+      if (pageMatch && parsed.pathname.toLowerCase().endsWith(".pdf")) {
+        parsed.hash = "";
+        return `${parsed.toString()}#page=${pageMatch[1]}`;
+      }
+    } catch {
+      // fall through
+    }
+
     if (isGoogleDocsEmbeddable(url)) {
       return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
     }
@@ -229,6 +248,7 @@ export const getEmbedUrl = (url: string) => {
     return url;
   }
 };
+
 export function renderImageInIframe(imgBlobUrl: string) {
   const html = `
     <html>
@@ -257,7 +277,7 @@ export function renderImageInIframe(imgBlobUrl: string) {
     </html>
   `;
 
-  const blob = new Blob([html], { type: 'text/html' });
+  const blob = new Blob([html], { type: "text/html" });
   const blobUrl = URL.createObjectURL(blob);
   return blobUrl;
 }
