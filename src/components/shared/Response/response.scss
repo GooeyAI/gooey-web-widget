@@ -110,7 +110,7 @@
   display: none;
 }
 
-.response-streaming> :not(ol):not(ul):not(pre):last-child:after,
+.response-streaming> :not(ol):not(ul):not(pre):not(details):last-child:after,
 .response-streaming>pre:last-child code:after {
   content: "\25CF";
   -webkit-font-smoothing: subpixel-antialiased;

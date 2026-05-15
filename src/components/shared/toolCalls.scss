@@ -5,7 +5,7 @@ $tool-call-surface: #f8f9fa;
 
 .tool-call-card {
   border-radius: 12px;
-  margin: 8px 0;
+  margin-bottom: 8px;
   background-color: transparent;
   border: 1px solid $tool-call-border;
 }
@@ -97,7 +97,7 @@ $tool-call-surface: #f8f9fa;
   max-height: 400px;
   overflow: auto;
   white-space: pre-wrap;
-  margin-bottom: .6rem;
+  margin-bottom: 0.6rem;
 }
 .tool-call-thinking-body p {
   margin-bottom: 0;

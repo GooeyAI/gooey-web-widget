@@ -1,5 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
-import clsx from "clsx";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import SpinLoader from "src/components/shared/SpinLoader";
@@ -7,23 +6,29 @@ import { parseTextBody } from "./responseParser";
 
 type Props = {
   body: string;
-  closed: boolean;
-  isStreaming?: boolean;
+  finished: boolean;
 };
 
-const ThinkingBlock: React.FC<Props> = ({ body, closed }) => {
-  const startedAt = useRef(Date.now());
+const ThinkingToolCall: React.FC<Props> = ({ body, finished }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  // Only time the block if we observed it while still open — otherwise the
+  // message is historical/cached and we can't infer how long thinking took.
+  const startRef = useRef<number | null>(finished ? null : Date.now());
+  const [elapsedSec, setElapsedSec] = useState<number | null>(null);
 
-  const elapsedSec = useMemo(
-    () =>
-      closed
-        ? Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000))
-        : null,
-    [closed],
-  );
+  useEffect(() => {
+    if (!finished || startRef.current === null || elapsedSec !== null) return;
+    setElapsedSec(
+      Math.max(1, Math.floor((Date.now() - startRef.current) / 1000)),
+    );
+  }, [finished, elapsedSec]);
 
   const parsedBody = useMemo(() => parseTextBody(body, {}, "", false), [body]);
+
+  let label: string;
+  if (!finished) label = "Thinking...";
+  else if (elapsedSec !== null) label = `Thought for ${elapsedSec}s`;
+  else label = "Thoughts";
 
   return (
     <details
@@ -32,7 +37,7 @@ const ThinkingBlock: React.FC<Props> = ({ body, closed }) => {
       className="tool-call-card"
     >
       <summary>
-        {closed ? (
+        {finished ? (
           <span className="tool-call-icon-emoji">🧠</span>
         ) : (
           <div className="tool-call-loader">
@@ -40,9 +45,7 @@ const ThinkingBlock: React.FC<Props> = ({ body, closed }) => {
           </div>
         )}
         <div className="tool-call-summary-content">
-          <span className="font_12_600">
-            {closed ? `Thought for ${elapsedSec}s` : "Thinking..."}
-          </span>
+          <span className="font_12_600">{label}</span>
         </div>
         <div className="tool-call-summary-toggle">
           {isExpanded ? (
@@ -52,11 +55,11 @@ const ThinkingBlock: React.FC<Props> = ({ body, closed }) => {
           )}
         </div>
       </summary>
-      <div className={clsx("tool-call-thinking-body font_12_400 gmt-8")}>
+      <div className="tool-call-thinking-body font_12_400 gmt-8">
         {parsedBody}
       </div>
     </details>
   );
 };
 
-export default ThinkingBlock;
+export default ThinkingToolCall;
