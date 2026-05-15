@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   extractOutputText,
   parseTextBody,
@@ -16,6 +16,32 @@ interface GooeyTextResponseProps {
   showSources?: boolean;
   isStreaming?: boolean;
   id?: string;
+}
+
+function useSmoothedText(target: string, isStreaming: boolean): string {
+  const [displayed, setDisplayed] = useState<string>(() =>
+    isStreaming ? "" : target,
+  );
+  const targetRef = useRef(target);
+  targetRef.current = target;
+
+  useEffect(() => {
+    if (!isStreaming) return;
+    let raf = 0;
+    const tick = () => {
+      setDisplayed((prev) => {
+        const tgt = targetRef.current;
+        if (!tgt.startsWith(prev)) return tgt;
+        if (prev.length >= tgt.length) return prev;
+        return tgt.slice(0, prev.length + 4);
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isStreaming]);
+
+  return isStreaming ? displayed : target;
 }
 
 type TextSegmentProps = {
@@ -56,7 +82,8 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
 }) => {
   const rawText = extractOutputText(data);
   const isRunning = data.status === "running";
-  const segments = useMemo(() => splitThinkSegments(rawText), [rawText]);
+  const displayed = useSmoothedText(rawText, isRunning);
+  const segments = useMemo(() => splitThinkSegments(displayed), [displayed]);
 
   const elements = segments.map((seg) => {
     if (seg.type === "think") {
