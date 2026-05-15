@@ -346,7 +346,7 @@ export const SourcesSection = ({
           </IconButton>
         </div>
       </div>
-      {isExpanded && references && references?.length && (
+      {isExpanded && references && references.length > 0 && (
         <SourcesList sources={references} />
       )}
     </div>
