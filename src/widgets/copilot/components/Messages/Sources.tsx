@@ -164,7 +164,7 @@ export const FullSourcePreview = (props: any) => {
             {data?.title}
           </p>
           <IconButton
-            onClick={() => window.open(data?.url, "_ablank")}
+            onClick={() => window.open(data?.url, "_blank")}
             variant="text-alt"
             className="gml-4"
           >
