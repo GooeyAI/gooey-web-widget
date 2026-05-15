@@ -6,6 +6,7 @@ import {
 import { Highlight, themes } from "prism-react-renderer";
 import Button from "./Buttons/Button";
 import { useState } from "react";
+import clsx from "clsx";
 
 function getTextBody(domNode: {
   attribs: { [key: string]: string };
@@ -62,14 +63,13 @@ function CodeBlock({
 }) {
   const body = getTextBody(domNode);
   const language: string = domNode?.attribs?.class.split("-").pop() || "python";
+  const codeProps = attributesToProps(domNode.attribs);
   return (
     <>
       <CodeHeader body={body} language={language} />
       <code
-        {...attributesToProps(domNode.attribs)}
-        style={{
-          borderRadius: "4px",
-        }}
+        {...codeProps}
+        className={clsx(codeProps?.className, "gooey-code-block")}
       >
         <Highlight theme={themes.vsDark} code={body} language={language}>
           {({ className, style, tokens, getLineProps, getTokenProps }) => (

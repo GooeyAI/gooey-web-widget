@@ -189,6 +189,9 @@
   max-width: 760px;
   margin: 0 auto;
 }
+.min-w-0 {
+  min-width: 0;
+}
 @media (max-width: 1100px) {
   .xs-text-center {
     text-align: center;

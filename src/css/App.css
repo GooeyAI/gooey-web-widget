@@ -1,8 +1,21 @@
 .gooey-embed-container * :not(code *) {
   box-sizing: border-box;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Ubuntu, Cantarell, "Noto Sans", sans-serif, "Helvetica Neue", Arial,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Ubuntu,
+    Cantarell,
+    "Noto Sans",
+    sans-serif,
+    "Helvetica Neue",
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -63,8 +76,14 @@ div:focus-visible {
 
 code,
 code[class*="language-"] {
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-    Liberation Mono, monospace !important;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace !important;
   font-size: 0.9rem;
   color: inherit;
   white-space: pre-wrap;
@@ -74,8 +93,14 @@ code[class*="language-"] {
 
 pre,
 pre[class*="language-"] {
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-    Liberation Mono, monospace !important;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace !important;
   overflow: auto;
   word-wrap: break-word;
   padding: 0.4rem 0.6rem;
@@ -85,4 +110,16 @@ pre[class*="language-"] {
 
 svg {
   fill: currentColor;
+}
+
+.gooey-code-block {
+  border-radius: 0 0 8px 8px;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  font-size: 12px;
+}
+
+.gooey-code-block pre {
+  margin: 0;
 }

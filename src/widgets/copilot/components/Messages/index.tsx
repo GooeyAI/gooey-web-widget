@@ -1,18 +1,25 @@
 import clsx from "clsx";
+import { useMemo } from "react";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { useMemo } from "react";
 import SpinLoader from "src/components/shared/SpinLoader";
+import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import { addInlineStyle } from "src/addStyles";
+import messagesStyle from "./messages.scss?inline";
+import { useMessagesScroll } from "./useMessagesScroll";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+
+addInlineStyle(messagesStyle);
 
 export const MESSAGE_GUTTER = 8;
+
 const Responses = (props: any) => {
   const { config } = useSystemContext();
-  const que = useMemo(() => props.queue, [props]);
   const msgs = props.data;
 
-  return que?.map((id: string) => {
+  return props.queue?.map((id: string) => {
     const responseData = msgs.get(id);
     if (responseData.role === "user") {
       return (
@@ -44,8 +51,27 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, scrollContainerRef, isMessagesLoading } =
+  const { messages, isSending, isMessagesLoading, isReceiving } =
     useMessagesContext();
+
+  const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
+  const lastUserIdx = useMemo(() => {
+    for (let i = queue.length - 1; i >= 0; i--) {
+      if (messages?.get(queue[i])?.role === "user") return i;
+    }
+    return -1;
+  }, [queue, messages]);
+  const beforeIds = lastUserIdx >= 0 ? queue.slice(0, lastUserIdx) : queue;
+  const anchorIds = lastUserIdx >= 0 ? queue.slice(lastUserIdx) : [];
+  const latestUserId = anchorIds[0] ?? null;
+
+  const {
+    scrollContainerRef,
+    anchorRef,
+    showScrollToBottom,
+    scrollToBottom,
+    handleScroll,
+  } = useMessagesScroll({ messages, latestUserId, isMessagesLoading });
 
   if (isMessagesLoading) {
     return (
@@ -55,23 +81,45 @@ const Messages = () => {
     );
   }
 
+  const data = messages ?? new Map();
+
   return (
-    <div
-      ref={scrollContainerRef}
-      className={clsx(
-        "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
-      )}
-    >
+    <div className="pos-relative d-flex flex-col flex-1 w-100 gooey-messages-root">
       <div
-        className="mw-760 d-flex flex-col"
-        style={{ marginLeft: "auto", marginRight: "auto" }}
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className={clsx(
+          "flex-1 bg-white gpt-16 overflow-y-auto w-100 gooey-messages-container",
+        )}
       >
-        <Responses
-          queue={Array.from(messages?.keys() ?? [])}
-          data={messages ?? new Map()}
-        />
-        <ResponseLoader show={isSending} />
+        <div className="mw-760 mx-auto">
+          <Responses queue={beforeIds} data={data} />
+        </div>
+        {anchorIds.length > 0 ? (
+          <div ref={anchorRef} className="mw-760 mx-auto gooey-anchor-pair">
+            <Responses queue={anchorIds} data={data} />
+            <ResponseLoader show={isSending} />
+          </div>
+        ) : (
+          <div className="mw-760 mx-auto">
+            <ResponseLoader show={isSending} />
+          </div>
+        )}
       </div>
+      {showScrollToBottom && (
+        <button
+          type="button"
+          className="gooey-scroll-to-bottom-btn"
+          onClick={scrollToBottom}
+          aria-label="Scroll to bottom"
+        >
+          {isReceiving ? (
+            <CircleBeat size={12} className="anim-blink" />
+          ) : (
+            <IconChevronDown size={16} />
+          )}
+        </button>
+      )}
     </div>
   );
 };
