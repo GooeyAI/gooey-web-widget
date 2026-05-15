@@ -1,13 +1,19 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MessageMishmash } from "src/contexts/MessagesContext";
 
 const SCROLL_TO_BOTTOM_THRESHOLD_PX = 24;
+
+// Real content end = bottom of the last actual element inside the anchor
+function measureRealContentEnd(
+  container: HTMLDivElement | null,
+  anchor: HTMLDivElement | null,
+) {
+  const realLast = anchor?.lastElementChild as HTMLElement | null;
+  if (!container || !realLast) return null;
+  const containerRect = container.getBoundingClientRect();
+  const realLastRect = realLast.getBoundingClientRect();
+  return realLastRect.bottom - containerRect.top + container.scrollTop;
+}
 
 interface UseMessagesScrollArgs {
   messages?: Map<string, MessageMishmash>;
@@ -44,26 +50,16 @@ export function useMessagesScroll({
     });
   }, [latestUserId, isMessagesLoading]);
 
-  // Real content end = bottom of the last actual element inside the anchor
-  const measureRealContentEnd = useCallback(() => {
-    const container = scrollContainerRef.current;
-    const realLast = anchorRef.current?.lastElementChild as HTMLElement | null;
-    if (!container || !realLast) return null;
-    const containerRect = container.getBoundingClientRect();
-    const realLastRect = realLast.getBoundingClientRect();
-    return realLastRect.bottom - containerRect.top + container.scrollTop;
-  }, []);
-
   const updateBottomButton = useCallback(() => {
     const container = scrollContainerRef.current;
-    const realEnd = measureRealContentEnd();
+    const realEnd = measureRealContentEnd(container, anchorRef.current);
     if (!container || realEnd === null) {
       setShowScrollToBottom(false);
       return;
     }
     const distance = realEnd - container.scrollTop - container.clientHeight;
     setShowScrollToBottom(distance > SCROLL_TO_BOTTOM_THRESHOLD_PX);
-  }, [measureRealContentEnd]);
+  }, []);
 
   // Refresh button as content streams in (discrete reaction to message-map
   useEffect(() => {
@@ -71,15 +67,15 @@ export function useMessagesScroll({
     updateBottomButton();
   }, [messages, isMessagesLoading, updateBottomButton]);
 
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = () => {
     const container = scrollContainerRef.current;
-    const realEnd = measureRealContentEnd();
+    const realEnd = measureRealContentEnd(container, anchorRef.current);
     if (!container || realEnd === null) return;
     container.scrollTo({
       top: Math.max(0, realEnd - container.clientHeight),
       behavior: "smooth",
     });
-  }, [measureRealContentEnd]);
+  };
 
   return {
     scrollContainerRef,
