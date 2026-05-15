@@ -1,20 +1,14 @@
 import React, { useMemo } from "react";
-import { extractOutputText, parseTextBody } from "./responseParser";
+import {
+  extractOutputText,
+  parseTextBody,
+  ResponseData,
+} from "./responseParser";
 import { splitThinkSegments } from "./thinkParser";
 import ThinkingBlock from "./ThinkingBlock";
 import style from "./response.scss?inline";
 import { addInlineStyle } from "src/addStyles";
 addInlineStyle(style);
-
-interface ResponseData {
-  text?: string;
-  type?: string;
-  status?: string;
-  detail?: string;
-  output_text?: string[];
-  raw_output_text?: string[];
-  references?: any[];
-}
 
 interface GooeyTextResponseProps {
   data: ResponseData;
@@ -32,35 +26,25 @@ type TextSegmentProps = {
   streaming: boolean;
 };
 
-const TextSegment = React.memo(
-  function TextSegment({
-    body,
-    data,
-    linkColor,
-    showSources,
-    streaming,
-  }: TextSegmentProps) {
-    const references = data.references;
-    const parsed = useMemo(
-      () => parseTextBody(body, data, linkColor, showSources),
-      // data is intentionally tracked via references only; other data fields
-      // don't affect parse output (see domHandlers.tsx).
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [body, references, linkColor, showSources],
-    );
-    return (
-      <div className={streaming ? "response-streaming" : undefined}>
-        {parsed}
-      </div>
-    );
-  },
-  (prev, next) =>
-    prev.body === next.body &&
-    prev.streaming === next.streaming &&
-    prev.linkColor === next.linkColor &&
-    prev.showSources === next.showSources &&
-    prev.data.references === next.data.references,
-);
+const TextSegment = ({
+  body,
+  data,
+  linkColor,
+  showSources,
+  streaming,
+}: TextSegmentProps) => {
+  const references = data.references;
+  const parsed = useMemo(
+    () => parseTextBody(body, data, linkColor, showSources),
+    // data is intentionally tracked via references only; other data fields
+    // don't affect parse output (see domHandlers.tsx).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [body, references, linkColor, showSources],
+  );
+  return (
+    <div className={streaming ? "response-streaming" : undefined}>{parsed}</div>
+  );
+};
 
 const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   data,
@@ -71,31 +55,21 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   ...restProps
 }) => {
   const rawText = extractOutputText(data);
+  const isRunning = data.status === "running";
   const segments = useMemo(() => splitThinkSegments(rawText), [rawText]);
-  const lastIdx = segments.length - 1;
 
-  const elements = segments.map((seg, idx) => {
-    const isLast = idx === lastIdx;
-    if (seg.kind === "think") {
+  const elements = segments.map((seg) => {
+    if (seg.type === "think") {
       if (seg.body.trim() === "") return null;
-      const isBodyStreaming = !!isStreaming && isLast && !seg.closed;
-      return (
-        <ThinkingBlock
-          key={idx}
-          body={seg.body}
-          closed={seg.closed}
-          isStreaming={isBodyStreaming}
-        />
-      );
+      return <ThinkingBlock body={seg.body} closed={seg.closed} />;
     }
     return (
       <TextSegment
-        key={idx}
         body={seg.body}
         data={data}
         linkColor={linkColor || ""}
         showSources={showSources || false}
-        streaming={!!isStreaming && isLast}
+        streaming={isRunning}
       />
     );
   });

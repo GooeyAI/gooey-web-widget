@@ -6,7 +6,7 @@ import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
 // Types
-interface ResponseData {
+export interface ResponseData {
   type?: string;
   status?: string;
   text?: string;
@@ -33,16 +33,6 @@ const MARKED_OPTIONS = {
   pedantic: false,
   silent: false,
 } as const;
-
-export const parseResponseBody = (
-  data: ResponseData,
-  linkColor: string,
-  showSources: boolean,
-): React.ReactNode => {
-  const body = extractOutputText(data);
-  if (!body) return "";
-  return parseTextBody(body, data, linkColor, showSources);
-};
 
 export const parseTextBody = (
   body: string,

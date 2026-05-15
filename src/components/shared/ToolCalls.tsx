@@ -27,7 +27,7 @@ function ToolCalls({ final_prompt }: { final_prompt: any[] }) {
   }
 
   return (
-    <div className={clsx("tool-calls-container", "mw-100")}>
+    <div className={clsx("mw-100")}>
       {toolCalls.map((toolCall) => (
         <ToolCallCard key={String(toolCall.id)} toolCall={toolCall} />
       ))}

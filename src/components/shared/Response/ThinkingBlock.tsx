@@ -11,7 +11,7 @@ type Props = {
   isStreaming?: boolean;
 };
 
-const ThinkingBlock: React.FC<Props> = ({ body, closed, isStreaming }) => {
+const ThinkingBlock: React.FC<Props> = ({ body, closed }) => {
   const startedAt = useRef(Date.now());
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -52,22 +52,11 @@ const ThinkingBlock: React.FC<Props> = ({ body, closed, isStreaming }) => {
           )}
         </div>
       </summary>
-      <div
-        className={clsx(
-          "tool-call-thinking-body font_12_400 gmt-8",
-          isStreaming && "response-streaming",
-        )}
-      >
+      <div className={clsx("tool-call-thinking-body font_12_400 gmt-8")}>
         {parsedBody}
       </div>
     </details>
   );
 };
 
-export default React.memo(
-  ThinkingBlock,
-  (prev, next) =>
-    prev.body === next.body &&
-    prev.closed === next.closed &&
-    prev.isStreaming === next.isStreaming,
-);
+export default ThinkingBlock;

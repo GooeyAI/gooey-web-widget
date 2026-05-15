@@ -1,10 +1,13 @@
 @import "src/css/colors.module.scss";
 
+$tool-call-border: #e9ecef;
+$tool-call-surface: #f8f9fa;
+
 .tool-call-card {
   border-radius: 12px;
   margin: 8px 0;
   background-color: transparent;
-  border: 1px solid #e9ecef;
+  border: 1px solid $tool-call-border;
 }
 
 .tool-call-card summary {
@@ -53,7 +56,7 @@
 }
 
 .tool-call-summary-toggle {
-  color: #6c757d;
+  color: $muted;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -78,7 +81,7 @@
   font-size: 11px;
   text-decoration: none;
   gap: 4px;
-  color: #6c757d;
+  color: $muted;
   margin-left: auto;
 }
 
@@ -87,26 +90,25 @@
 }
 
 .tool-call-thinking-body {
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",
-    "Roboto Mono", Consolas, "Courier New", monospace;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: $tool-call-surface;
+  border: 1px solid $tool-call-border;
   padding: 8px;
   border-radius: 6px;
   max-height: 400px;
   overflow: auto;
   white-space: pre-wrap;
-  line-height: 1.4;
   margin-bottom: .6rem;
+}
+.tool-call-thinking-body p {
+  margin-bottom: 0;
 }
 .tool-call-json-block {
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",
     "Roboto Mono", Consolas, "Courier New", monospace;
   font-size: 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: $tool-call-surface;
+  border: 1px solid $tool-call-border;
   padding: 8px;
   border-radius: 6px;
   max-height: 200px;
