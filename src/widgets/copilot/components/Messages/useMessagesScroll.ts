@@ -44,9 +44,16 @@ export function useMessagesScroll({
     if (!latestUserId) return;
     if (latestUserId === lastAnchoredIdRef.current) return;
     lastAnchoredIdRef.current = latestUserId;
-    anchorRef.current?.scrollIntoView({
+    const container = scrollContainerRef.current;
+    const anchor = anchorRef.current;
+    if (!container || !anchor) return;
+    // Scroll only the widget's container — not the host page.
+    const top =
+      container.scrollTop +
+      (anchor.getBoundingClientRect().top - container.getBoundingClientRect().top);
+    container.scrollTo({
+      top: Math.max(0, top),
       behavior: wasLoading ? "instant" : "smooth",
-      block: "start",
     });
   }, [latestUserId, isMessagesLoading]);
 
