@@ -49,11 +49,37 @@ class FatalStreamError extends Error {
   }
 }
 
-export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
+// Per-widget SSE registry — replaces the old `window.GooeyEventSource`
+// global so multiple widgets on the same page don't race each other's
+// cancellations. Entries are added on `getDataFromStream` entry and
+// removed in `finally`, so `cancelStream` is a no-op when no stream is
+// currently active for that widget.
+const activeStreams = new Map<string, AbortController>();
+
+// Aborts the currently active SSE for `widgetId`, if any. Returns true
+// when a stream was actually aborted so callers can fall back to a
+// different cancellation path (e.g. axios cancel token) when this is a
+// no-op.
+export const cancelStream = (widgetId: string): boolean => {
+  const ac = activeStreams.get(widgetId);
+  if (!ac) return false;
+  ac.abort();
+  activeStreams.delete(widgetId);
+  return true;
+};
+
+export const getDataFromStream = async (
+  sseUrl: string,
+  setterFn: any,
+  widgetId: string,
+) => {
   const abortController = new AbortController();
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error — exposed globally so cancelApiCall() can abort the stream
-  window.GooeyEventSource = { close: () => abortController.abort() };
+  // If a prior stream for this widget is somehow still registered
+  // (shouldn't happen — the previous call's `finally` clears it), abort
+  // it before installing the new one.
+  const previous = activeStreams.get(widgetId);
+  if (previous) previous.abort();
+  activeStreams.set(widgetId, abortController);
 
   try {
     await fetchEventSource(sseUrl, {
@@ -114,5 +140,11 @@ export const getDataFromStream = async (sseUrl: string, setterFn: any) => {
       type: STREAM_MESSAGE_TYPES.ERROR,
       detail: e?.message || ERROR_MESSAGES.STREAM_CONNECTION_FAILED,
     });
+  } finally {
+    // Only clear our own controller — if a later `getDataFromStream`
+    // already replaced the entry, leave it alone.
+    if (activeStreams.get(widgetId) === abortController) {
+      activeStreams.delete(widgetId);
+    }
   }
 };
