@@ -286,6 +286,11 @@ const IncomingMsg = memo(
               "mw-100",
             )}
           >
+            {props?.data?.final_prompt && props?.showToolCalls && (
+              <div className="gmb-12">
+                <ToolCalls final_prompt={props?.data?.final_prompt} />
+              </div>
+            )}
             {/* Show any partial response that was streamed before the error */}
             {props.data.text && (
               <GooeyTextResponse
