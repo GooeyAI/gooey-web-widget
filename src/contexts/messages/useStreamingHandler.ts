@@ -12,6 +12,7 @@ import { buildAssistantErrorMessage } from "./errorHandling";
 
 type StreamingHandlerParams = {
   config: any;
+  widgetId: string;
   finalizeConversation: (
     messages: Map<string, any>,
     metadata?: { title?: string; timestamp?: string },
@@ -28,6 +29,7 @@ type StreamingHandlerParams = {
 
 export const useStreamingHandler = ({
   config,
+  widgetId,
   finalizeConversation,
   setIsReceiving,
   setIsSendingMessage,
@@ -40,13 +42,19 @@ export const useStreamingHandler = ({
 }: StreamingHandlerParams) => {
   const currentStreamRef = useRef<any>(null);
   const hasErrorRef = useRef(false);
+  // Set on FINAL_RESPONSE so a late `onclose` from the SSE library
+  // cannot rewrite the already-finalized bot message — `fetch-event-source`
+  // sometimes fires `onclose` after we abort on FINAL_RESPONSE, which
+  // would otherwise re-enter the close branch and strip `output.*`
+  // fields off the completed message.
+  const streamFinalizedRef = useRef(false);
 
   const updateStreamedMessage = useCallback(
     (payload: any) => {
       setMessages((prev: any) => {
-        // stream close — skip if already errored
+        // stream close — skip if already errored or already finalized
         if (!payload) {
-          if (hasErrorRef.current) return prev;
+          if (hasErrorRef.current || streamFinalizedRef.current) return prev;
           const newMessages = new Map(prev);
           const lastResponseId: any = Array.from(prev.keys()).pop();
           const prevMessage = prev.get(lastResponseId);
@@ -136,13 +144,31 @@ export const useStreamingHandler = ({
           const lastResponseId: any = Array.from(prev.keys()).pop(); // last message id
           const prevMessage = prev.get(lastResponseId);
           const { output, ...restPayload } = payload;
-          newMessages.set(lastResponseId, {
+          // Spread order: prevMessage < restPayload < output < id. The
+          // backend doc on MessagesContext.tsx notes that fields like
+          // `references` and `final_prompt` are inlined on the payload
+          // *and* nested under `output` for unspecified reasons — the
+          // nested `output.*` form is the canonical source of truth, so
+          // it must overwrite the inlined copy here.
+          const merged = {
             ...prevMessage,
-            conversation_id: prevMessage?.conversation_id, // keep the conversation id
-            id: currentStreamRef.current,
-            ...output,
             ...restPayload,
-          });
+            ...output,
+            id: currentStreamRef.current,
+          };
+          // Coalesce `output_text` with the streamed `prevMessage.text`
+          // when the payload didn't carry one (e.g. tool-only responses).
+          // Without this the message renders blank after a successful
+          // stream.
+          if (
+            !Array.isArray(merged.output_text) ||
+            !merged.output_text.length ||
+            !merged.output_text[0]
+          ) {
+            merged.output_text = [prevMessage?.text || ""];
+          }
+          newMessages.set(lastResponseId, merged);
+          streamFinalizedRef.current = true;
           setIsReceiving(false);
 
           // Track this as a newly received message for autoplay
@@ -205,6 +231,7 @@ export const useStreamingHandler = ({
   const sendPayload = useCallback(
     async (payload: any, callbacks?: { onFinally?: () => void }) => {
       hasErrorRef.current = false;
+      streamFinalizedRef.current = false;
       try {
         await uploadPayloadFiles(payload, config!.apiUrl!);
 
@@ -226,7 +253,7 @@ export const useStreamingHandler = ({
           payload,
           apiSource.current,
         );
-        getDataFromStream(streamUrl, updateStreamedMessage);
+        getDataFromStream(streamUrl, updateStreamedMessage, widgetId);
         // setLoading false in updateStreamedMessage
       } catch (e) {
         // report error to Sentry
@@ -242,6 +269,7 @@ export const useStreamingHandler = ({
       currentUserId,
       preAttachedFileUsed,
       updateStreamedMessage,
+      widgetId,
     ],
   );
 
