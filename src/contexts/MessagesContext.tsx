@@ -12,7 +12,6 @@ import {
   CopilotChatWidgetController,
   useController,
 } from "src/contexts/ControllerUtils";
-import * as Sentry from "@sentry/react";
 import {
   STREAM_MESSAGE_STATUS,
   STREAM_MESSAGE_TYPES,
@@ -21,6 +20,7 @@ import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
 import {
   buildAssistantErrorMessage,
+  captureSendError,
   extractErrorDetail,
   isUserCancellation,
 } from "./messages/errorHandling";
@@ -285,7 +285,7 @@ const MessagesContextProvider = ({
       setIsSendingMessage(false);
       return;
     }
-    Sentry.captureException(e);
+    captureSendError(e);
     const errorMessage = buildAssistantErrorMessage(extractErrorDetail(e));
     setMessages((prev: Map<string, any>) => {
       const newMessages = new Map(prev);

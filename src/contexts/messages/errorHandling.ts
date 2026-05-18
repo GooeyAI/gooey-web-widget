@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Sentry from "@sentry/react";
 import { v4 as uuidv4 } from "uuid";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming-types";
 
@@ -31,7 +32,41 @@ const pickFirstKey = (value: unknown): string => {
   return "";
 };
 
-export const isUserCancellation = (e: any): boolean => axios.isCancel(e);
+export const isUserCancellation = (e: any): boolean =>
+  axios.isCancel(e) || e?.name === "AbortError";
+
+// Captures an exception thrown by the send path with the same shape of
+// Sentry extras that the streaming.ts onopen handler uses, so backend
+// debugging context survives axios errors (file uploads, the
+// createStreamApi POST) — bare Sentry.captureException(e) loses the
+// status code and body.
+export const captureSendError = (e: any): void => {
+  const response = e?.response;
+  let bodyForSentry: unknown = undefined;
+  if (response) {
+    // Don't bother serializing huge HTML error pages; the truncated
+    // detail is already what the UI shows and what helps most in
+    // triage.
+    if (typeof response.data === "string") {
+      bodyForSentry =
+        response.data.length > 2000
+          ? `${response.data.slice(0, 2000)}…`
+          : response.data;
+    } else {
+      bodyForSentry = response.data;
+    }
+  }
+  Sentry.captureException(e, {
+    extra: {
+      status: response?.status,
+      statusText: response?.statusText,
+      url: e?.config?.url,
+      method: e?.config?.method,
+      code: e?.code,
+      body: bodyForSentry,
+    },
+  });
+};
 
 // Derives a human-readable detail from axios errors (HTTP responses, network
 // failures, timeouts) and generic throwables.
