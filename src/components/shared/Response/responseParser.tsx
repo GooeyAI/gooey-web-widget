@@ -14,6 +14,7 @@ interface ResponseData {
   status?: string;
   text?: string;
   detail?: string;
+  error_detail?: string;
   output_text?: string[];
   raw_output_text?: string[];
   references?: Reference[];
@@ -65,6 +66,7 @@ const extractOutputText = (data: ResponseData): string => {
     status = "",
     text,
     detail,
+    error_detail,
     output_text = [],
     raw_output_text = [],
   } = data;
@@ -75,7 +77,10 @@ const extractOutputText = (data: ResponseData): string => {
     type === STREAM_MESSAGE_TYPES.MESSAGE_PART ||
     type === STREAM_MESSAGE_TYPES.ERROR
   ) {
-    output = text || detail || "";
+    // ERROR frames built by `buildAssistantErrorMessage` carry the
+    // human-readable string on `error_detail`; older / server-emitted
+    // error frames may use `text` or `detail`.
+    output = text || detail || error_detail || "";
   } else if (
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
     status === STREAM_MESSAGE_STATUS.COMPLETED
