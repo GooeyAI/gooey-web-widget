@@ -26,18 +26,25 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   const [chunks, setChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    // timer logic
-    let intervalId: any;
-    if (isRunning) {
-      // setting time from 0 to 1 every 10 milisecond using javascript setInterval method
-      intervalId = setInterval(() => setTime(time + 1), 10);
-    }
+    if (!isRunning) return;
+    // Functional updater + isRunning-only deps so the interval is
+    // created once per recording session instead of 100 times a second
+    // (which is what happened when `time` was a dep).
+    const intervalId = setInterval(() => setTime((t) => t + 1), 10);
     return () => clearInterval(intervalId);
-  }, [isRunning, time]);
+  }, [isRunning]);
+
+  const clearErrorTimeout = () => {
+    if (errorTimeoutRef.current !== null) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
+  };
 
   const onSuccess = (stream: MediaStream) => {
     streamRef.current = stream;
@@ -55,7 +62,12 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
     setLoading(false);
     Sentry.captureException(err);
     setIsError(true);
-    setTimeout(() => {
+    // Schedule an auto-dismiss; clear any previous one first so a
+    // second mic-permission failure inside the same component doesn't
+    // queue overlapping cancel calls.
+    clearErrorTimeout();
+    errorTimeoutRef.current = setTimeout(() => {
+      errorTimeoutRef.current = null;
       onCancel();
     }, 10000);
   };
@@ -103,6 +115,9 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
       if (mediaRecorderRef.current?.state !== "inactive") {
         mediaRecorderRef.current?.stop();
       }
+      // Cancel any pending auto-dismiss so a stale timer doesn't fire
+      // onCancel on a new recording mounted at the same slot.
+      clearErrorTimeout();
     };
   }, []);
 
@@ -118,6 +133,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   }, [chunks, onSend, send]);
 
   const handleClose = () => {
+    clearErrorTimeout();
     handleStopRecording();
     onCancel();
   };
