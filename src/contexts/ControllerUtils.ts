@@ -78,9 +78,12 @@ function msgArrayToMap(
 ): Map<string, MessageMishmash> {
   let ret = new Map<string, MessageMishmash>();
   for (let i = 0; i < entries.length; i++) {
-    let entry = entries[i];
-    entry.id = `simple-msg-id-${i}`;
-    ret.set(entry.id, entry);
+    // Clone before stamping the synthetic id — the controller's
+    // message array is owned by the embedder, mutating its objects
+    // would clobber their state (and break referential equality
+    // checks they do on their side).
+    const withId = { ...entries[i], id: `simple-msg-id-${i}` };
+    ret.set(withId.id, withId);
   }
   return ret;
 }
