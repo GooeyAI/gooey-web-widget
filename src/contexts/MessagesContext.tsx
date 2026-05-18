@@ -24,6 +24,7 @@ import {
   extractErrorDetail,
   isUserCancellation,
 } from "./messages/errorHandling";
+import { cancelStream } from "src/api/streaming";
 
 const CITATION_STYLE = "number";
 
@@ -34,6 +35,23 @@ const toDisplayUrls = (items?: (string | File)[]): string[] | undefined =>
   items?.map((item) =>
     item instanceof File ? URL.createObjectURL(item) : item,
   );
+
+// Release any blob: ObjectURLs the user message renderer was holding.
+// Called when a conversation is purged or replaced — without this the
+// underlying File objects stay alive for the lifetime of the page.
+const revokeBlobUrls = (messages: Map<string, any>) => {
+  for (const msg of messages.values()) {
+    for (const field of ["input_images", "input_documents"] as const) {
+      const items = msg?.[field];
+      if (!Array.isArray(items)) continue;
+      for (const url of items) {
+        if (typeof url === "string" && url.startsWith("blob:")) {
+          URL.revokeObjectURL(url);
+        }
+      }
+    }
+  }
+};
 
 const createNewQuery = (payload: RequestModel) => {
   return {
@@ -231,6 +249,22 @@ const MessagesContextProvider = ({
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
   const controllerRef = useRef(controller);
+  // Mirror `messages` into a ref so callbacks that aren't allowed to
+  // depend on it (e.g. `setActiveConversation`, which would otherwise
+  // be recreated on every render) can still read the current value
+  // when they need to revoke blob URLs.
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+  // Stable per-widget id used as the key in `activeStreams` so this
+  // provider's Stop button only ever aborts its own SSE, even when
+  // multiple widget instances share a page. Prefer the integration id
+  // (deterministic across reloads) and fall back to a uuid for
+  // embedders that don't pass one.
+  const widgetIdRef = useRef<string>(
+    (config?.integration_id as string) || uuidv4(),
+  );
 
   useEffect(() => {
     controllerRef.current = controller;
@@ -365,6 +399,7 @@ const MessagesContextProvider = ({
 
   const { sendPayload } = useStreamingHandler({
     config,
+    widgetId: widgetIdRef.current,
     finalizeConversation,
     setIsReceiving,
     setIsSendingMessage,
@@ -391,18 +426,18 @@ const MessagesContextProvider = ({
   };
 
   const purgeMessages = () => {
+    revokeBlobUrls(messages);
     purgeMessagesStore();
     currentConversation.current = {};
   };
 
   const cancelApiCall = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    if (window?.GooeyEventSource) GooeyEventSource.close();
-    else apiSource?.current.cancel("Operation canceled by the user.");
-
-    if (!isReceiving && !isSending) {
-      apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
+    // Prefer aborting the SSE for this widget; only fall back to
+    // cancelling the in-flight POST when there is no active stream
+    // (i.e. user clicked Stop before `conversation_start` arrived).
+    const sseAborted = cancelStream(widgetIdRef.current);
+    if (!sseAborted) {
+      apiSource.current.cancel("Operation canceled by the user.");
     }
 
     const newMessages = new Map(messages);
@@ -454,6 +489,9 @@ const MessagesContextProvider = ({
       }
       if (conversation.id && controllerRef.current?.onConversationChange)
         controllerRef.current?.onConversationChange?.(conversation.id);
+      // Release any blob: URLs from the conversation we're navigating
+      // away from before swapping in the new message list.
+      revokeBlobUrls(messagesRef.current);
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
