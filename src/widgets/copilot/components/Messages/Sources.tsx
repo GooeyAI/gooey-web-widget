@@ -87,7 +87,7 @@ const useSourceActions = (data: SourceData, metadata: Metadata | null) => {
     : data.url;
 
   const openInWindow = useCallback(
-    () => window.open(data.url, "_blank"),
+    () => window.open(data.url, "_blank", "noopener,noreferrer"),
     [data.url],
   );
 
@@ -165,7 +165,7 @@ export const FullSourcePreview = (props: any) => {
             {data?.title}
           </p>
           <IconButton
-            onClick={() => window.open(data?.url, "_blank")}
+            onClick={() => window.open(data?.url, "_blank", "noopener,noreferrer")}
             variant="text-alt"
             className="gml-4"
           >

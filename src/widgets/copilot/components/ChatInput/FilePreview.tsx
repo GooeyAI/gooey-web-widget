@@ -44,7 +44,7 @@ const FilePreview = ({
         isImage: file?.data?.type?.includes("image"),
       });
     } else {
-      window.open(fileURL, "_blank");
+      window.open(fileURL, "_blank", "noopener,noreferrer");
     }
   };
 

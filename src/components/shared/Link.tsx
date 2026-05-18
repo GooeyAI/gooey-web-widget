@@ -10,7 +10,7 @@ const Link = (props: any) => {
         !config?.enableSourcePreview) ||
       props?.data?.url?.includes("composio.dev")
     ) {
-      window.open(props?.data?.url, "_blank");
+      window.open(props?.data?.url, "_blank", "noopener,noreferrer");
     } else {
       layoutController?.toggleSecondaryDrawer?.(() => (
         <FullSourcePreview
