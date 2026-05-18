@@ -160,7 +160,12 @@ const ChatInput = () => {
   };
 
   const handleCancelSend = () => {
-    cancelApiCall?.();
+    const droppedDraft = cancelApiCall?.();
+    if (droppedDraft && !value) {
+      setValue(droppedDraft);
+      requestAnimationFrame(adjustTextareaHeight);
+      inputRef.current?.focus();
+    }
   };
 
   const handleRecordClick = () => {

@@ -71,7 +71,7 @@ export interface MessagesContextType {
   initializeQuery?: (payload: RequestModel) => void;
   retryLastQuery?: () => void;
   handleNewConversation?: () => void;
-  cancelApiCall?: () => void;
+  cancelApiCall?: () => string | undefined;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -443,9 +443,23 @@ const MessagesContextProvider = ({
     const newMessages = new Map(messages);
     const idsArray = Array.from(messages.keys());
 
+    // Holds the dropped user message's text so we can hand it back to
+    // the caller (Stop button) for re-insertion into the chat input.
+    // Read directly from the messages map at cancel time so we don't
+    // need to mirror it into a separate state cell.
+    let droppedDraft: string | undefined;
+    const dropUserMessage = (userId: string | undefined) => {
+      if (!userId) return;
+      const userMessage: any = newMessages.get(userId);
+      if (typeof userMessage?.input_prompt === "string") {
+        droppedDraft = userMessage.input_prompt;
+      }
+      newMessages.delete(userId);
+    };
+
     if (isSending) {
       // No bot response started yet — drop the pending user message
-      newMessages.delete(idsArray.pop());
+      dropUserMessage(idsArray.pop());
       setMessages(newMessages);
     } else if (isReceiving) {
       const lastId = idsArray[idsArray.length - 1];
@@ -462,7 +476,7 @@ const MessagesContextProvider = ({
       } else {
         // Empty bot placeholder — drop it along with the user message
         newMessages.delete(idsArray.pop()); // bot placeholder
-        newMessages.delete(idsArray.pop()); // user message
+        dropUserMessage(idsArray.pop()); // user message
       }
       setMessages(newMessages);
     }
@@ -472,6 +486,7 @@ const MessagesContextProvider = ({
     apiSource.current = axios.CancelToken.source(); // set new cancel token for next api call
     setIsReceiving(false);
     setIsSendingMessage(false);
+    return droppedDraft;
   }, [isReceiving, isSending, messages]);
 
   const setActiveConversation = useCallback(
