@@ -4,6 +4,7 @@ import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconBug from "src/assets/SvgIcons/IconBug";
+import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
@@ -70,7 +71,7 @@ const FeedbackButtons = ({
 }) => {
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
-  const { initializeQuery } = useMessagesContext();
+  const { initializeQuery, rerun } = useMessagesContext();
 
   if (!buttons) return null;
 
@@ -173,6 +174,16 @@ const FeedbackButtons = ({
                 <IconBug size={12} />
               </IconButton>
             </a>
+          )}
+          {rerun && data?.web_url && (
+            <GooeyTooltip text="Re-run">
+              <IconButton
+                onClick={() => rerun(data?.web_url!)}
+                className="text-muted d-flex justify-content-center align-items-center h-100"
+              >
+                <IconRefresh size={12} />
+              </IconButton>
+            </GooeyTooltip>
           )}
         </div>
       )}

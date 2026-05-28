@@ -5,6 +5,7 @@ export interface Conversation {
   bot_id?: string;
   title?: string;
   timestamp?: string;
+  url?: string;
   user_id?: string;
   messages?: any[]; // Array of messages
   getMessages?: () => Promise<any[]>;

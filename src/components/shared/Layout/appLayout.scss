@@ -54,3 +54,26 @@
     z-index: 9999;
   }
 }
+
+@keyframes gooey-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.gooey-skeleton-bar {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    #c8c8c8 0%,
+    #efefef 42%,
+    #efefef 58%,
+    #c8c8c8 100%
+  );
+  background-size: 220% 100%;
+  animation: gooey-skeleton-shimmer 1.5s ease-in-out infinite;
+}
