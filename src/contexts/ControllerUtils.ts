@@ -16,6 +16,8 @@ export type CopilotChatWidgetController = {
   updateConfig?: (config: CopilotConfigType) => void;
   setConversationData?: (conversation: Conversation) => void;
   onConversationChange?: (conversationId: string) => void;
+  fetchConversations?: () => Promise<Conversation[]>;
+  rerun?: (run_url: string) => void;
 };
 
 export function useController({
@@ -56,6 +58,10 @@ export function useController({
 
   if (controller.onNewConversation) {
     ctx.handleNewConversation = controller.onNewConversation;
+  }
+
+  if (controller.rerun) {
+    ctx.rerun = controller.rerun;
   }
 
   return ctx;

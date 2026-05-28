@@ -1,4 +1,10 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -32,6 +38,7 @@ export interface MessagesContextType {
   messages?: Map<string, MessageMishmash>;
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
+  rerun?: (run_url: string) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   isReceiving?: boolean;
@@ -210,11 +217,6 @@ const MessagesContextProvider = ({
 
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
-  const controllerRef = useRef(controller);
-
-  useEffect(() => {
-    controllerRef.current = controller;
-  }, [controller]);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -342,13 +344,13 @@ const MessagesContextProvider = ({
       } else if (conversation.getMessages) {
         messages = await conversation.getMessages();
       }
-      if (conversation.id && controllerRef.current?.onConversationChange)
-        controllerRef.current?.onConversationChange?.(conversation.id);
+      if (conversation.id && controller?.onConversationChange)
+        controller?.onConversationChange?.(conversation.id);
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
     },
-    [cancelApiCall, isReceiving, isSending],
+    [cancelApiCall, isReceiving, isSending, controller],
   );
 
   useEffect(() => {

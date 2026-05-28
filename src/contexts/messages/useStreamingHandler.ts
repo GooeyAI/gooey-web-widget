@@ -6,7 +6,6 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadPayloadFiles } from "src/api/file-upload";
-import { handleToolCall } from "../tools";
 
 type StreamingHandlerParams = {
   config: any;
@@ -141,11 +140,6 @@ export const useStreamingHandler = ({
           let final_prompt = prevMessage.final_prompt || [];
           for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
             final_prompt[idx] = value;
-            try {
-              handleToolCall(value, prevMessage.web_url);
-            } catch (e) {
-              console.error(`Error handling tool call ${value}`, e);
-            }
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,

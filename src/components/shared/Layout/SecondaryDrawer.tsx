@@ -12,26 +12,6 @@ const SecondaryDrawer = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth * 0.65);
 
-  useEffect(() => {
-    const sideBarElement = drawerRef.current;
-
-    if (!sideBarElement || !layoutController?.isSecondaryDrawerOpen) return;
-
-    if (layoutController?.isMobile) {
-      sideBarElement.style.width = "100%";
-      sideBarElement.style.position = "absolute !important";
-    } else {
-      if (layoutController?.isSecondaryDrawerOpen) {
-        sideBarElement.style.width = `${drawerWidth}px`;
-        sideBarElement.style.position = "relative !important";
-      }
-    }
-  }, [
-    layoutController?.isMobile,
-    layoutController?.isSecondaryDrawerOpen,
-    drawerWidth,
-  ]);
-
   const handleMouseDown = (e: React.MouseEvent) => {
     if (layoutController?.isMobile) return;
     setIsResizing(true);
@@ -86,6 +66,11 @@ const SecondaryDrawer = () => {
         zIndex: 10,
         transition: isResizing ? "none" : "width 0.2s ease",
         position: layoutController?.isMobile ? "absolute" : "relative",
+        width: layoutController?.isSecondaryDrawerOpen
+          ? layoutController?.isMobile
+            ? "100%"
+            : `${drawerWidth}px`
+          : "0px",
       }}
       className={clsx(
         "h-100 top-0 overflow-x-hidden right-0 bg-grey d-flex flex-col",

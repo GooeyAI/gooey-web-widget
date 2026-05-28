@@ -7,6 +7,11 @@ import { Conversation } from "src/contexts/ConversationLayer";
 import React from "react";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import GooeyTooltip from "../Tooltip";
+import {
+  ConversationsSkeleton,
+  ServerConversationLink,
+  useServerConversations,
+} from "./ServerConversations";
 
 const SideNavbar = () => {
   const {
@@ -19,94 +24,41 @@ const SideNavbar = () => {
   const currentConversationId = currentConversation?.id || null;
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
-  const conversationsList = React.useMemo(() => {
-    if (!conversations || conversations.length === 0) return [];
-    const now = new Date().getTime();
-    const today = new Date().setHours(0, 0, 0, 0);
-    const endToday = new Date().setHours(23, 59, 59, 999);
-    const yesterday = new Date(today - 1).setHours(0, 0, 0, 0);
-    const endYesterday = new Date(today - 1).setHours(23, 59, 59, 999);
-    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
-    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000; // days x hours x minutes x seconds x milliseconds
-
-    const grouped: any = {
-      Today: [],
-      Yesterday: [],
-      "Previous 7 Days": [],
-      "Previous 30 Days": [],
-      Months: {},
-    };
-
-    conversations.forEach((conversation: Conversation) => {
-      const lastMessageTimestamp = new Date(
-        conversation.timestamp as string,
-      ).getTime();
-      let subheading: string;
-
-      if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
-        subheading = "Today";
-      } else if (
-        lastMessageTimestamp >= yesterday &&
-        lastMessageTimestamp <= endYesterday
-      ) {
-        subheading = "Yesterday";
-      } else if (
-        lastMessageTimestamp > endToday - sevenDaysInMs &&
-        lastMessageTimestamp <= endToday
-      ) {
-        subheading = "Previous 7 Days";
-      } else if (now - lastMessageTimestamp <= thirtyDaysInMs) {
-        subheading = "Previous 30 Days";
-      } else {
-        const monthName: string = new Date(lastMessageTimestamp).toLocaleString(
-          "default",
-          {
-            month: "long",
-          },
-        );
-        if (!grouped.Months[monthName]) {
-          grouped.Months[monthName] = [];
-        }
-        grouped.Months[monthName].push(conversation);
-        return; // Skip adding to other groups
-      }
-      grouped[subheading].unshift(conversation);
+  const fetchConversations = config?.controller?.fetchConversations;
+  const { serverConversations, isServerConversationsLoading, isServerMode } =
+    useServerConversations({
+      fetchConversations,
+      isSidebarOpen: !!layoutController?.isSidebarOpen,
     });
+  const effectiveConversations: Conversation[] | null | undefined = isServerMode
+    ? serverConversations
+    : conversations;
 
-    // Convert Months object to array
-    const monthEntries = Object.entries(grouped.Months).map(
-      ([monthName, conversations]) => ({
-        subheading: monthName,
-        conversations,
-      }),
-    );
+  const closeDrawersAfterConversationClick = () => {
+    if (layoutController?.isMobile) layoutController?.toggleSidebar();
+    if (layoutController?.isSecondaryDrawerOpen)
+      layoutController?.toggleSecondaryDrawer(null);
+  };
 
-    // Combine all groups into a single array
-    return [
-      { subheading: "Today", conversations: grouped.Today },
-      { subheading: "Yesterday", conversations: grouped.Yesterday },
-      {
-        subheading: "Previous 7 Days",
-        conversations: grouped["Previous 7 Days"],
-      },
-      {
-        subheading: "Previous 30 Days",
-        conversations: grouped["Previous 30 Days"],
-      },
-      ...monthEntries,
-    ].filter((group) => group?.conversations?.length > 0);
-  }, [conversations]);
+  const handleConversationClick = (conversation: Conversation) => {
+    setActiveConversation?.(conversation);
+    closeDrawersAfterConversationClick();
+  };
+
+  const conversationsList = React.useMemo(
+    () => groupConversationsByDate(effectiveConversations),
+    [effectiveConversations],
+  );
 
   if (!layoutController?.showNewConversationButton) return null;
   const isEmpty = !messages?.size;
+
   return (
     <nav
       id="gooey-side-navbar"
       style={{
-        transition: layoutController?.isMobile
-          ? "none"
-          : "width ease-in-out 0.2s",
-        width: layoutController?.isMobile ? "0px" : "260px",
+        transition: "width ease-in-out 0.2s",
+        width: layoutController?.isSidebarOpen ? "260px" : "0px",
         zIndex: 10,
       }}
       className={clsx(
@@ -187,7 +139,10 @@ const SideNavbar = () => {
           </div>
 
           {/* Conversations list */}
-          {conversationsList.length === 0 ? (
+          {isServerMode &&
+          (isServerConversationsLoading || serverConversations === null) ? (
+            <ConversationsSkeleton />
+          ) : conversationsList.length === 0 ? (
             <div className="h-100 gpb-30 d-flex align-center justify-center">
               <p className="gmb-30 text-muted text-center font_14_400">
                 No conversations yet
@@ -195,7 +150,7 @@ const SideNavbar = () => {
             </div>
           ) : (
             <div className="gp-8 flex-1 h-100">
-              {conversationsList.map((group: any) => (
+              {conversationsList.map((group) => (
                 <div key={group.subheading} className="gmb-30">
                   <div
                     className="top-0 gpt-8 gpb-8 bg-grey pos-sticky"
@@ -210,24 +165,31 @@ const SideNavbar = () => {
                           new Date(b.timestamp as string).getTime() -
                           new Date(a.timestamp as string).getTime(),
                       )
-                      .map((conversation: Conversation) => {
-                        return (
-                          <li key={conversation.id}>
-                            <ConversationButton
-                              conversation={conversation}
-                              isActive={
-                                currentConversationId === conversation?.id
-                              }
-                              onClick={() => {
-                                setActiveConversation?.(conversation);
-                                if (layoutController?.isMobile)
-                                  layoutController?.toggleSidebar();
-                                if (layoutController?.isSecondaryDrawerOpen)
-                                  layoutController?.toggleSecondaryDrawer(null);
-                              }}
-                            />
-                          </li>
-                        );
+                      .map((conversation: Conversation, idx: number) => {
+                        if (isServerMode) {
+                          return (
+                            <li key={conversation.url || idx}>
+                              <ServerConversationLink
+                                conversation={conversation}
+                                onClick={closeDrawersAfterConversationClick}
+                              />
+                            </li>
+                          );
+                        } else {
+                          return (
+                            <li key={conversation.id}>
+                              <ConversationButton
+                                conversation={conversation}
+                                isActive={
+                                  currentConversationId === conversation?.id
+                                }
+                                onClick={() =>
+                                  handleConversationClick(conversation)
+                                }
+                              />
+                            </li>
+                          );
+                        }
                       })}
                   </ol>
                 </div>
@@ -240,6 +202,85 @@ const SideNavbar = () => {
   );
 };
 
+type ConversationGroup = {
+  subheading: string;
+  conversations: Conversation[];
+};
+
+const groupConversationsByDate = (
+  conversations?: Conversation[] | null,
+): ConversationGroup[] => {
+  if (!conversations || conversations.length === 0) return [];
+
+  const now = new Date().getTime();
+  const today = new Date().setHours(0, 0, 0, 0);
+  const endToday = new Date().setHours(23, 59, 59, 999);
+  const yesterday = new Date(today - 1).setHours(0, 0, 0, 0);
+  const endYesterday = new Date(today - 1).setHours(23, 59, 59, 999);
+  const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+
+  const grouped: Record<string, Conversation[]> = {
+    Today: [],
+    Yesterday: [],
+    "Previous 7 Days": [],
+    "Previous 30 Days": [],
+  };
+  const monthGroups: Record<string, Conversation[]> = {};
+
+  conversations.forEach((conversation) => {
+    const lastMessageTimestamp = new Date(
+      conversation.timestamp as string,
+    ).getTime();
+
+    if (lastMessageTimestamp >= today && lastMessageTimestamp <= endToday) {
+      grouped.Today.unshift(conversation);
+      return;
+    }
+    if (
+      lastMessageTimestamp >= yesterday &&
+      lastMessageTimestamp <= endYesterday
+    ) {
+      grouped.Yesterday.unshift(conversation);
+      return;
+    }
+    if (
+      lastMessageTimestamp > endToday - sevenDaysInMs &&
+      lastMessageTimestamp <= endToday
+    ) {
+      grouped["Previous 7 Days"].unshift(conversation);
+      return;
+    }
+    if (now - lastMessageTimestamp <= thirtyDaysInMs) {
+      grouped["Previous 30 Days"].unshift(conversation);
+      return;
+    }
+
+    const monthName = new Date(lastMessageTimestamp).toLocaleString("default", {
+      month: "long",
+    });
+    monthGroups[monthName] ||= [];
+    monthGroups[monthName].push(conversation);
+  });
+
+  return [
+    { subheading: "Today", conversations: grouped.Today },
+    { subheading: "Yesterday", conversations: grouped.Yesterday },
+    {
+      subheading: "Previous 7 Days",
+      conversations: grouped["Previous 7 Days"],
+    },
+    {
+      subheading: "Previous 30 Days",
+      conversations: grouped["Previous 30 Days"],
+    },
+    ...Object.entries(monthGroups).map(([monthName, conversations]) => ({
+      subheading: monthName,
+      conversations,
+    })),
+  ].filter((group) => group.conversations.length > 0);
+};
+
 // Memoized component for individual conversation buttons
 const ConversationButton: React.FC<{
   conversation: Conversation;
@@ -247,15 +288,7 @@ const ConversationButton: React.FC<{
   onClick: () => void;
 }> = React.memo(({ conversation, isActive, onClick }) => {
   // use timestamp in day, time format for title if no message is present
-  const tempTitle =
-    conversation?.title ||
-    new Date(conversation.timestamp as string).toLocaleString("default", {
-      day: "numeric",
-      month: "short",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
+  const title = getConversationTitle(conversation);
   return (
     <Button
       className="w-100 gp-8 gmb-6 text-left"
@@ -263,9 +296,22 @@ const ConversationButton: React.FC<{
       onClick={onClick}
       hideOverflow
     >
-      <p className="font_14_400">{tempTitle}</p>
+      <p className="font_14_400">{title}</p>
     </Button>
   );
 });
+
+const getConversationTitle = (conversation: Conversation) => {
+  if (conversation.title) return conversation.title;
+  if (!conversation.timestamp) return "Untitled";
+
+  return new Date(conversation.timestamp).toLocaleString("default", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+};
 
 export default SideNavbar;
