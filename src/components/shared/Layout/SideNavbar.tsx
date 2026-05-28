@@ -4,7 +4,8 @@ import IconSidebar from "src/assets/SvgIcons/IconSideBar";
 import Button from "../Buttons/Button";
 import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
-import React from "react";
+import { ExternalConversation } from "src/contexts/ControllerUtils";
+import React, { useEffect, useRef } from "react";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import GooeyTooltip from "../Tooltip";
 
@@ -15,12 +16,34 @@ const SideNavbar = () => {
     currentConversation,
     handleNewConversation,
     messages,
+    externalConversations,
+    isExternalConversationsLoading,
+    loadExternalConversations,
   } = useMessagesContext();
   const currentConversationId = currentConversation?.id || null;
   const { layoutController, config } = useSystemContext();
   const branding = config?.branding;
+
+  const isExternalMode = !!loadExternalConversations;
+  const effectiveConversations:
+    | (Conversation | ExternalConversation)[]
+    | null
+    | undefined = isExternalMode ? externalConversations : conversations;
+
+  // Trigger fetchConversations whenever the sidebar opens.
+  const wasSidebarOpenRef = useRef(false);
+  useEffect(() => {
+    if (!isExternalMode) return;
+    const isOpen = !!layoutController?.isSidebarOpen;
+    if (isOpen && !wasSidebarOpenRef.current) {
+      loadExternalConversations?.();
+    }
+    wasSidebarOpenRef.current = isOpen;
+  }, [layoutController?.isSidebarOpen, isExternalMode, loadExternalConversations]);
+
   const conversationsList = React.useMemo(() => {
-    if (!conversations || conversations.length === 0) return [];
+    if (!effectiveConversations || effectiveConversations.length === 0)
+      return [];
     const now = new Date().getTime();
     const today = new Date().setHours(0, 0, 0, 0);
     const endToday = new Date().setHours(23, 59, 59, 999);
@@ -37,7 +60,8 @@ const SideNavbar = () => {
       Months: {},
     };
 
-    conversations.forEach((conversation: Conversation) => {
+    effectiveConversations.forEach(
+      (conversation: Conversation | ExternalConversation) => {
       const lastMessageTimestamp = new Date(
         conversation.timestamp as string,
       ).getTime();
@@ -95,7 +119,7 @@ const SideNavbar = () => {
       },
       ...monthEntries,
     ].filter((group) => group?.conversations?.length > 0);
-  }, [conversations]);
+  }, [effectiveConversations]);
 
   if (!layoutController?.showNewConversationButton) return null;
   const isEmpty = !messages?.size;
@@ -187,7 +211,10 @@ const SideNavbar = () => {
           </div>
 
           {/* Conversations list */}
-          {conversationsList.length === 0 ? (
+          {isExternalMode &&
+          (isExternalConversationsLoading || externalConversations === null) ? (
+            <ConversationsSkeleton />
+          ) : conversationsList.length === 0 ? (
             <div className="h-100 gpb-30 d-flex align-center justify-center">
               <p className="gmb-30 text-muted text-center font_14_400">
                 No conversations yet
@@ -206,29 +233,60 @@ const SideNavbar = () => {
                   <ol>
                     {group.conversations
                       .sort(
-                        (a: Conversation, b: Conversation) =>
+                        (
+                          a: Conversation | ExternalConversation,
+                          b: Conversation | ExternalConversation,
+                        ) =>
                           new Date(b.timestamp as string).getTime() -
                           new Date(a.timestamp as string).getTime(),
                       )
-                      .map((conversation: Conversation) => {
-                        return (
-                          <li key={conversation.id}>
-                            <ConversationButton
-                              conversation={conversation}
-                              isActive={
-                                currentConversationId === conversation?.id
-                              }
-                              onClick={() => {
-                                setActiveConversation?.(conversation);
-                                if (layoutController?.isMobile)
-                                  layoutController?.toggleSidebar();
-                                if (layoutController?.isSecondaryDrawerOpen)
-                                  layoutController?.toggleSecondaryDrawer(null);
-                              }}
-                            />
-                          </li>
-                        );
-                      })}
+                      .map(
+                        (
+                          conversation: Conversation | ExternalConversation,
+                          idx: number,
+                        ) => {
+                          if (isExternalMode) {
+                            const external = conversation as ExternalConversation;
+                            return (
+                              <li key={external.url || idx}>
+                                <ExternalConversationLink
+                                  conversation={external}
+                                  onClick={() => {
+                                    if (layoutController?.isMobile)
+                                      layoutController?.toggleSidebar();
+                                    if (
+                                      layoutController?.isSecondaryDrawerOpen
+                                    )
+                                      layoutController?.toggleSecondaryDrawer(
+                                        null,
+                                      );
+                                  }}
+                                />
+                              </li>
+                            );
+                          }
+                          const local = conversation as Conversation;
+                          return (
+                            <li key={local.id}>
+                              <ConversationButton
+                                conversation={local}
+                                isActive={
+                                  currentConversationId === local?.id
+                                }
+                                onClick={() => {
+                                  setActiveConversation?.(local);
+                                  if (layoutController?.isMobile)
+                                    layoutController?.toggleSidebar();
+                                  if (layoutController?.isSecondaryDrawerOpen)
+                                    layoutController?.toggleSecondaryDrawer(
+                                      null,
+                                    );
+                                }}
+                              />
+                            </li>
+                          );
+                        },
+                      )}
                   </ol>
                 </div>
               ))}
@@ -239,6 +297,121 @@ const SideNavbar = () => {
     </nav>
   );
 };
+
+// Skeleton placeholder shown while `fetchConversations` is loading.
+// Mirrors the real conversation list DOM structure exactly so spacing stays
+// stable across the loading -> loaded transition. The actual data positions
+// (subheading text, conversation title text) are replaced with shimmer bars.
+const SKELETON_WIDTH_CYCLE = [
+  "70%",
+  "55%",
+  "85%",
+  "45%",
+  "65%",
+  "75%",
+  "60%",
+  "50%",
+  "80%",
+  "40%",
+];
+const SKELETON_ROW_COUNT = 50;
+const SKELETON_WIDTHS = Array.from(
+  { length: SKELETON_ROW_COUNT },
+  (_, i) => SKELETON_WIDTH_CYCLE[i % SKELETON_WIDTH_CYCLE.length],
+);
+
+const ConversationsSkeleton = () => {
+  return (
+    <div className="gp-8 flex-1 h-100">
+      <div className="gmb-30">
+        <div
+          className="top-0 gpt-8 gpb-8 bg-grey pos-sticky"
+          style={{ zIndex: 1 }}
+        >
+          <h5 className="gpl-8 text-muted" style={{ margin: 0 }}>
+            <span
+              className="gooey-skeleton-bar d-inline-block"
+              style={{ width: "56px", height: "10px", verticalAlign: "middle" }}
+            />
+          </h5>
+        </div>
+        <ol>
+          {SKELETON_WIDTHS.map((width, idx) => (
+            <li key={idx}>
+              <ExternalConversationLink
+                conversation={{ skeletonWidth: width }}
+                onClick={() => {}}
+              />
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+};
+
+// Memoized component for an external (host-provided) conversation entry.
+// Renders an anchor so the browser handles navigation to `conversation.url`.
+// When `conversation.skeletonWidth` is set, the title text is replaced with a
+// shimmer bar of that width so this component doubles as a skeleton row.
+const ExternalConversationLink: React.FC<{
+  conversation: ExternalConversation & { skeletonWidth?: string };
+  onClick: () => void;
+}> = React.memo(({ conversation, onClick }) => {
+  const isSkeleton = !!conversation.skeletonWidth;
+  const tempTitle =
+    conversation?.title ||
+    (conversation.timestamp
+      ? new Date(conversation.timestamp).toLocaleString("default", {
+          day: "numeric",
+          month: "short",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        })
+      : "Untitled");
+  return (
+    <a
+      href={isSkeleton ? undefined : conversation.url || "#"}
+      onClick={isSkeleton ? (e) => e.preventDefault() : onClick}
+      className={clsx(
+        "d-block w-100 gp-8 gmb-6 text-left",
+        !isSkeleton && "button-text-alt",
+      )}
+      style={{
+        color: "inherit",
+        textDecoration: "none",
+        borderRadius: "8px",
+        border: "1px solid transparent",
+        cursor: isSkeleton ? "default" : "pointer",
+      }}
+    >
+      <p
+        className="font_14_400"
+        style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          margin: 0,
+          textDecoration: "none",
+        }}
+      >
+        {isSkeleton ? (
+          <span
+            className="gooey-skeleton-bar d-inline-block"
+            style={{
+              width: conversation.skeletonWidth,
+              height: "14px",
+              verticalAlign: "middle",
+            }}
+          />
+        ) : (
+          tempTitle
+        )}
+      </p>
+    </a>
+  );
+});
 
 // Memoized component for individual conversation buttons
 const ConversationButton: React.FC<{

@@ -1,4 +1,10 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -10,6 +16,7 @@ import useConversations, {
 import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
 import {
   CopilotChatWidgetController,
+  ExternalConversation,
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
@@ -32,6 +39,7 @@ export interface MessagesContextType {
   messages?: Map<string, MessageMishmash>;
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
+  rerun?: (run_url: string) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   isReceiving?: boolean;
@@ -42,6 +50,9 @@ export interface MessagesContextType {
   latestMessageIds?: Set<string>;
   preAttachedFileUsed?: boolean;
   setPreAttachedFileUsed?: (used: boolean) => void;
+  externalConversations?: ExternalConversation[] | null;
+  isExternalConversationsLoading?: boolean;
+  loadExternalConversations?: () => Promise<void>;
 }
 
 // --- Event Type Definitions ---
@@ -207,14 +218,56 @@ const MessagesContextProvider = ({
   const [isReceiving, setIsReceiving] = useState(false);
   const [isMessagesLoading, setMessagesLoading] = useState(true);
   const [isSharedConversation, setIsSharedConversation] = useState(false);
+  const [externalConversations, setExternalConversations] = useState<
+    ExternalConversation[] | null
+  >(null);
+  const [isExternalConversationsLoading, setIsExternalConversationsLoading] =
+    useState(false);
+  const [
+    shouldFetchExternalConversations,
+    setShouldFetchExternalConversations,
+  ] = useState(false);
+  // Track whether the fetch has already been kicked off. A ref (rather than
+  // `useMemo`) is the correct primitive here because `useMemo` is a perf
+  // optimization that React is allowed to discard at any time — relying on it
+  // to dedupe side effects causes duplicate network calls in production.
+  const hasFetchedExternalConversationsRef = useRef(false);
+
+  useEffect(() => {
+    if (!shouldFetchExternalConversations) return;
+    if (!controller?.fetchConversations) return;
+    if (hasFetchedExternalConversationsRef.current) return;
+    hasFetchedExternalConversationsRef.current = true;
+
+    let cancelled = false;
+    setIsExternalConversationsLoading(true);
+    controller
+      .fetchConversations()
+      .then((result) => {
+        if (cancelled) return;
+        setExternalConversations(result || []);
+      })
+      .catch((e) => {
+        Sentry.captureException(e);
+        if (cancelled) return;
+        setExternalConversations([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsExternalConversationsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldFetchExternalConversations, controller]);
+
+  const loadExternalConversations = useCallback(async () => {
+    if (!controller?.fetchConversations) return;
+    setShouldFetchExternalConversations(true);
+  }, [controller]);
 
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
-  const controllerRef = useRef(controller);
-
-  useEffect(() => {
-    controllerRef.current = controller;
-  }, [controller]);
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -342,13 +395,13 @@ const MessagesContextProvider = ({
       } else if (conversation.getMessages) {
         messages = await conversation.getMessages();
       }
-      if (conversation.id && controllerRef.current?.onConversationChange)
-        controllerRef.current?.onConversationChange?.(conversation.id);
+      if (conversation.id && controller?.onConversationChange)
+        controller?.onConversationChange?.(conversation.id);
       preLoadData(messages);
       updateCurrentConversation(conversation);
       setMessagesLoading(false);
     },
-    [cancelApiCall, isReceiving, isSending],
+    [cancelApiCall, isReceiving, isSending, controller],
   );
 
   useEffect(() => {
@@ -416,6 +469,12 @@ const MessagesContextProvider = ({
     setPreAttachedFileUsed,
     ...controllerContext,
   };
+
+  if (controller?.fetchConversations) {
+    context.externalConversations = externalConversations;
+    context.isExternalConversationsLoading = isExternalConversationsLoading;
+    context.loadExternalConversations = loadExternalConversations;
+  }
 
   return (
     <MessagesContext.Provider value={context}>

@@ -94,6 +94,7 @@ const SystemContextProvider = ({
   const [configState, setConfigState] = useState<CopilotConfigType>(config);
   const isInline =
     configState?.mode === "inline" || configState?.mode === "fullscreen";
+  const hasExternalConversations = !!controller?.fetchConversations;
   const [tempStore, setTempStore] = useState<Map<string, any>>(new Map());
   const [layoutState, setLayoutState] = useState<LayoutStateType>({
     isOpen: isInline || false,
@@ -104,9 +105,10 @@ const SystemContextProvider = ({
     showSidebarButton: false,
     showFocusModeButton: !isInline || false,
     showNewConversationButton:
-      configState?.enableConversations === undefined
+      hasExternalConversations ||
+      (configState?.enableConversations === undefined
         ? true
-        : configState?.enableConversations,
+        : configState?.enableConversations),
     isMobile: false,
     isSecondaryDrawerOpen: false,
     secondaryDrawerContent: () => null,
@@ -219,10 +221,15 @@ const SystemContextProvider = ({
 
   useEffect(() => {
     // set initial state based on isMobile and isInline
+    // In external conversations mode keep the sidebar closed by default so the
+    // host's `fetchConversations` only fires after the user explicitly opens
+    // the sidebar.
     setLayoutState((prev) => ({
       ...prev,
-      isSidebarOpen: !isMobile,
-      showSidebarButton: forceHideSidebar ? false : isMobile,
+      isSidebarOpen: hasExternalConversations ? false : !isMobile,
+      showSidebarButton: forceHideSidebar
+        ? false
+        : isMobile || hasExternalConversations,
       showFocusModeButton: isInline
         ? false
         : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
@@ -233,7 +240,7 @@ const SystemContextProvider = ({
       ),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
+  }, [forceHideSidebar, isInline, isMobile, isMobileWindow, hasExternalConversations]);
 
   if (controller) controller.updateConfig = (next: CopilotConfigType) => {
     setConfigState((prev) => ({

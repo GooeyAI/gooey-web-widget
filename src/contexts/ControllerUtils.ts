@@ -8,6 +8,12 @@ import type {
 import type { CopilotConfigType } from "./types";
 import { Conversation } from "./ConversationLayer";
 
+export type ExternalConversation = {
+  title?: string;
+  timestamp?: string;
+  url?: string;
+};
+
 export type CopilotChatWidgetController = {
   messages?: MessageMishmash[];
   onSendMessage?: (payload: RequestModel) => void;
@@ -16,6 +22,8 @@ export type CopilotChatWidgetController = {
   updateConfig?: (config: CopilotConfigType) => void;
   setConversationData?: (conversation: Conversation) => void;
   onConversationChange?: (conversationId: string) => void;
+  fetchConversations?: () => Promise<ExternalConversation[]>;
+  rerun?: (run_url: string) => void;
 };
 
 export function useController({
@@ -56,6 +64,10 @@ export function useController({
 
   if (controller.onNewConversation) {
     ctx.handleNewConversation = controller.onNewConversation;
+  }
+
+  if (controller.rerun) {
+    ctx.rerun = controller.rerun;
   }
 
   return ctx;
