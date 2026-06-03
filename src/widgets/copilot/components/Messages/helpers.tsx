@@ -120,7 +120,7 @@ export const fetchUrlMeta = async (url: string) => {
 };
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
-  let size = 12;
+  let size = 14;
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
       return (

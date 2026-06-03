@@ -29,6 +29,7 @@ const createNewQuery = (payload: RequestModel) => {
     ...payload,
     id: uuidv4(),
     role: "user",
+    created_at: new Date().toISOString(),
   };
 };
 
@@ -39,6 +40,7 @@ export interface MessagesContextType {
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
   rerun?: (run_url: string) => void;
+  editQuery?: (messageId: string, payload: RequestModel) => void;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   isReceiving?: boolean;
@@ -242,7 +244,11 @@ const MessagesContextProvider = ({
       ? undefined
       : currentConversation.current?.id;
     setIsSendingMessage(true);
-    if (!conversationId && currentConversation.current?.messages) {
+    if (
+      !payload.messages &&
+      !conversationId &&
+      currentConversation.current?.messages
+    ) {
       // make messages array in payload from messages in currentConversation and add
       payload.messages = currentConversation.current?.messages?.map(
         (message) => ({
@@ -270,6 +276,28 @@ const MessagesContextProvider = ({
     });
     const newQuery = createNewQuery(payload);
     addResponse(newQuery);
+  };
+
+  const editQuery = (messageId: string, payload: RequestModel) => {
+    if (isSending || isReceiving) return;
+    const entries = Array.from(messages.entries());
+    const idx = entries.findIndex(([id]) => id === messageId);
+    if (idx < 0) return;
+    // keep everything before the edited message; drop it and all that follow
+    const kept = entries.slice(0, idx);
+    setMessages(new Map(kept));
+    // build the truncated history so the bot regenerates ignoring removed turns
+    const history = kept.map(([id, message]) => ({
+      id,
+      role: message.role || "assistant",
+      content:
+        message.role === "user"
+          ? (message as RequestModel).input_prompt || ""
+          : (message as FinalResponse).raw_output_text?.[0] ||
+            (message as FinalResponse).output_text?.[0] ||
+            "",
+    }));
+    initializeQuery({ ...payload, messages: history });
   };
 
   const { sendPayload } = useStreamingHandler({
@@ -413,6 +441,7 @@ const MessagesContextProvider = ({
     messages,
     isSending,
     initializeQuery,
+    editQuery,
     handleNewConversation,
     cancelApiCall,
     isReceiving,

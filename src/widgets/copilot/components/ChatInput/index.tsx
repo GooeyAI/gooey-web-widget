@@ -22,10 +22,10 @@ import { isMobile } from "../Messages/helpers";
 import IconCamera from "src/assets/SvgIcons/IconCamera";
 import { RequestModel } from "src/contexts/MessagesContext";
 import PlaceholderMessage from "../Messages/PlaceholderMessage";
+import GooeyTextArea from "./GooeyTextArea";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
-const INPUT_HEIGHT = 44;
 const acceptedFileTypes = "application/*, text/*, audio/*";
 const acceptedImageTypes = "image/*, video/*,";
 
@@ -55,8 +55,6 @@ const ChatInput = () => {
   const [files, setFiles] = useState<UploadedFile[] | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement | null>(null);
-
-  const inputRef = useRef<null | HTMLElement>(null);
 
   // Handle preAttachedFile on mount
   useEffect(() => {
@@ -94,34 +92,6 @@ const ChatInput = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
 
-  // Reset textarea height when value becomes empty
-  useEffect(() => {
-    if (!value.trim()) {
-      const ele: HTMLElement | null = inputRef.current;
-      if (ele) {
-        ele.style.height = INPUT_HEIGHT + "px";
-      }
-    }
-  }, [value]);
-
-  const adjustTextareaHeight = () => {
-    const ele: HTMLElement | null = inputRef.current;
-    if (!ele) return;
-
-    // Reset height first to get accurate scrollHeight measurement
-    ele.style.height = INPUT_HEIGHT + "px";
-
-    if (ele.scrollHeight > INPUT_HEIGHT) {
-      ele.style.height = ele.scrollHeight + "px";
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.target;
-    setValue(value);
-    adjustTextareaHeight();
-  };
-
   const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && !e.shiftKey) {
       if (isSending || isReceiving) return;
@@ -158,7 +128,6 @@ const ChatInput = () => {
     }
     initializeQuery?.(payload);
     setValue("");
-    adjustTextareaHeight();
   };
 
   const handleCancelSend = () => {
@@ -336,20 +305,17 @@ const ChatInput = () => {
           )}
 
           {/* Typing area */}
-          <textarea
+          <GooeyTextArea
             value={value}
-            ref={inputRef as any}
             id={CHAT_INPUT_ID}
-            onChange={handleInputChange}
+            onChange={(e) => setValue(e?.target?.value)}
             onKeyDown={handlePressEnter}
-            className={clsx(
-              "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
-            )}
+            className={clsx("font_16_500 gm-0")}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`
             }
-          ></textarea>
+          />
 
           {/* Right icons */}
           <div className="input-right-buttons">
