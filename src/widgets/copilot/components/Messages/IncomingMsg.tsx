@@ -119,7 +119,7 @@ const FeedbackButtons = ({
               }
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
-              <IconCopy size={14} />
+              <IconCopy size={18} />
             </IconButton>
           </GooeyTooltip>
           {thumbButtons &&
@@ -270,9 +270,7 @@ const IncomingMsg = memo(
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
-            <div className="gmb-12">
-              <ToolCalls final_prompt={props?.data?.final_prompt} />
-            </div>
+            <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
           <GooeyTextResponse
             data={props.data}
