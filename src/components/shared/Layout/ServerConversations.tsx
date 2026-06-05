@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import * as Sentry from "@sentry/react";
 import clsx from "clsx";
 import { Conversation } from "src/contexts/ConversationLayer";
+import { getConversationTitle } from "./SideNavbar";
 
 export const useServerConversations = ({
   fetchConversations,
@@ -91,19 +92,6 @@ export function ServerConversationLink({
     </a>
   );
 }
-
-const getConversationTitle = (conversation: Conversation) => {
-  if (conversation.title) return conversation.title;
-  if (!conversation.timestamp) return "Untitled";
-
-  return new Date(conversation.timestamp).toLocaleString("default", {
-    day: "numeric",
-    month: "short",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  });
-};
 
 const SKELETON_WIDTH_CYCLE = [
   "70%",

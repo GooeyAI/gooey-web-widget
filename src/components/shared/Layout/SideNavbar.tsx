@@ -301,7 +301,7 @@ const ConversationButton: React.FC<{
   );
 });
 
-const getConversationTitle = (conversation: Conversation) => {
+export const getConversationTitle = (conversation: Conversation) => {
   if (conversation.title) return conversation.title;
   if (!conversation.timestamp) return "Untitled";
 
