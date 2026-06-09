@@ -234,15 +234,19 @@ const MessagesContextProvider = ({
     };
   };
 
-  const initializeQuery = (payload: RequestModel) => {
+  const initializeQuery = (
+    payload: RequestModel,
+    opts?: { startNewConversation?: boolean },
+  ) => {
     if (!payload || isSending || isReceiving) return;
     // Clear any previously received message IDs when starting a new query
     setLatestMessageIds(new Set());
 
     // calls the server and updates the state with user message
-    const conversationId = isSharedConversation
-      ? undefined
-      : currentConversation.current?.id;
+    const conversationId =
+      opts?.startNewConversation || isSharedConversation
+        ? undefined
+        : currentConversation.current?.id;
     setIsSendingMessage(true);
     if (
       !payload.messages &&
@@ -297,7 +301,10 @@ const MessagesContextProvider = ({
             (message as FinalResponse).output_text?.[0] ||
             "",
     }));
-    initializeQuery({ ...payload, messages: history });
+    initializeQuery(
+      { ...payload, messages: history },
+      { startNewConversation: true },
+    );
   };
 
   const { sendPayload } = useStreamingHandler({
