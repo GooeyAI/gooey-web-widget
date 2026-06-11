@@ -243,11 +243,19 @@ export const getEmbedUrl = (url: string) => {
 
     // Google Drive share links (.../view) fail in iframes; use the /preview
     // embed instead. NOTE: the file must be shared as "Anyone with the link".
-    if (url.includes("drive.google.com")) {
-      const fileId = extractGoogleDriveFileId(url);
-      if (fileId) {
-        return `https://drive.google.com/file/d/${fileId}/preview`;
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === "drive.google.com") {
+        const fileId = extractGoogleDriveFileId(url);
+        // Pre-2021 share links need their resourcekey; rebuilding the URL would
+        // drop it and break the preview, so keep the original URL for those.
+        if (fileId && !parsed.searchParams.has("resourcekey")) {
+          return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+        return url;
       }
+    } catch {
+      // not a valid absolute URL; fall through
     }
 
     // gview ignores #page=N in the encoded url param; native PDF viewer does not
