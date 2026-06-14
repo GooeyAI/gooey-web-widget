@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import clsx from "clsx";
 
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
@@ -13,6 +14,8 @@ type MediaPreviewProps = {
   mediaType?: MediaType;
   poster?: string;
   showActions?: boolean;
+  /** Applied to inline img/video; skips default fluid sizing when set. */
+  inlineClassName?: string;
 };
 
 export const videoExtensions = new Set([
@@ -193,6 +196,20 @@ const styleContent = `
     margin-left: 3px;
     fill: #fff;
   }
+  .gw-media-inline-media {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  .gw-media-inline-thumbnail {
+    display: block;
+  }
+  .gw-media-dialog-media {
+    max-width: 90vw;
+    max-height: 85vh;
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 const MediaPreview = ({
@@ -201,6 +218,7 @@ const MediaPreview = ({
   mediaType,
   poster,
   showActions = true,
+  inlineClassName,
 }: MediaPreviewProps) => {
   const [open, setOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -271,16 +289,20 @@ const MediaPreview = ({
     }
   };
 
-  const renderMedia = (variant: "inline" | "dialog") => {
-    const commonStyle =
-      variant === "inline"
-        ? { maxWidth: "100%", height: "auto", display: "block" }
-        : { maxWidth: "90vw", maxHeight: "85vh", width: "100%", height: "100%" };
+  const mediaClassName = (variant: "inline" | "dialog") =>
+    clsx(
+      variant === "dialog" && "gw-media-dialog-media",
+      variant === "inline" &&
+        (inlineClassName
+          ? ["gw-media-inline-thumbnail", inlineClassName]
+          : "gw-media-inline-media"),
+    );
 
+  const renderMedia = (variant: "inline" | "dialog") => {
     if (resolvedType === "video") {
       const videoElement = (
         <video
-          style={commonStyle}
+          className={mediaClassName(variant)}
           controls={variant === "dialog"}
           muted={variant === "inline"}
           autoPlay={variant === "dialog"}
@@ -321,7 +343,7 @@ const MediaPreview = ({
       <img
         src={src}
         alt={alt}
-        style={commonStyle}
+        className={mediaClassName(variant)}
         loading="lazy"
         aria-label={alt}
       />
