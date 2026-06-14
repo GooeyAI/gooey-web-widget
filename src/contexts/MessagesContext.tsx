@@ -215,8 +215,15 @@ const MessagesContextProvider = ({
   const [isMessagesLoading, setMessagesLoading] = useState(true);
   const [isSharedConversation, setIsSharedConversation] = useState(false);
 
+  const isServerMode = !!config?.controller?.fetchConversations;
+
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
+
+  const handleConversationFinalized = (conversation: Conversation) => {
+    if (isServerMode) return;
+    handleAddConversation(conversation);
+  };
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -267,7 +274,7 @@ const MessagesContextProvider = ({
 
   const { sendPayload } = useStreamingHandler({
     config,
-    handleAddConversation,
+    onConversationFinalized: handleConversationFinalized,
     updateCurrentConversation,
     setIsReceiving,
     setIsSendingMessage,
