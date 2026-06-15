@@ -9,7 +9,7 @@ import { uploadPayloadFiles } from "src/api/file-upload";
 
 type StreamingHandlerParams = {
   config: any;
-  handleAddConversation: (conversation: any) => void;
+  onConversationFinalized: (conversation: any) => void;
   updateCurrentConversation: (conversation: any) => void;
   setIsReceiving: (value: boolean) => void;
   setIsSendingMessage: (value: boolean) => void;
@@ -23,7 +23,7 @@ type StreamingHandlerParams = {
 
 export const useStreamingHandler = ({
   config,
-  handleAddConversation,
+  onConversationFinalized,
   updateCurrentConversation,
   setIsReceiving,
   setIsSendingMessage,
@@ -114,7 +114,7 @@ export const useStreamingHandler = ({
             bot_id: config?.integration_id,
           };
           updateCurrentConversation(conversationData);
-          handleAddConversation(
+          onConversationFinalized(
             Object.assign(
               {},
               {
@@ -157,7 +157,7 @@ export const useStreamingHandler = ({
     },
     [
       config?.integration_id,
-      handleAddConversation,
+      onConversationFinalized,
       setIsReceiving,
       setIsSendingMessage,
       setLatestMessageIds,

@@ -23,6 +23,13 @@ export const useServerConversations = ({
   }, [fetchConversations]);
 
   useEffect(() => {
+    if (!isSidebarOpen) {
+      setServerConversations(null);
+      setIsServerConversationsLoading(false);
+    }
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
     if (!fetchConversations || !isSidebarOpen || serverConversations !== null)
       return;
 
