@@ -50,9 +50,37 @@
   top: 3px;
 }
 
-.file-preview-box img {
+.file-preview-list {
+  gap: 12px;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;
+}
+
+.file-preview-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.file-preview-loader-inner {
+  z-index: 2;
+}
+
+.file-preview-remove {
+  position: absolute;
+  top: 6px;
+  right: -16px;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.file-preview-box img,
+.file-preview-box video {
   height: 60px;
   width: 100px;
+  max-height: 60px;
   object-fit: cover;
 }
 

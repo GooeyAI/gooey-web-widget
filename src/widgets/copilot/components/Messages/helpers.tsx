@@ -213,6 +213,22 @@ export function isGoogleDocsEmbeddable(input: string): boolean {
     return false;
   }
 }
+// Extracts a Google Drive file ID from a share URL (`/file/d/<id>/`, `?id=<id>`,
+// `/d/<id>`). IDs are URL-safe base64, typically ~33 chars. Returns null if none.
+export function extractGoogleDriveFileId(url: string): string | null {
+  if (!url) return null;
+  const patterns = [
+    /\/file\/d\/([-\w]{25,})/, // .../file/d/<id>/view
+    /[?&]id=([-\w]{25,})/, // ...?id=<id>
+    /\/d\/([-\w]{25,})/, // .../d/<id>
+  ];
+  for (const re of patterns) {
+    const m = url.match(re);
+    if (m?.[1]) return m[1];
+  }
+  return null;
+}
+
 export const getEmbedUrl = (url: string) => {
   try {
     // Check if it's a YouTube URL
@@ -223,6 +239,23 @@ export const getEmbedUrl = (url: string) => {
     if (match && match[1]) {
       // Return the embedded YouTube URL format
       return `https://www.youtube.com/embed/${match[1]}`;
+    }
+
+    // Google Drive share links (.../view) fail in iframes; use the /preview
+    // embed instead. NOTE: the file must be shared as "Anyone with the link".
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === "drive.google.com") {
+        const fileId = extractGoogleDriveFileId(url);
+        // Pre-2021 share links need their resourcekey; rebuilding the URL would
+        // drop it and break the preview, so keep the original URL for those.
+        if (fileId && !parsed.searchParams.has("resourcekey")) {
+          return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+        return url;
+      }
+    } catch {
+      // not a valid absolute URL; fall through
     }
 
     // gview ignores #page=N in the encoded url param; native PDF viewer does not
