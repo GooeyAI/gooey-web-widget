@@ -1,19 +1,18 @@
-import React from "react";
-import { parseResponseBody } from "./responseParser";
-import clsx from "clsx";
+import React, { useMemo } from "react";
+import {
+  extractOutputText,
+  parseTextBody,
+  ResponseData,
+} from "./responseParser";
+import { splitThinkSegments } from "./thinkParser";
+import ThinkingToolCall from "./ThinkingBlock";
 import style from "./response.scss?inline";
 import { addInlineStyle } from "src/addStyles";
+import clsx from "clsx";
 addInlineStyle(style);
 
 interface GooeyTextResponseProps {
-  data: {
-    text?: string;
-    type?: string;
-    status?: string;
-    detail?: string;
-    output_text?: string[];
-    raw_output_text?: string[];
-  };
+  data: ResponseData;
   linkColor?: string;
   showSources?: boolean;
   isStreaming?: boolean;
@@ -22,17 +21,14 @@ interface GooeyTextResponseProps {
 
 const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
   data,
-  linkColor,
-  showSources,
+  linkColor = "",
+  showSources = false,
   isStreaming,
   id,
   ...restProps
 }) => {
-  const parsedElements = parseResponseBody(
-    data,
-    linkColor || "",
-    showSources || false,
-  );
+  const rawText = extractOutputText(data);
+  const segments = useMemo(() => splitThinkSegments(rawText), [rawText]);
 
   return (
     <div
@@ -43,7 +39,19 @@ const GooeyTextResponse: React.FC<GooeyTextResponseProps> = ({
       id={id}
       {...restProps}
     >
-      {parsedElements}
+      {segments.map((seg, i) => {
+        if (seg.type === "think") {
+          if (seg.body.trim() === "") return null;
+          return (
+            <ThinkingToolCall key={i} body={seg.body} finished={seg.closed} />
+          );
+        }
+        return (
+          <React.Fragment key={i}>
+            {parseTextBody(seg.body, data, linkColor, showSources)}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };

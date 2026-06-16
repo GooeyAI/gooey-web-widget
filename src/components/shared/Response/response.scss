@@ -19,7 +19,9 @@
 .markdown ol {
   /* Some container/global styles remove list markers; restore them for markdown. */
   list-style-position: outside;
-  padding-left: 1.25rem;
+  /* Roomy enough for 2-digit ::marker (10., 99.) so the outer overflow:hidden
+     on the response wrapper doesn't clip the leading digit. */
+  padding-left: 2rem;
   margin: 0 0 12px 0;
 }
 
@@ -110,7 +112,7 @@
   display: none;
 }
 
-.response-streaming> :not(ol):not(ul):not(pre):last-child:after,
+.response-streaming> :not(ol):not(ul):not(pre):not(details):last-child:after,
 .response-streaming>pre:last-child code:after {
   content: "\25CF";
   -webkit-font-smoothing: subpixel-antialiased;

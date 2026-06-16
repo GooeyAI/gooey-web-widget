@@ -296,9 +296,7 @@ const IncomingMsg = memo(
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
-            <div className="gmb-12">
-              <ToolCalls final_prompt={props?.data?.final_prompt} />
-            </div>
+            <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
           <GooeyTextResponse
             data={props.data}

@@ -6,7 +6,7 @@ import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
 // Types
-interface ResponseData {
+export interface ResponseData {
   type?: string;
   status?: string;
   text?: string;
@@ -34,12 +34,12 @@ const MARKED_OPTIONS = {
   silent: false,
 } as const;
 
-export const parseResponseBody = (
+export const parseTextBody = (
+  body: string,
   data: ResponseData,
   linkColor: string,
   showSources: boolean,
 ): React.ReactNode => {
-  const body = extractOutputText(data);
   if (!body) return "";
 
   const { processedText, expressions } = latexProcessor.processText(body);
@@ -56,7 +56,7 @@ export const parseResponseBody = (
   return parse(rawHtml as string, parserOptions);
 };
 
-const extractOutputText = (data: ResponseData): string => {
+export const extractOutputText = (data: ResponseData): string => {
   const {
     type = "",
     status = "",
