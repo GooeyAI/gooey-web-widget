@@ -72,6 +72,7 @@ export function ServerConversationLink({
   onClick: () => void;
 }) {
   const title = getConversationTitle(conversation);
+  const run_metadata = conversation?.run_metadata;
   return (
     <a
       href={conversation.url || "#"}
@@ -96,6 +97,40 @@ export function ServerConversationLink({
       >
         {title}
       </p>
+      {!!run_metadata && (
+        <div className="d-flex align-center">
+          {!!run_metadata.icon && (
+            <div className="avatar avatar-xs bg-primary gmr-8">
+              <img
+                src={run_metadata.icon}
+                alt="conversation-icon"
+                className="avatar-xs"
+              />
+            </div>
+          )}
+          {!run_metadata.icon && !!run_metadata.emoji && (
+            <div className="gmr-8">
+              <span className="font_10_500 text-muted">
+                {run_metadata.emoji}
+              </span>
+            </div>
+          )}
+          {!!run_metadata.title && (
+            <p
+              className="font_12_400 text-muted"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                margin: 0,
+                textDecoration: "none",
+              }}
+            >
+              {run_metadata.title}
+            </p>
+          )}
+        </div>
+      )}
     </a>
   );
 }

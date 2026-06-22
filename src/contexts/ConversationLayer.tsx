@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 
+export interface RunMetadata {
+  icon?: string;
+  emoji?: string;
+  title?: string;
+}
+
 export interface Conversation {
   id?: string;
   bot_id?: string;
@@ -9,6 +15,7 @@ export interface Conversation {
   user_id?: string;
   messages?: any[]; // Array of messages
   getMessages?: () => Promise<any[]>;
+  run_metadata?: RunMetadata;
 }
 
 export const USER_ID_LS_KEY = "user_id";

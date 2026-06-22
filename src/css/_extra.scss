@@ -229,3 +229,16 @@
 .gooey-scroll-container::-webkit-scrollbar {
   display: none;
 }
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  overflow: hidden;
+}
+.avatar-xs {
+  width: 10px;
+  height: 10px;
+}
+
