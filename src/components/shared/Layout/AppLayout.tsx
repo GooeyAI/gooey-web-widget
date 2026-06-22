@@ -36,7 +36,7 @@ const ClickAwayListener = ({ onClick, children }: any) => {
       style={{
         height: "100%",
         width: "100%",
-        zIndex: 1,
+        zIndex: 9,
         background: "rgba(0,0,0,0.1)",
         backdropFilter: "blur(0.2px)",
       }}
