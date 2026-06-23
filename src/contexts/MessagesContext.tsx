@@ -196,10 +196,8 @@ const MessagesContextProvider = ({
 }) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const { config, layoutController } = useSystemContext();
-  const { conversations, handleAddConversation } = useConversations(
-    currentUserId,
-    config?.integration_id as string,
-  );
+  const { conversations, handleAddConversation, handleDeleteConversation } =
+    useConversations(currentUserId, config?.integration_id as string);
 
   const {
     messages,
@@ -221,10 +219,25 @@ const MessagesContextProvider = ({
 
   const apiSource = useRef(axios.CancelToken.source());
   const currentConversation = useRef<Conversation | null>(null);
+  // Id of the conversation an edit is replacing. Editing a message forks a
+  // fresh backend conversation (new conversation_id); once that fork's first
+  // response is saved we delete this stale entry so the edit replaces it in the
+  // saved list rather than adding a duplicate. Set in editQuery, consumed on
+  // the next finalize, and cleared if the user switches conversations first
+  // (purgeMessages / setActiveConversation / controller.setConversationData).
+  const conversationIdToReplace = useRef<string | null>(null);
 
-  const handleConversationFinalized = (conversation: Conversation) => {
-    if (isServerMode) return;
-    handleAddConversation(conversation);
+  const handleConversationFinalized = async (
+    conversation: Conversation | null,
+  ) => {
+    if (isServerMode || !conversation) return;
+    await handleAddConversation(conversation);
+    // Drop the pre-edit conversation now that its replacement is persisted.
+    const staleId = conversationIdToReplace.current;
+    conversationIdToReplace.current = null;
+    if (staleId && staleId !== conversation.id) {
+      await handleDeleteConversation(staleId);
+    }
   };
 
   const updateCurrentConversation = (conversation: Conversation) => {
@@ -301,6 +314,10 @@ const MessagesContextProvider = ({
             (message as FinalResponse).output_text?.[0] ||
             "",
     }));
+    // Fork a fresh backend conversation, then replace the conversation being
+    // edited: its saved entry is deleted once the fork's first response lands.
+    // Null when editing an unsaved conversation (nothing to replace).
+    conversationIdToReplace.current = currentConversation.current?.id ?? null;
     initializeQuery(
       { ...payload, messages: history },
       { startNewConversation: true },
@@ -338,6 +355,8 @@ const MessagesContextProvider = ({
   const purgeMessages = () => {
     purgeMessagesStore();
     currentConversation.current = {};
+    // Fresh chat: pending edit-replacement no longer applies.
+    conversationIdToReplace.current = null;
   };
 
   const cancelApiCall = useCallback(() => {
@@ -390,6 +409,8 @@ const MessagesContextProvider = ({
         controller?.onConversationChange?.(conversation.id);
       preLoadData(messages);
       updateCurrentConversation(conversation);
+      // Switched to a real saved conversation: cancel any pending replacement.
+      conversationIdToReplace.current = null;
       setMessagesLoading(false);
     },
     [cancelApiCall, isReceiving, isSending, controller],
@@ -428,6 +449,8 @@ const MessagesContextProvider = ({
     controller.setConversationData = async (conversation: Conversation) => {
       if (isSending || isReceiving) return;
       currentConversation.current = conversation;
+      // Host switched the conversation: cancel any pending replacement.
+      conversationIdToReplace.current = null;
       if (
         conversation.messages &&
         messagesChanged(Array.from(messages.values()), conversation.messages)

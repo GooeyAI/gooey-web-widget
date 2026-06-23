@@ -135,6 +135,40 @@ const addConversation = (db: IDBDatabase, conversation: Conversation) => {
   });
 };
 
+const deleteConversation = (
+  db: IDBDatabase,
+  conversationId: string,
+  user_id: string,
+  bot_id: string,
+) => {
+  return new Promise<Conversation[]>((resolve, reject) => {
+    const transaction = db.transaction(["conversations"], "readwrite");
+    const objectStore = transaction.objectStore("conversations");
+    const request = objectStore.delete(conversationId);
+
+    request.onsuccess = () => {
+      const allObjectsReq = objectStore.getAll();
+      allObjectsReq.onsuccess = () => {
+        resolve(
+          allObjectsReq.result
+            .filter(
+              (c: Conversation) =>
+                c.user_id === user_id && c.bot_id === bot_id,
+            )
+            .map((c) => formatConversation(c, db)),
+        );
+      };
+      allObjectsReq.onerror = () => {
+        reject(allObjectsReq.error);
+      };
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+};
+
 const DB_NAME = "GOOEY_COPILOT_CONVERSATIONS_DB";
 export const useConversations = (user_id: string, bot_id: string) => {
   const [conversations, setConversations] = useState<Conversation[] | null>(
@@ -170,7 +204,20 @@ export const useConversations = (user_id: string, bot_id: string) => {
     setConversations(updatedConversations);
   };
 
-  return { conversations, handleAddConversation };
+  const handleDeleteConversation = async (conversationId: string) => {
+    if (!conversationId) return;
+
+    const db = await initDB(DB_NAME);
+    const updatedConversations = await deleteConversation(
+      db,
+      conversationId,
+      user_id,
+      bot_id,
+    );
+    setConversations(updatedConversations);
+  };
+
+  return { conversations, handleAddConversation, handleDeleteConversation };
 };
 
 export default useConversations;
