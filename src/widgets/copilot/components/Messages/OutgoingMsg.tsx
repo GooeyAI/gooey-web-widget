@@ -6,10 +6,12 @@ import clsx from "clsx";
 import { MESSAGE_GUTTER } from ".";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconCheck from "src/assets/SvgIcons/IconCheck";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import Button from "src/components/shared/Buttons/Button";
 import GooeyTooltip from "src/components/shared/Tooltip";
+import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
 addInlineStyle(style);
@@ -205,7 +207,7 @@ interface DisplayMessageProps {
   text: string;
   timeStr: string;
   isBusy: boolean;
-  onCopy: () => void;
+  onCopy: () => void | Promise<void>;
   onEdit: () => void;
   canEdit: boolean;
 }
@@ -223,6 +225,7 @@ function DisplayMessage({
   canEdit,
 }: DisplayMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { copied, signalCopied } = useCopyFeedback();
   // Nothing to show without text (e.g. an attachment-only message): the bubble
   // and the Copy/Edit actions all operate on text, so render nothing.
   if (!text) return null;
@@ -279,9 +282,20 @@ function DisplayMessage({
         {timeStr && (
           <span className="font_12_400 text-muted gmr-4">{timeStr}</span>
         )}
-        <GooeyTooltip text="Copy" direction="bottom">
-          <IconButton className="text-muted" onClick={onCopy} aria-label="Copy">
-            <IconCopy size={18} />
+        <GooeyTooltip
+          text={copied ? "Copied" : "Copy"}
+          direction="bottom"
+          forceShow={copied}
+        >
+          <IconButton
+            className="text-muted"
+            onClick={async () => {
+              await onCopy();
+              signalCopied();
+            }}
+            aria-label="Copy"
+          >
+            {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
           </IconButton>
         </GooeyTooltip>
         {!isBusy && canEdit && (
