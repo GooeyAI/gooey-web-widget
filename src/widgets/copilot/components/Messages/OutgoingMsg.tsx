@@ -190,6 +190,7 @@ const OutgoingMsg = memo(
               isBusy={isBusy}
               onCopy={handleCopy}
               onEdit={handleStartEdit}
+              canEdit={Boolean(editQuery)}
             />
           )}
         </div>
@@ -206,6 +207,7 @@ interface DisplayMessageProps {
   isBusy: boolean;
   onCopy: () => void;
   onEdit: () => void;
+  canEdit: boolean;
 }
 
 /**
@@ -218,6 +220,7 @@ function DisplayMessage({
   isBusy,
   onCopy,
   onEdit,
+  canEdit,
 }: DisplayMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   // Nothing to show without text (e.g. an attachment-only message): the bubble
@@ -281,7 +284,7 @@ function DisplayMessage({
             <IconCopy size={18} />
           </IconButton>
         </GooeyTooltip>
-        {!isBusy && (
+        {!isBusy && canEdit && (
           <GooeyTooltip text="Edit" direction="bottom">
             <IconButton
               className="text-muted"
