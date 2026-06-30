@@ -10,6 +10,7 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import Button from "src/components/shared/Buttons/Button";
+import BotAvatar from "src/components/shared/BotAvatar";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import { ShareButton } from "./ShareDialog";
 
@@ -48,25 +49,11 @@ const Header = () => {
         <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
           <Button onClick={handleNewConversation} disabled={isEmpty}>
             <div className="d-flex align-center">
-              <div
-                className="bot-avatar bg-primary gmr-8"
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "100%",
-                  // marginLeft: "-12px",
-                }}
-              >
-                <img
-                  src={branding?.photoUrl}
-                  alt="bot-avatar"
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "100%",
-                  }}
-                />
-              </div>
+              <BotAvatar
+                size={24}
+                src={branding?.photoUrl || "https://gooey.ai/favicon.ico"}
+                className="gmr-8"
+              />
               <p className="font_16_700 text-almostBlack">
                 {branding?.title || "New Chat"}
               </p>

@@ -1,5 +1,6 @@
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import Button from "src/components/shared/Buttons/Button";
+import BotAvatar from "src/components/shared/BotAvatar";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
 import clsx from "clsx";
 
@@ -19,24 +20,7 @@ const BotProfile = () => {
   if (!branding) return null;
   return (
     <div className="d-flex flex-col justify-center align-center text-center">
-      {branding.photoUrl && (
-        <div
-          className="bot-avatar gmr-8 gmb-24 bg-primary"
-          style={{ width: "128px", height: "128px", borderRadius: "100%" }}
-        >
-          {" "}
-          <img
-            src={branding.photoUrl}
-            alt="bot-avatar"
-            style={{
-              width: "128px",
-              height: "128px",
-              borderRadius: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-      )}
+      <BotAvatar size={128} src={branding.photoUrl} className="gmr-8 gmb-24" />
       <div>
         <p className="font_24_500 gmb-16">{branding.name}</p>
         <p className="font_12_500 text-muted gmb-12 d-flex align-center justify-center">
