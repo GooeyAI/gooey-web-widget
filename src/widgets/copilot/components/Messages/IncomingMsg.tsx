@@ -10,7 +10,7 @@ import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
+import { useMessagesContext } from "src/contexts/hooks";
 import { MESSAGE_GUTTER } from ".";
 import ResponseLoader from "../Loader";
 import {
@@ -23,32 +23,6 @@ import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 
 addInlineStyle(style);
-
-export const BotMessageLayout = (props: Record<string, any>) => {
-  const branding = useSystemContext().config?.branding;
-  return (
-    <div className="d-flex align-start">
-      {branding?.photoUrl && (
-        <div
-          className="bot-avatar bg-primary gmr-12"
-          style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-        >
-          <img
-            src={branding?.photoUrl}
-            alt="bot-avatar"
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-      )}
-      <div className="gmt-2 mw-100 overflow-hidden">{props.children}</div>
-    </div>
-  );
-};
 
 type ReplyButton = {
   id: string;

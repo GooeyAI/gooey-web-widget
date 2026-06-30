@@ -27,7 +27,7 @@ type LayoutStateType = {
   isOpen: boolean;
   isFocusMode: boolean;
   isInline: boolean; // true - when widget is mounted in fullscreen / inline mode
-  isMobile: boolean; // true - when widget is <= mobile
+  isNarrowWidth: boolean; // true - when widget container is <= mobile width 768px
   isGooeyChatApp: boolean; // true - when widget is mounted in gooey chat widget site (chat/name-{integrationId})
 
   isSidebarOpen: boolean;
@@ -82,13 +82,21 @@ const SystemContextProvider = ({
       configState?.enableConversations === undefined
         ? true
         : configState?.enableConversations,
-    isMobile: false,
+    isNarrowWidth: false,
     isSecondaryDrawerOpen: false,
     secondaryDrawerContent: () => null,
     isGooeyChatApp: false,
   });
   const forceHideSidebar = !layoutState?.showNewConversationButton;
-  const [isMobile, isMobileWindow] = useDeviceWidth(shadowRoot, "mobile");
+  // Re-measure when the popup opens: in popup mode `#gooeyChat-container`
+  // (the 460px-wide element useDeviceWidth measures) is only mounted once
+  // `isOpen` is true, so without this dep the width is read while the popup
+  // is still closed and isNarrowWidth stays false — collapsing the sidebar overlay.
+  const [isNarrowWidth, isNarrowWindowWidth] = useDeviceWidth(
+    shadowRoot,
+    "mobile",
+    [layoutState?.isOpen],
+  );
 
   const setTempStoreValue = (key: string, value: any) => {
     setTempStore((prev: Map<string, any>) => {
@@ -173,20 +181,20 @@ const SystemContextProvider = ({
   );
 
   useLayoutEffect(() => {
-    // set initial state based on isMobile and isInline
+    // set initial state based on isNarrowWidth and isInline
     setLayoutState((prev) => ({
       ...prev,
-      isSidebarOpen: !isMobile,
-      showSidebarButton: forceHideSidebar ? false : isMobile,
+      isSidebarOpen: !isNarrowWidth,
+      showSidebarButton: forceHideSidebar ? false : isNarrowWidth,
       showFocusModeButton: isInline
         ? false
-        : (isMobile && !isMobileWindow) || (!isMobile && !isMobileWindow),
-      isMobile,
-      isMobileWindow,
+        : (isNarrowWidth && !isNarrowWindowWidth) || (!isNarrowWidth && !isNarrowWindowWidth),
+      isNarrowWidth,
+      isNarrowWindowWidth,
       isGooeyChatApp: isGooeyChatAppFromURL(configState?.integration_id || ""),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forceHideSidebar, isInline, isMobile, isMobileWindow]);
+  }, [forceHideSidebar, isInline, isNarrowWidth, isNarrowWindowWidth]);
 
   if (controller)
     controller.updateConfig = (next: CopilotConfigType) => {

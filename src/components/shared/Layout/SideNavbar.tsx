@@ -35,7 +35,7 @@ const SideNavbar = () => {
     : conversations;
 
   const closeDrawersAfterConversationClick = () => {
-    if (layoutController?.isMobile) layoutController?.toggleSidebar();
+    if (layoutController?.isNarrowWidth) layoutController?.toggleSidebar();
     if (layoutController?.isSecondaryDrawerOpen)
       layoutController?.toggleSecondaryDrawer(null);
   };
@@ -63,7 +63,7 @@ const SideNavbar = () => {
       }}
       className={clsx(
         "h-100 overflow-x-hidden top-0 left-0 bg-grey d-flex flex-col",
-        layoutController?.isMobile ? "pos-absolute" : "pos-relative",
+        layoutController?.isNarrowWidth ? "pos-absolute" : "pos-relative",
       )}
     >
       <div

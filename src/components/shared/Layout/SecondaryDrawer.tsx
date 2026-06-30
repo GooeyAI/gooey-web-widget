@@ -13,7 +13,7 @@ const SecondaryDrawer = () => {
   const [drawerWidth, setDrawerWidth] = useState(window.innerWidth * 0.65);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (layoutController?.isMobile) return;
+    if (layoutController?.isNarrowWidth) return;
     setIsResizing(true);
     e.preventDefault();
   };
@@ -65,9 +65,9 @@ const SecondaryDrawer = () => {
       style={{
         zIndex: 10,
         transition: isResizing ? "none" : "width 0.2s ease",
-        position: layoutController?.isMobile ? "absolute" : "relative",
+        position: layoutController?.isNarrowWidth ? "absolute" : "relative",
         width: layoutController?.isSecondaryDrawerOpen
-          ? layoutController?.isMobile
+          ? layoutController?.isNarrowWidth
             ? "100%"
             : `${drawerWidth}px`
           : "0px",
@@ -82,7 +82,7 @@ const SecondaryDrawer = () => {
       </div>
 
       {/* Resize System */}
-      {!layoutController?.isMobile && (
+      {!layoutController?.isNarrowWidth && (
         <div
           style={{
             position: "absolute",
