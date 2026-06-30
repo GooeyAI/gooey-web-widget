@@ -55,7 +55,7 @@ export function CopilotChatWidget({
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
 
   return (
-    <div className="gooey-embed-container" tabIndex={-1}>
+    <div className="gooey-embed-container text-almostBlack" tabIndex={-1}>
       <Styles />
       <Sentry.ErrorBoundary>
         <SystemContextProvider
