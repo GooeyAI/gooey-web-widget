@@ -290,7 +290,7 @@ const MessagesContextProvider = ({
     if (isReceiving || isSending) {
       cancelApiCall();
     }
-    if (layoutController?.isMobile && layoutController?.isSidebarOpen)
+    if (layoutController?.isNarrowWidth && layoutController?.isSidebarOpen)
       layoutController?.toggleSidebar();
     setIsReceiving(false);
     setIsSendingMessage(false);
