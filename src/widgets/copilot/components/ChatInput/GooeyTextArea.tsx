@@ -56,6 +56,8 @@ const GooeyTextArea = ({
       style={{
         boxSizing: "border-box",
         minWidth: 0,
+        minHeight: `${minHeight}px`,
+        maxHeight: `${maxHeight}px`,
         ...style,
       }}
       onChange={(e) => {
