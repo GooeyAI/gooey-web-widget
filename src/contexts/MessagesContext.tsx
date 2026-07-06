@@ -236,7 +236,12 @@ const MessagesContextProvider = ({
   const handleConversationFinalized = async (
     conversation: Conversation | null,
   ) => {
-    if (isServerMode || !conversation) return;
+    if (isServerMode || !conversation) {
+      // No local conversation was persisted, so any armed edit replacement no
+      // longer has a matching finalize to consume it — clear it.
+      conversationIdToReplace.current = null;
+      return;
+    }
     await handleAddConversation(conversation);
     // Drop the pre-edit conversation now that its replacement is persisted.
     const staleId = conversationIdToReplace.current;
@@ -298,6 +303,9 @@ const MessagesContextProvider = ({
       },
       { onFinally: () => setIsSendingMessage(false) },
     ).catch((e) => {
+      // An aborted/failed fork must not leave a pending edit replacement armed,
+      // or a later finalize could delete the wrong (pre-edit) conversation.
+      conversationIdToReplace.current = null;
       // report error to Sentry
       Sentry.captureException(e);
     });
@@ -382,6 +390,9 @@ const MessagesContextProvider = ({
   };
 
   const cancelApiCall = useCallback(() => {
+    // Canceling an in-flight (possibly edit) request must not leave a pending
+    // edit replacement armed for a later, unrelated finalize.
+    conversationIdToReplace.current = null;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     if (window?.GooeyEventSource) GooeyEventSource.close();
