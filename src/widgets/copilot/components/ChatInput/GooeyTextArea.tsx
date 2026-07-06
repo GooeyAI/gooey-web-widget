@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 const DEFAULT_MIN_HEIGHT = 44;
 const DEFAULT_MAX_HEIGHT = 200;
@@ -25,17 +25,21 @@ const GooeyTextArea = ({
 }: GooeyTextAreaProps) => {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const adjustHeight = (element: HTMLTextAreaElement) => {
-    element.style.height = `${minHeight}px`;
-    const nextHeight = Math.min(element.scrollHeight, maxHeight);
-    element.style.height = `${Math.max(nextHeight, minHeight)}px`;
-    element.style.overflowY = element.scrollHeight > maxHeight ? "auto" : "hidden";
-  };
+  const adjustHeight = useCallback(
+    (element: HTMLTextAreaElement) => {
+      element.style.height = `${minHeight}px`;
+      const nextHeight = Math.min(element.scrollHeight, maxHeight);
+      element.style.height = `${Math.max(nextHeight, minHeight)}px`;
+      element.style.overflowY =
+        element.scrollHeight > maxHeight ? "auto" : "hidden";
+    },
+    [minHeight, maxHeight],
+  );
 
   useEffect(() => {
     if (!inputRef.current) return;
     adjustHeight(inputRef.current);
-  }, [value, minHeight, maxHeight]);
+  }, [value, adjustHeight]);
 
   return (
     <textarea
