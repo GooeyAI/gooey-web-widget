@@ -88,11 +88,8 @@ const ChatInput = () => {
         setIsMenuOpen(false);
       }
     };
-    // Use "click", not "mousedown": menu items are portaled outside
-    // menuButtonRef, so a mousedown-based dismiss closes the menu (unmounting the
-    // item) before the item's onClick can fire — breaking the file picker.
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
 
   const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
