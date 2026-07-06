@@ -35,7 +35,7 @@ const Button = ({
   return (
     <button
       {...rest}
-      onMouseDown={onClick}
+      onClick={onClick}
       className={clsx(variantClasses, className, isPressed && "depressed")}
     >
       <div

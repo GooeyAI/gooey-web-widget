@@ -77,16 +77,18 @@ const ChatInput = () => {
     setFiles(newFiles as [UploadedFile]);
   }, [config?.payload?.input_images, preAttachedFileUsed]);
 
-  // Dismiss menu on outside click
   useEffect(() => {
     if (!isMenuOpen) return;
     const handleClick = (e: MouseEvent) => {
-      if (
-        menuButtonRef.current &&
-        !menuButtonRef.current.contains(e.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
+      const path = e.composedPath(); // get the path of the click event as we are in shadow DOM
+      const isInsideTrigger =
+        !!menuButtonRef.current && path.includes(menuButtonRef.current);
+      const isInsideMenu = path.some(
+        (node) =>
+          node instanceof Element && node.classList.contains("gooey-modal"),
+      );
+      if (isInsideTrigger || isInsideMenu) return;
+      setIsMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
