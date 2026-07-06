@@ -345,7 +345,7 @@ function EditMessage({
         autoFocus
         minHeight={88}
         maxHeight={200}
-        onChange={(e) => onChange(e?.target?.value)}
+        onChange={(e) => onChange(e.target.value)}
         onFocus={(e) => {
           const textarea = e.currentTarget;
           requestAnimationFrame(() => {
