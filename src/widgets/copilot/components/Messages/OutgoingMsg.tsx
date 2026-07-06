@@ -319,7 +319,6 @@ interface EditMessageProps {
   onSend: () => void;
   canSend: boolean;
   isBusy: boolean;
-  primaryColor?: string;
 }
 
 /** Inline editor for a user message: textarea with Cancel/Send actions. */
