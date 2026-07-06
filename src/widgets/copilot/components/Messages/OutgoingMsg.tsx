@@ -362,10 +362,7 @@ function EditMessage({
           }
         }}
       />
-      <div
-        className="d-flex justify-end align-center gmt-8"
-        style={{ gap: "8px" }}
-      >
+      <div className="d-flex justify-end align-center gmt-8 gap-8">
         <Button variant="text" className="font_14_500" onClick={onCancel}>
           Cancel
         </Button>
