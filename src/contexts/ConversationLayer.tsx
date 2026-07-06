@@ -155,6 +155,11 @@ const deleteConversation = (
               (c: Conversation) =>
                 c.user_id === user_id && c.bot_id === bot_id,
             )
+            .sort(
+              (a: Conversation, b: Conversation) =>
+                new Date(b.timestamp as string).getTime() -
+                new Date(a.timestamp as string).getTime(),
+            )
             .map((c) => formatConversation(c, db)),
         );
       };
