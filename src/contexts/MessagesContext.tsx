@@ -24,12 +24,15 @@ import { useStreamingHandler } from "./messages/useStreamingHandler";
 
 const CITATION_STYLE = "number";
 
-const createNewQuery = (payload: RequestModel) => {
+const createNewQuery = (
+  payload: RequestModel,
+  createdAt = new Date().toISOString(),
+) => {
   return {
     ...payload,
     id: uuidv4(),
     role: "user",
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
   };
 };
 
@@ -282,9 +285,13 @@ const MessagesContextProvider = ({
       );
     }
     setIsSharedConversation(false); //reset shared conversation flag
+    // Stamp created_at once so the sent payload and the local message (and thus
+    // the persisted conversation timestamp) agree on the same time.
+    const createdAt = new Date().toISOString();
+    const payloadWithCreatedAt = { ...payload, created_at: createdAt };
     sendPayload(
       {
-        ...payload,
+        ...payloadWithCreatedAt,
         conversation_id: conversationId,
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
@@ -294,7 +301,7 @@ const MessagesContextProvider = ({
       // report error to Sentry
       Sentry.captureException(e);
     });
-    const newQuery = createNewQuery(payload);
+    const newQuery = createNewQuery(payloadWithCreatedAt, createdAt);
     addResponse(newQuery);
   };
 
