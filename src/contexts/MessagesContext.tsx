@@ -150,6 +150,9 @@ export interface OpenAPIMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  input_images?: string[];
+  input_documents?: string[];
+  input_audio?: Blob | string;
 }
 
 export interface RequestModel {
@@ -304,16 +307,28 @@ const MessagesContextProvider = ({
     const kept = entries.slice(0, idx);
     setMessages(new Map(kept));
     // build the truncated history so the bot regenerates ignoring removed turns
-    const history = kept.map(([id, message]) => ({
-      id,
-      role: message.role || "assistant",
-      content:
-        message.role === "user"
-          ? (message as RequestModel).input_prompt || ""
-          : (message as FinalResponse).raw_output_text?.[0] ||
-            (message as FinalResponse).output_text?.[0] ||
-            "",
-    }));
+    const history: OpenAPIMessage[] = kept.map(([id, message]) => {
+      if (message.role === "user") {
+        const userMessage = message as RequestModel;
+        return {
+          id,
+          role: "user",
+          content: userMessage.input_prompt || "",
+          // keep prior-turn attachments so the fork regenerates with full context
+          input_images: userMessage.input_images,
+          input_documents: userMessage.input_documents,
+          input_audio: userMessage.input_audio,
+        };
+      }
+      return {
+        id,
+        role: "assistant",
+        content:
+          (message as FinalResponse).raw_output_text?.[0] ||
+          (message as FinalResponse).output_text?.[0] ||
+          "",
+      };
+    });
     // Fork a fresh backend conversation, then replace the conversation being
     // edited: its saved entry is deleted once the fork's first response lands.
     // Null when editing an unsaved conversation (nothing to replace).
