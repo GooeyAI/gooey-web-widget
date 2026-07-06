@@ -61,12 +61,9 @@ const OutgoingMsg = memo(
     const input_audio_url = resolveInputAudioUrl(input_audio);
 
     const timeStr = formatMessageTime(created_at);
-    const reusableAudio =
-      typeof input_audio === "string"
-        ? input_audio
-        : Array.isArray(input_audio)
-          ? input_audio[0]
-          : undefined;
+    const reusableAudio = Array.isArray(input_audio)
+      ? input_audio[0]
+      : input_audio;
     const hasAttachments =
       input_images.length > 0 ||
       input_documents.length > 0 ||
