@@ -1,6 +1,6 @@
 import SvgIcon from "src/components/shared/SvgIcon";
 
-const IconCopy = (props: any) => {
+const IconCheck = (props: any) => {
   const size = props?.size || 12;
   return (
     <SvgIcon>
@@ -18,4 +18,4 @@ const IconCopy = (props: any) => {
   );
 };
 
-export default IconCopy;
+export default IconCheck;
