@@ -58,11 +58,15 @@ const GooeyTooltip = ({
   children,
   direction = "right",
   disabled = false,
+  forceShow = false,
 }: {
   text?: string;
   children: JSX.Element;
   direction?: TooltipDirection;
   disabled?: boolean;
+  // Keep the tooltip visible regardless of hover (e.g. transient "Copied!"
+  // feedback after a click, which would otherwise dismiss the tooltip).
+  forceShow?: boolean;
 }) => {
   const [showModal, setShowModal] = useState(false);
   const timerRef = useRef<any>(null);
@@ -101,7 +105,7 @@ const GooeyTooltip = ({
           <p className="font_14_500">{text}</p>
         </div>
       )}
-      showModal={showModal}
+      showModal={showModal || forceShow}
       direction={{
         x:
           direction === "left"

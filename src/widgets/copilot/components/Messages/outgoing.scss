@@ -1,6 +1,7 @@
 .gooey-outgoingMsg {
   max-width: 80%;
   animation: fade-in-A 0.4s;
+  overflow-x: hidden;
 }
 .gooey-outgoingMsg audio {
   max-width: 100%;
@@ -17,6 +18,29 @@
     color: #333;
     background-color: rgba(0, 0, 0, 0.05);
   }
+}
+
+// Hover toolbar (time, copy, edit) under a user message
+.gooey-outgoing-actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.gooey-outgoingMsg:hover .gooey-outgoing-actions,
+.gooey-outgoing-actions:focus-within {
+  opacity: 1;
+}
+
+// Inline edit mode
+.gooey-outgoingMsg.is-editing {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.gooey-outgoing-edit {
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
 }
 .outgoingMsg-image {
   max-width: 200px;

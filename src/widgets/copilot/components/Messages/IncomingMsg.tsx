@@ -3,6 +3,7 @@ import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconCheck from "src/assets/SvgIcons/IconCheck";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
@@ -11,6 +12,7 @@ import GooeyTextResponse from "src/components/shared/Response";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
+import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { MESSAGE_GUTTER } from ".";
 import ResponseLoader from "../Loader";
 import {
@@ -46,6 +48,7 @@ const FeedbackButtons = ({
   const { buttons, bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery, rerun } = useMessagesContext();
+  const { copied, signalCopied } = useCopyFeedback();
 
   if (!buttons) return null;
 
@@ -109,17 +112,21 @@ const FeedbackButtons = ({
           style={{ gap: "4px" }}
         >
           {/* Copy Text Message to clipboard */}
-          <GooeyTooltip text="Copy Message">
+          <GooeyTooltip
+            text={copied ? "Copied" : "Copy Message"}
+            forceShow={copied}
+          >
             <IconButton
-              onClick={async (e) =>
+              onClick={async (e) => {
                 await copyRenderedMessageToClipboard({
                   currentTarget: e.currentTarget,
                   messageId,
-                })
-              }
+                });
+                signalCopied();
+              }}
               className="text-muted d-flex justify-content-center align-items-center h-100"
             >
-              <IconCopy size={14} />
+              {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
             </IconButton>
           </GooeyTooltip>
           {thumbButtons &&
@@ -270,9 +277,7 @@ const IncomingMsg = memo(
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
-            <div className="gmb-12">
-              <ToolCalls final_prompt={props?.data?.final_prompt} />
-            </div>
+            <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
           <GooeyTextResponse
             data={props.data}

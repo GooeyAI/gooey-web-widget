@@ -5,8 +5,10 @@ import {
 } from "html-react-parser";
 import { Highlight, themes } from "prism-react-renderer";
 import Button from "./Buttons/Button";
-import { useState } from "react";
 import clsx from "clsx";
+import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconCheck from "src/assets/SvgIcons/IconCheck";
+import { useCopyFeedback } from "./useCopyFeedback";
 
 function getTextBody(domNode: {
   attribs: { [key: string]: string };
@@ -22,16 +24,13 @@ function getTextBody(domNode: {
 }
 
 const CodeHeader = ({ body = "", language = "" }) => {
-  const [buttonText, setButtonText] = useState("Copy");
+  const { copied, signalCopied } = useCopyFeedback();
   if (!body) return null;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(body);
-      setButtonText("Copied");
-      setTimeout(() => {
-        setButtonText("Copy");
-      }, 5000); // Reset button text after 5 seconds
+      signalCopied();
     } catch (err) {
       console.error("Failed to copy: ", err);
     }
@@ -47,10 +46,11 @@ const CodeHeader = ({ body = "", language = "" }) => {
       </p>
       <Button
         onClick={handleCopy}
-        className="font_12_500 text-white gp-4"
+        className="font_12_500 text-white gp-4 d-flex align-center"
         variant="text"
+        aria-label={copied ? "Copied" : "Copy"}
       >
-        {buttonText}
+        {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
       </Button>
     </div>
   );
