@@ -23,11 +23,19 @@ import IconCamera from "src/assets/SvgIcons/IconCamera";
 import { RequestModel } from "src/contexts/MessagesContext";
 import PlaceholderMessage from "../Messages/PlaceholderMessage";
 import GooeyTextArea from "./GooeyTextArea";
+import type { ThemeId } from "src/themes";
 addInlineStyle(style);
 
 export const CHAT_INPUT_ID = "gooeyChat-input";
 const acceptedFileTypes = "application/*, text/*, audio/*";
 const acceptedImageTypes = "image/*, video/*,";
+const INPUT_MIN_HEIGHT_BY_THEME: Partial<Record<ThemeId, number>> = {
+  whatsapp: 32,
+  builder: 40,
+};
+
+const getInputMinHeight = (theme?: ThemeId) =>
+  theme ? INPUT_MIN_HEIGHT_BY_THEME[theme] : undefined;
 
 // Define a type for file state
 interface UploadedFile {
@@ -309,7 +317,7 @@ const ChatInput = () => {
           <GooeyTextArea
             value={value}
             id={CHAT_INPUT_ID}
-            minHeight={config.theme === "whatsapp" ? 32 : undefined}
+            minHeight={getInputMinHeight(config.theme)}
             onChange={(e) => setValue(e?.target?.value)}
             onKeyDown={handlePressEnter}
             className={clsx("font_16_500 gm-0")}
@@ -331,13 +339,14 @@ const ChatInput = () => {
               )}
             {/* Send Actions */}
             {(!!value ||
+              config.theme === "builder" ||
               !config?.enableAudioMessage ||
               showStop ||
               !!files?.length) && (
               <IconButton
                 disabled={disableSend}
                 variant="text-alt"
-                className="gp-4"
+                className="gooey-send-button gp-4"
                 onClick={showStop ? handleCancelSend : handleSendMessage}
               >
                 {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}

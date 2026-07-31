@@ -1,0 +1,76 @@
+.gooey-chat-theme:is(
+    [data-gooey-theme="whatsapp"],
+    [data-gooey-theme="builder"]
+  ) {
+  .gooey-messages-container > .mw-760,
+  .gooey-messages-container > .gooey-anchor-pair {
+    width: 100%;
+    max-width: 1000px !important;
+  }
+
+  .gooey-incoming-content {
+    width: 100%;
+  }
+
+  .gooey-incoming-content .button-outlined,
+  .gooey-placeholderMsg-container .button-outlined,
+  .tool-call-card {
+    background-color: #ffffff;
+  }
+
+  .gooey-outgoingMsg {
+    max-width: min(700px, calc(100% - 32px));
+  }
+
+  .gooeyChat-chat-input {
+    box-sizing: border-box;
+    z-index: 2;
+    max-width: none !important;
+    backdrop-filter: none;
+  }
+
+  .input-left-buttons {
+    flex: 0 0 32px;
+    margin-right: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .input-left-buttons button,
+  .input-right-buttons button {
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    padding: 6px !important;
+    background-color: transparent !important;
+  }
+
+  .input-right-buttons {
+    bottom: 8px;
+    display: flex;
+    align-items: center;
+    transform: none;
+  }
+
+  .input-right-buttons .gooey-send-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+  }
+
+  .button-text:hover:not(:disabled),
+  .button-text-alt:hover:not(:disabled),
+  .button-outlined:hover:not(:disabled) {
+    background-color: var(--gooey-theme-hover) !important;
+  }
+
+  .button-text:active:not(:disabled),
+  .button-text-alt:active:not(:disabled),
+  .button-outlined:active:not(:disabled) {
+    background-color: var(--gooey-theme-active) !important;
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--gooey-theme-focus);
+    outline-offset: 2px;
+  }
+}

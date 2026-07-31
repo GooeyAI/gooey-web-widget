@@ -1,4 +1,4 @@
-export const THEME_IDS = ["default", "whatsapp"] as const;
+export const THEME_IDS = ["default", "whatsapp", "builder"] as const;
 
 export type ThemeId = (typeof THEME_IDS)[number];
 

@@ -11,6 +11,12 @@
   border-radius: 16px 16px 0 0;
 }
 
+.gooeyChat-chat-input.gooey-chat-input-empty {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .gooeyChat-chat-input-textarea {
   width: 100%;
   max-width: 100%;
@@ -37,16 +43,21 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.gooey-chat-input-bar {
+  align-items: flex-end;
+}
+
 .input-left-buttons {
-  position: relative;
-  left: 4px;
-  top: 7px;
+  position: static;
+  align-self: flex-end;
+  height: 32px !important;
 }
 
 .input-right-buttons {
   position: absolute;
   right: 4px;
-  top: 3px;
+  bottom: 6px;
 }
 
 .gooey-file-menu-button {

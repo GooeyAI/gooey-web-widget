@@ -264,19 +264,21 @@ const IncomingMsg = memo(
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER + 4} gpr-${MESSAGE_GUTTER}`,
-            "gooey-incoming-bubble mw-100",
+            "gooey-incoming-content mw-100",
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
             <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
-          <GooeyTextResponse
-            data={props.data}
-            linkColor={props?.linkColor}
-            showSources={props?.showSources}
-            isStreaming={isStreaming}
-            id={props?.id}
-          />
+          <div className="gooey-incoming-bubble">
+            <GooeyTextResponse
+              data={props.data}
+              linkColor={props?.linkColor}
+              showSources={props?.showSources}
+              isStreaming={isStreaming}
+              id={props?.id}
+            />
+          </div>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
               <audio

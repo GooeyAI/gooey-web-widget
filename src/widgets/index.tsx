@@ -6,11 +6,15 @@ import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
 import { resolveTheme } from "src/themes";
+import builderStyle from "src/themes/builder.scss?inline";
+import sharedThemeStyle from "src/themes/shared.scss?inline";
 import whatsappStyle from "src/themes/whatsapp.scss?inline";
 import ChatWidget from "./copilot";
 import { ShadowRootContext } from "src/contexts/ShadowRootContext";
 import * as Sentry from "@sentry/react";
 addInlineStyle(rootStyle);
+addInlineStyle(sharedThemeStyle);
+addInlineStyle(builderStyle);
 addInlineStyle(whatsappStyle);
 
 export function renderCopilotChatWidget(
