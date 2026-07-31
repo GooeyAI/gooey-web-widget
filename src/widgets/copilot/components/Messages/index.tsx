@@ -10,6 +10,8 @@ import { addInlineStyle } from "src/addStyles";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import IconButton from "src/components/shared/Buttons/IconButton";
 
 addInlineStyle(messagesStyle);
 
@@ -53,8 +55,14 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, isMessagesLoading, isReceiving } =
-    useMessagesContext();
+  const { config } = useSystemContext();
+  const {
+    messages,
+    isSending,
+    isMessagesLoading,
+    isReceiving,
+    handleNewConversation,
+  } = useMessagesContext();
 
   const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
   const lastUserIdx = useMemo(() => {
@@ -108,6 +116,16 @@ const Messages = () => {
           </div>
         )}
       </div>
+      {config?.theme === "whatsapp" && !!messages?.size && (
+        <IconButton
+          aria-label="New chat"
+          className="whatsapp-new-chat-button"
+          onClick={handleNewConversation}
+          variant="text-alt"
+        >
+          <IconPencilEdit size={22} />
+        </IconButton>
+      )}
       {showScrollToBottom && (
         <button
           type="button"

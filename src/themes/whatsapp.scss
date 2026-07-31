@@ -1,0 +1,252 @@
+.gooey-chat-theme[data-gooey-theme="whatsapp"] {
+  --gooey-whatsapp-canvas: #f5f1eb;
+  --gooey-whatsapp-incoming: #ffffff;
+  --gooey-whatsapp-outgoing: #d9fdd4;
+  --gooey-whatsapp-composer: #fffefd;
+  --gooey-whatsapp-text: #0a0a0a;
+  --gooey-whatsapp-muted: rgb(0 0 0 / 50%);
+
+  color: var(--gooey-whatsapp-text);
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+
+  .gooey-chat-main {
+    background-color: var(--gooey-whatsapp-canvas) !important;
+    background-image: url("../assets/whatsapp-background.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .gooey-chat-header {
+    background-color: var(--gooey-whatsapp-composer) !important;
+  }
+
+  .gooey-messages-container {
+    box-sizing: border-box;
+    background-color: var(--gooey-whatsapp-canvas) !important;
+    background-image: url("../assets/whatsapp-background.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .gooey-messages-container > .mw-760,
+  .gooey-messages-container > .gooey-anchor-pair {
+    width: 100%;
+    max-width: 1000px !important;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .gooey-incomingMsg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gooey-incoming-bubble {
+    box-sizing: border-box;
+    position: relative;
+    width: fit-content;
+    max-width: min(700px, calc(100% - 32px)) !important;
+    padding: 5.5px 10px 6.5px !important;
+    border-radius: 12px 12px 12px 0;
+    background-color: var(--gooey-whatsapp-incoming);
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .gooey-incoming-bubble::after {
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    width: 9px;
+    height: 10px;
+    background-color: var(--gooey-whatsapp-incoming);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 15%));
+    content: "";
+  }
+
+  .gooey-incoming-bubble .markdown {
+    font-size: 14px !important;
+    line-height: 1.4;
+  }
+
+  .gooey-incoming-bubble .markdown h1 {
+    margin: 8px 0;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .gooey-incoming-bubble .markdown h2 {
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .gooey-incoming-bubble .markdown h3,
+  .gooey-incoming-bubble .markdown h4,
+  .gooey-incoming-bubble .markdown h5 {
+    margin: 6px 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .gooey-incoming-bubble .markdown p,
+  .gooey-incoming-bubble .markdown ul,
+  .gooey-incoming-bubble .markdown ol {
+    margin-bottom: 6px;
+  }
+
+  .gooey-incoming-bubble .markdown li {
+    margin-bottom: 4px;
+  }
+
+  .gooey-outgoingMsg {
+    max-width: min(700px, calc(100% - 32px));
+  }
+
+  .gooey-outgoing-text {
+    position: relative;
+    padding: 5.5px 10px 6.5px !important;
+    border-radius: 12px 12px 0 12px !important;
+    background-color: var(--gooey-whatsapp-outgoing);
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+  }
+
+  .gooey-outgoing-text::after {
+    position: absolute;
+    right: -8px;
+    bottom: 0;
+    width: 9px;
+    height: 10px;
+    background-color: var(--gooey-whatsapp-outgoing);
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 15%));
+    content: "";
+  }
+
+  .gooey-outgoing-text p {
+    padding: 0 !important;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .gooey-outgoing-actions,
+  .gooey-outgoing-actions .text-muted {
+    color: var(--gooey-whatsapp-muted) !important;
+  }
+
+  .gooeyChat-chat-input {
+    box-sizing: border-box;
+    z-index: 2;
+    max-width: none !important;
+    border-radius: 0;
+    background: var(--gooey-whatsapp-canvas);
+    backdrop-filter: none;
+  }
+
+  .gooeyChat-chat-input.gooey-chat-input-empty {
+    background: transparent;
+  }
+
+  .gooey-chat-input-bar {
+    box-sizing: border-box;
+    height: 48px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 9px 8px 7px;
+    border-radius: 99px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  }
+
+  .gooeyChat-chat-input-textarea {
+    min-height: 32px !important;
+    padding: 8px 44px 8px 8px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background-color: transparent;
+    color: var(--gooey-whatsapp-text);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .input-left-buttons {
+    position: static;
+    flex: 0 0 32px;
+    height: 32px !important;
+    margin-right: 0 !important;
+    background-color: transparent !important;
+  }
+
+  .input-left-buttons button,
+  .input-right-buttons button {
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    padding: 6px !important;
+    background-color: transparent !important;
+  }
+
+  .input-right-buttons {
+    top: 50%;
+    right: 9px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    transform: translateY(-50%);
+  }
+
+  .whatsapp-new-chat-button {
+    box-sizing: border-box;
+    position: absolute;
+    bottom: 80px;
+    right: 16px;
+    z-index: 1;
+    display: flex;
+    flex: 0 0 48px;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+    aspect-ratio: 1;
+    padding: 8px !important;
+    border: 0;
+    border-radius: 50% !important;
+    background-color: #ffffff !important;
+    box-shadow:
+      0 2px 2.5px rgb(10 10 10 / 20%),
+      0 1px 0.5px rgb(10 10 10 / 6%);
+  }
+
+  .gooey-scroll-to-bottom-btn {
+    color: var(--gooey-whatsapp-muted);
+  }
+
+  .sources-card {
+    background-color: var(--gooey-whatsapp-incoming);
+  }
+
+  @media (max-width: 639px) {
+    .gooey-messages-container > .mw-760,
+    .gooey-messages-container > .gooey-anchor-pair {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    .gooey-outgoingMsg {
+      max-width: 100%;
+    }
+  }
+}

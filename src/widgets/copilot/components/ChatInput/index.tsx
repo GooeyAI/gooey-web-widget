@@ -225,7 +225,6 @@ const ChatInput = () => {
   };
 
   if (!config) return null;
-  const { colors } = config?.branding || {};
   const showStop = isSending || isReceiving;
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
@@ -238,6 +237,7 @@ const ChatInput = () => {
     <div
       className={clsx(
         !config.branding.showPoweredByGooey && "gpb-8",
+        !messages?.size && !isSending && "gooey-chat-input-empty",
         "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
       )}
     >
@@ -253,7 +253,7 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex">
+        <div className="gooey-chat-input-bar pos-relative d-flex">
           {/* Left icons */}
           {isLeftButtons && (
             <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
@@ -263,8 +263,7 @@ const ChatInput = () => {
                 ModalContent={() => (
                   <div className="gp-8">
                     <Button
-                      className="w-100 text-left"
-                      style={{ minWidth: "100px" }}
+                      className="gooey-file-menu-button w-100 text-left"
                       variant="text-alt"
                       onClick={handleFileMenuClick}
                       LeftIconComponent={() => <IconFile size={16} />}
@@ -292,7 +291,7 @@ const ChatInput = () => {
                   </div>
                 )}
               >
-                <div ref={menuButtonRef} style={{ display: "inline-block" }}>
+                <div ref={menuButtonRef} className="gooey-file-menu-trigger">
                   <IconButton
                     onClick={() => setIsMenuOpen((v) => !v)}
                     variant="text-alt"
@@ -310,6 +309,7 @@ const ChatInput = () => {
           <GooeyTextArea
             value={value}
             id={CHAT_INPUT_ID}
+            minHeight={config.theme === "whatsapp" ? 32 : undefined}
             onChange={(e) => setValue(e?.target?.value)}
             onKeyDown={handlePressEnter}
             className={clsx("font_16_500 gm-0")}
@@ -339,7 +339,6 @@ const ChatInput = () => {
                 variant="text-alt"
                 className="gp-4"
                 onClick={showStop ? handleCancelSend : handleSendMessage}
-                style={{ color: colors?.primary || "default" }}
               >
                 {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
               </IconButton>
@@ -350,8 +349,7 @@ const ChatInput = () => {
       {/* Gooey Branding */}
       {!!config.branding.showPoweredByGooey && (
         <p
-          className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
-          style={{ fontSize: "8px" }}
+          className="gooey-powered-by font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
         >
           Powered by{" "}
           <a

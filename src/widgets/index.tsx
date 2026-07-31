@@ -5,10 +5,13 @@ import { CopilotChatWidgetController } from "src/contexts/ControllerUtils";
 import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
+import { resolveTheme } from "src/themes";
+import whatsappStyle from "src/themes/whatsapp.scss?inline";
 import ChatWidget from "./copilot";
 import { ShadowRootContext } from "src/contexts/ShadowRootContext";
 import * as Sentry from "@sentry/react";
 addInlineStyle(rootStyle);
+addInlineStyle(whatsappStyle);
 
 export function renderCopilotChatWidget(
   elem: Element,
@@ -53,9 +56,14 @@ export function CopilotChatWidget({
   config.branding.name ||= "Gooey";
   config.branding.title ||= config.branding.name;
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
+  config.theme = resolveTheme(config.theme);
 
   return (
-    <div className="gooey-embed-container text-almostBlack" tabIndex={-1}>
+    <div
+      className="gooey-embed-container gooey-chat-theme text-almostBlack"
+      data-gooey-theme={config.theme}
+      tabIndex={-1}
+    >
       <Styles />
       <Sentry.ErrorBoundary>
         <SystemContextProvider

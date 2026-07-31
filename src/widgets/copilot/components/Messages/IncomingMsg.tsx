@@ -75,10 +75,7 @@ const FeedbackButtons = ({
   return (
     <div className="mw-100">
       {normalButtons.length > 0 && (
-        <div
-          className="d-flex flex-col sm-flex-row gmt-12"
-          style={{ gap: "12px", flexWrap: "wrap" }}
-        >
+        <div className="gooey-feedback-buttons d-flex flex-col sm-flex-row gmt-12">
           {normalButtons.map(
             (button) =>
               button && (
@@ -107,10 +104,7 @@ const FeedbackButtons = ({
         </div>
       )}
       {(thumbButtons.length > 0 || showRunLink) && (
-        <div
-          className="d-flex gmt-2 justify-content-start"
-          style={{ gap: "4px" }}
-        >
+        <div className="gooey-feedback-actions d-flex gmt-2 justify-content-start">
           {/* Copy Text Message to clipboard */}
           <GooeyTooltip
             text={copied ? "Copied" : "Copy Message"}
@@ -203,10 +197,7 @@ const FeedbackButton = ({
           button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response"
         }
       >
-        <div
-          className={clsx("my-auto", className)}
-          style={{ whiteSpace: "nowrap" }}
-        >
+        <div className={clsx("gooey-feedback-button", "my-auto", className)}>
           <Button
             key={button.id}
             className="text-muted d-flex justify-content-center align-items-center h-100"
@@ -273,7 +264,7 @@ const IncomingMsg = memo(
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER + 4} gpr-${MESSAGE_GUTTER}`,
-            "mw-100",
+            "gooey-incoming-bubble mw-100",
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
@@ -299,11 +290,11 @@ const IncomingMsg = memo(
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gmb-8">
               <video
+                className="gooey-incoming-video"
                 autoPlay={isAutoPlay}
                 playsInline={true}
                 controls
                 src={videoTrack}
-                style={{ backgroundColor: "#000" }}
               ></video>
             </div>
           )}

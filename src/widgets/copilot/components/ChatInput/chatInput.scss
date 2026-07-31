@@ -49,6 +49,18 @@
   top: 3px;
 }
 
+.gooey-file-menu-button {
+  min-width: 100px;
+}
+
+.gooey-file-menu-trigger {
+  display: inline-block;
+}
+
+.gooey-powered-by {
+  font-size: 8px;
+}
+
 .file-preview-list {
   gap: 12px;
   flex-wrap: nowrap;

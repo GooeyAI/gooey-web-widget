@@ -17,6 +17,23 @@
   border-radius: 12px;
 }
 
+.gooey-incoming-video {
+  background-color: #000;
+}
+
+.gooey-feedback-buttons {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gooey-feedback-actions {
+  gap: 4px;
+}
+
+.gooey-feedback-button {
+  white-space: nowrap;
+}
+
 .sources-listContainer {
   display: flex;
   min-height: 72px;
