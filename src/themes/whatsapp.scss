@@ -5,9 +5,15 @@
   --gooey-whatsapp-composer: #fffefd;
   --gooey-whatsapp-text: #0a0a0a;
   --gooey-whatsapp-muted: rgb(0 0 0 / 50%);
-  --gooey-theme-hover: #f0f2f5;
-  --gooey-theme-active: #e4e7ea;
-  --gooey-theme-focus: var(--gooey-whatsapp-muted);
+  --gooey-message-content-max-width: 1000px;
+  --gooey-message-content-padding: 16px;
+  --gooey-outgoing-message-max-width: min(700px, calc(100% - 32px));
+  --gooey-button-outlined-background: #ffffff;
+  --gooey-button-outlined-border: transparent;
+  --gooey-button-hover: #f0f2f5;
+  --gooey-button-active: #e4e7ea;
+  --gooey-button-focus: var(--gooey-whatsapp-muted);
+  --gooey-tool-call-background: #ffffff;
 
   color: var(--gooey-whatsapp-text);
   font-family:
@@ -34,12 +40,6 @@
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-  }
-
-  .gooey-messages-container > .mw-760,
-  .gooey-messages-container > .gooey-anchor-pair {
-    padding-right: 16px;
-    padding-left: 16px;
   }
 
   .gooey-incomingMsg {
@@ -109,14 +109,6 @@
     margin-bottom: 4px;
   }
 
-  .gooey-incoming-content .button-outlined {
-    border-color: transparent;
-  }
-
-  .gooey-placeholderMsg-container .button-outlined {
-    border-color: transparent;
-  }
-
   .gooey-outgoing-text {
     position: relative;
     padding: 5.5px 10px 6.5px !important;
@@ -150,6 +142,7 @@
   }
 
   .gooeyChat-chat-input {
+    max-width: var(--gooey-message-content-max-width) !important;
     border-radius: 0;
     background: var(--gooey-whatsapp-canvas);
   }
@@ -162,34 +155,33 @@
     box-sizing: border-box;
     min-height: 48px;
     align-items: flex-end;
-    gap: 8px;
-    padding: 8px 9px 8px 7px;
+    gap: 4px;
+    padding: 4px 9px 4px 7px;
     border-radius: 24px;
     background-color: #ffffff;
     box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
   }
 
   .gooeyChat-chat-input-textarea {
-    min-height: 32px !important;
-    padding: 8px 44px 8px 8px !important;
+    min-height: 40px !important;
+    padding: 10px 8px 10px 4px !important;
     border: 0 !important;
     border-radius: 0 !important;
     outline: 0 !important;
     background-color: transparent;
     color: var(--gooey-whatsapp-text);
     font-weight: 500;
-    line-height: 1.2;
+    line-height: 20px;
   }
 
   .input-right-buttons {
-    right: 9px;
     gap: 7px;
   }
 
   .whatsapp-new-chat-button {
     box-sizing: border-box;
     position: absolute;
-    bottom: 80px;
+    bottom: 64px;
     right: 16px;
     z-index: 1;
     display: flex;
@@ -204,7 +196,7 @@
     padding: 8px !important;
     border: 0;
     border-radius: 50% !important;
-    background-color: #ffffff !important;
+    background-color: #ffffff;
     box-shadow:
       0 2px 2.5px rgb(10 10 10 / 20%),
       0 1px 0.5px rgb(10 10 10 / 6%);
@@ -219,12 +211,6 @@
   }
 
   @media (max-width: 639px) {
-    .gooey-messages-container > .mw-760,
-    .gooey-messages-container > .gooey-anchor-pair {
-      padding-right: 16px;
-      padding-left: 16px;
-    }
-
     .gooey-outgoingMsg {
       max-width: 100%;
     }

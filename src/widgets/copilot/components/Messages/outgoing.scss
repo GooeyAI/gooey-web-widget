@@ -1,5 +1,5 @@
 .gooey-outgoingMsg {
-  max-width: 80%;
+  max-width: var(--gooey-outgoing-message-max-width, 80%);
   animation: fade-in-A 0.4s;
   overflow-x: hidden;
 }

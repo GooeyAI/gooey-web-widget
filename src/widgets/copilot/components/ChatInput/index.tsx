@@ -30,7 +30,7 @@ export const CHAT_INPUT_ID = "gooeyChat-input";
 const acceptedFileTypes = "application/*, text/*, audio/*";
 const acceptedImageTypes = "image/*, video/*,";
 const INPUT_MIN_HEIGHT_BY_THEME: Partial<Record<ThemeId, number>> = {
-  whatsapp: 32,
+  whatsapp: 40,
   builder: 40,
 };
 
@@ -304,7 +304,10 @@ const ChatInput = () => {
                     onClick={() => setIsMenuOpen((v) => !v)}
                     variant="text-alt"
                     isPressed={isMenuOpen}
-                    className={clsx("gp-4 h-100", isMenuOpen && "depressed")}
+                    className={clsx(
+                      "gooey-input-control",
+                      isMenuOpen && "depressed",
+                    )}
                   >
                     <IconPlus size={18} />
                   </IconButton>
@@ -333,7 +336,12 @@ const ChatInput = () => {
               !showStop &&
               config?.enableAudioMessage &&
               !value && (
-                <IconButton onClick={handleRecordClick} variant="text-alt">
+                <IconButton
+                  aria-label="Record audio"
+                  className="gooey-input-control"
+                  onClick={handleRecordClick}
+                  variant="text-alt"
+                >
                   <IconMicrophone size={18} />
                 </IconButton>
               )}
@@ -346,7 +354,7 @@ const ChatInput = () => {
               <IconButton
                 disabled={disableSend}
                 variant="text-alt"
-                className="gooey-send-button gp-4"
+                className="gooey-input-control gooey-send-button"
                 onClick={showStop ? handleCancelSend : handleSendMessage}
               >
                 {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}

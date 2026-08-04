@@ -3,6 +3,14 @@
   min-width: 0;
 }
 
+.gooey-messages-container > .mw-760,
+.gooey-messages-container > .gooey-anchor-pair {
+  width: 100%;
+  max-width: var(--gooey-message-content-max-width, 760px) !important;
+  padding-right: var(--gooey-message-content-padding, 0);
+  padding-left: var(--gooey-message-content-padding, 0);
+}
+
 // Wraps the latest user message + everything after it.
 .gooey-anchor-pair {
   min-height: 100%;

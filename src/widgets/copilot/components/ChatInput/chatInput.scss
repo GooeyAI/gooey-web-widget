@@ -18,8 +18,10 @@
 }
 
 .gooeyChat-chat-input-textarea {
-  width: 100%;
+  flex: 1 1 auto;
+  width: auto;
   max-width: 100%;
+  min-width: 0;
   outline: none;
   resize: none;
   position: relative;
@@ -50,14 +52,61 @@
 
 .input-left-buttons {
   position: static;
+  display: flex;
+  flex: 0 0 40px;
   align-self: flex-end;
-  height: 32px !important;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px !important;
 }
 
 .input-right-buttons {
-  position: absolute;
-  right: 4px;
-  bottom: 6px;
+  position: static;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  align-self: flex-end;
+  align-items: center;
+  height: 40px;
+}
+
+.gooey-input-control {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0 !important;
+  line-height: 0;
+}
+
+.gooey-input-control svg {
+  display: block;
+}
+
+.gooey-send-button {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.gooey-chat-theme:is(
+    [data-gooey-theme="whatsapp"],
+    [data-gooey-theme="builder"]
+  ) {
+  .gooeyChat-chat-input {
+    box-sizing: border-box;
+    z-index: 2;
+    max-width: none !important;
+    backdrop-filter: none;
+  }
+
+  .input-left-buttons {
+    margin-right: 0 !important;
+    background-color: transparent !important;
+  }
 }
 
 .gooey-file-menu-button {
@@ -65,7 +114,10 @@
 }
 
 .gooey-file-menu-trigger {
-  display: inline-block;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
 }
 
 .gooey-powered-by {

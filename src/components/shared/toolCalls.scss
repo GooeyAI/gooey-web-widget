@@ -3,7 +3,7 @@
 .tool-call-card {
   border-radius: 12px;
   margin: 8px 0;
-  background-color: transparent;
+  background-color: var(--gooey-tool-call-background, transparent);
   border: 1px solid #e9ecef;
 }
 

@@ -61,12 +61,9 @@ button.depressed {
 
 // Variant - OUTLINED
 .button-outlined {
+  border-color: var(--gooey-button-outlined-border, transparent);
   border-radius: 12px;
-  background-color: #f5f5f5;
-}
-
-.button-outlined:hover:not(:disabled) {
-  background-color: $light;
+  background-color: var(--gooey-button-outlined-background, #f5f5f5);
 }
 
 // Variant - TEXT
@@ -74,13 +71,8 @@ button.depressed {
   border: 1px solid transparent;
 }
 
-.button-text:hover {
+.gooey-chat-theme .button-text:hover:not(:disabled) {
   border: 1px solid #eee;
-}
-
-.button-text:active:not(:disabled) {
-  background-color: #eee;
-  color: #0d0d0d !important;
 }
 
 #expand-collapse-button svg {
@@ -102,8 +94,22 @@ button.depressed {
   transition: transform 0.3s ease;
 }
 
-.button-text-alt:hover {
-  background-color: $light;
+.gooey-chat-theme .button-text:hover:not(:disabled),
+.gooey-chat-theme .button-text-alt:hover:not(:disabled),
+.gooey-chat-theme .button-outlined:hover:not(:disabled) {
+  background-color: var(--gooey-button-hover, $light);
+}
+
+.gooey-chat-theme .button-text:active:not(:disabled),
+.gooey-chat-theme .button-text-alt:active:not(:disabled),
+.gooey-chat-theme .button-outlined:active:not(:disabled) {
+  background-color: var(--gooey-button-active, #eee);
+  color: #0d0d0d !important;
+}
+
+.gooey-chat-theme button:focus-visible {
+  outline: 2px solid var(--gooey-button-focus, $muted);
+  outline-offset: 2px;
 }
 
 .collapsed-area {
