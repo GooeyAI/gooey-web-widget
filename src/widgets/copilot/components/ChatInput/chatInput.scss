@@ -2,6 +2,7 @@
 
 .gooeyChat-chat-input {
   width: 100%;
+  max-width: var(--gooey-message-content-max-width, 760px) !important;
   background: transparent;
   position: sticky;
   bottom: 0;
@@ -92,6 +93,22 @@
   border-radius: 14px;
 }
 
+.gooey-chat-theme[data-gooey-theme="default"] {
+  .gooey-chat-input-bar {
+    align-items: center;
+    gap: 12px;
+  }
+
+  .input-left-buttons,
+  .input-right-buttons {
+    align-self: center;
+  }
+
+  .input-left-buttons {
+    margin-right: 0 !important;
+  }
+}
+
 .gooey-chat-theme:is(
     [data-gooey-theme="whatsapp"],
     [data-gooey-theme="builder"]
@@ -99,7 +116,6 @@
   .gooeyChat-chat-input {
     box-sizing: border-box;
     z-index: 2;
-    max-width: none !important;
     backdrop-filter: none;
   }
 

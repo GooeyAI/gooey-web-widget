@@ -92,6 +92,10 @@ const Messages = () => {
   }
 
   const data = messages ?? new Map();
+  const showFloatingNewChat =
+    !!messages?.size &&
+    (config?.theme === "whatsapp" ||
+      (config?.theme === "default" && config?.showHeader === false));
 
   return (
     <div className="pos-relative d-flex flex-col flex-1 w-100 gooey-messages-root">
@@ -116,10 +120,10 @@ const Messages = () => {
           </div>
         )}
       </div>
-      {config?.theme === "whatsapp" && !!messages?.size && (
+      {showFloatingNewChat && (
         <IconButton
           aria-label="New chat"
-          className="whatsapp-new-chat-button"
+          className="gooey-floating-new-chat-button"
           onClick={handleNewConversation}
           variant="text-alt"
         >
