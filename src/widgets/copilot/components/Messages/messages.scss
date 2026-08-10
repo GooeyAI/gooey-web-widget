@@ -23,7 +23,7 @@
   position: absolute;
   // Top-right: the sticky chat input floats over the bottom of this container,
   // so a bottom-anchored button ends up underneath it.
-  top: 16px;
+  bottom: 16px;
   right: 16px;
   z-index: 2;
   display: flex;
