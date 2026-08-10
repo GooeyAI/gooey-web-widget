@@ -21,9 +21,11 @@
 .gooey-floating-new-chat-button {
   box-sizing: border-box;
   position: absolute;
+  // Top-right: the sticky chat input floats over the bottom of this container,
+  // so a bottom-anchored button ends up underneath it.
+  top: 16px;
   right: 16px;
-  bottom: 16px;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex: 0 0 48px;
   align-items: center;
@@ -42,11 +44,13 @@
     0 1px 0.5px rgb(10 10 10 / 6%);
 }
 
+// Rendered into `.gooey-scroll-to-bottom-slot` (just above the input bar) so it
+// tracks the sticky input instead of the scroll container's bottom edge.
 .gooey-scroll-to-bottom-btn {
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: 16px;
+  bottom: 8px;
   transform: translateX(-50%);
   width: 32px;
   height: 32px;

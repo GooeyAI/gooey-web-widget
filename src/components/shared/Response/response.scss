@@ -17,8 +17,11 @@
 
 .markdown ul,
 .markdown ol {
-  /* Some container/global styles remove list markers; restore them for markdown. */
+  /* Some container/global styles remove list markers and padding; restore them
+     for markdown only, so app chrome (sidebar, menus) keeps the reset. */
   list-style-position: outside;
+  /* Wide enough that 3-digit `ol` markers ("100.") aren't clipped. */
+  padding-left: 2.5rem;
   margin: 0 0 12px 0;
 }
 

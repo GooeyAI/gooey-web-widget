@@ -3,19 +3,16 @@
 .gooeyChat-chat-input {
   width: 100%;
   max-width: var(--gooey-message-content-max-width, 760px) !important;
-  background: transparent;
   position: sticky;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  // Opaque surface on purpose: a translucent background + backdrop-filter
+  // paints black in WebKit when the widget renders inside a shadow root.
+  background: $white;
   border-radius: 16px 16px 0 0;
 }
 
 .gooeyChat-chat-input.gooey-chat-input-empty {
   background: transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .gooeyChat-chat-input-textarea {
@@ -49,6 +46,16 @@
 
 .gooey-chat-input-bar {
   align-items: flex-end;
+}
+
+// Zero-size anchor pinned to the top edge of the input bar; the scroll-to-bottom
+// button is portalled in here and positions itself against it.
+.gooey-scroll-to-bottom-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
 }
 
 .input-left-buttons {
@@ -116,7 +123,6 @@
   .gooeyChat-chat-input {
     box-sizing: border-box;
     z-index: 2;
-    backdrop-filter: none;
   }
 
   .input-left-buttons {

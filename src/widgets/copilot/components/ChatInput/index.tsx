@@ -19,6 +19,7 @@ import IconFile from "src/assets/SvgIcons/IconFile";
 import IconImage from "src/assets/SvgIcons/IconImage";
 import { v4 as uuidv4 } from "uuid";
 import { isMobile } from "../Messages/helpers";
+import { SCROLL_TO_BOTTOM_SLOT_ID } from "../Messages";
 import IconCamera from "src/assets/SvgIcons/IconCamera";
 import { RequestModel } from "src/contexts/MessagesContext";
 import PlaceholderMessage from "../Messages/PlaceholderMessage";
@@ -262,6 +263,10 @@ const ChatInput = () => {
         />
       ) : (
         <div className="gooey-chat-input-bar pos-relative d-flex">
+          <div
+            id={SCROLL_TO_BOTTOM_SLOT_ID}
+            className="gooey-scroll-to-bottom-slot"
+          />
           {/* Left icons */}
           {isLeftButtons && (
             <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
