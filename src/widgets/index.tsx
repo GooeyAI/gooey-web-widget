@@ -11,9 +11,9 @@ import whatsappStyle from "src/themes/whatsapp.scss?inline";
 import ChatWidget from "./copilot";
 import { ShadowRootContext } from "src/contexts/ShadowRootContext";
 import * as Sentry from "@sentry/react";
-addInlineStyle(rootStyle);
-addInlineStyle(builderStyle);
-addInlineStyle(whatsappStyle);
+addInlineStyle(rootStyle, "utility");
+addInlineStyle(builderStyle, "theme");
+addInlineStyle(whatsappStyle, "theme");
 
 export function renderCopilotChatWidget(
   elem: Element,
@@ -73,7 +73,7 @@ export function CopilotChatWidget({
       }
       tabIndex={-1}
     >
-      <Styles />
+      <Styles shadowRoot={shadowRoot} />
       <Sentry.ErrorBoundary>
         <SystemContextProvider
           config={config}

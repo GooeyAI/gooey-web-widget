@@ -12,6 +12,7 @@ import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import { themeCapabilities } from "src/themes";
 
 addInlineStyle(messagesStyle);
 
@@ -90,10 +91,12 @@ const Messages = () => {
   }
 
   const data = messages ?? new Map();
+  const { floatingNewChat } = themeCapabilities(config?.theme);
   const showFloatingNewChat =
     !!messages?.size &&
-    (config?.theme === "whatsapp" ||
-      (config?.theme === "default" && config?.showHeader === false));
+    (floatingNewChat === "always" ||
+      (floatingNewChat === "when-chrome-hidden" &&
+        config?.showHeader === false));
 
   return (
     <div className="pos-relative d-flex flex-col flex-1 w-100 gooey-messages-root">

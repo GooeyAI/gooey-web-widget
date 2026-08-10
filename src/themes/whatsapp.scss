@@ -14,6 +14,9 @@
   --gooey-button-active: #e4e7ea;
   --gooey-button-focus: var(--gooey-whatsapp-muted);
   --gooey-tool-call-background: #ffffff;
+  // Declared once: each literal url() here is inlined as its own ~540KB data
+  // URI at build time, so referencing the asset twice doubled the bundle cost.
+  --gooey-whatsapp-wallpaper: url("../assets/whatsapp-background.svg");
 
   color: var(--gooey-whatsapp-text);
   font-family:
@@ -21,9 +24,10 @@
     system-ui,
     sans-serif;
 
-  .gooey-chat-main {
+  .gooey-chat-main,
+  .gooey-messages-container {
     background-color: var(--gooey-whatsapp-canvas) !important;
-    background-image: url("../assets/whatsapp-background.svg");
+    background-image: var(--gooey-whatsapp-wallpaper);
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -35,11 +39,6 @@
 
   .gooey-messages-container {
     box-sizing: border-box;
-    background-color: var(--gooey-whatsapp-canvas) !important;
-    background-image: url("../assets/whatsapp-background.svg");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
   }
 
   .gooey-incomingMsg {
