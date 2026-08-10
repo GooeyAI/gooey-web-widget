@@ -13,7 +13,7 @@ import useConversations, {
   updateLocalUser,
   USER_ID_LS_KEY,
 } from "./ConversationLayer";
-import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
+import { CHAT_INPUT_ID } from "src/widgets/copilot/components/constants";
 import {
   CopilotChatWidgetController,
   useController,

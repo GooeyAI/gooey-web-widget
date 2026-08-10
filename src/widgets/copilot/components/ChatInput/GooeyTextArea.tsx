@@ -51,7 +51,7 @@ const GooeyTextArea = ({
       placeholder={placeholder}
       className={clsx(
         className,
-        "br-large b-1 gpt-10 gpb-10 gpr-40 gpl-12 gooeyChat-chat-input-textarea"
+        "br-large b-1 gpt-10 gpb-10 gpr-12 gpl-12 gooeyChat-chat-input-textarea"
       )}
       style={{
         boxSizing: "border-box",

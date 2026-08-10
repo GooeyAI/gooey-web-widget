@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { useMemo } from "react";
 import ResponseLoader from "../Loader";
 import IncomingMsg from "./IncomingMsg";
 import OutgoingMsg from "./OutgoingMsg";
@@ -15,12 +14,6 @@ import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
 
 addInlineStyle(messagesStyle);
-
-export const MESSAGE_GUTTER = 8;
-// Anchor rendered by ChatInput. The scroll-to-bottom button is portalled into it
-// because the input is sticky and floats over the bottom of the messages area,
-// so anything anchored to that area's bottom edge ends up behind the input.
-export const SCROLL_TO_BOTTOM_SLOT_ID = "gooeyChat-scroll-to-bottom-slot";
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
@@ -88,17 +81,6 @@ const Messages = () => {
     handleScroll,
   } = useMessagesScroll({ messages, latestUserId, isMessagesLoading });
 
-  // ChatInput is a sibling, so the slot only exists after the first commit.
-  const [scrollToBottomSlot, setScrollToBottomSlot] =
-    useState<HTMLElement | null>(null);
-  useEffect(() => {
-    const root = scrollContainerRef.current?.getRootNode() as
-      | Document
-      | ShadowRoot
-      | undefined;
-    setScrollToBottomSlot(root?.getElementById(SCROLL_TO_BOTTOM_SLOT_ID) ?? null);
-  }, [isMessagesLoading, showScrollToBottom, scrollContainerRef]);
-
   if (isMessagesLoading) {
     return (
       <div className="d-flex h-100 w-100 align-center justify-center">
@@ -146,23 +128,20 @@ const Messages = () => {
           <IconPencilEdit size={22} />
         </IconButton>
       )}
-      {showScrollToBottom &&
-        scrollToBottomSlot &&
-        createPortal(
-          <button
-            type="button"
-            className="gooey-scroll-to-bottom-btn"
-            onClick={scrollToBottom}
-            aria-label="Scroll to bottom"
-          >
-            {isReceiving ? (
-              <CircleBeat size={12} className="anim-blink" />
-            ) : (
-              <IconChevronDown size={16} />
-            )}
-          </button>,
-          scrollToBottomSlot,
-        )}
+      {showScrollToBottom && (
+        <button
+          type="button"
+          className="gooey-scroll-to-bottom-btn"
+          onClick={scrollToBottom}
+          aria-label="Scroll to bottom"
+        >
+          {isReceiving ? (
+            <CircleBeat size={12} className="anim-blink" />
+          ) : (
+            <IconChevronDown size={16} />
+          )}
+        </button>
+      )}
     </div>
   );
 };

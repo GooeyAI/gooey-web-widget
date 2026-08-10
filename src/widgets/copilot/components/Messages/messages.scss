@@ -44,13 +44,14 @@
     0 1px 0.5px rgb(10 10 10 / 6%);
 }
 
-// Rendered into `.gooey-scroll-to-bottom-slot` (just above the input bar) so it
-// tracks the sticky input instead of the scroll container's bottom edge.
+// Anchored to `.gooey-messages-root`. Deliberately no z-index: that container is
+// `position: relative` with `z-index: auto`, so it opens no stacking context and
+// any z-index here would outrank the sticky chat input and paint this button on
+// top of the composer. Plain DOM order keeps the input above it.
 .gooey-scroll-to-bottom-btn {
   position: absolute;
-  z-index: 3;
   left: 50%;
-  bottom: 8px;
+  bottom: 16px;
   transform: translateX(-50%);
   width: 32px;
   height: 32px;

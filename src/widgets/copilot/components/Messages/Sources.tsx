@@ -21,7 +21,7 @@ import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import IconBooks from "src/assets/SvgIcons/IconBooks";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
-import { MESSAGE_GUTTER } from ".";
+import { MESSAGE_GUTTER } from "../constants";
 
 // Types
 interface SourceData {

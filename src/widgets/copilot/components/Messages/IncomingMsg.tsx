@@ -9,11 +9,12 @@ import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
+import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
-import { MESSAGE_GUTTER } from ".";
+import { MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -250,6 +251,7 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const hasText = hasResponseText(props.data);
 
     if (
       !props.data ||
@@ -270,7 +272,9 @@ const IncomingMsg = memo(
           {props?.data?.final_prompt && props?.showToolCalls && (
             <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
-          <div className="gooey-incoming-bubble">
+          {/* Bubble chrome only once there is text — an empty response must not
+              paint an empty bubble in themes that style it. */}
+          <div className={clsx(hasText && "gooey-incoming-bubble")}>
             <GooeyTextResponse
               data={props.data}
               linkColor={props?.linkColor}

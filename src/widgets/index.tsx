@@ -60,10 +60,17 @@ export function CopilotChatWidget({
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
   config.theme = resolveTheme(config.theme);
 
+  const brandPrimary: string | undefined = config.branding.colors?.primary;
+
   return (
     <div
       className="gooey-embed-container gooey-chat-theme text-almostBlack"
       data-gooey-theme={config.theme}
+      style={
+        brandPrimary
+          ? ({ "--gooey-brand-primary": brandPrimary } as React.CSSProperties)
+          : undefined
+      }
       tabIndex={-1}
     >
       <Styles />
