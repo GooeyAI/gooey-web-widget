@@ -20,27 +20,26 @@ export const STYLE_LAYERS = ["component", "utility", "theme"] as const;
 
 export type StyleLayer = (typeof STYLE_LAYERS)[number];
 
-declare global {
-  var addedStyles: Map<string, StyleLayer>;
-}
+/**
+ * Module-scoped on purpose, not on `globalThis`. Nothing outside this file reads
+ * it, and it is rebuilt from module-scope imports on every page load, so there is
+ * nothing to share. Keeping it local also means two widget bundles on one page
+ * cannot collide over the shape of a shared global — they each register and
+ * inject their own CSS into their own shadow roots.
+ */
+const registry = new Map<string, StyleLayer>();
 
-const registry = (): Map<string, StyleLayer> =>
-  (globalThis.addedStyles ??= new Map());
-
-const cssText = (): string => {
-  const styles = registry();
-  return STYLE_LAYERS.flatMap((layer) =>
-    Array.from(styles.entries())
+const cssText = (): string =>
+  STYLE_LAYERS.flatMap((layer) =>
+    Array.from(registry.entries())
       .filter(([, entryLayer]) => entryLayer === layer)
       .map(([style]) => style),
   ).join("\n");
-};
 
 export function addInlineStyle(style: string, layer: StyleLayer = "component") {
-  const styles = registry();
   // First registration wins, so a stylesheet imported from two places keeps the
   // layer its owner declared.
-  if (!styles.has(style)) styles.set(style, layer);
+  if (!registry.has(style)) registry.set(style, layer);
 }
 
 const supportsAdoptedStyleSheets = (): boolean => {
@@ -66,8 +65,11 @@ const getSharedSheet = (): CSSStyleSheet | null => {
   const css = cssText();
   try {
     if (!sharedSheet) sharedSheet = new CSSStyleSheet();
-    // Stylesheets register at module scope, so this normally runs once. It still
-    // refreshes if a lazily imported module adds CSS after the first mount.
+    // Every stylesheet registers at module scope, so this normally runs once per
+    // page. The comparison exists to make repeat mounts cheap, not to support
+    // late registration: in adopt mode `Styles` renders null and is never
+    // re-invoked, so CSS registered after the first mount would not reach an
+    // already-adopted sheet. Keep stylesheet imports at module scope.
     if (sharedSheetCss !== css) {
       sharedSheet.replaceSync(css);
       sharedSheetCss = css;

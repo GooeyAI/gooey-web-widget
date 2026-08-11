@@ -258,7 +258,7 @@ const ChatInput = () => {
         <div className="gooey-chat-input-bar pos-relative d-flex">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons pos-relative bg-lightGrey rounded-lg br-large d-flex">
+            <div className="input-left-buttons pos-relative br-large d-flex">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}

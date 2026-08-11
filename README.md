@@ -112,10 +112,20 @@ Gooey look. Any unrecognised value silently falls back to `default`.
 
 A boolean to show or hide the widget chrome. Defaults to `true`.
 
-Note that this controls the whole chrome, not just the header bar: setting it to
-`false` also removes the sidebar and the conversation history it contains. In the
-`default` and `whatsapp` themes a floating "New chat" button is shown instead, so
-users can still start a fresh conversation.
+Note that this controls the whole chrome, not just the header bar. Setting it to
+`false` removes:
+
+- the sidebar and the conversation history it contains. The `default` and
+  `whatsapp` themes show a floating "New chat" button instead, so users can still
+  start a fresh conversation. The `builder` theme does not — provide your own
+  entry point if you need one.
+- **every close and expand control**, including the button rendered for your own
+  `onClose` callback. If you hide the chrome you are responsible for providing
+  the way out.
+
+Because of that second point, `mode: "popup"` with `showHeader: false` is **not
+supported**: the launcher is hidden while the popup is open, so there is no
+built-in way to close it. Use `mode: "inline"`, or keep the header.
 
 ##### `enableAudioMessage: boolean`
 

@@ -6,10 +6,11 @@
   --gooey-whatsapp-text: #0a0a0a;
   --gooey-whatsapp-muted: rgb(0 0 0 / 50%);
   --gooey-message-content-max-width: 1000px;
-  --gooey-message-content-padding: 16px;
+  // Matches the composer's own `gpl-8 gpr-8`, so the message column and the
+  // input line up on the same gutter.
+  --gooey-message-content-padding: 8px;
   --gooey-outgoing-message-max-width: min(700px, calc(100% - 32px));
   --gooey-button-outlined-background: #ffffff;
-  --gooey-button-outlined-border: transparent;
   --gooey-button-hover: #f0f2f5;
   --gooey-button-active: #e4e7ea;
   --gooey-button-focus: var(--gooey-whatsapp-muted);
@@ -37,18 +38,15 @@
     background-color: var(--gooey-whatsapp-composer) !important;
   }
 
-  .gooey-messages-container {
-    box-sizing: border-box;
-  }
-
-  .gooey-incomingMsg {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  // No flex column here. `align-items: flex-start` would take the sources
+  // section out of `stretch` and size it to its content, and the horizontal
+  // scroller inside it is bounded by `max-width: 100%` — against its parent. A
+  // content-sized parent means the strip is no longer bounded by the message
+  // column, and the overflow escapes to `.gooey-messages-container` instead,
+  // scrolling the whole conversation sideways. The bubble is shrink-wrapped by
+  // its own `width: fit-content` below, so block layout is all this needs.
 
   .gooey-incoming-bubble {
-    box-sizing: border-box;
     position: relative;
     width: fit-content;
     max-width: min(700px, calc(100% - 32px)) !important;
@@ -112,6 +110,15 @@
     margin-bottom: 4px;
   }
 
+  // The bubble and its hover toolbar sit 12px, not 8px, from the right edge:
+  // `.gooey-outgoingMsg` is `overflow-x: hidden`, so the tail below (9px wide
+  // plus its drop-shadow) has to fit inside this margin or it gets clipped.
+  // Both are bumped together so the toolbar stays flush with the bubble.
+  .gooey-outgoing-text,
+  .gooey-outgoing-actions {
+    margin-right: 12px !important;
+  }
+
   .gooey-outgoing-text {
     position: relative;
     padding: 5.5px 10px 6.5px !important;
@@ -149,14 +156,8 @@
     background: var(--gooey-whatsapp-canvas);
   }
 
-  .gooeyChat-chat-input.gooey-chat-input-empty {
-    background: transparent;
-  }
-
   .gooey-chat-input-bar {
-    box-sizing: border-box;
     min-height: 48px;
-    align-items: flex-end;
     gap: 4px;
     padding: 4px 9px 4px 7px;
     border-radius: 24px;
@@ -164,8 +165,9 @@
     box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
   }
 
+  // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
+  // inline style by GooeyTextArea — not duplicated here.
   .gooeyChat-chat-input-textarea {
-    min-height: 40px !important;
     padding: 10px 8px 10px 4px !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -185,7 +187,10 @@
   }
 
   .sources-card {
-    background-color: var(--gooey-whatsapp-incoming);
+    background-color: var(--gooey-whatsapp-composer);
+  }
+  .gooey-incoming-bubble .sources-card {
+    background-color: var(--gooey-whatsapp-canvas);
   }
 
   @media (max-width: 639px) {

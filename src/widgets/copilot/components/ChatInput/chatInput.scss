@@ -48,9 +48,10 @@
   align-items: flex-end;
 }
 
+// Nudged up so the 34px `+` control bottom-aligns with the 40px right-hand
+// group. Depends on `pos-relative` staying on the element in the JSX.
 .input-left-buttons {
-  bottom: 2px;
-
+  bottom: 4px;
 }
 
 .input-right-buttons {
@@ -81,14 +82,11 @@
     gap: 12px;
   }
 
+  // The grey pill behind the `+` control is default-theme only. Declared here
+  // rather than as a `bg-lightGrey` utility in the JSX, so the other themes
+  // don't each have to fight it back off with `!important`.
   .input-left-buttons {
-    margin-right: 0 !important;
-  }
-
-
-  .input-left-buttons .gooey-input-control {
-    flex: 0 0 auto;
-    width: auto;
+    background-color: $light-grey;
   }
 
   .input-right-buttons {
@@ -107,13 +105,7 @@
     [data-gooey-theme="builder"]
   ) {
   .gooeyChat-chat-input {
-    box-sizing: border-box;
     z-index: 2;
-  }
-
-  .input-left-buttons {
-    margin-right: 0 !important;
-    background-color: transparent !important;
   }
 }
 

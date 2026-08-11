@@ -31,7 +31,10 @@ export interface ThemeCapabilities {
   floatingNewChat: "always" | "when-chrome-hidden" | "never";
   /**
    * Show the send button even when audio messages are enabled and the composer
-   * is empty. Themes that do this trade the mic shortcut for a stable control.
+   * is empty, so its position never shifts as the user types. This *adds* to the
+   * mic rather than replacing it: with `enableAudioMessage` on, an empty
+   * composer shows both, and the send button is disabled until there is
+   * something to send.
    */
   alwaysShowSendButton: boolean;
 }
@@ -44,7 +47,9 @@ export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
   },
   whatsapp: {
     inputMinHeight: 40,
-    floatingNewChat: "always",
+    // Not "always": the header already carries a new-chat button in inline mode,
+    // and showing both rendered the same icon and handler twice.
+    floatingNewChat: "when-chrome-hidden",
     alwaysShowSendButton: false,
   },
   builder: {

@@ -71,10 +71,6 @@ button.depressed {
   border: 1px solid transparent;
 }
 
-.gooey-chat-theme .button-text:hover:not(:disabled) {
-  border: 1px solid #eee;
-}
-
 #expand-collapse-button svg {
   transform: rotate(180deg);
 }
@@ -100,8 +96,15 @@ button.depressed {
   background-color: var(--gooey-button-hover, $light);
 }
 
+.gooey-chat-theme .button-text:hover:not(:disabled) {
+  border: 1px solid #eee;
+}
+
+// `.gooey-send-button` is excluded: its colour is the host's brand primary, and
+// the `color` below is `!important`, so including it would repaint the primary
+// action black for as long as it is held down.
 .gooey-chat-theme .button-text:active:not(:disabled),
-.gooey-chat-theme .button-text-alt:active:not(:disabled),
+.gooey-chat-theme .button-text-alt:not(.gooey-send-button):active:not(:disabled),
 .gooey-chat-theme .button-outlined:active:not(:disabled) {
   background-color: var(--gooey-button-active, #eee);
   color: #0d0d0d !important;

@@ -26,19 +26,16 @@
     background-color: var(--gooey-builder-surface) !important;
   }
 
+  // Nothing to reset here: `.gooey-incoming-bubble` has no base styling at all,
+  // it is only given a background/padding/shadow by the whatsapp theme.
   .gooey-incoming-bubble {
-    max-width: min(760px, 100%) !important;
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-    background: transparent;
-    box-shadow: none;
+    max-width: min(760px, 100%);
   }
 
   .gooey-outgoing-text {
     border: 1px solid var(--gooey-builder-border);
     border-radius: 12px;
     background-color: var(--gooey-builder-bubble);
-    box-shadow: none;
   }
 
   .gooey-outgoing-actions,
@@ -47,23 +44,22 @@
   }
 
   .gooey-chat-input-bar {
-    box-sizing: border-box;
     min-height: 56px;
-    align-items: flex-end;
     gap: 4px;
     padding: 7px;
     border: 1px solid var(--gooey-builder-border);
     border-radius: 20px;
   }
 
+  // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
+  // inline style by GooeyTextArea — not duplicated here.
   .gooeyChat-chat-input-textarea {
-    min-height: 40px;
     padding: 10px 4px !important;
     border: 0;
-    border-radius: 0 !important;
+    // Suppresses the base `:focus` outline; the bar itself carries the border.
     outline: 0;
+    border-radius: 0 !important;
     background-color: transparent;
-    box-shadow: none;
     line-height: 20px;
   }
 
