@@ -53,7 +53,8 @@
     width: fit-content;
     max-width: min(700px, calc(100% - 32px)) !important;
     padding: 5.5px 10px 6.5px !important;
-    border-radius: 12px 12px 12px 0;
+    // Square top-left corner: that is where the tail attaches.
+    border-radius: 0 12px 12px 12px;
     background-color: var(--gooey-whatsapp-incoming);
     box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
     font-size: 14px;
@@ -61,14 +62,17 @@
     overflow-wrap: anywhere;
   }
 
+  // Tail at the top-left, flush with the top edge of the bubble and tapering
+  // down toward the outer point. The 9px box is offset -8px so 1px overlaps the
+  // bubble and no seam shows between the two fills.
   .gooey-incoming-bubble::after {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: -8px;
     width: 9px;
     height: 10px;
     background-color: var(--gooey-whatsapp-incoming);
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
     filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 15%));
     content: "";
   }

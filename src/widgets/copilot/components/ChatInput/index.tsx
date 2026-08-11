@@ -258,7 +258,7 @@ const ChatInput = () => {
         <div className="gooey-chat-input-bar pos-relative d-flex">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
+            <div className="input-left-buttons pos-relative bg-lightGrey rounded-lg br-large d-flex">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}
@@ -293,7 +293,7 @@ const ChatInput = () => {
                   </div>
                 )}
               >
-                <div ref={menuButtonRef} className="gooey-file-menu-trigger">
+                <div ref={menuButtonRef}>
                   <IconButton
                     onClick={() => setIsMenuOpen((v) => !v)}
                     variant="text-alt"
@@ -359,9 +359,7 @@ const ChatInput = () => {
       )}
       {/* Gooey Branding */}
       {!!config.branding.showPoweredByGooey && (
-        <p
-          className="gooey-powered-by font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
-        >
+        <p className="gooey-powered-by font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0">
           Powered by{" "}
           <a
             href="https://gooey.ai/copilot/"

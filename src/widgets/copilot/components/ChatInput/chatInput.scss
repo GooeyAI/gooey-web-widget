@@ -49,14 +49,8 @@
 }
 
 .input-left-buttons {
-  position: static;
-  display: flex;
-  flex: 0 0 40px;
-  align-self: flex-end;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px !important;
+  bottom: 2px;
+
 }
 
 .input-right-buttons {
@@ -67,16 +61,6 @@
   align-self: flex-end;
   align-items: center;
   height: 40px;
-}
-
-.gooey-input-control {
-  display: grid;
-  flex: 0 0 32px;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0 !important;
-  line-height: 0;
 }
 
 .gooey-input-control svg {
@@ -94,13 +78,27 @@
 
 .gooey-chat-theme[data-gooey-theme="default"] {
   .gooey-chat-input-bar {
-    // Bottom-aligned like the other themes, so the controls stay next to the
-    // last line as the textarea grows instead of drifting to its middle.
     gap: 12px;
   }
 
   .input-left-buttons {
     margin-right: 0 !important;
+  }
+
+
+  .input-left-buttons .gooey-input-control {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .input-right-buttons {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+  }
+
+  .gooeyChat-chat-input-textarea {
+    padding-right: 48px !important;
   }
 }
 
@@ -121,13 +119,6 @@
 
 .gooey-file-menu-button {
   min-width: 100px;
-}
-
-.gooey-file-menu-trigger {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
 }
 
 .gooey-powered-by {

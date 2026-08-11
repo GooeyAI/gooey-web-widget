@@ -21,8 +21,6 @@
 .gooey-floating-new-chat-button {
   box-sizing: border-box;
   position: absolute;
-  // Top-right: the sticky chat input floats over the bottom of this container,
-  // so a bottom-anchored button ends up underneath it.
   bottom: 16px;
   right: 16px;
   z-index: 2;
