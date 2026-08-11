@@ -6,7 +6,7 @@ import IconClose from "src/assets/SvgIcons/IconClose";
 import IconMicrophone from "src/assets/SvgIcons/IconMicrophone";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import SpinLoader from "src/components/shared/SpinLoader";
-import { MESSAGE_GUTTER } from "../Messages";
+import { MESSAGE_GUTTER } from "../constants";
 
 interface InlineAudioRecorderProps {
   onCancel: () => void;

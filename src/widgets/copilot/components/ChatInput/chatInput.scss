@@ -2,18 +2,24 @@
 
 .gooeyChat-chat-input {
   width: 100%;
-  background: transparent;
+  max-width: var(--gooey-message-content-max-width, 760px) !important;
   position: sticky;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  // Opaque surface on purpose: a translucent background + backdrop-filter
+  // paints black in WebKit when the widget renders inside a shadow root.
+  background: $white;
   border-radius: 16px 16px 0 0;
 }
 
+.gooeyChat-chat-input.gooey-chat-input-empty {
+  background: transparent !important;
+}
+
 .gooeyChat-chat-input-textarea {
-  width: 100%;
+  flex: 1 1 auto;
+  width: auto;
   max-width: 100%;
+  min-width: 0;
   outline: none;
   resize: none;
   position: relative;
@@ -37,16 +43,95 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.gooey-chat-input-bar {
+  align-items: flex-end;
+}
+
 .input-left-buttons {
-  position: relative;
-  left: 4px;
-  top: 7px;
+  position: static;
+  display: flex;
+  flex: 0 0 40px;
+  align-self: flex-end;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px !important;
 }
 
 .input-right-buttons {
-  position: absolute;
-  right: 4px;
-  top: 3px;
+  position: static;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  align-self: flex-end;
+  align-items: center;
+  height: 40px;
+}
+
+.gooey-input-control {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0 !important;
+  line-height: 0;
+}
+
+.gooey-input-control svg {
+  display: block;
+}
+
+.gooey-send-button {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  // Falls back to the base `button` colour so an unbranded widget is unchanged.
+  color: var(--gooey-brand-primary, #{$almost-black});
+  border-radius: 14px;
+}
+
+.gooey-chat-theme[data-gooey-theme="default"] {
+  .gooey-chat-input-bar {
+    // Bottom-aligned like the other themes, so the controls stay next to the
+    // last line as the textarea grows instead of drifting to its middle.
+    gap: 12px;
+  }
+
+  .input-left-buttons {
+    margin-right: 0 !important;
+  }
+}
+
+.gooey-chat-theme:is(
+    [data-gooey-theme="whatsapp"],
+    [data-gooey-theme="builder"]
+  ) {
+  .gooeyChat-chat-input {
+    box-sizing: border-box;
+    z-index: 2;
+  }
+
+  .input-left-buttons {
+    margin-right: 0 !important;
+    background-color: transparent !important;
+  }
+}
+
+.gooey-file-menu-button {
+  min-width: 100px;
+}
+
+.gooey-file-menu-trigger {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+}
+
+.gooey-powered-by {
+  font-size: 8px;
 }
 
 .file-preview-list {

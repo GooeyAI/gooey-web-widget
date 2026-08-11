@@ -36,8 +36,7 @@ p,
 pre,
 ul,
 ol,
-li,
-p {
+li {
   margin: 0;
   padding: 0;
 }

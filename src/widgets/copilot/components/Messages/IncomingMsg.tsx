@@ -9,11 +9,12 @@ import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
+import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
-import { MESSAGE_GUTTER } from ".";
+import { MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -75,10 +76,7 @@ const FeedbackButtons = ({
   return (
     <div className="mw-100">
       {normalButtons.length > 0 && (
-        <div
-          className="d-flex flex-col sm-flex-row gmt-12"
-          style={{ gap: "12px", flexWrap: "wrap" }}
-        >
+        <div className="gooey-feedback-buttons d-flex flex-col sm-flex-row gmt-12">
           {normalButtons.map(
             (button) =>
               button && (
@@ -107,10 +105,7 @@ const FeedbackButtons = ({
         </div>
       )}
       {(thumbButtons.length > 0 || showRunLink) && (
-        <div
-          className="d-flex gmt-2 justify-content-start"
-          style={{ gap: "4px" }}
-        >
+        <div className="gooey-feedback-actions d-flex gmt-2 justify-content-start">
           {/* Copy Text Message to clipboard */}
           <GooeyTooltip
             text={copied ? "Copied" : "Copy Message"}
@@ -203,10 +198,7 @@ const FeedbackButton = ({
           button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response"
         }
       >
-        <div
-          className={clsx("my-auto", className)}
-          style={{ whiteSpace: "nowrap" }}
-        >
+        <div className={clsx("gooey-feedback-button", "my-auto", className)}>
           <Button
             key={button.id}
             className="text-muted d-flex justify-content-center align-items-center h-100"
@@ -259,6 +251,7 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const hasText = hasResponseText(props.data);
 
     if (
       !props.data ||
@@ -273,19 +266,23 @@ const IncomingMsg = memo(
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER + 4} gpr-${MESSAGE_GUTTER}`,
-            "mw-100",
+            "gooey-incoming-content mw-100",
           )}
         >
           {props?.data?.final_prompt && props?.showToolCalls && (
             <ToolCalls final_prompt={props?.data?.final_prompt} />
           )}
-          <GooeyTextResponse
-            data={props.data}
-            linkColor={props?.linkColor}
-            showSources={props?.showSources}
-            isStreaming={isStreaming}
-            id={props?.id}
-          />
+          {/* Bubble chrome only once there is text — an empty response must not
+              paint an empty bubble in themes that style it. */}
+          <div className={clsx(hasText && "gooey-incoming-bubble")}>
+            <GooeyTextResponse
+              data={props.data}
+              linkColor={props?.linkColor}
+              showSources={props?.showSources}
+              isStreaming={isStreaming}
+              id={props?.id}
+            />
+          </div>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
               <audio
@@ -299,11 +296,11 @@ const IncomingMsg = memo(
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gmb-8">
               <video
+                className="gooey-incoming-video"
                 autoPlay={isAutoPlay}
                 playsInline={true}
                 controls
                 src={videoTrack}
-                style={{ backgroundColor: "#000" }}
               ></video>
             </div>
           )}

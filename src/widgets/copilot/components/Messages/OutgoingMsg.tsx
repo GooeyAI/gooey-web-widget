@@ -3,7 +3,7 @@ import style from "./outgoing.scss?inline";
 import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
-import { MESSAGE_GUTTER } from ".";
+import { MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconCheck from "src/assets/SvgIcons/IconCheck";

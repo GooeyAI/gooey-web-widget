@@ -1,0 +1,73 @@
+.gooey-chat-theme[data-gooey-theme="builder"] {
+  --gooey-builder-surface: #FBFAF8;
+  --gooey-builder-bubble: #ffffff;
+  --gooey-builder-border: #e6e3de;
+  --gooey-builder-text: #181818;
+  --gooey-builder-muted: #718096;
+  --gooey-message-content-max-width: 1000px;
+  --gooey-message-content-padding: 8px;
+  --gooey-outgoing-message-max-width: min(700px, calc(100% - 32px));
+  --gooey-button-outlined-background: #ffffff;
+  --gooey-button-outlined-border: var(--gooey-builder-border);
+  --gooey-button-hover: #f0eeea;
+  --gooey-button-active: #e8e5df;
+  --gooey-button-focus: var(--gooey-builder-muted);
+  --gooey-tool-call-background: #ffffff;
+
+  color: var(--gooey-builder-text);
+
+  .gooey-chat-main,
+  .gooey-messages-container,
+  .gooeyChat-chat-input {
+    background: var(--gooey-builder-surface) !important;
+  }
+
+  .gooey-chat-header {
+    background-color: var(--gooey-builder-surface) !important;
+  }
+
+  .gooey-incoming-bubble {
+    max-width: min(760px, 100%) !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .gooey-outgoing-text {
+    border: 1px solid var(--gooey-builder-border);
+    border-radius: 12px;
+    background-color: var(--gooey-builder-bubble);
+    box-shadow: none;
+  }
+
+  .gooey-outgoing-actions,
+  .gooey-outgoing-actions .text-muted {
+    color: var(--gooey-builder-muted) !important;
+  }
+
+  .gooey-chat-input-bar {
+    box-sizing: border-box;
+    min-height: 56px;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 7px;
+    border: 1px solid var(--gooey-builder-border);
+    border-radius: 20px;
+  }
+
+  .gooeyChat-chat-input-textarea {
+    min-height: 40px;
+    padding: 10px 4px !important;
+    border: 0;
+    border-radius: 0 !important;
+    outline: 0;
+    background-color: transparent;
+    box-shadow: none;
+    line-height: 20px;
+  }
+
+  .input-right-buttons {
+    gap: 8px;
+  }
+}

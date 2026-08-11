@@ -5,10 +5,16 @@ import { CopilotChatWidgetController } from "src/contexts/ControllerUtils";
 import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
+import { resolveTheme } from "src/themes";
+import builderStyle from "src/themes/builder.scss?inline";
+import whatsappStyle from "src/themes/whatsapp.scss?inline";
 import ChatWidget from "./copilot";
 import { ShadowRootContext } from "src/contexts/ShadowRootContext";
+import { useSystemContext } from "src/contexts/hooks";
 import * as Sentry from "@sentry/react";
-addInlineStyle(rootStyle);
+addInlineStyle(rootStyle, "utility");
+addInlineStyle(builderStyle, "theme");
+addInlineStyle(whatsappStyle, "theme");
 
 export function renderCopilotChatWidget(
   elem: Element,
@@ -53,26 +59,61 @@ export function CopilotChatWidget({
   config.branding.name ||= "Gooey";
   config.branding.title ||= config.branding.name;
   config.branding.photoUrl ||= "https://gooey.ai/favicon.ico";
+  config.theme = resolveTheme(config.theme);
 
   return (
-    <div className="gooey-embed-container text-almostBlack" tabIndex={-1}>
-      <Styles />
-      <Sentry.ErrorBoundary>
-        <SystemContextProvider
-          config={config}
-          shadowRoot={shadowRoot}
-          controller={controller}
-        >
-          <MessagesContextProvider
-            controller={controller}
-            shadowRoot={shadowRoot}
-          >
-            <ShadowRootContext.Provider value={shadowRoot}>
+    <Sentry.ErrorBoundary>
+      <SystemContextProvider
+        config={config}
+        shadowRoot={shadowRoot}
+        controller={controller}
+      >
+        <MessagesContextProvider controller={controller} shadowRoot={shadowRoot}>
+          <ShadowRootContext.Provider value={shadowRoot}>
+            <ThemedRoot shadowRoot={shadowRoot}>
               <ChatWidget />
-            </ShadowRootContext.Provider>
-          </MessagesContextProvider>
-        </SystemContextProvider>
-      </Sentry.ErrorBoundary>
+            </ThemedRoot>
+          </ShadowRootContext.Provider>
+        </MessagesContextProvider>
+      </SystemContextProvider>
+    </Sentry.ErrorBoundary>
+  );
+}
+
+/**
+ * The embed root that carries the theme hooks (`data-gooey-theme` and the
+ * `--gooey-brand-primary` custom property) read by the theme stylesheets.
+ *
+ * It lives *inside* `SystemContextProvider` and reads the config from context
+ * rather than from the mount-time prop, so `controller.updateConfig` — which
+ * updates that context state in place — reskins the widget on the fly. Keeping
+ * it above the provider (as it was) meant the attribute was fixed at mount and
+ * a theme change required a full unmount/remount of the React root.
+ */
+function ThemedRoot({
+  shadowRoot,
+  children,
+}: {
+  shadowRoot?: ShadowRoot;
+  children: React.ReactNode;
+}) {
+  const { config } = useSystemContext();
+  const theme = resolveTheme(config?.theme);
+  const brandPrimary: string | undefined = config?.branding?.colors?.primary;
+
+  return (
+    <div
+      className="gooey-embed-container gooey-chat-theme text-almostBlack"
+      data-gooey-theme={theme}
+      style={
+        brandPrimary
+          ? ({ "--gooey-brand-primary": brandPrimary } as React.CSSProperties)
+          : undefined
+      }
+      tabIndex={-1}
+    >
+      <Styles shadowRoot={shadowRoot} />
+      {children}
     </div>
   );
 }

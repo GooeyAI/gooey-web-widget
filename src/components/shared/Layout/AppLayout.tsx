@@ -33,14 +33,7 @@ const ClickAwayListener = ({ onClick, children }: any) => {
   return (
     <div
       onClick={onClick}
-      style={{
-        height: "100%",
-        width: "100%",
-        zIndex: 1,
-        background: "rgba(0,0,0,0.1)",
-        backdropFilter: "blur(0.2px)",
-      }}
-      className="pos-absolute top-0 cr-pointer"
+      className="gooey-click-away-listener pos-absolute top-0 cr-pointer"
     >
       {children}
     </div>
@@ -63,12 +56,17 @@ const AppLayout = ({ children }: Props) => {
       )}
     >
       <div className="d-flex h-100 pos-relative">
-        <SideNavbar />
-        {layoutController?.isSidebarOpen && layoutController?.isNarrowWidth && (
-          <ClickAwayListener onClick={layoutController?.toggleSidebar} />
+        {config?.showHeader !== false && (
+          <>
+            <SideNavbar />
+            {layoutController?.isSidebarOpen &&
+              layoutController?.isNarrowWidth && (
+                <ClickAwayListener onClick={layoutController?.toggleSidebar} />
+              )}
+          </>
         )}
-        <main className="pos-relative d-flex flex-1 flex-col align-center h-100 w-100 min-w-0 bg-white">
-          <Header />
+        <main className="gooey-chat-main pos-relative d-flex flex-1 flex-col align-center h-100 w-100 min-w-0 bg-white">
+          {config?.showHeader !== false && <Header />}
           {children}
         </main>
         <SecondaryDrawer />
