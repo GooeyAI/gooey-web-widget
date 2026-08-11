@@ -29,3 +29,6 @@ gitleaks-baseline.json
 
 #builds
 dist
+
+# Superpowers working notes (plans/specs) — local only
+docs/superpowers/

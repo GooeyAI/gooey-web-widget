@@ -51,7 +51,7 @@
 // Nudged up so the 34px `+` control bottom-aligns with the 40px right-hand
 // group. Depends on `pos-relative` staying on the element in the JSX.
 .input-left-buttons {
-  bottom: 4px;
+  bottom: 2px;
 }
 
 .input-right-buttons {
@@ -87,6 +87,7 @@
   // don't each have to fight it back off with `!important`.
   .input-left-buttons {
     background-color: $light-grey;
+    bottom: 4px !important;
   }
 
   .input-right-buttons {
@@ -100,14 +101,10 @@
   }
 }
 
-.gooey-chat-theme:is(
-    [data-gooey-theme="whatsapp"],
-    [data-gooey-theme="builder"]
-  ) {
-  .gooeyChat-chat-input {
-    z-index: 2;
-  }
-}
+// No z-index on .gooeyChat-chat-input. It is position: sticky, so it already
+// paints above the static message content without one, and any positive value
+// outranks the header's z-index: 1 -- which showed as PlaceholderMessage (a
+// child of this element) painting over the header in the themes that set it.
 
 .gooey-file-menu-button {
   min-width: 100px;
