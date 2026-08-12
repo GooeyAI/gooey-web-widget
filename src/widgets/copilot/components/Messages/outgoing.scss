@@ -29,6 +29,14 @@
 .gooey-outgoing-actions:focus-within {
   opacity: 1;
 }
+.gooey-outgoing-actions.is-mobile {
+  opacity: 1;
+}
+@media (max-width: 768px) {
+  .gooey-outgoing-actions {
+    opacity: 1;
+  }
+}
 
 // Inline edit mode
 .gooey-outgoingMsg.is-editing {

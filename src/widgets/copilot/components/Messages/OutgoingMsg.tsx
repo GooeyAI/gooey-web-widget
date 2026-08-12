@@ -14,6 +14,7 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
+import { isMobile } from "./helpers";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -272,8 +273,9 @@ function DisplayMessage({
       </div>
       <div
         className={clsx(
-          "gooey-outgoing-actions d-flex align-center gmt-4",
+          "gooey-outgoing-actions d-flex align-center gmt-2",
           `gmr-${MESSAGE_GUTTER}`,
+          isMobile() && "is-mobile",
         )}
       >
         {timeStr && (
