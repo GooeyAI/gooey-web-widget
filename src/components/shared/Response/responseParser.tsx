@@ -1,12 +1,11 @@
 import parse, { HTMLReactParserOptions } from "html-react-parser";
 import React from "react";
 import { marked } from "marked";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
 // Types
-interface ResponseData {
+export interface ResponseData {
   type?: string;
   status?: string;
   text?: string;
@@ -53,30 +52,18 @@ export const parseResponseBody = (
   };
 
   const parserOptions = createReactParserOptions(processingData);
-  return parse(rawHtml as string, parserOptions);
+  return keyTopLevelNodes(parse(rawHtml as string, parserOptions));
 };
 
-const extractOutputText = (data: ResponseData): string => {
-  const {
-    type = "",
-    status = "",
-    text,
-    detail,
-    output_text = [],
-    raw_output_text = [],
-  } = data;
+/**
+ * Prefer the markdown already shown while streaming (`text`) so completing a
+ * response does not swap in `output_text` and remount the whole parsed tree.
+ * Historical messages still fall back to the saved output fields.
+ */
+export const extractOutputText = (data: ResponseData): string => {
+  const { text, detail, output_text = [], raw_output_text = [] } = data;
 
-  let output = "";
-
-  if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    output = text || detail || "";
-  } else if (
-    type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
-    status === "completed"
-  ) {
-    output = output_text[0] || raw_output_text[0] || "";
-  }
-
+  const output = text || output_text[0] || raw_output_text[0] || detail || "";
   return replaceAudioEmojis(output);
 };
 
@@ -86,6 +73,16 @@ const replaceAudioEmojis = (text: string): string => {
     result = result.replace(from, to);
   });
   return result;
+};
+
+const keyTopLevelNodes = (nodes: ReturnType<typeof parse>): React.ReactNode => {
+  const list = Array.isArray(nodes) ? nodes : [nodes];
+  return list.map((node, index) => {
+    if (!React.isValidElement(node)) {
+      return node;
+    }
+    return React.cloneElement(node, { key: node.key ?? String(index) });
+  });
 };
 
 const createReactParserOptions = (

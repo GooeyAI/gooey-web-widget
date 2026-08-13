@@ -97,6 +97,9 @@ export const useStreamingHandler = ({
             id: currentStreamRef.current,
             ...output,
             ...restPayload,
+            // Keep the markdown already rendered while streaming so the
+            // response parser does not swap bodies and remount the message.
+            ...(prevMessage?.text ? { text: prevMessage.text } : {}),
           });
           setIsReceiving(false);
 

@@ -284,6 +284,10 @@ const IncomingMsg = memo(
             linkColor={props?.linkColor}
             showSources={props?.showSources}
             isStreaming={isStreaming}
+            // Keep fade-in for history, but not when a live stream just completed
+            // — remounting parsed markdown would replay the animation on the
+            // whole message.
+            revealText={isStreaming || !isNewlyReceived}
             id={props?.id}
           />
           {!isStreaming && !videoTrack && audioTrack && (
