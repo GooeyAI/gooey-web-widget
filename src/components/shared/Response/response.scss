@@ -209,6 +209,26 @@
   object-fit: cover;
 }
 
+.gooey-svg-preview {
+  display: block;
+  border: 1px solid #eee;
+  background: #fff;
+}
+
+.gooey-svg-preview-canvas {
+  background: #f5f5f5;
+  min-height: 120px;
+}
+
+.markdown .gooey-svg-preview img {
+  max-width: 100%;
+  max-height: 480px;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  object-fit: contain;
+}
+
 .markdown hr {
   display: block;
   height: 1px;

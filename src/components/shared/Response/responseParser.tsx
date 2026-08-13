@@ -108,23 +108,27 @@ const replaceDomNode = (
   const codeResult = domHandlers.handleCodeBlock(domNode, createParserOptions);
   if (codeResult) return codeResult;
 
-  // 2. Handle LaTeX expressions
+  // 2. Handle inline SVG (raw HTML, not a fenced code block)
+  const svgResult = domHandlers.handleInlineSvg(domNode);
+  if (svgResult) return svgResult;
+
+  // 3. Handle LaTeX expressions
   const latexResult = domHandlers.handleLatexExpression(domNode, data);
   if (latexResult) return latexResult;
 
-  // 3. Handle source references
+  // 4. Handle source references
   const sourceResult = domHandlers.handleSourceReferences(domNode, data);
   if (sourceResult) return sourceResult;
 
-  // 4. Handle images
+  // 5. Handle images
   const imageResult = domHandlers.handleImage(domNode);
   if (imageResult) return imageResult;
 
-  // 5. Handle videos
+  // 6. Handle videos
   const videoResult = domHandlers.handleVideo(domNode);
   if (videoResult) return videoResult;
 
-  // 6. Handle links
+  // 7. Handle links
   const linkResult = domHandlers.handleLink(domNode, data, createParserOptions);
   if (linkResult) return linkResult;
 

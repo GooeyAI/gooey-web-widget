@@ -8,6 +8,8 @@ import Sources from "../../../widgets/copilot/components/Messages/Sources";
 import { extractLastPathSegment } from "../../../widgets/copilot/components/Messages/helpers";
 import { LaTeXExpression, latexProcessor } from "./latexProcessor";
 import MediaPreview, { getMediaTypeFromUrl } from "./MediaPreview";
+import SvgPreview from "./SvgPreview";
+import { previewableSvgFromCode } from "./svgMarkup";
 
 // Types
 export interface DomNode {
@@ -44,16 +46,32 @@ export class DomNodeHandlers {
     domNode: DomNode,
     createParserOptions: Function,
   ): React.ReactElement | undefined {
-    if (domNode.name !== "pre" || !domNode.attribs || !domNode.children?.length) return;
+    if (domNode.name !== "pre" || !domNode.children?.length) return;
 
-    const codeChild = domNode.children[0];
-    const isCodeBlock =
-      codeChild?.name === "code" &&
-      codeChild?.attribs?.class?.includes("language-");
+    const codeChild = domNode.children.find((child) => child?.name === "code");
+    if (!codeChild) return;
 
-    if (isCodeBlock) {
+    const body = this.getNodeText(codeChild);
+    const language = this.getCodeLanguage(codeChild);
+    const svgMarkup = previewableSvgFromCode(language, body);
+    if (svgMarkup) {
+      return <SvgPreview markup={svgMarkup} />;
+    }
+
+    if (codeChild.attribs?.class?.includes("language-")) {
       return <CodeBlock domNode={codeChild} options={createParserOptions()} />;
     }
+  }
+
+  public handleInlineSvg(domNode: DomNode): React.ReactElement | undefined {
+    if (domNode.name?.toLowerCase() !== "svg") return;
+
+    const svgMarkup = previewableSvgFromCode(
+      "svg",
+      this.serializeDomNode(domNode),
+    );
+    if (!svgMarkup) return;
+    return <SvgPreview markup={svgMarkup} />;
   }
 
   public handleLatexExpression(
@@ -78,10 +96,12 @@ export class DomNodeHandlers {
     const parts = domNode.data.split(placeholder);
     if (parts.length === 2) {
       const before = parts[0]
-        ? this.handleLatexExpression({ ...domNode, data: parts[0] }, data) ?? parts[0]
+        ? (this.handleLatexExpression({ ...domNode, data: parts[0] }, data) ??
+          parts[0])
         : null;
       const after = parts[1]
-        ? this.handleLatexExpression({ ...domNode, data: parts[1] }, data) ?? parts[1]
+        ? (this.handleLatexExpression({ ...domNode, data: parts[1] }, data) ??
+          parts[1])
         : null;
 
       return (
@@ -171,11 +191,52 @@ export class DomNodeHandlers {
   }
 
   // Helper methods
+  private getCodeLanguage(codeNode: DomNode): string {
+    const className = codeNode.attribs?.class || "";
+    const match = className.match(/language-([\w+]+)/i);
+    return match?.[1]?.toLowerCase() || "";
+  }
+
+  private getNodeText(node: DomNode): string {
+    if (typeof node.data === "string") return node.data;
+    return (node.children || [])
+      .map((child) => this.getNodeText(child))
+      .join("");
+  }
+
+  private serializeDomNode(node: DomNode): string {
+    if (node.type === "text" || (!node.name && typeof node.data === "string")) {
+      return node.data || "";
+    }
+    if (!node.name) return "";
+
+    const attrs = Object.entries(node.attribs || {})
+      .map(([key, value]) => `${key}="${this.escapeAttribute(String(value))}"`)
+      .join(" ");
+    const open = attrs ? `<${node.name} ${attrs}>` : `<${node.name}>`;
+    const inner = (node.children || [])
+      .map((child) => this.serializeDomNode(child))
+      .join("");
+    return `${open}${inner}</${node.name}>`;
+  }
+
+  private escapeAttribute(value: string): string {
+    return value
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;");
+  }
+
   private extractReferenceNumbers(text: string): number[] {
     const matches = text.match(NUMBER_REFERENCE_REGEX) || [];
-    const numbers = matches.flatMap((match) =>
-      match.slice(1, -1).split(",").map((s) => parseInt(s.trim(), 10))
-    ).filter((n) => !isNaN(n));
+    const numbers = matches
+      .flatMap((match) =>
+        match
+          .slice(1, -1)
+          .split(",")
+          .map((s) => parseInt(s.trim(), 10)),
+      )
+      .filter((n) => !isNaN(n));
     return [...new Set(numbers)]; // Remove duplicates
   }
 
