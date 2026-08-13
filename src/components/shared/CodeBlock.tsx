@@ -4,11 +4,11 @@ import {
   attributesToProps,
 } from "html-react-parser";
 import { Highlight, themes } from "prism-react-renderer";
-import Button from "./Buttons/Button";
 import clsx from "clsx";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconCheck from "src/assets/SvgIcons/IconCheck";
 import { useCopyFeedback } from "./useCopyFeedback";
+import IconButton from "./Buttons/IconButton";
 
 function getTextBody(domNode: {
   attribs: { [key: string]: string };
@@ -38,20 +38,20 @@ const CodeHeader = ({ body = "", language = "" }) => {
 
   return (
     <div
-      className="bg-darkGrey text-white d-flex align-center justify-between gp-4 gmt-6"
+      className="bg-darkGrey text-white d-flex align-center justify-between gp-2"
       style={{ borderRadius: "8px 8px 0 0" }}
     >
       <p className="font_12_500 gml-4" style={{ margin: 0 }}>
         {language}
       </p>
-      <Button
+      <IconButton
         onClick={handleCopy}
         className="font_12_500 text-white gp-4 d-flex align-center"
         variant="text"
         aria-label={copied ? "Copied" : "Copy"}
       >
         {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
-      </Button>
+      </IconButton>
     </div>
   );
 };
@@ -65,7 +65,7 @@ function CodeBlock({
   const language: string = domNode?.attribs?.class.split("-").pop() || "python";
   const codeProps = attributesToProps(domNode.attribs);
   return (
-    <>
+    <div className="gmb-4">
       <CodeHeader body={body} language={language} />
       <code
         {...codeProps}
@@ -85,7 +85,7 @@ function CodeBlock({
           )}
         </Highlight>
       </code>
-    </>
+    </div>
   );
 }
 

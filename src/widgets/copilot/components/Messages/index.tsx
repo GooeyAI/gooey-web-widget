@@ -10,10 +10,11 @@ import { addInlineStyle } from "src/addStyles";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import IconButton from "src/components/shared/Buttons/IconButton";
+import { themeCapabilities } from "src/themes";
 
 addInlineStyle(messagesStyle);
-
-export const MESSAGE_GUTTER = 8;
 
 const Responses = (props: any) => {
   const { config } = useSystemContext();
@@ -53,8 +54,14 @@ const Responses = (props: any) => {
 };
 
 const Messages = () => {
-  const { messages, isSending, isMessagesLoading, isReceiving } =
-    useMessagesContext();
+  const { config } = useSystemContext();
+  const {
+    messages,
+    isSending,
+    isMessagesLoading,
+    isReceiving,
+    handleNewConversation,
+  } = useMessagesContext();
 
   const queue = useMemo(() => Array.from(messages?.keys() ?? []), [messages]);
   const lastUserIdx = useMemo(() => {
@@ -84,6 +91,12 @@ const Messages = () => {
   }
 
   const data = messages ?? new Map();
+  const { floatingNewChat } = themeCapabilities(config?.theme);
+  const showFloatingNewChat =
+    !!messages?.size &&
+    (floatingNewChat === "always" ||
+      (floatingNewChat === "when-chrome-hidden" &&
+        config?.showHeader === false));
 
   return (
     <div className="pos-relative d-flex flex-col flex-1 w-100 gooey-messages-root">
@@ -108,6 +121,16 @@ const Messages = () => {
           </div>
         )}
       </div>
+      {showFloatingNewChat && (
+        <IconButton
+          aria-label="New chat"
+          className="gooey-floating-new-chat-button"
+          onClick={handleNewConversation}
+          variant="text-alt"
+        >
+          <IconPencilEdit size={22} />
+        </IconButton>
+      )}
       {showScrollToBottom && (
         <button
           type="button"

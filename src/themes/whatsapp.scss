@@ -1,0 +1,201 @@
+.gooey-chat-theme[data-gooey-theme="whatsapp"] {
+  --gooey-whatsapp-canvas: #f5f1eb;
+  --gooey-whatsapp-incoming: #ffffff;
+  --gooey-whatsapp-outgoing: #d9fdd4;
+  --gooey-whatsapp-composer: #fffefd;
+  --gooey-whatsapp-text: #0a0a0a;
+  --gooey-whatsapp-muted: rgb(0 0 0 / 50%);
+  --gooey-message-content-max-width: 1000px;
+  // Matches the composer's own `gpl-8 gpr-8`, so the message column and the
+  // input line up on the same gutter.
+  --gooey-message-content-padding: 8px;
+  --gooey-outgoing-message-max-width: min(700px, calc(100% - 32px));
+  --gooey-button-outlined-background: #ffffff;
+  --gooey-button-hover: #f0f2f5;
+  --gooey-button-active: #e4e7ea;
+  --gooey-button-focus: var(--gooey-whatsapp-muted);
+  --gooey-tool-call-background: #ffffff;
+  // Declared once: each literal url() here is inlined as its own ~540KB data
+  // URI at build time, so referencing the asset twice doubled the bundle cost.
+  --gooey-whatsapp-wallpaper: url("../assets/whatsapp-background.svg");
+
+  color: var(--gooey-whatsapp-text);
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+
+  .gooey-chat-main,
+  .gooey-messages-container {
+    background-color: var(--gooey-whatsapp-canvas) !important;
+    background-image: var(--gooey-whatsapp-wallpaper);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .gooey-chat-header {
+    background-color: var(--gooey-whatsapp-composer) !important;
+  }
+
+  // No flex column here. `align-items: flex-start` would take the sources
+  // section out of `stretch` and size it to its content, and the horizontal
+  // scroller inside it is bounded by `max-width: 100%` — against its parent. A
+  // content-sized parent means the strip is no longer bounded by the message
+  // column, and the overflow escapes to `.gooey-messages-container` instead,
+  // scrolling the whole conversation sideways. The bubble is shrink-wrapped by
+  // its own `width: fit-content` below, so block layout is all this needs.
+
+  .gooey-incoming-bubble {
+    position: relative;
+    width: fit-content;
+    max-width: min(700px, calc(100% - 32px)) !important;
+    padding: 5.5px 10px 6.5px !important;
+    // Square top-left corner: that is where the tail attaches.
+    border-radius: 0 12px 12px 12px;
+    background-color: var(--gooey-whatsapp-incoming);
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  // Tail at the top-left, flush with the top edge of the bubble and tapering
+  // down toward the outer point. The 9px box is offset -8px so 1px overlaps the
+  // bubble and no seam shows between the two fills.
+  .gooey-incoming-bubble::after {
+    position: absolute;
+    top: 0;
+    left: -8px;
+    width: 9px;
+    height: 10px;
+    background-color: var(--gooey-whatsapp-incoming);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 15%));
+    content: "";
+  }
+
+  .gooey-incoming-bubble .markdown {
+    font-size: 14px !important;
+    line-height: 1.4;
+  }
+
+  .gooey-incoming-bubble .markdown h1 {
+    margin: 8px 0;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .gooey-incoming-bubble .markdown h2 {
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .gooey-incoming-bubble .markdown h3,
+  .gooey-incoming-bubble .markdown h4,
+  .gooey-incoming-bubble .markdown h5 {
+    margin: 6px 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .gooey-incoming-bubble .markdown p,
+  .gooey-incoming-bubble .markdown ul,
+  .gooey-incoming-bubble .markdown ol {
+    margin-bottom: 6px;
+  }
+
+  .gooey-incoming-bubble .markdown li {
+    margin-bottom: 4px;
+  }
+
+  // The bubble and its hover toolbar sit 12px, not 8px, from the right edge:
+  // `.gooey-outgoingMsg` is `overflow-x: hidden`, so the tail below (9px wide
+  // plus its drop-shadow) has to fit inside this margin or it gets clipped.
+  // Both are bumped together so the toolbar stays flush with the bubble.
+  .gooey-outgoing-text,
+  .gooey-outgoing-actions {
+    margin-right: 12px !important;
+  }
+
+  .gooey-outgoing-text {
+    position: relative;
+    padding: 5.5px 10px 6.5px !important;
+    border-radius: 12px 12px 0 12px !important;
+    background-color: var(--gooey-whatsapp-outgoing);
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+  }
+
+  .gooey-outgoing-text::after {
+    position: absolute;
+    right: -8px;
+    bottom: 0;
+    width: 9px;
+    height: 10px;
+    background-color: var(--gooey-whatsapp-outgoing);
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 15%));
+    content: "";
+  }
+
+  .gooey-outgoing-text p {
+    padding: 0 !important;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .gooey-outgoing-actions,
+  .gooey-outgoing-actions .text-muted {
+    color: var(--gooey-whatsapp-muted) !important;
+  }
+
+  .gooeyChat-chat-input {
+    border-radius: 0;
+    background: var(--gooey-whatsapp-canvas);
+  }
+
+  .gooey-chat-input-bar {
+    min-height: 48px;
+    gap: 4px;
+    padding: 4px 9px 4px 7px;
+    border-radius: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  }
+
+  // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
+  // inline style by GooeyTextArea — not duplicated here.
+  .gooeyChat-chat-input-textarea {
+    padding: 10px 8px 10px 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background-color: transparent;
+    color: var(--gooey-whatsapp-text);
+    font-weight: 500;
+    line-height: 20px;
+  }
+
+  .input-right-buttons {
+    gap: 7px;
+  }
+
+  .gooey-scroll-to-bottom-btn {
+    color: var(--gooey-whatsapp-muted);
+  }
+
+  .sources-card {
+    background-color: var(--gooey-whatsapp-composer);
+  }
+  .gooey-incoming-bubble .sources-card {
+    background-color: var(--gooey-whatsapp-canvas);
+  }
+
+  @media (max-width: 639px) {
+    .gooey-outgoingMsg {
+      max-width: 100%;
+    }
+  }
+}

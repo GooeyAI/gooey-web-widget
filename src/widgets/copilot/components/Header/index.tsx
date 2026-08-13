@@ -13,6 +13,10 @@ import Button from "src/components/shared/Buttons/Button";
 import BotAvatar from "src/components/shared/BotAvatar";
 import IconClose from "src/assets/SvgIcons/IconClose";
 import { ShareButton } from "./ShareDialog";
+import { addInlineStyle } from "src/addStyles";
+import style from "./header.scss?inline";
+
+addInlineStyle(style);
 
 const Header = () => {
   const { layoutController, config }: SystemContextType = useSystemContext();
@@ -28,10 +32,7 @@ const Header = () => {
   const onClose = config?.onClose;
 
   return (
-    <div
-      className="bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header"
-      style={{ zIndex: 1 }}
-    >
+    <div className="gooey-chat-header bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header">
       <div className="d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
@@ -74,9 +75,8 @@ const Header = () => {
             >
               <IconButton
                 variant="text"
-                className="cr-pointer"
+                className="gooey-focus-mode-button cr-pointer"
                 onClick={layoutController?.toggleFocusMode}
-                style={{ transform: "rotate(90deg)" }}
               >
                 {layoutController.isFocusMode ? (
                   <IconCollapse size={16} />

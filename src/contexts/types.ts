@@ -1,7 +1,11 @@
+import type { ThemeId } from "src/themes";
+
 export interface CopilotConfigType {
   target: string;
   integration_id: string;
   mode: "popup" | "inline" | "fullscreen";
+  theme?: ThemeId;
+  showHeader?: boolean;
   enableAudioMessage: boolean;
   enablePhotoUpload: boolean;
   enableLipsyncVideo: boolean;

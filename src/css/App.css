@@ -36,8 +36,7 @@ p,
 pre,
 ul,
 ol,
-li,
-p {
+li {
   margin: 0;
   padding: 0;
 }
@@ -84,7 +83,6 @@ code[class*="language-"] {
     Consolas,
     Liberation Mono,
     monospace !important;
-  font-size: 0.9rem;
   color: inherit;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -117,6 +115,9 @@ svg {
   display: block;
   max-width: 100%;
   overflow-x: auto;
+  /* Fenced blocks stay smaller than inline code. Declared here and not left to
+     the `code` rule above: this element is a <code>, so without its own value it
+     inherits that rule and blocks grow whenever inline code does. */
   font-size: 12px;
 }
 

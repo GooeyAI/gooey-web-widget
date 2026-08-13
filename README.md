@@ -38,6 +38,8 @@ const config = {
   target: "#gooey-embed",
   integration_id: "Kbo",
   mode: "popup" | "inline" | "fullscreen",
+  theme: "default" | "whatsapp" | "builder",
+  showHeader: true,
   enableAudioMessage: true,
   showSources: true,
   enablePhotoUpload: true,
@@ -96,6 +98,34 @@ Determines how the Gooey widget is displayed on your site:
 - `fullscreen`: This mode renders the widget in fullscreen mode, covering the entire page. Ideal for creating a dedicated chat page.
 
 <img alt="Screenshot 2024-05-25 at 11 33 17 AM" src="https://github.com/GooeyAI/gooey-web-widget/assets/10388784/826dda8d-876e-4d0a-baf6-6bca6f6af75f">
+
+##### `theme: string (default | whatsapp | builder)`
+
+The visual style applied to the widget. Defaults to `default`, which is the original
+Gooey look. Any unrecognised value silently falls back to `default`.
+
+- `default`: The standard Gooey chat interface.
+- `whatsapp`: WhatsApp-style speech bubbles on a patterned canvas.
+- `builder`: A neutral, low-contrast surface intended for embedding in builder UIs.
+
+##### `showHeader: boolean`
+
+A boolean to show or hide the widget chrome. Defaults to `true`.
+
+Note that this controls the whole chrome, not just the header bar. Setting it to
+`false` removes:
+
+- the sidebar and the conversation history it contains. The `default` and
+  `whatsapp` themes show a floating "New chat" button instead, so users can still
+  start a fresh conversation. The `builder` theme does not — provide your own
+  entry point if you need one.
+- **every close and expand control**, including the button rendered for your own
+  `onClose` callback. If you hide the chrome you are responsible for providing
+  the way out.
+
+Because of that second point, `mode: "popup"` with `showHeader: false` is **not
+supported**: the launcher is hidden while the popup is open, so there is no
+built-in way to close it. Use `mode: "inline"`, or keep the header.
 
 ##### `enableAudioMessage: boolean`
 

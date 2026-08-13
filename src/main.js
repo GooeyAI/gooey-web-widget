@@ -25,5 +25,10 @@ const defaultConfig = {
   integration_id: "Kbo",
 };
 
-GooeyEmbed.mount({ target: "#popup", mode: "popup", ...defaultConfig });
+GooeyEmbed.mount({
+  target: "#popup",
+  mode: "popup",
+  theme: "whatsapp",
+  ...defaultConfig,
+});
 GooeyEmbed.mount({ target: "#inline", mode: "inline", fillParent: true, ...defaultConfig });

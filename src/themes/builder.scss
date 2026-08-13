@@ -1,0 +1,69 @@
+.gooey-chat-theme[data-gooey-theme="builder"] {
+  --gooey-builder-surface: #FBFAF8;
+  --gooey-builder-bubble: #ffffff;
+  --gooey-builder-border: #e6e3de;
+  --gooey-builder-text: #181818;
+  --gooey-builder-muted: #718096;
+  --gooey-message-content-max-width: 1000px;
+  --gooey-message-content-padding: 0px;
+  --gooey-outgoing-message-max-width: min(700px, calc(100% - 32px));
+  --gooey-button-outlined-background: #ffffff;
+  --gooey-button-outlined-border: var(--gooey-builder-border);
+  --gooey-button-hover: #f0eeea;
+  --gooey-button-active: #e8e5df;
+  --gooey-button-focus: var(--gooey-builder-muted);
+  --gooey-tool-call-background: #ffffff;
+
+  color: var(--gooey-builder-text);
+
+  .gooey-chat-main,
+  .gooey-messages-container,
+  .gooeyChat-chat-input {
+    background: var(--gooey-builder-surface) !important;
+  }
+
+  .gooey-chat-header {
+    background-color: var(--gooey-builder-surface) !important;
+  }
+
+  // Nothing to reset here: `.gooey-incoming-bubble` has no base styling at all,
+  // it is only given a background/padding/shadow by the whatsapp theme.
+  .gooey-incoming-bubble {
+    max-width: min(760px, 100%);
+  }
+
+  .gooey-outgoing-text {
+    border: 1px solid var(--gooey-builder-border);
+    border-radius: 12px;
+    background-color: var(--gooey-builder-bubble);
+  }
+
+  .gooey-outgoing-actions,
+  .gooey-outgoing-actions .text-muted {
+    color: var(--gooey-builder-muted) !important;
+  }
+
+  .gooey-chat-input-bar {
+    min-height: 56px;
+    gap: 4px;
+    padding: 7px;
+    border: 1px solid var(--gooey-builder-border);
+    border-radius: 20px;
+  }
+
+  // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
+  // inline style by GooeyTextArea — not duplicated here.
+  .gooeyChat-chat-input-textarea {
+    padding: 10px 4px !important;
+    border: 0;
+    // Suppresses the base `:focus` outline; the bar itself carries the border.
+    outline: 0;
+    border-radius: 0 !important;
+    background-color: transparent;
+    line-height: 20px;
+  }
+
+  .input-right-buttons {
+    gap: 8px;
+  }
+}

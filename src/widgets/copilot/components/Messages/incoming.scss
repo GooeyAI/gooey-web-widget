@@ -5,6 +5,10 @@
   word-break: break-word !important;
 }
 
+.gooey-incoming-content {
+  width: 100%;
+}
+
 .gooey-incomingMsg audio {
   width: 100%;
   height: 40px;
@@ -17,11 +21,27 @@
   border-radius: 12px;
 }
 
+.gooey-incoming-video {
+  background-color: #000;
+}
+
+.gooey-feedback-buttons {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gooey-feedback-actions {
+  gap: 4px;
+}
+
+.gooey-feedback-button {
+  white-space: nowrap;
+}
+
 .sources-listContainer {
   display: flex;
   min-height: 72px;
   max-width: calc(100% + 16px); // 16px is the padding of the parent container
-  
 }
 
 .sources-card {

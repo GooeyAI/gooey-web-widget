@@ -2,18 +2,24 @@
 
 .gooeyChat-chat-input {
   width: 100%;
-  background: transparent;
+  max-width: var(--gooey-message-content-max-width, 760px) !important;
   position: sticky;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  // Opaque surface on purpose: a translucent background + backdrop-filter
+  // paints black in WebKit when the widget renders inside a shadow root.
+  background: $white;
   border-radius: 16px 16px 0 0;
 }
 
+.gooeyChat-chat-input.gooey-chat-input-empty {
+  background: transparent !important;
+}
+
 .gooeyChat-chat-input-textarea {
-  width: 100%;
+  flex: 1 1 auto;
+  width: auto;
   max-width: 100%;
+  min-width: 0;
   outline: none;
   resize: none;
   position: relative;
@@ -37,16 +43,75 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.gooey-chat-input-bar {
+  align-items: flex-end;
+}
+
+// Nudged up so the 34px `+` control bottom-aligns with the 40px right-hand
+// group. Depends on `pos-relative` staying on the element in the JSX.
 .input-left-buttons {
-  position: relative;
-  left: 4px;
-  top: 7px;
+  bottom: 2px;
 }
 
 .input-right-buttons {
-  position: absolute;
-  right: 4px;
-  top: 3px;
+  position: static;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  align-self: flex-end;
+  align-items: center;
+  height: 40px;
+}
+
+.gooey-input-control svg {
+  display: block;
+}
+
+.gooey-send-button {
+  flex-basis: 40px;
+  width: 40px;
+  height: 40px;
+  // Falls back to the base `button` colour so an unbranded widget is unchanged.
+  color: var(--gooey-brand-primary, #{$almost-black});
+  border-radius: 14px;
+}
+
+.gooey-chat-theme[data-gooey-theme="default"] {
+  .gooey-chat-input-bar {
+    gap: 12px;
+  }
+
+  // The grey pill behind the `+` control is default-theme only. Declared here
+  // rather than as a `bg-lightGrey` utility in the JSX, so the other themes
+  // don't each have to fight it back off with `!important`.
+  .input-left-buttons {
+    background-color: $light-grey;
+    bottom: 4px !important;
+  }
+
+  .input-right-buttons {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+  }
+
+  .gooeyChat-chat-input-textarea {
+    padding-right: 48px !important;
+  }
+}
+
+// No z-index on .gooeyChat-chat-input. It is position: sticky, so it already
+// paints above the static message content without one, and any positive value
+// outranks the header's z-index: 1 -- which showed as PlaceholderMessage (a
+// child of this element) painting over the header in the themes that set it.
+
+.gooey-file-menu-button {
+  min-width: 100px;
+}
+
+.gooey-powered-by {
+  font-size: 8px;
 }
 
 .file-preview-list {
