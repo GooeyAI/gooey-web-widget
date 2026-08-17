@@ -13,6 +13,7 @@
   --gooey-button-active: #e8e5df;
   --gooey-button-focus: var(--gooey-builder-muted);
   --gooey-tool-call-background: #ffffff;
+  --gooey-file-preview-item-bg: var(--gooey-builder-bubble);
 
   color: var(--gooey-builder-text);
 
@@ -49,6 +50,7 @@
     padding: 7px;
     border: 1px solid var(--gooey-builder-border);
     border-radius: 20px;
+    background-color: var(--gooey-builder-bubble);
   }
 
   // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an

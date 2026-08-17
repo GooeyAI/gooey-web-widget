@@ -198,9 +198,8 @@ const ChatInput = () => {
 
   const handleFilesAdded = (selected: File[]) => {
     if (!selected.length) return;
-    setFiles((prev: any) =>
-      prev ? [...prev, ...processFiles(selected)] : processFiles(selected),
-    );
+    const added = processFiles(selected);
+    setFiles((prev: any) => (prev ? [...added, ...prev] : added));
   };
 
   const openFilePicker = useFilePicker(
@@ -251,7 +250,7 @@ const ChatInput = () => {
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
-        <div className="gp-12 b-1 br-large gmb-12 gm-12">
+        <div className="gooey-file-preview-tray gp-12 b-1 br-large gmb-12 gm-12">
           <FilePreview files={files} onRemove={handleRemoveFile} />
         </div>
       )}
