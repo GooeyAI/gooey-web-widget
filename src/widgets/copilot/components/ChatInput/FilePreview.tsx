@@ -18,6 +18,8 @@ import style from "./chatInput.scss?inline";
 
 addInlineStyle(style);
 
+const filePreviewCloseClass = "file-preview-close bg-white gp-4 b-1 br-circle";
+
 const FilePreview = ({
   files,
   onRemove,
@@ -63,7 +65,7 @@ const FilePreview = ({
         const fileType = file?.type?.split("/")[0] || file?.type || "application";
 
         return (
-          <div key={index}>
+          <div key={file.id || file.url || index}>
             {fileType === "image" || fileType === "video" ? (
               <MediaPreviewItem
                 onRemove={() => {
@@ -127,7 +129,7 @@ const MediaPreviewItem = ({
       {isRemovable && (
         <div className="file-preview-remove">
           <IconButton
-            className="bg-white gp-4 b-1"
+            className={filePreviewCloseClass}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -180,9 +182,8 @@ export const FilePreviewItem = ({
   return (
     <div
       className={clsx(
-        "b-1 gp-10 br-default pos-relative d-flex align-center cr-pointer",
+        "file-preview-item b-1 gp-10 br-default pos-relative d-flex align-center cr-pointer",
       )}
-      style={{ width: "200px" }}
       onClick={onClick}
     >
       {isUploading && (
@@ -201,17 +202,9 @@ export const FilePreviewItem = ({
         </div>
       )}
       {isRemovable && (
-        <div
-          style={{
-            position: "absolute",
-            top: "6px",
-            left: "4px",
-            transform: "translate(-50%, -50%)",
-            zIndex: 4,
-          }}
-        >
+        <div className="file-preview-remove">
           <IconButton
-            className="bg-white gp-2 b-1"
+            className={filePreviewCloseClass}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

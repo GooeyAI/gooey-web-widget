@@ -25,10 +25,11 @@ import PlaceholderMessage from "../Messages/PlaceholderMessage";
 import GooeyTextArea from "./GooeyTextArea";
 import { themeCapabilities } from "src/themes";
 import { CHAT_INPUT_ID } from "../constants";
+import { useFilePicker } from "./useFilePicker";
 addInlineStyle(style);
 
-const acceptedFileTypes = "application/*, text/*, audio/*";
-const acceptedImageTypes = "image/*, video/*,";
+const acceptedFileTypes = "application/*,text/*,audio/*";
+const acceptedImageTypes = "image/*,video/*";
 
 // Define a type for file state
 interface UploadedFile {
@@ -156,30 +157,38 @@ const ChatInput = () => {
       const id = uuidv4();
       try {
         if (!config || !config.apiUrl) return;
-        uploadFileToGooey(config.apiUrl, file).then((url) => {
-          setFiles((prev: any) => {
-            const idx = prev.findIndex((f: any) => f.id === id);
-            if (idx === -1) return prev; // if photo removed before upload completed
-            // @TODO: cancel upload if file removed
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              isUploading: false,
-              gooeyUrl: url,
-            };
-            return updated;
+        uploadFileToGooey(config.apiUrl, file)
+          .then((url) => {
+            setFiles((prev: any) => {
+              const idx = prev.findIndex((f: any) => f.id === id);
+              if (idx === -1) return prev; // if photo removed before upload completed
+              // @TODO: cancel upload if file removed
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                isUploading: false,
+                gooeyUrl: url,
+              };
+              return updated;
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            setFiles((prev: any) =>
+              (prev || []).filter((f: any) => f.id !== id),
+            );
+            // TODO: show error toast
           });
-        });
       } catch (err) {
         console.error(err);
-        setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
+        setFiles((prev: any) => (prev || []).filter((f: any) => f.id !== id));
         // TODO: show error toast
       }
 
       return {
         id,
         name: file.name,
-        type: file.type.split("/")[0],
+        type: (file.type || "application/octet-stream").split("/")[0],
         data: file,
         gooeyUrl: "",
         isUploading: true,
@@ -187,42 +196,38 @@ const ChatInput = () => {
     });
   };
 
-  const onFileAdded = (e: any) => {
-    const files = Array.from(e.target.files);
-    if (!files || !files.length) return;
-    setFiles((prev: any) =>
-      prev ? [...prev, ...processFiles(files)] : processFiles(files),
-    );
+  const handleFilesAdded = (selected: File[]) => {
+    if (!selected.length) return;
+    const added = processFiles(selected);
+    setFiles((prev: any) => (prev ? [...added, ...prev] : added));
   };
+
+  const openFilePicker = useFilePicker(
+    { accept: acceptedFileTypes, multiple: true },
+    handleFilesAdded,
+  );
+  const openPhotoPicker = useFilePicker(
+    { accept: acceptedImageTypes, multiple: true },
+    handleFilesAdded,
+  );
+  const openCameraPicker = useFilePicker(
+    { accept: acceptedImageTypes, capture: "environment" },
+    handleFilesAdded,
+  );
 
   const handleFileMenuClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedFileTypes;
-    input.onchange = onFileAdded;
-    input.multiple = true;
-    input.click();
+    openFilePicker();
   };
 
   const handlePhotoMenuClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedImageTypes;
-    input.onchange = onFileAdded;
-    input.multiple = true;
-    input.click();
+    openPhotoPicker();
   };
 
   const handleTakePhotoClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedImageTypes;
-    input.capture = "environment"; // opens camera directly on mobile
-    input.onchange = onFileAdded;
-    input.click();
+    openCameraPicker();
   };
 
   if (!config) return null;
@@ -245,7 +250,7 @@ const ChatInput = () => {
     >
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
-        <div className="gp-12 b-1 br-large gmb-12 gm-12">
+        <div className="gooey-file-preview-tray gp-12 b-1 br-large gmb-12 gm-12">
           <FilePreview files={files} onRemove={handleRemoveFile} />
         </div>
       )}

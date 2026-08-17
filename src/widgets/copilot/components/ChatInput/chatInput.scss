@@ -120,6 +120,11 @@
   scrollbar-width: thin;
 }
 
+.file-preview-item {
+  width: 200px;
+  background: var(--gooey-file-preview-item-bg, transparent);
+}
+
 .file-preview-loader {
   position: absolute;
   top: 50%;
@@ -134,9 +139,8 @@
 
 .file-preview-remove {
   position: absolute;
-  top: 6px;
-  right: -16px;
-  transform: translate(-50%, -50%);
+  top: 4px;
+  right: 4px;
   z-index: 1;
 }
 

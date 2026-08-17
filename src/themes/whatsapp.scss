@@ -15,6 +15,9 @@
   --gooey-button-active: #e4e7ea;
   --gooey-button-focus: var(--gooey-whatsapp-muted);
   --gooey-tool-call-background: #ffffff;
+  --gooey-file-preview-item-bg: #ffffff;
+  // `b-1` uses the global #eee, which disappears on this canvas.
+  --gooey-file-preview-border: rgb(0 0 0 / 16%);
   // Declared once: each literal url() here is inlined as its own ~540KB data
   // URI at build time, so referencing the asset twice doubled the bundle cost.
   --gooey-whatsapp-wallpaper: url("../assets/whatsapp-background.svg");
@@ -154,6 +157,12 @@
   .gooeyChat-chat-input {
     border-radius: 0;
     background: var(--gooey-whatsapp-canvas);
+  }
+
+  .gooey-file-preview-tray,
+  .gooey-file-preview-tray .file-preview-item,
+  .gooey-file-preview-tray .gw-media-inline-thumbnail {
+    border-color: var(--gooey-file-preview-border);
   }
 
   .gooey-chat-input-bar {
