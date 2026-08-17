@@ -6,6 +6,28 @@ export type FilePickerOptions = {
   capture?: string;
 };
 
+// Inline + !important so host rules like `input[type=file] { display: none }`
+// cannot hide a light-DOM input. WebKit treats display:none click() as a no-op.
+function isolateFileInput(input: HTMLInputElement) {
+  const styles: Array<[string, string]> = [
+    ["display", "block"],
+    ["visibility", "visible"],
+    ["position", "fixed"],
+    ["top", "-9999px"],
+    ["left", "-9999px"],
+    ["width", "1px"],
+    ["height", "1px"],
+    ["opacity", "0"],
+    ["overflow", "hidden"],
+    ["pointer-events", "none"],
+    ["clip", "auto"],
+    ["clip-path", "none"],
+  ];
+  for (const [property, value] of styles) {
+    input.style.setProperty(property, value, "important");
+  }
+}
+
 /**
  * Opens a native file picker from a user gesture.
  *
@@ -26,6 +48,10 @@ export type FilePickerOptions = {
  * `document.body` is used instead of the widget shadow root because WebKit
  * has historically dropped file-input activations inside shadow trees.
  * Each widget instance owns its own inputs, so multiple embeds stay isolated.
+ *
+ * Those nodes sit in the host light DOM, so `isolateFileInput` sets hide
+ * styles with `!important`. A host `input[type="file"] { display: none }`
+ * would otherwise recreate the iOS `click()` no-op.
  */
 export function useFilePicker(
   { accept, multiple = false, capture }: FilePickerOptions,
@@ -43,9 +69,8 @@ export function useFilePicker(
     if (capture) input.capture = capture;
     input.setAttribute("aria-hidden", "true");
     input.tabIndex = -1;
-    // Off-screen but still in the document. Do not use display:none / hidden.
-    input.style.cssText =
-      "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;";
+    // Off-screen, painted, and isolated from host `display: none` / `[hidden]`.
+    isolateFileInput(input);
 
     const onChange = () => {
       const files = Array.from(input.files || []);
