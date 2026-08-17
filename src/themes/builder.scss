@@ -53,16 +53,28 @@
     background-color: var(--gooey-builder-bubble);
   }
 
+  // Composer only. The inline message editor reuses GooeyTextArea, so it lands
+  // on this same class — but it sits directly on the surface with no bar behind
+  // it, and would render as a transparent, borderless box.
   // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
   // inline style by GooeyTextArea — not duplicated here.
-  .gooeyChat-chat-input-textarea {
+  .gooey-chat-input-bar .gooeyChat-chat-input-textarea {
     padding: 10px 4px !important;
     border: 0;
     // Suppresses the base `:focus` outline; the bar itself carries the border.
     outline: 0;
     border-radius: 0 !important;
     background-color: transparent;
+  }
+
+  .gooeyChat-chat-input-textarea {
     line-height: 20px;
+  }
+
+  // The editor carries its own surface: nothing sits behind it but the canvas.
+  .gooey-outgoing-edit .gooeyChat-chat-input-textarea {
+    border-color: var(--gooey-builder-border);
+    background-color: var(--gooey-builder-bubble);
   }
 
   .input-right-buttons {
