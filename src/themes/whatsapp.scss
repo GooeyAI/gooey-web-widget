@@ -174,17 +174,29 @@
     box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
   }
 
+  // Composer only. The inline message editor reuses GooeyTextArea, so it lands
+  // on this same class — but it sits directly on the wallpaper with no bar
+  // behind it, and would render as a transparent, borderless box.
   // min-height comes from `inputMinHeight` in THEME_CAPABILITIES, applied as an
   // inline style by GooeyTextArea — not duplicated here.
-  .gooeyChat-chat-input-textarea {
+  .gooey-chat-input-bar .gooeyChat-chat-input-textarea {
     padding: 10px 8px 10px 4px !important;
     border: 0 !important;
     border-radius: 0 !important;
     outline: 0 !important;
     background-color: transparent;
-    color: var(--gooey-whatsapp-text);
     font-weight: 500;
+  }
+
+  .gooeyChat-chat-input-textarea {
+    color: var(--gooey-whatsapp-text);
     line-height: 20px;
+  }
+
+  // The editor carries its own surface: nothing sits behind it but wallpaper.
+  .gooey-outgoing-edit .gooeyChat-chat-input-textarea {
+    border-color: var(--gooey-whatsapp-canvas);
+    background-color: var(--gooey-whatsapp-composer);
   }
 
   .input-right-buttons {
