@@ -34,6 +34,7 @@ const Responses = (props: any) => {
           button_pressed={responseData.button_pressed}
           input_location={responseData.input_location}
           input_documents={responseData.input_documents}
+          web_url={responseData.web_url}
         />
       );
     } else {

@@ -35,6 +35,7 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  web_url?: string;
 }
 
 const OutgoingMsg = memo(
@@ -47,10 +48,12 @@ const OutgoingMsg = memo(
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    web_url = undefined,
   }: OutgoingMsgProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState("");
-    const { editQuery, isSending, isReceiving } = useMessagesContext();
+    const { onEditQuery, isControllerEdit, isSending, isReceiving } =
+      useMessagesContext();
 
     let mapUrl;
     if (latitude && longitude) {
@@ -71,6 +74,9 @@ const OutgoingMsg = memo(
       Boolean(reusableAudio);
     const isBusy = Boolean(isSending || isReceiving);
     const canSendEdit = Boolean(editValue.trim() || hasAttachments);
+    // a controller-driven edit re-runs the originating run, so it needs web_url
+    const canEdit =
+      Boolean(onEditQuery) && (!isControllerEdit || Boolean(web_url));
 
     const handleCopy = async () => {
       try {
@@ -81,7 +87,7 @@ const OutgoingMsg = memo(
     };
 
     const handleStartEdit = () => {
-      if (isBusy) return;
+      if (isBusy || !canEdit) return;
       setEditValue(input_prompt || "");
       setIsEditing(true);
     };
@@ -93,14 +99,18 @@ const OutgoingMsg = memo(
 
     const handleSendEdit = () => {
       const text = editValue.trim();
-      if (!id || isBusy || (!text && !hasAttachments)) return;
+      if (!id || isBusy || !canEdit || (!text && !hasAttachments)) return;
       setIsEditing(false);
-      editQuery?.(id, {
-        input_prompt: text,
-        input_images,
-        input_documents,
-        input_audio: reusableAudio,
-      });
+      onEditQuery?.(
+        id,
+        {
+          input_prompt: text,
+          input_images,
+          input_documents,
+          input_audio: reusableAudio,
+        },
+        web_url,
+      );
     };
 
     return (
@@ -190,7 +200,7 @@ const OutgoingMsg = memo(
               isBusy={isBusy}
               onCopy={handleCopy}
               onEdit={handleStartEdit}
-              canEdit={Boolean(editQuery)}
+              canEdit={canEdit}
             />
           )}
         </div>

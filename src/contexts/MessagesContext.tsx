@@ -43,7 +43,15 @@ export interface MessagesContextType {
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
   rerun?: (run_url: string) => void;
-  editQuery?: (messageId: string, payload: RequestModel) => void;
+  onEditQuery?: (
+    messageId: string,
+    payload: RequestModel,
+    webUrl?: string,
+  ) => void;
+  // true when a host controller owns onEditQuery. Such a host re-runs the
+  // edited turn on the server, so it needs the message's web_url; the local
+  // handler below forks in the browser and does not. See ControllerUtils.
+  isControllerEdit?: boolean;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
   isReceiving?: boolean;
@@ -182,6 +190,9 @@ export interface RequestModel {
 export type MessageMishmash = {
   id: string;
   role: "user" | "assistant";
+  // the run this message belongs to. The server stamps it on both halves of a
+  // turn, so a user message can be pointed back at the run that answered it.
+  web_url?: string;
 } & (
   | RequestModel
   | ConversationStart
@@ -228,7 +239,7 @@ const MessagesContextProvider = ({
   // Id of the conversation an edit is replacing. Editing a message forks a
   // fresh backend conversation (new conversation_id); once that fork's first
   // response is saved we delete this stale entry so the edit replaces it in the
-  // saved list rather than adding a duplicate. Set in editQuery, consumed on
+  // saved list rather than adding a duplicate. Set in onEditQuery, consumed on
   // the next finalize, and cleared if the user switches conversations first
   // (purgeMessages / setActiveConversation / controller.setConversationData).
   const conversationIdToReplace = useRef<string | null>(null);
@@ -313,7 +324,7 @@ const MessagesContextProvider = ({
     addResponse(newQuery);
   };
 
-  const editQuery = (messageId: string, payload: RequestModel) => {
+  const onEditQuery = (messageId: string, payload: RequestModel) => {
     if (isSending || isReceiving) return;
     const entries = Array.from(messages.entries());
     const idx = entries.findIndex(([id]) => id === messageId);
@@ -504,7 +515,7 @@ const MessagesContextProvider = ({
     messages,
     isSending,
     initializeQuery,
-    editQuery,
+    onEditQuery,
     handleNewConversation,
     cancelApiCall,
     isReceiving,
