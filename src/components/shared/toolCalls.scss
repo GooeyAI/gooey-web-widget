@@ -40,7 +40,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 }
 
 .tool-call-icon-image,
@@ -62,7 +61,7 @@
 
 .tool-call-icon-emoji {
   font-size: 14px;
-  line-height: 14px;
+  line-height: 1;
 }
 
 .tool-call-summary-content {
