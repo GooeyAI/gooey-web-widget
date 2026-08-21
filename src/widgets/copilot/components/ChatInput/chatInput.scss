@@ -15,6 +15,27 @@
   background: transparent !important;
 }
 
+// `display: flex`, `align-items: center` and `padding: 8px` all come from the
+// base `button` rule; `box-sizing: border-box` from the container reset.
+// Anchored to `.gooeyChat-chat-input` (`position: sticky` is already a
+// containing block) so the control stays visible when the host shrinks the
+// messages pane. Do not give this a z-index — the sticky composer already
+// paints above the message list, and a z-index here would outrank the header.
+.gooey-floating-new-chat-button {
+  position: absolute;
+  right: 16px;
+  bottom: calc(100% + 16px);
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow:
+    0 2px 2.5px rgb(10 10 10 / 20%),
+    0 1px 0.5px rgb(10 10 10 / 6%);
+}
+
 .gooeyChat-chat-input-textarea {
   flex: 1 1 auto;
   width: auto;

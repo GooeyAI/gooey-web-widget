@@ -13,6 +13,7 @@ import style from "./chatInput.scss?inline";
 import FilePreview from "./FilePreview";
 import { uploadFileToGooey } from "src/api/file-upload";
 import IconPlus from "src/assets/SvgIcons/IconPlus";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import GooeyPopper from "src/components/shared/Popper/Popper";
 import Button from "src/components/shared/Buttons/Button";
 import IconFile from "src/assets/SvgIcons/IconFile";
@@ -49,6 +50,7 @@ const ChatInput = () => {
     isSending,
     cancelApiCall,
     isReceiving,
+    handleNewConversation,
     preAttachedFileUsed,
     setPreAttachedFileUsed,
   } = useMessagesContext();
@@ -232,6 +234,11 @@ const ChatInput = () => {
 
   if (!config) return null;
   const theme = themeCapabilities(config.theme);
+  const showFloatingNewChat =
+    !!messages?.size &&
+    (theme.floatingNewChat === "always" ||
+      (theme.floatingNewChat === "when-chrome-hidden" &&
+        config.showHeader === false));
   const showStop = isSending || isReceiving;
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
@@ -248,6 +255,16 @@ const ChatInput = () => {
         "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
       )}
     >
+      {showFloatingNewChat && (
+        <IconButton
+          aria-label="New chat"
+          className="gooey-floating-new-chat-button"
+          onClick={handleNewConversation}
+          variant="text-alt"
+        >
+          <IconPencilEdit size={22} />
+        </IconButton>
+      )}
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
         <div className="gooey-file-preview-tray gp-12 b-1 br-large gmb-12 gm-12">

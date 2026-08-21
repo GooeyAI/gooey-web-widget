@@ -116,12 +116,12 @@ Read this before touching any stylesheet import.
   `onClose`.
 - `Header` (`src/widgets/copilot/components/Header/index.tsx`) owns the sidebar
   toggle, focus mode, close, share dialog, and the inline-mode new-chat button.
-- `Messages` owns the scroll container plus two floating controls
-  (scroll-to-bottom, and the new-chat button gated on `floatingNewChat`).
+- `Messages` owns the scroll container and the scroll-to-bottom control.
   Scroll behaviour is in `useMessagesScroll.ts`.
 - `ChatInput` owns the composer, `GooeyTextArea` (auto-grow, `minHeight` driven
-  by `THEME_CAPABILITIES`), `FilePreview`, `InlineAudioRecorder`, and — note —
-  renders `PlaceholderMessage` for the empty state.
+  by `THEME_CAPABILITIES`), `FilePreview`, `InlineAudioRecorder`, the floating
+  new-chat button gated on `floatingNewChat`, and — note — renders
+  `PlaceholderMessage` for the empty state.
 
 ### Portals and the shadow root
 
