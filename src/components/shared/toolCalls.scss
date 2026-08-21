@@ -31,16 +31,38 @@
 }
 
 
-.tool-call-icon-image {
+.tool-call-icon {
   width: 14px;
   height: 14px;
-  object-fit: contain;
+  min-width: 14px;
+  max-width: 14px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tool-call-icon-image,
+.tool-call-loader {
+  width: 14px;
+  height: 14px;
+}
+
+.tool-call-icon-image {
+  object-fit: contain;
+}
+
+.tool-call-loader {
+  border: 2px solid #ccc;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: rotate 1s linear infinite;
 }
 
 .tool-call-icon-emoji {
-  font-size: 12px;
-  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 14px;
 }
 
 .tool-call-summary-content {

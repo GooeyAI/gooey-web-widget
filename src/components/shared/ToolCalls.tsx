@@ -4,7 +4,6 @@ import { addInlineStyle } from "src/addStyles";
 import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
-import SpinLoader from "./SpinLoader";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
@@ -48,19 +47,15 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
       className="tool-call-card"
     >
       <summary>
-        {is_running ? (
-          <div className="tool-call-loader">
-            <SpinLoader size={13} />
-          </div>
-        ) : icon ? (
-          icon.startsWith("http") || icon.startsWith("/") ? (
+        <div className="tool-call-icon">
+          {is_running ? (
+            <div className="tool-call-loader" />
+          ) : icon && (icon.startsWith("http") || icon.startsWith("/")) ? (
             <img src={icon} alt="" className="tool-call-icon-image" />
           ) : (
-            <span className="tool-call-icon-emoji">{icon}</span>
-          )
-        ) : (
-          <span className="tool-call-icon-emoji">🛠️</span>
-        )}
+            <span className="tool-call-icon-emoji">{icon || "🛠️"}</span>
+          )}
+        </div>
         <div className="tool-call-summary-content">
           <span className="font_12_600">{label}</span>
           {argumentSummary && (
