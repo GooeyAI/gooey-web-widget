@@ -1,26 +1,41 @@
 @import "src/css/colors.module.scss";
 
+// Floats over the message list, which scrolls underneath it - hence the rounded
+// top corners and the opaque fill. `position: sticky` cannot do this here: the
+// scrolling happens in `.gooey-messages-container`, a nested element, so the
+// composer has no scrolling ancestor to stick within and simply sat in flow as
+// its own row. Out of flow it is centred by its own auto inline margins rather
+// than by the pane's `align-items`. Its height is published as
+// `--gooey-composer-height` (see ChatInput) so the list can pad itself clear.
 .gooeyChat-chat-input {
   width: 100%;
   max-width: var(--gooey-message-content-max-width, 760px) !important;
-  position: sticky;
+  position: absolute;
+  right: 0;
   bottom: 0;
-  // Opaque surface on purpose: a translucent background + backdrop-filter
-  // paints black in WebKit when the widget renders inside a shadow root.
-  background: $white;
-  border-radius: 16px 16px 0 0;
+  left: 0;
+  margin-inline: auto;
+  // No surface of its own: the message list masks itself to nothing behind
+  // the controls (see messages.scss), so there is nothing left to hide behind
+  // an opaque panel and the controls sit directly on the chat. Transparent
+  // rather than translucent on purpose - a translucent background plus
+  // backdrop-filter paints black in WebKit inside a shadow root.
+  background: transparent;
 }
 
+// The empty state has no conversation to float over, and its placeholder needs
+// to size the pane rather than hang off the bottom of it.
 .gooeyChat-chat-input.gooey-chat-input-empty {
+  position: relative;
   background: transparent !important;
 }
 
 // `display: flex`, `align-items: center` and `padding: 8px` all come from the
 // base `button` rule; `box-sizing: border-box` from the container reset.
-// Anchored to `.gooeyChat-chat-input` (`position: sticky` is already a
-// containing block) so the control stays visible when the host shrinks the
-// messages pane. Do not give this a z-index — the sticky composer already
-// paints above the message list, and a z-index here would outrank the header.
+// Anchored to `.gooeyChat-chat-input`, which is positioned and so already a
+// containing block, keeping the control visible when the host shrinks the
+// messages pane. Do not give this a z-index — the composer already paints above
+// the message list, and a z-index here would outrank the header.
 .gooey-floating-new-chat-button {
   position: absolute;
   right: 16px;
