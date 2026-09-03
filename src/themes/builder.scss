@@ -17,9 +17,10 @@
 
   color: var(--gooey-builder-text);
 
+  // Not `.gooeyChat-chat-input`: it floats over the list and stays transparent,
+  // with `.gooey-chat-input-bar` below carrying the only visible surface.
   .gooey-chat-main,
-  .gooey-messages-container,
-  .gooeyChat-chat-input {
+  .gooey-messages-container {
     background: var(--gooey-builder-surface) !important;
   }
 
