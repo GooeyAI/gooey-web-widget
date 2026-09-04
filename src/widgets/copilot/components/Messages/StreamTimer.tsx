@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { formatRunTime } from "./helpers";
 import { MetaLabel } from "./MessageTime";
 
-// Fast enough that the tenths move smoothly, slow enough to stay cheap.
-const TICK_MS = 100;
+// Comfortably finer than the second the label counts in, so the number turns
+// over close enough to the boundary that nobody could catch it late.
+const TICK_MS = 250;
 
 /**
  * Times a response in the browser while it streams.
@@ -77,7 +78,13 @@ export function StreamTimerLabel({
     return () => clearInterval(id);
   }, [startedAt]);
 
+  // Whole seconds only, counting 1, 2, 3: a tenths digit spinning next to a
+  // response that is still arriving is motion the reader has to ignore, and it
+  // implies a precision the wait does not have. The final figure, which is
+  // read at rest, keeps its decimal.
   return (
-    <MetaLabel className={className}>{formatRunTime(elapsedSec)}</MetaLabel>
+    <MetaLabel className={className}>
+      {formatRunTime(Math.max(1, Math.floor(elapsedSec)))}
+    </MetaLabel>
   );
 }
