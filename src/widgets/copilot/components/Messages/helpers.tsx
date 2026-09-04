@@ -139,12 +139,64 @@ export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   }
 };
 
-/** Clock time for a message, e.g. "1:24 PM". Empty when there is nothing usable. */
-export function formatMessageTime(iso?: string): string {
-  if (!iso) return "";
+function parseTimestamp(iso?: string): Date | null {
+  if (!iso) return null;
   const date = new Date(iso);
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * The exact moment a message was sent, e.g. "1:24 PM" — with the date in front
+ * of it once the message is no longer from today, because a bare clock time on
+ * a message from last week names an hour without saying which day.
+ *
+ * This is the precise reading; the label on screen shows `formatRelativeTime`.
+ */
+export function formatMessageTime(iso?: string): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  const time = date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const now = new Date();
+  if (date.toDateString() === now.toDateString()) return time;
+  return `${formatCalendarDate(date, now)}, ${time}`;
+}
+
+/**
+ * Age of a message as "12s ago" / "5m ago" / "3h ago" / "2d ago". Past a week
+ * an age stops being informative, so it gives the date instead.
+ *
+ * `now` is a parameter rather than read from the clock so a caller that ticks
+ * can drive every label from one timestamp and the text stays reproducible.
+ */
+export function formatRelativeTime(
+  iso?: string,
+  now: number = Date.now(),
+): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  const ageSec = (now - date.getTime()) / 1000;
+  // A timestamp slightly in the future means the two clocks disagree, not that
+  // the message is from the future; the floor keeps that out of sight.
+  if (ageSec < 60) return `${Math.max(1, Math.round(ageSec))}s ago`;
+  const minutes = Math.floor(ageSec / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return formatCalendarDate(date, new Date(now));
+}
+
+/** "12 Aug", carrying the year only when it is not the current one. */
+function formatCalendarDate(date: Date, now: Date): string {
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
+  });
 }
 
 /**

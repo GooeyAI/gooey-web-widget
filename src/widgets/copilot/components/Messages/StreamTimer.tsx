@@ -1,6 +1,6 @@
-import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { formatRunTime } from "./helpers";
+import { MetaLabel } from "./MessageTime";
 
 // Fast enough that the tenths move smoothly, slow enough to stay cheap.
 const TICK_MS = 100;
@@ -79,21 +79,5 @@ export function StreamTimerLabel({
 
   return (
     <MetaLabel className={className}>{formatRunTime(elapsedSec)}</MetaLabel>
-  );
-}
-
-/** The grey supporting text in a message's action row (time, run time). */
-export function MetaLabel({
-  children,
-  className,
-}: {
-  children?: string;
-  className?: string;
-}) {
-  if (!children) return null;
-  return (
-    <span className={clsx("font_12_400 text-muted", className)}>
-      {children}
-    </span>
   );
 }
