@@ -26,6 +26,7 @@ import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
+import { MetaLabel, StreamTimerLabel, useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
 
@@ -35,12 +36,24 @@ type ReplyButton = {
   isPressed?: boolean;
 };
 
+/**
+ * The strip under a response. It holds the live timer while the response is
+ * streaming and the actions once it has finished, so both land in the same
+ * place and the row does not jump when the stream ends.
+ */
+const ActionRow = ({ children }: { children: React.ReactNode }) => (
+  <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
+    {children}
+  </div>
+);
+
 const IncomingMsgActions = ({
   data,
   showRunLink,
   messageId,
   hasText,
   hasContent,
+  measuredSec,
 }: {
   data: {
     buttons?: ReplyButton[];
@@ -54,6 +67,7 @@ const IncomingMsgActions = ({
   messageId: string;
   hasText: boolean;
   hasContent: boolean;
+  measuredSec: number | null;
 }) => {
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -81,10 +95,13 @@ const IncomingMsgActions = ({
   });
 
   const timeStr = formatMessageTime(data?.created_at);
-  // `run_time_sec` is what the stream's final response carries; a bare
-  // `run_time` is accepted too so a host controller can hand us the value
-  // under the name its own payloads use.
-  const runTimeStr = formatRunTime(data?.run_time_sec ?? data?.run_time);
+  // Whoever actually knows wins: `run_time_sec` is what the stream's final
+  // response carries, a bare `run_time` is accepted too so a host controller
+  // can use the name its own payloads use, and the browser's own measurement
+  // is the last resort for a response that streamed without either.
+  const runTimeStr = formatRunTime(
+    data?.run_time_sec ?? data?.run_time ?? measuredSec,
+  );
   const metaStr = [timeStr, runTimeStr].filter(Boolean).join(" · ");
   // Copy puts the rendered message body on the clipboard, so it needs a body.
   const showCopy = hasText;
@@ -133,7 +150,7 @@ const IncomingMsgActions = ({
         </div>
       )}
       {showActions && (
-        <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
+        <ActionRow>
           {/* Copy Text Message to clipboard */}
           {showCopy && (
             <GooeyTooltip
@@ -191,10 +208,8 @@ const IncomingMsgActions = ({
               </IconButton>
             </GooeyTooltip>
           )}
-          {metaStr && (
-            <span className="font_12_400 text-muted gml-4">{metaStr}</span>
-          )}
-        </div>
+          <MetaLabel className="gml-4">{metaStr}</MetaLabel>
+        </ActionRow>
       )}
       {hasSendLocationButton && (
         <LocationModal
@@ -285,13 +300,23 @@ const IncomingMsg = memo(
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
     const hasText = hasResponseText(props.data);
+    const { startedAt, measuredSec } = useStreamTimer(isStreaming);
 
+    // Nothing has arrived yet: the timer keeps the blinking dot company so the
+    // wait is legible before there is any text to put a row under.
     if (
       !props.data ||
       type === STREAM_MESSAGE_TYPES.CONVERSATION_START ||
       type === STREAM_MESSAGE_TYPES.RUN_START
     ) {
-      return <ResponseLoader show={true} />;
+      return (
+        <div className="d-flex align-center">
+          <ResponseLoader show={true} />
+          {startedAt !== null && (
+            <StreamTimerLabel startedAt={startedAt} className="gml-8" />
+          )}
+        </div>
+      );
     }
 
     return (
@@ -337,15 +362,24 @@ const IncomingMsg = memo(
               ></video>
             </div>
           )}
-          {/* Copy and the timestamp do not depend on the backend sending any
-              reply buttons, so the action row is not gated on them. */}
-          {!isStreaming && (
+          {/* While streaming, the row carries the timer alone; once the
+              response is final it carries the actions. Copy and the timestamp
+              do not depend on the backend sending any reply buttons, so the
+              row is not gated on them. */}
+          {isStreaming ? (
+            startedAt !== null && (
+              <ActionRow>
+                <StreamTimerLabel startedAt={startedAt} />
+              </ActionRow>
+            )
+          ) : (
             <IncomingMsgActions
               data={props?.data}
               showRunLink={props.showRunLink}
               messageId={props.id}
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
+              measuredSec={measuredSec}
             />
           )}
         </div>
