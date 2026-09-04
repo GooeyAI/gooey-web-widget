@@ -139,6 +139,29 @@ export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
   }
 };
 
+/** Clock time for a message, e.g. "1:24 PM". Empty when there is nothing usable. */
+export function formatMessageTime(iso?: string): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/**
+ * How long the run took, from the seconds the backend reports on the final
+ * response. Empty when absent, unparseable or not positive.
+ */
+export function formatRunTime(seconds?: number | string | null): string {
+  const value = typeof seconds === "string" ? Number(seconds) : seconds;
+  if (typeof value !== "number" || !isFinite(value) || value <= 0) return "";
+  if (value < 10) return `${value.toFixed(1)}s`;
+  const total = Math.round(value);
+  if (total < 60) return `${total}s`;
+  const minutes = Math.floor(total / 60);
+  const remainder = total % 60;
+  return remainder ? `${minutes}m ${remainder}s` : `${minutes}m`;
+}
+
 export function truncateMiddle(str: string, charLimit: number) {
   // Early return if the string length is within the limit
   if (str.length <= charLimit) {

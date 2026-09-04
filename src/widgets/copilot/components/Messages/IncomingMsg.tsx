@@ -18,6 +18,8 @@ import { MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
+  formatMessageTime,
+  formatRunTime,
   getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
 } from "./helpers";
 import style from "./incoming.scss?inline";
@@ -33,25 +35,28 @@ type ReplyButton = {
   isPressed?: boolean;
 };
 
-const FeedbackButtons = ({
+const IncomingMsgActions = ({
   data,
   showRunLink,
   messageId,
+  hasText,
 }: {
   data: {
-    buttons: ReplyButton[];
+    buttons?: ReplyButton[];
     bot_message_id: string;
     web_url?: string;
+    created_at?: string;
+    run_time_sec?: number;
+    run_time?: number;
   };
   showRunLink: boolean;
   messageId: string;
+  hasText: boolean;
 }) => {
-  const { buttons, bot_message_id } = data;
+  const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery, rerun } = useMessagesContext();
   const { copied, signalCopied } = useCopyFeedback();
-
-  if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -72,6 +77,25 @@ const FeedbackButtons = ({
       hasSendLocationButton = true;
     }
   });
+
+  const timeStr = formatMessageTime(data?.created_at);
+  // `run_time_sec` is what the stream's final response carries; a bare
+  // `run_time` is accepted too so a host controller can hand us the value
+  // under the name its own payloads use.
+  const runTimeStr = formatRunTime(data?.run_time_sec ?? data?.run_time);
+  const metaStr = [timeStr, runTimeStr].filter(Boolean).join(" · ");
+  // Copy puts the rendered message body on the clipboard, so it needs a body.
+  const showCopy = hasText;
+  const showDebugLink = showRunLink && Boolean(data?.web_url);
+  const showRerun = Boolean(rerun) && Boolean(data?.web_url);
+  // The action row stands on its own: thumbs are optional extras the backend
+  // adds, not the reason the row exists.
+  const showActions =
+    Boolean(metaStr) ||
+    showCopy ||
+    thumbButtons.length > 0 ||
+    showDebugLink ||
+    showRerun;
 
   return (
     <div className="mw-100">
@@ -104,26 +128,31 @@ const FeedbackButtons = ({
           )}
         </div>
       )}
-      {(thumbButtons.length > 0 || showRunLink) && (
-        <div className="gooey-feedback-actions d-flex gmt-2 justify-content-start">
+      {showActions && (
+        <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
+          {metaStr && (
+            <span className="font_12_400 text-muted gmr-4">{metaStr}</span>
+          )}
           {/* Copy Text Message to clipboard */}
-          <GooeyTooltip
-            text={copied ? "Copied" : "Copy Message"}
-            forceShow={copied}
-          >
-            <IconButton
-              onClick={async (e) => {
-                await copyRenderedMessageToClipboard({
-                  currentTarget: e.currentTarget,
-                  messageId,
-                });
-                signalCopied();
-              }}
-              className="text-muted d-flex justify-content-center align-items-center h-100"
+          {showCopy && (
+            <GooeyTooltip
+              text={copied ? "Copied" : "Copy Message"}
+              forceShow={copied}
             >
-              {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
-            </IconButton>
-          </GooeyTooltip>
+              <IconButton
+                onClick={async (e) => {
+                  await copyRenderedMessageToClipboard({
+                    currentTarget: e.currentTarget,
+                    messageId,
+                  });
+                  signalCopied();
+                }}
+                className="text-muted d-flex justify-content-center align-items-center h-100"
+              >
+                {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+              </IconButton>
+            </GooeyTooltip>
+          )}
           {thumbButtons &&
             thumbButtons.map(
               (button) =>
@@ -144,17 +173,17 @@ const FeedbackButtons = ({
                   />
                 ),
             )}
-          {showRunLink && data?.web_url && (
+          {showDebugLink && (
             <a href={data?.web_url} target="_blank" rel="noopener noreferrer">
               <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
                 <IconBug size={12} />
               </IconButton>
             </a>
           )}
-          {rerun && data?.web_url && (
+          {showRerun && (
             <GooeyTooltip text="Re-run">
               <IconButton
-                onClick={() => rerun(data?.web_url!)}
+                onClick={() => rerun?.(data?.web_url!)}
                 className="text-muted d-flex justify-content-center align-items-center h-100"
               >
                 <IconRefresh size={12} />
@@ -304,11 +333,14 @@ const IncomingMsg = memo(
               ></video>
             </div>
           )}
-          {!isStreaming && props?.data?.buttons && (
-            <FeedbackButtons
+          {/* Copy and the timestamp do not depend on the backend sending any
+              reply buttons, so the action row is not gated on them. */}
+          {!isStreaming && (
+            <IncomingMsgActions
               data={props?.data}
               showRunLink={props.showRunLink}
               messageId={props.id}
+              hasText={hasText}
             />
           )}
         </div>
