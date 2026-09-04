@@ -14,7 +14,7 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
-import { isMobile } from "./helpers";
+import { formatMessageTime, isMobile } from "./helpers";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -389,13 +389,6 @@ function EditMessage({
       </div>
     </div>
   );
-}
-
-function formatMessageTime(iso?: string): string {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 // Truncate text for collapsed view (first 200 characters or first 3 lines)
