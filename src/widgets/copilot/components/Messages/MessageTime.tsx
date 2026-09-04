@@ -7,27 +7,34 @@ const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 
 /**
- * A message's supporting time text, shown as an age ("12s ago") with the exact
- * clock time a hover away. The age is what a reader of a conversation actually
- * wants — how fresh is this? — and the tooltip keeps the precise answer for
- * the rarer times that one matters.
+ * A message's supporting time text, with the exact clock time a hover away.
  *
- * A run duration, when there is one, shares the same label and the same
- * tooltip: they describe one event between them, so splitting them into two
- * hover targets would only make the row fussier to read.
+ * An age ("12s ago") is what a reader of a conversation wants at a glance —
+ * how fresh is this? — but only once per exchange: a reply carries the same
+ * age as the prompt directly above it, so `showAge` lets the response drop it
+ * and show only how long it took. Either way the tooltip reports both, so the
+ * precise reading is never further than a hover.
+ *
+ * Time and duration share one label and therefore one tooltip: they describe
+ * one event between them, and splitting them into two hover targets would only
+ * make the row fussier to read.
  */
 export function MessageTimeLabel({
   createdAt,
   runTimeStr = "",
+  showAge = true,
   className,
   direction = "top",
 }: {
   createdAt?: string;
   runTimeStr?: string;
+  showAge?: boolean;
   className?: string;
   direction?: "top" | "bottom" | "left" | "right";
 }) {
-  const relativeStr = useRelativeTime(createdAt);
+  // Withholding the timestamp also stops the clock: nothing on screen goes
+  // stale, so nothing needs a tick.
+  const relativeStr = useRelativeTime(showAge ? createdAt : undefined);
   const label = [relativeStr, runTimeStr].filter(Boolean).join(" · ");
   if (!label) return null;
 

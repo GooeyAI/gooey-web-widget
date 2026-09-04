@@ -101,7 +101,9 @@ const IncomingMsgActions = ({
   const runTimeStr = formatRunTime(
     data?.run_time_sec ?? data?.run_time ?? measuredSec,
   );
-  const hasTiming = Boolean(data?.created_at || runTimeStr);
+  // The age is the prompt's to report, so a response with a timestamp and no
+  // duration has nothing to put in the row.
+  const hasTiming = Boolean(runTimeStr);
   // Copy puts the rendered message body on the clipboard, so it needs a body.
   const showCopy = hasText;
   const showDebugLink = showRunLink && Boolean(data?.web_url);
@@ -210,6 +212,7 @@ const IncomingMsgActions = ({
           <MessageTimeLabel
             createdAt={data?.created_at}
             runTimeStr={runTimeStr}
+            showAge={false}
             className="gml-4"
           />
         </ActionRow>
