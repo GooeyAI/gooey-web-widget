@@ -134,9 +134,6 @@ const IncomingMsgActions = ({
       )}
       {showActions && (
         <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
-          {metaStr && (
-            <span className="font_12_400 text-muted gmr-4">{metaStr}</span>
-          )}
           {/* Copy Text Message to clipboard */}
           {showCopy && (
             <GooeyTooltip
@@ -193,6 +190,9 @@ const IncomingMsgActions = ({
                 <IconRefresh size={12} />
               </IconButton>
             </GooeyTooltip>
+          )}
+          {metaStr && (
+            <span className="font_12_400 text-muted gml-4">{metaStr}</span>
           )}
         </div>
       )}
