@@ -18,7 +18,6 @@ import { MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
-  formatMessageTime,
   formatRunTime,
   getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
 } from "./helpers";
@@ -26,7 +25,8 @@ import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
-import { MetaLabel, StreamTimerLabel, useStreamTimer } from "./StreamTimer";
+import { MessageTimeLabel } from "./MessageTime";
+import { StreamTimerLabel, useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
 
@@ -94,7 +94,6 @@ const IncomingMsgActions = ({
     }
   });
 
-  const timeStr = formatMessageTime(data?.created_at);
   // Whoever actually knows wins: `run_time_sec` is what the stream's final
   // response carries, a bare `run_time` is accepted too so a host controller
   // can use the name its own payloads use, and the browser's own measurement
@@ -102,7 +101,7 @@ const IncomingMsgActions = ({
   const runTimeStr = formatRunTime(
     data?.run_time_sec ?? data?.run_time ?? measuredSec,
   );
-  const metaStr = [timeStr, runTimeStr].filter(Boolean).join(" · ");
+  const hasTiming = Boolean(data?.created_at || runTimeStr);
   // Copy puts the rendered message body on the clipboard, so it needs a body.
   const showCopy = hasText;
   const showDebugLink = showRunLink && Boolean(data?.web_url);
@@ -112,7 +111,7 @@ const IncomingMsgActions = ({
   // it paints no bubble, so a lone timestamp would float in the gutter.
   const showActions =
     hasContent &&
-    (Boolean(metaStr) ||
+    (hasTiming ||
       showCopy ||
       thumbButtons.length > 0 ||
       showDebugLink ||
@@ -208,7 +207,11 @@ const IncomingMsgActions = ({
               </IconButton>
             </GooeyTooltip>
           )}
-          <MetaLabel className="gml-4">{metaStr}</MetaLabel>
+          <MessageTimeLabel
+            createdAt={data?.created_at}
+            runTimeStr={runTimeStr}
+            className="gml-4"
+          />
         </ActionRow>
       )}
       {hasSendLocationButton && (

@@ -14,7 +14,8 @@ import GooeyTooltip from "src/components/shared/Tooltip";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
-import { formatMessageTime, isMobile } from "./helpers";
+import { isMobile } from "./helpers";
+import { MessageTimeLabel } from "./MessageTime";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -64,7 +65,6 @@ const OutgoingMsg = memo(
 
     const input_audio_url = resolveInputAudioUrl(input_audio);
 
-    const timeStr = formatMessageTime(created_at);
     const reusableAudio = Array.isArray(input_audio)
       ? input_audio[0]
       : input_audio;
@@ -196,7 +196,7 @@ const OutgoingMsg = memo(
           ) : (
             <DisplayMessage
               text={input_prompt}
-              timeStr={timeStr}
+              createdAt={created_at}
               isBusy={isBusy}
               onCopy={handleCopy}
               onEdit={handleStartEdit}
@@ -213,7 +213,7 @@ export default OutgoingMsg;
 
 interface DisplayMessageProps {
   text: string;
-  timeStr: string;
+  createdAt?: string;
   isBusy: boolean;
   onCopy: () => void | Promise<void>;
   onEdit: () => void;
@@ -226,7 +226,7 @@ interface DisplayMessageProps {
  */
 function DisplayMessage({
   text,
-  timeStr,
+  createdAt,
   isBusy,
   onCopy,
   onEdit,
@@ -288,9 +288,11 @@ function DisplayMessage({
           isMobile() && "is-mobile",
         )}
       >
-        {timeStr && (
-          <span className="font_12_400 text-muted gmr-4">{timeStr}</span>
-        )}
+        <MessageTimeLabel
+          createdAt={createdAt}
+          className="gmr-4"
+          direction="bottom"
+        />
         <GooeyTooltip
           text={copied ? "Copied" : "Copy"}
           direction="bottom"
