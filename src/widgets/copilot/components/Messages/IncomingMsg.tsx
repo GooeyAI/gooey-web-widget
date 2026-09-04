@@ -213,7 +213,6 @@ const IncomingMsgActions = ({
             createdAt={data?.created_at}
             runTimeStr={runTimeStr}
             showAge={false}
-            leadingSeparator
             className="gml-4"
           />
         </ActionRow>

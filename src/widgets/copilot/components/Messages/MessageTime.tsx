@@ -27,25 +27,20 @@ export function MessageTimeLabel({
   createdAt,
   runTimeStr = "",
   showAge = true,
-  leadingSeparator = false,
   className,
   direction = "top",
 }: {
   createdAt?: string;
   runTimeStr?: string;
   showAge?: boolean;
-  // Set when the label follows the row's icons, so the dot that would divide
-  // an age from a duration divides the label from the icons instead.
-  leadingSeparator?: boolean;
   className?: string;
   direction?: "top" | "bottom" | "left" | "right";
 }) {
   // Withholding the timestamp also stops the clock: nothing on screen goes
   // stale, so nothing needs a tick.
   const relativeStr = useRelativeTime(showAge ? createdAt : undefined);
-  const parts = [relativeStr, runTimeStr].filter(Boolean);
-  if (!parts.length) return null;
-  const label = (leadingSeparator ? "· " : "") + parts.join(" · ");
+  const label = [relativeStr, runTimeStr].filter(Boolean).join(" · ");
+  if (!label) return null;
 
   const tooltip = [
     formatMessageTime(createdAt),
