@@ -40,6 +40,7 @@ const IncomingMsgActions = ({
   showRunLink,
   messageId,
   hasText,
+  hasContent,
 }: {
   data: {
     buttons?: ReplyButton[];
@@ -52,6 +53,7 @@ const IncomingMsgActions = ({
   showRunLink: boolean;
   messageId: string;
   hasText: boolean;
+  hasContent: boolean;
 }) => {
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -89,13 +91,15 @@ const IncomingMsgActions = ({
   const showDebugLink = showRunLink && Boolean(data?.web_url);
   const showRerun = Boolean(rerun) && Boolean(data?.web_url);
   // The action row stands on its own: thumbs are optional extras the backend
-  // adds, not the reason the row exists.
+  // adds, not the reason the row exists. An empty response is the exception —
+  // it paints no bubble, so a lone timestamp would float in the gutter.
   const showActions =
-    Boolean(metaStr) ||
-    showCopy ||
-    thumbButtons.length > 0 ||
-    showDebugLink ||
-    showRerun;
+    hasContent &&
+    (Boolean(metaStr) ||
+      showCopy ||
+      thumbButtons.length > 0 ||
+      showDebugLink ||
+      showRerun);
 
   return (
     <div className="mw-100">
@@ -341,6 +345,7 @@ const IncomingMsg = memo(
               showRunLink={props.showRunLink}
               messageId={props.id}
               hasText={hasText}
+              hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
             />
           )}
         </div>
