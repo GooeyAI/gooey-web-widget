@@ -154,7 +154,9 @@ export function formatMessageTime(iso?: string): string {
 export function formatRunTime(seconds?: number | string | null): string {
   const value = typeof seconds === "string" ? Number(seconds) : seconds;
   if (typeof value !== "number" || !isFinite(value) || value <= 0) return "";
-  if (value < 10) return `${value.toFixed(1)}s`;
+  // One decimal is worth showing while it says something ("3.2s"), but "2.0s"
+  // reads like spurious precision, so drop a zero tenth.
+  if (value < 10) return `${value.toFixed(1).replace(/\.0$/, "")}s`;
   const total = Math.round(value);
   if (total < 60) return `${total}s`;
   const minutes = Math.floor(total / 60);
