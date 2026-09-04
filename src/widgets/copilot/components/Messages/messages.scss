@@ -18,26 +18,9 @@
   flex-direction: column;
 }
 
-// `display: flex`, `align-items: center` and `padding: 8px` all come from the
-// base `button` rule; `box-sizing: border-box` from the container reset.
-.gooey-floating-new-chat-button {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 50%;
-  background-color: #ffffff;
-  box-shadow:
-    0 2px 2.5px rgb(10 10 10 / 20%),
-    0 1px 0.5px rgb(10 10 10 / 6%);
-}
-
-// Both floating controls are anchored to `.gooey-messages-root`, which is a
-// sibling of the composer in a flex column — they cannot overlap it, so their
-// z-index only orders them against the message list.
+// Anchored to `.gooey-messages-root`, a sibling of the composer in a flex
+// column — it cannot overlap the input, so z-index only orders it against the
+// message list. The new-chat control lives on the composer instead.
 .gooey-scroll-to-bottom-btn {
   position: absolute;
   left: 50%;
