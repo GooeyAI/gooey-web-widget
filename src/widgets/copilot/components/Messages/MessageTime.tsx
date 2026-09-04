@@ -1,7 +1,11 @@
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import { addInlineStyle } from "src/addStyles";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { formatMessageTime, formatRelativeTime } from "./helpers";
+import style from "./messageTime.scss?inline";
+
+addInlineStyle(style);
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -23,20 +27,25 @@ export function MessageTimeLabel({
   createdAt,
   runTimeStr = "",
   showAge = true,
+  leadingSeparator = false,
   className,
   direction = "top",
 }: {
   createdAt?: string;
   runTimeStr?: string;
   showAge?: boolean;
+  // Set when the label follows the row's icons, so the dot that would divide
+  // an age from a duration divides the label from the icons instead.
+  leadingSeparator?: boolean;
   className?: string;
   direction?: "top" | "bottom" | "left" | "right";
 }) {
   // Withholding the timestamp also stops the clock: nothing on screen goes
   // stale, so nothing needs a tick.
   const relativeStr = useRelativeTime(showAge ? createdAt : undefined);
-  const label = [relativeStr, runTimeStr].filter(Boolean).join(" · ");
-  if (!label) return null;
+  const parts = [relativeStr, runTimeStr].filter(Boolean);
+  if (!parts.length) return null;
+  const label = (leadingSeparator ? "· " : "") + parts.join(" · ");
 
   const tooltip = [
     formatMessageTime(createdAt),
@@ -91,7 +100,7 @@ export function MetaLabel({
 }) {
   if (!children) return null;
   return (
-    <span className={clsx("font_12_400 text-muted", className)}>
+    <span className={clsx("gooey-meta-label font_12_400 text-muted", className)}>
       {children}
     </span>
   );
