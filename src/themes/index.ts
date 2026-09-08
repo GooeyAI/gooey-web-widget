@@ -24,6 +24,8 @@ export function resolveTheme(theme: unknown): ThemeId {
 export interface ThemeCapabilities {
   /** Minimum composer height in px. */
   inputMinHeight: number;
+  /** Group more than two reply buttons into an Options list. */
+  optionsMenu: boolean;
   /**
    * When to float a "new chat" button over the message list.
    * `when-chrome-hidden` means only if the header (and so the sidebar) is off.
@@ -41,11 +43,13 @@ export interface ThemeCapabilities {
 
 export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
   default: {
+    optionsMenu: false,
     inputMinHeight: 44,
     floatingNewChat: "when-chrome-hidden",
     alwaysShowSendButton: false,
   },
   whatsapp: {
+    optionsMenu: true,
     inputMinHeight: 40,
     // Not "always": the header already carries a new-chat button in inline mode,
     // and showing both rendered the same icon and handler twice.
@@ -53,6 +57,7 @@ export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
     alwaysShowSendButton: false,
   },
   builder: {
+    optionsMenu: false,
     inputMinHeight: 40,
     // Deliberate for now, and the reason this table exists: builder is the only
     // theme with no way to start a new chat when the header is hidden. Recorded
