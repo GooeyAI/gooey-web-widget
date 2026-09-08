@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { memo, useRef } from "react";
+import { memo, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
@@ -8,11 +8,13 @@ import IconBug from "src/assets/SvgIcons/IconBug";
 import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import GooeyDialog from "src/components/shared/Dialog";
+import { themeCapabilities } from "src/themes";
 import GooeyTextResponse from "src/components/shared/Response";
 import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { useMessagesContext } from "src/contexts/hooks";
+import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
@@ -30,6 +32,7 @@ addInlineStyle(style);
 type ReplyButton = {
   id: string;
   title: string;
+  description?: string;
   isPressed?: boolean;
 };
 
@@ -50,8 +53,15 @@ const FeedbackButtons = ({
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery, rerun } = useMessagesContext();
   const { copied, signalCopied } = useCopyFeedback();
+  const { config } = useSystemContext();
 
   if (!buttons) return null;
+
+  const menuButtons = buttons.filter(
+    (button) => !button.id.includes("send_location"),
+  );
+  const showOptionsMenu =
+    themeCapabilities(config?.theme).optionsMenu && menuButtons.length > 2;
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -65,7 +75,7 @@ const FeedbackButtons = ({
       getFeedbackButtonIconWithTooltip(button.id, button.isPressed || false)
     ) {
       thumbButtons.push(button);
-    } else {
+    } else if (!showOptionsMenu || button.id.includes("send_location")) {
       normalButtons.push(button);
     }
     if (button.id.includes("send_location")) {
@@ -74,7 +84,10 @@ const FeedbackButtons = ({
   });
 
   return (
-    <div className="mw-100">
+    <div className="gooey-message-actions mw-100">
+      {showOptionsMenu && (
+        <OptionsMenu buttons={menuButtons} botMessageId={bot_message_id} />
+      )}
       {normalButtons.length > 0 && (
         <div className="gooey-feedback-buttons d-flex flex-col sm-flex-row gmt-12">
           {normalButtons.map(
@@ -124,7 +137,7 @@ const FeedbackButtons = ({
               {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
             </IconButton>
           </GooeyTooltip>
-          {thumbButtons &&
+          {!showOptionsMenu &&
             thumbButtons.map(
               (button) =>
                 button && (
@@ -174,6 +187,83 @@ const FeedbackButtons = ({
         />
       )}
     </div>
+  );
+};
+
+const OptionsMenu = ({
+  buttons,
+  botMessageId,
+}: {
+  buttons: ReplyButton[];
+  botMessageId: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const { initializeQuery, isSending, isReceiving } = useMessagesContext();
+
+  return (
+    <>
+      <Button
+        variant="outlined"
+        className="gooey-options-trigger w-100 gmt-12"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+      >
+        <span className="d-flex align-center justify-center">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            className="gmr-8"
+          >
+            <path
+              d="M8 6h12M8 12h12M8 18h12M3 6h1M3 12h1M3 18h1"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          Options
+        </span>
+      </Button>
+      <GooeyDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Options"
+        maxWidth="xs"
+        className="gooey-options-menu"
+      >
+        {buttons.map((button) => (
+          <Button
+            key={button.id}
+            className="gooey-options-row w-100 text-left gpt-20 gpb-20 gpl-0 gpr-0"
+            disabled={button.isPressed || isSending || isReceiving}
+            onClick={() => {
+              setOpen(false);
+              initializeQuery?.({
+                button_pressed: {
+                  button_id: button.id,
+                  button_title: button.title,
+                  context_msg_id: botMessageId,
+                },
+              });
+            }}
+          >
+            <span className="d-block font_16_400">{button.title}</span>
+            {button.description && (
+              <span className="d-block font_14_400 text-muted gmt-4">
+                {button.description}
+              </span>
+            )}
+          </Button>
+        ))}
+        <div className="gooey-options-hint text-center font_14_400 gpt-24 gpb-24">
+          Tap an item to select it
+        </div>
+      </GooeyDialog>
+    </>
   );
 };
 

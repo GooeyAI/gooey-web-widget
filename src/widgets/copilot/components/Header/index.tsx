@@ -33,7 +33,7 @@ const Header = () => {
 
   return (
     <div className="gooey-chat-header bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header">
-      <div className="d-flex align-center">
+      <div className="gooey-chat-identity d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
           <GooeyTooltip text="Open sidebar" direction="right">
@@ -48,14 +48,18 @@ const Header = () => {
           </GooeyTooltip>
         )}
         <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
-          <Button onClick={handleNewConversation} disabled={isEmpty}>
+          <Button
+            className="gooey-chat-title-button"
+            onClick={handleNewConversation}
+            disabled={isEmpty}
+          >
             <div className="d-flex align-center">
               <BotAvatar
                 size={24}
                 src={branding?.photoUrl || "https://gooey.ai/favicon.ico"}
                 className="gmr-8"
               />
-              <p className="font_16_700 text-almostBlack">
+              <p className="gooey-chat-title font_16_700 text-almostBlack">
                 {branding?.title || "New Chat"}
               </p>
             </div>
