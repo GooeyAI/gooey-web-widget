@@ -1,62 +1,24 @@
 import { useRef, useState } from "react";
+import { addInlineStyle } from "src/addStyles";
 import GooeyPopper from "./Popper/Popper";
+import style from "./tooltip.scss?inline";
 
-type TooltipDirection = "top" | "bottom" | "left" | "right";
-const TOOLTIP_INSET = "-6px";
-const getArrowStyles = (direction: TooltipDirection) => {
-  switch (direction) {
-    case "top":
-      return {
-        borderTop: "10px solid white",
-        borderLeft: "10px solid transparent",
-        borderRight: "10px solid transparent",
-        left: "50%",
-        bottom: TOOLTIP_INSET,
-        transform: "translateX(-50%)",
-      };
-    case "bottom":
-      return {
-        borderBottom: "10px solid white",
-        borderLeft: "10px solid transparent",
-        borderRight: "10px solid transparent",
-        left: "50%",
-        top: TOOLTIP_INSET,
-        transform: "translateX(-50%)",
-      };
-    case "left":
-      return {
-        borderLeft: "10px solid white",
-        borderTop: "10px solid transparent",
-        borderBottom: "10px solid transparent",
-        right: TOOLTIP_INSET,
-        transform: "translateY(-50%)",
-        top: "50%",
-      };
-    case "right":
-      return {
-        borderRight: "10px solid white",
-        borderTop: "10px solid transparent",
-        borderBottom: "10px solid transparent",
-        left: TOOLTIP_INSET,
-        transform: "translateY(-50%)",
-        top: "50%",
-      };
-    default:
-      return {
-        borderTop: "10px solid white",
-        borderLeft: "10px solid transparent",
-        borderRight: "10px solid transparent",
-        left: "50%",
-        bottom: TOOLTIP_INSET,
-        transform: "translateX(-50%)",
-      };
-  }
-};
+addInlineStyle(style);
+
+/** Where to put the tooltip, or "auto" to give it whichever side has room. */
+type TooltipDirection = "top" | "bottom" | "left" | "right" | "auto";
+
+// Clears the arrow's overhang, so the point sits next to what it names rather
+// than on top of it.
+const TOOLTIP_OFFSET = 8;
 
 const GooeyTooltip = ({
   text = "This is a tooltip",
   children,
-  direction = "right",
+  // Auto by default: a tooltip's anchor is usually a small control near an
+  // edge of a narrow embed, where the only side with room is not one a caller
+  // can pick in advance. Popper measures and the arrow follows its choice.
+  direction = "auto",
   disabled = false,
   forceShow = false,
 }: {
@@ -70,7 +32,6 @@ const GooeyTooltip = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const timerRef = useRef<any>(null);
-  const arrowStyles = getArrowStyles(direction);
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const eventHandlers = isTouchDevice
   ? {
@@ -94,31 +55,29 @@ const GooeyTooltip = ({
     <GooeyPopper
       ModalContent={() => (
         <div className="gp-8">
-          <div
-            style={{
-              position: "absolute",
-              width: "2px",
-              height: "2px",
-              ...arrowStyles,
-            }}
-          />
+          <div className="gooey-tooltip-arrow" data-popper-arrow />
           <p className="font_14_500">{text}</p>
         </div>
       )}
       showModal={showModal || forceShow}
+      offset={TOOLTIP_OFFSET}
       direction={{
         x:
-          direction === "left"
-            ? "left"
-            : direction === "right"
-            ? "right"
-            : "center",
+          direction === "auto"
+            ? "auto"
+            : direction === "left"
+              ? "left"
+              : direction === "right"
+                ? "right"
+                : "center",
         y:
-          direction === "top"
-            ? "top"
-            : direction === "bottom"
-            ? "bottom"
-            : "center",
+          direction === "auto"
+            ? "auto"
+            : direction === "top"
+              ? "top"
+              : direction === "bottom"
+                ? "bottom"
+                : "center",
       }}
       onClick={(e) => {
         // prevent click/touch event from triggering the tooltip

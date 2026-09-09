@@ -7,6 +7,7 @@ import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
+import { ACTION_ICON_SIZE } from "../constants";
 
 const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
 
@@ -120,7 +121,7 @@ export const fetchUrlMeta = async (url: string) => {
 };
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
-  let size = 14;
+  const size = ACTION_ICON_SIZE;
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
       return (
@@ -138,6 +139,84 @@ export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
       return null;
   }
 };
+
+function parseTimestamp(iso?: string): Date | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/** Clock time alone, e.g. "9:15 PM". Empty when there is nothing usable. */
+export function formatClockTime(iso?: string): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/** The date alone, e.g. "Aug 3". Empty when there is nothing usable. */
+export function formatMessageDate(iso?: string): string {
+  const date = parseTimestamp(iso);
+  return date ? formatCalendarDate(date) : "";
+}
+
+/**
+ * Whether a message is from today, which is what decides between naming an
+ * hour and naming a day: "9:15 PM" is unambiguous only while today lasts.
+ */
+export function isFromToday(iso?: string): boolean {
+  const date = parseTimestamp(iso);
+  if (!date) return false;
+  return date.toDateString() === new Date().toDateString();
+}
+
+/**
+ * The shortest reading that is still unambiguous: "1:24 PM" while the message
+ * is from today, "Aug 3" once it is not. A bare clock time on last week's
+ * message names an hour without saying which day, and last week's exact minute
+ * is rarely what anyone is after — the tooltip carries both either way.
+ */
+export function formatMessageTime(iso?: string): string {
+  return isFromToday(iso) ? formatClockTime(iso) : formatMessageDate(iso);
+}
+
+/**
+ * The precise moment a label abbreviates, e.g. "1:24 PM, Aug 3, 2025". The
+ * year is always spelled out here because this is the reading someone opens a
+ * tooltip to get.
+ */
+export function formatFullTimestamp(iso?: string): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  const day = formatCalendarDate(date, { alwaysYear: true });
+  return `${formatClockTime(iso)}, ${day}`;
+}
+
+/** "Aug 12", naming the year when asked or when it is not the current one. */
+function formatCalendarDate(date: Date, { alwaysYear = false } = {}): string {
+  const isThisYear = date.getFullYear() === new Date().getFullYear();
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: alwaysYear || !isThisYear ? "numeric" : undefined,
+  });
+}
+
+/**
+ * How long the run took, from the seconds the backend reports on the final
+ * response. Empty when absent, unparseable or not positive.
+ */
+export function formatRunTime(seconds?: number | string | null): string {
+  const value = typeof seconds === "string" ? Number(seconds) : seconds;
+  if (typeof value !== "number" || !isFinite(value) || value <= 0) return "";
+  // One decimal is worth showing while it says something ("3.2s"), but "2.0s"
+  // reads like spurious precision, so drop a zero tenth.
+  if (value < 10) return `${value.toFixed(1).replace(/\.0$/, "")}s`;
+  const total = Math.round(value);
+  if (total < 60) return `${total}s`;
+  const minutes = Math.floor(total / 60);
+  const remainder = total % 60;
+  return remainder ? `${minutes}m ${remainder}s` : `${minutes}m`;
+}
 
 export function truncateMiddle(str: string, charLimit: number) {
   // Early return if the string length is within the limit

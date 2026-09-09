@@ -74,7 +74,7 @@ const SideNavbar = () => {
         <div className="gp-8 b-btm-1 h-header d-flex align-center">
           {/* Close / minimize button */}
           {/* Sidebar button */}
-          <GooeyTooltip text="Close sidebar" direction="right">
+          <GooeyTooltip text="Close sidebar">
             <IconButton
               variant="text"
               className="cr-pointer"
@@ -87,7 +87,7 @@ const SideNavbar = () => {
 
         <div className="pos-relative d-flex flex-col h-100 flex-1 overflow-y-auto">
           <div className="gp-8">
-            <GooeyTooltip text="New Chat" direction="right" disabled={isEmpty}>
+            <GooeyTooltip text="New Chat" disabled={isEmpty}>
               <Button
                 className="w-100 pos-relative text-dark"
                 disabled={isEmpty}

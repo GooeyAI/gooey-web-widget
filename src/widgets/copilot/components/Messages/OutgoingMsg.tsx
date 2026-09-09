@@ -3,17 +3,17 @@ import style from "./outgoing.scss?inline";
 import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
-import { MESSAGE_GUTTER } from "../constants";
+import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
-import IconCheck from "src/assets/SvgIcons/IconCheck";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import Button from "src/components/shared/Buttons/Button";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
+import CopyButton from "./CopyButton";
+import { isMobile } from "./helpers";
+import { MessageTimeLabel } from "./MessageTime";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -34,6 +34,7 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  web_url?: string;
 }
 
 const OutgoingMsg = memo(
@@ -46,10 +47,12 @@ const OutgoingMsg = memo(
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    web_url = undefined,
   }: OutgoingMsgProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState("");
-    const { editQuery, isSending, isReceiving } = useMessagesContext();
+    const { onEditQuery, isControllerEdit, isSending, isReceiving } =
+      useMessagesContext();
 
     let mapUrl;
     if (latitude && longitude) {
@@ -60,7 +63,6 @@ const OutgoingMsg = memo(
 
     const input_audio_url = resolveInputAudioUrl(input_audio);
 
-    const timeStr = formatMessageTime(created_at);
     const reusableAudio = Array.isArray(input_audio)
       ? input_audio[0]
       : input_audio;
@@ -70,6 +72,9 @@ const OutgoingMsg = memo(
       Boolean(reusableAudio);
     const isBusy = Boolean(isSending || isReceiving);
     const canSendEdit = Boolean(editValue.trim() || hasAttachments);
+    // a controller-driven edit re-runs the originating run, so it needs web_url
+    const canEdit =
+      Boolean(onEditQuery) && (!isControllerEdit || Boolean(web_url));
 
     const handleCopy = async () => {
       try {
@@ -80,7 +85,7 @@ const OutgoingMsg = memo(
     };
 
     const handleStartEdit = () => {
-      if (isBusy) return;
+      if (isBusy || !canEdit) return;
       setEditValue(input_prompt || "");
       setIsEditing(true);
     };
@@ -92,14 +97,18 @@ const OutgoingMsg = memo(
 
     const handleSendEdit = () => {
       const text = editValue.trim();
-      if (!id || isBusy || (!text && !hasAttachments)) return;
+      if (!id || isBusy || !canEdit || (!text && !hasAttachments)) return;
       setIsEditing(false);
-      editQuery?.(id, {
-        input_prompt: text,
-        input_images,
-        input_documents,
-        input_audio: reusableAudio,
-      });
+      onEditQuery?.(
+        id,
+        {
+          input_prompt: text,
+          input_images,
+          input_documents,
+          input_audio: reusableAudio,
+        },
+        web_url,
+      );
     };
 
     return (
@@ -185,11 +194,11 @@ const OutgoingMsg = memo(
           ) : (
             <DisplayMessage
               text={input_prompt}
-              timeStr={timeStr}
+              createdAt={created_at}
               isBusy={isBusy}
               onCopy={handleCopy}
               onEdit={handleStartEdit}
-              canEdit={Boolean(editQuery)}
+              canEdit={canEdit}
             />
           )}
         </div>
@@ -202,7 +211,7 @@ export default OutgoingMsg;
 
 interface DisplayMessageProps {
   text: string;
-  timeStr: string;
+  createdAt?: string;
   isBusy: boolean;
   onCopy: () => void | Promise<void>;
   onEdit: () => void;
@@ -215,14 +224,13 @@ interface DisplayMessageProps {
  */
 function DisplayMessage({
   text,
-  timeStr,
+  createdAt,
   isBusy,
   onCopy,
   onEdit,
   canEdit,
 }: DisplayMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { copied, signalCopied } = useCopyFeedback();
   // Nothing to show without text (e.g. an attachment-only message): the bubble
   // and the Copy/Edit actions all operate on text, so render nothing.
   if (!text) return null;
@@ -272,38 +280,22 @@ function DisplayMessage({
       </div>
       <div
         className={clsx(
-          "gooey-outgoing-actions d-flex align-center gmt-4",
+          "gooey-outgoing-actions d-flex align-center gmt-2",
           `gmr-${MESSAGE_GUTTER}`,
+          isMobile() && "is-mobile",
         )}
       >
-        {timeStr && (
-          <span className="font_12_400 text-muted gmr-4">{timeStr}</span>
-        )}
-        <GooeyTooltip
-          text={copied ? "Copied" : "Copy"}
-          direction="bottom"
-          forceShow={copied}
-        >
-          <IconButton
-            className="text-muted"
-            onClick={async () => {
-              await onCopy();
-              signalCopied();
-            }}
-            aria-label="Copy"
-          >
-            {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
-          </IconButton>
-        </GooeyTooltip>
+        <MessageTimeLabel createdAt={createdAt} className="gmr-4" />
+        <CopyButton onCopy={onCopy} />
         {!isBusy && canEdit && (
-          <GooeyTooltip text="Edit" direction="bottom">
+          <GooeyTooltip text="Edit">
             <IconButton
               className="text-muted"
               onClick={onEdit}
               disabled={isBusy}
               aria-label="Edit"
             >
-              <IconPencilEdit size={18} />
+              <IconPencilEdit size={ACTION_ICON_SIZE} />
             </IconButton>
           </GooeyTooltip>
         )}
@@ -377,13 +369,6 @@ function EditMessage({
       </div>
     </div>
   );
-}
-
-function formatMessageTime(iso?: string): string {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 // Truncate text for collapsed view (first 200 characters or first 3 lines)

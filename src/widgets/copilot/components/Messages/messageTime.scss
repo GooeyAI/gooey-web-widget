@@ -1,0 +1,10 @@
+// The label is usually a tooltip's child, and a tooltip wraps its child in a
+// block div. That div lays the 12px text out against a strut sized by the
+// inherited 16px font, so the text baseline-aligns ~1.5px below the middle of
+// a box the flex row then centres — the label reads low next to the icons.
+//
+// Blockifying the label removes the strut: the wrapper is left with a single
+// block child and takes its height, so centring the box centres the text.
+.gooey-meta-label {
+  display: block;
+}
