@@ -1,113 +1,67 @@
 import clsx from "clsx";
 import { addInlineStyle } from "src/addStyles";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import {
-  formatClockTime,
-  formatMessageDate,
-  formatMessageTime,
-  isFromToday,
-} from "./helpers";
+import { formatFullTimestamp, formatMessageTime } from "./helpers";
 import style from "./messageTime.scss?inline";
 
 addInlineStyle(style);
 
-type LabelProps = {
-  createdAt?: string;
-  className?: string;
-  direction?: TooltipDirection;
-};
-
-type TooltipDirection = "top" | "bottom" | "left" | "right";
-
 /**
- * When a prompt was sent: "6:09 PM", trailed by the date on anything older
- * than today. It carries no tooltip because it holds nothing back — the label
- * is already the precise reading.
- */
-export function PromptTimeLabel({ createdAt, className }: LabelProps) {
-  return (
-    <MetaLabel className={className}>{formatMessageTime(createdAt)}</MetaLabel>
-  );
-}
-
-/**
- * What a response cost and when it landed: "10s · 10:34 PM", or "15s · Aug 3"
- * once a clock time alone would no longer say which day.
+ * When a message happened, and on a response that reports one, how long it
+ * took: "6:09 PM", "Aug 3", or "15s · Aug 3". A prompt is the same label
+ * without a duration — the two rows say the same kind of thing about their own
+ * half of a turn, so they say it the same way.
  *
- * The pair earns its place in a way an age would not. The duration is only
- * knowable here, and an absolute stamp is what someone comparing a reply
- * against a log, a report or their own memory needs. The two share one label
- * and one tooltip because they describe a single run between them, and the
- * tooltip spells that out in full — nothing there has to be decoded.
+ * The label states the least it can and still be unambiguous; the tooltip
+ * spells the moment out in full, which is what someone comparing a reply
+ * against a log, a report or their own memory needs without it cluttering
+ * every row. Duration and stamp share one label and one tooltip because
+ * between them they describe a single run.
  */
-export function ResponseTimingLabel({
+export function MessageTimeLabel({
   createdAt,
   runTimeStr = "",
   className,
-  direction = "top",
-}: LabelProps & { runTimeStr?: string }) {
-  const stamp = isFromToday(createdAt)
-    ? formatClockTime(createdAt)
-    : formatMessageDate(createdAt);
+}: {
+  createdAt?: string;
+  runTimeStr?: string;
+  className?: string;
+}) {
+  const label = [runTimeStr, formatMessageTime(createdAt)]
+    .filter(Boolean)
+    .join(" · ");
+  if (!label) return null;
 
+  const tooltip = describeRun(runTimeStr, createdAt);
+  if (!tooltip) return <MetaLabel className={className}>{label}</MetaLabel>;
   return (
-    <TooltipLabel
-      tooltip={describeRun(runTimeStr, createdAt)}
-      className={className}
-      direction={direction}
-    >
-      {[runTimeStr, stamp].filter(Boolean).join(" · ")}
-    </TooltipLabel>
+    <GooeyTooltip text={tooltip}>
+      <MetaLabel className={className}>{label}</MetaLabel>
+    </GooeyTooltip>
   );
 }
 
 /**
- * "Generated in 15s at 9:15 PM, Aug 3", less whichever part is unknown — and
- * nothing at all without a duration, since a stamp on its own is already
- * spelled out in the label and a tooltip repeating it would say nothing.
+ * "Generated in 15s at 9:15 PM, Aug 3, 2025", less whichever part is unknown.
+ * Without a duration — which most deployments do not show — the moment alone
+ * is still worth saying, because the label beside it is an abbreviation of it.
  */
 function describeRun(runTimeStr: string, createdAt?: string): string {
-  if (!runTimeStr) return "";
-  const clock = formatClockTime(createdAt);
-  const moment =
-    clock && !isFromToday(createdAt)
-      ? `${clock}, ${formatMessageDate(createdAt)}`
-      : clock;
+  const moment = formatFullTimestamp(createdAt);
+  if (!runTimeStr) return moment;
   return moment
     ? `Generated in ${runTimeStr} at ${moment}`
     : `Generated in ${runTimeStr}`;
 }
 
-/** Grey supporting text, explained on hover when there is more to say. */
-function TooltipLabel({
-  tooltip,
+/** The grey supporting text in a message's action row (time, run time). */
+function MetaLabel({
   children,
   className,
-  direction,
 }: {
-  tooltip: string;
   children: string;
   className?: string;
-  direction: TooltipDirection;
 }) {
-  if (!children) return null;
-  if (!tooltip) return <MetaLabel className={className}>{children}</MetaLabel>;
-  return (
-    <GooeyTooltip text={tooltip} direction={direction}>
-      <MetaLabel className={className}>{children}</MetaLabel>
-    </GooeyTooltip>
-  );
-}
-
-/** The grey supporting text in a message's action row (time, run time). */
-export function MetaLabel({
-  children,
-  className,
-}: {
-  children?: string;
-  className?: string;
-}) {
-  if (!children) return null;
   return (
     <span className={clsx("gooey-meta-label font_12_400 text-muted", className)}>
       {children}

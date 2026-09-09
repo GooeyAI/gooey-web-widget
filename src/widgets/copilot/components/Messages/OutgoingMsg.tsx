@@ -5,17 +5,15 @@ import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
-import IconCheck from "src/assets/SvgIcons/IconCheck";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import Button from "src/components/shared/Buttons/Button";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
+import CopyButton from "./CopyButton";
 import { isMobile } from "./helpers";
-import { PromptTimeLabel } from "./MessageTime";
+import { MessageTimeLabel } from "./MessageTime";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -233,7 +231,6 @@ function DisplayMessage({
   canEdit,
 }: DisplayMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { copied, signalCopied } = useCopyFeedback();
   // Nothing to show without text (e.g. an attachment-only message): the bubble
   // and the Copy/Edit actions all operate on text, so render nothing.
   if (!text) return null;
@@ -288,29 +285,10 @@ function DisplayMessage({
           isMobile() && "is-mobile",
         )}
       >
-        <PromptTimeLabel createdAt={createdAt} className="gmr-4" />
-        <GooeyTooltip
-          text={copied ? "Copied" : "Copy"}
-          direction="bottom"
-          forceShow={copied}
-        >
-          <IconButton
-            className="text-muted"
-            onClick={async () => {
-              await onCopy();
-              signalCopied();
-            }}
-            aria-label="Copy"
-          >
-            {copied ? (
-              <IconCheck size={ACTION_ICON_SIZE} />
-            ) : (
-              <IconCopy size={ACTION_ICON_SIZE} />
-            )}
-          </IconButton>
-        </GooeyTooltip>
+        <MessageTimeLabel createdAt={createdAt} className="gmr-4" />
+        <CopyButton onCopy={onCopy} />
         {!isBusy && canEdit && (
-          <GooeyTooltip text="Edit" direction="bottom">
+          <GooeyTooltip text="Edit">
             <IconButton
               className="text-muted"
               onClick={onEdit}

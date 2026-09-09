@@ -156,8 +156,7 @@ export function formatClockTime(iso?: string): string {
 /** The date alone, e.g. "Aug 3". Empty when there is nothing usable. */
 export function formatMessageDate(iso?: string): string {
   const date = parseTimestamp(iso);
-  if (!date) return "";
-  return formatCalendarDate(date, new Date());
+  return date ? formatCalendarDate(date) : "";
 }
 
 /**
@@ -171,22 +170,34 @@ export function isFromToday(iso?: string): boolean {
 }
 
 /**
- * When a message was sent, e.g. "1:24 PM" — trailed by the date once the
- * message is no longer from today, because a bare clock time on a message from
- * last week names an hour without saying which day.
+ * The shortest reading that is still unambiguous: "1:24 PM" while the message
+ * is from today, "Aug 3" once it is not. A bare clock time on last week's
+ * message names an hour without saying which day, and last week's exact minute
+ * is rarely what anyone is after — the tooltip carries both either way.
  */
 export function formatMessageTime(iso?: string): string {
-  const time = formatClockTime(iso);
-  if (!time || isFromToday(iso)) return time;
-  return `${time}, ${formatMessageDate(iso)}`;
+  return isFromToday(iso) ? formatClockTime(iso) : formatMessageDate(iso);
 }
 
-/** "12 Aug", carrying the year only when it is not the current one. */
-function formatCalendarDate(date: Date, now: Date): string {
+/**
+ * The precise moment a label abbreviates, e.g. "1:24 PM, Aug 3, 2025". The
+ * year is always spelled out here because this is the reading someone opens a
+ * tooltip to get.
+ */
+export function formatFullTimestamp(iso?: string): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  const day = formatCalendarDate(date, { alwaysYear: true });
+  return `${formatClockTime(iso)}, ${day}`;
+}
+
+/** "Aug 12", naming the year when asked or when it is not the current one. */
+function formatCalendarDate(date: Date, { alwaysYear = false } = {}): string {
+  const isThisYear = date.getFullYear() === new Date().getFullYear();
   return date.toLocaleDateString([], {
     month: "short",
     day: "numeric",
-    year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
+    year: alwaysYear || !isThisYear ? "numeric" : undefined,
   });
 }
 

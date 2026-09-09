@@ -2,8 +2,6 @@ import clsx from "clsx";
 import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
-import IconCheck from "src/assets/SvgIcons/IconCheck";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
@@ -13,8 +11,8 @@ import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
-import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
+import CopyButton from "./CopyButton";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -25,7 +23,7 @@ import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
-import { ResponseTimingLabel } from "./MessageTime";
+import { MessageTimeLabel } from "./MessageTime";
 import { useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
@@ -36,11 +34,7 @@ type ReplyButton = {
   isPressed?: boolean;
 };
 
-/**
- * The strip under a response. It holds the live timer while the response is
- * streaming and the actions once it has finished, so both land in the same
- * place and the row does not jump when the stream ends.
- */
+/** The strip of actions and supporting text under a finished response. */
 const ActionRow = ({ children }: { children: React.ReactNode }) => (
   <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
     {children}
@@ -74,7 +68,6 @@ const IncomingMsgActions = ({
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery, rerun } = useMessagesContext();
-  const { copied, signalCopied } = useCopyFeedback();
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -160,27 +153,16 @@ const IncomingMsgActions = ({
         <ActionRow>
           {/* Copy Text Message to clipboard */}
           {showCopy && (
-            <GooeyTooltip
-              text={copied ? "Copied" : "Copy Message"}
-              forceShow={copied}
-            >
-              <IconButton
-                onClick={async (e) => {
-                  await copyRenderedMessageToClipboard({
-                    currentTarget: e.currentTarget,
-                    messageId,
-                  });
-                  signalCopied();
-                }}
-                className="text-muted d-flex justify-content-center align-items-center h-100"
-              >
-                {copied ? (
-                  <IconCheck size={ACTION_ICON_SIZE} />
-                ) : (
-                  <IconCopy size={ACTION_ICON_SIZE} />
-                )}
-              </IconButton>
-            </GooeyTooltip>
+            <CopyButton
+              label="Copy Message"
+              className="d-flex justify-content-center align-items-center h-100"
+              onCopy={(event) =>
+                copyRenderedMessageToClipboard({
+                  currentTarget: event.currentTarget,
+                  messageId,
+                })
+              }
+            />
           )}
           {thumbButtons &&
             thumbButtons.map(
@@ -229,7 +211,7 @@ const IncomingMsgActions = ({
               </IconButton>
             </GooeyTooltip>
           )}
-          <ResponseTimingLabel
+          <MessageTimeLabel
             createdAt={data?.created_at}
             runTimeStr={runTimeStr}
             className="gml-4"
@@ -316,6 +298,10 @@ const IncomingMsg = memo(
     showRunLink: boolean;
     showRunTime: boolean;
     showToolCalls: boolean;
+    // Off for a response rendered as a still picture of itself — the share
+    // card, whose container sets `pointer-events: none`, so a copy button
+    // there could only be looked at.
+    showActionRow?: boolean;
   }) => {
     const {
       output_audio = [],
@@ -387,7 +373,7 @@ const IncomingMsg = memo(
           {/* The row belongs to a finished response. Copy and the timestamp do
               not depend on the backend sending any reply buttons, so the row is
               not gated on them. */}
-          {!isStreaming && (
+          {!isStreaming && props.showActionRow !== false && (
             <IncomingMsgActions
               data={props?.data}
               showRunLink={props.showRunLink}

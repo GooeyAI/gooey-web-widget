@@ -161,6 +161,7 @@ const ShareDialog = ({
                 autoPlay={false}
                 showRunLink={false}
                 showRunTime={false}
+                showActionRow={false}
                 showToolCalls={false}
                 id={firstAssistantMessage.id}
                 showSources={showSources}
