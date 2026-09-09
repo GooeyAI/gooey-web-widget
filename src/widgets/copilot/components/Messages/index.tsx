@@ -44,6 +44,7 @@ const Responses = (props: any) => {
           linkColor={config?.branding?.colors?.primary || "initial"}
           autoPlay={config?.autoPlayResponses}
           showRunLink={config?.showRunLink || false}
+          showRunTime={config?.showRunTime || false}
           showToolCalls={config?.showToolCalls || false}
         />
       );

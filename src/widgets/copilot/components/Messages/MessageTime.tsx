@@ -61,15 +61,21 @@ export function ResponseTimingLabel({
   );
 }
 
-/** "Generated in 15s at 9:15 PM, Aug 3", less whichever part is unknown. */
+/**
+ * "Generated in 15s at 9:15 PM, Aug 3", less whichever part is unknown — and
+ * nothing at all without a duration, since a stamp on its own is already
+ * spelled out in the label and a tooltip repeating it would say nothing.
+ */
 function describeRun(runTimeStr: string, createdAt?: string): string {
+  if (!runTimeStr) return "";
   const clock = formatClockTime(createdAt);
   const moment =
     clock && !isFromToday(createdAt)
       ? `${clock}, ${formatMessageDate(createdAt)}`
       : clock;
-  if (runTimeStr && moment) return `Generated in ${runTimeStr} at ${moment}`;
-  return runTimeStr ? `Generated in ${runTimeStr}` : moment;
+  return moment
+    ? `Generated in ${runTimeStr} at ${moment}`
+    : `Generated in ${runTimeStr}`;
 }
 
 /** Grey supporting text, explained on hover when there is more to say. */

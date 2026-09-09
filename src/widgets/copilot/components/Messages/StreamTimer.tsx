@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
-import { formatRunTime } from "./helpers";
-import { MetaLabel } from "./MessageTime";
-
-// Comfortably finer than the second the label counts in, so the number turns
-// over close enough to the boundary that nobody could catch it late.
-const TICK_MS = 250;
+import { useState } from "react";
 
 /**
  * Times a response in the browser while it streams.
+ *
+ * Nothing ticks on screen while it does. This measures only so that a finished
+ * response has a duration to report where the backend sent none; a counter
+ * climbing beside an answer that has not arrived reads as an apology, and is
+ * the last thing a visitor to a customer's site needs to watch.
  *
  * `startedAt` is pinned when a message starts streaming and `measuredSec` is
  * frozen when it stops, so the pair only ever describes a response the viewer
@@ -53,38 +52,3 @@ const stopState = (state: TimerState): TimerState => ({
       ? null
       : (performance.now() - state.startedAt) / 1000,
 });
-
-/**
- * The live half of the timer. It owns its own tick so that ten updates a
- * second re-render this label alone and not the message around it, which would
- * otherwise re-parse the response markdown on every frame.
- */
-export function StreamTimerLabel({
-  startedAt,
-  className,
-}: {
-  startedAt: number;
-  className?: string;
-}) {
-  const [elapsedSec, setElapsedSec] = useState(
-    () => (performance.now() - startedAt) / 1000,
-  );
-
-  useEffect(() => {
-    const id = setInterval(
-      () => setElapsedSec((performance.now() - startedAt) / 1000),
-      TICK_MS,
-    );
-    return () => clearInterval(id);
-  }, [startedAt]);
-
-  // Whole seconds only, counting 1, 2, 3: a tenths digit spinning next to a
-  // response that is still arriving is motion the reader has to ignore, and it
-  // implies a precision the wait does not have. The final figure, which is
-  // read at rest, keeps its decimal.
-  return (
-    <MetaLabel className={className}>
-      {formatRunTime(Math.max(1, Math.floor(elapsedSec)))}
-    </MetaLabel>
-  );
-}

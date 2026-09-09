@@ -26,7 +26,7 @@ import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
 import { ResponseTimingLabel } from "./MessageTime";
-import { StreamTimerLabel, useStreamTimer } from "./StreamTimer";
+import { useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
 
@@ -50,6 +50,7 @@ const ActionRow = ({ children }: { children: React.ReactNode }) => (
 const IncomingMsgActions = ({
   data,
   showRunLink,
+  showRunTime,
   messageId,
   hasText,
   hasContent,
@@ -64,6 +65,7 @@ const IncomingMsgActions = ({
     run_time?: number;
   };
   showRunLink: boolean;
+  showRunTime: boolean;
   messageId: string;
   hasText: boolean;
   hasContent: boolean;
@@ -94,13 +96,17 @@ const IncomingMsgActions = ({
     }
   });
 
+  // How long a run took is off by default: on a customer's own site it reads
+  // as a report card on their agent, not as information their visitors asked
+  // for. Gooey's own surfaces, where the number is the point, opt in.
+  //
   // Whoever actually knows wins: `run_time_sec` is what the stream's final
   // response carries, a bare `run_time` is accepted too so a host controller
   // can use the name its own payloads use, and the browser's own measurement
   // is the last resort for a response that streamed without either.
-  const runTimeStr = formatRunTime(
-    data?.run_time_sec ?? data?.run_time ?? measuredSec,
-  );
+  const runTimeStr = showRunTime
+    ? formatRunTime(data?.run_time_sec ?? data?.run_time ?? measuredSec)
+    : "";
   // The response reports its own stamp again now, so either half is reason
   // enough to draw the row.
   const hasTiming = Boolean(runTimeStr || data?.created_at);
@@ -308,6 +314,7 @@ const IncomingMsg = memo(
     linkColor: string;
     autoPlay: boolean | undefined;
     showRunLink: boolean;
+    showRunTime: boolean;
     showToolCalls: boolean;
   }) => {
     const {
@@ -323,23 +330,15 @@ const IncomingMsg = memo(
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
     const hasText = hasResponseText(props.data);
-    const { startedAt, measuredSec } = useStreamTimer(isStreaming);
+    const { measuredSec } = useStreamTimer(isStreaming);
 
-    // Nothing has arrived yet: the timer keeps the blinking dot company so the
-    // wait is legible before there is any text to put a row under.
+    // Nothing has arrived yet, so there is nothing to put a row under.
     if (
       !props.data ||
       type === STREAM_MESSAGE_TYPES.CONVERSATION_START ||
       type === STREAM_MESSAGE_TYPES.RUN_START
     ) {
-      return (
-        <div className="d-flex align-center">
-          <ResponseLoader show={true} />
-          {startedAt !== null && (
-            <StreamTimerLabel startedAt={startedAt} className="gml-8" />
-          )}
-        </div>
-      );
+      return <ResponseLoader show={true} />;
     }
 
     return (
@@ -385,20 +384,14 @@ const IncomingMsg = memo(
               ></video>
             </div>
           )}
-          {/* While streaming, the row carries the timer alone; once the
-              response is final it carries the actions. Copy and the timestamp
-              do not depend on the backend sending any reply buttons, so the
-              row is not gated on them. */}
-          {isStreaming ? (
-            startedAt !== null && (
-              <ActionRow>
-                <StreamTimerLabel startedAt={startedAt} />
-              </ActionRow>
-            )
-          ) : (
+          {/* The row belongs to a finished response. Copy and the timestamp do
+              not depend on the backend sending any reply buttons, so the row is
+              not gated on them. */}
+          {!isStreaming && (
             <IncomingMsgActions
               data={props?.data}
               showRunLink={props.showRunLink}
+              showRunTime={props.showRunTime}
               messageId={props.id}
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
