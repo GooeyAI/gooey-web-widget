@@ -3,7 +3,7 @@ import style from "./outgoing.scss?inline";
 import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
-import { MESSAGE_GUTTER } from "../constants";
+import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconCheck from "src/assets/SvgIcons/IconCheck";
@@ -15,7 +15,7 @@ import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
 import { useMessagesContext } from "src/contexts/hooks";
 import GooeyTextArea from "../ChatInput/GooeyTextArea";
 import { isMobile } from "./helpers";
-import { MessageTimeLabel } from "./MessageTime";
+import { PromptTimeLabel } from "./MessageTime";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -288,11 +288,7 @@ function DisplayMessage({
           isMobile() && "is-mobile",
         )}
       >
-        <MessageTimeLabel
-          createdAt={createdAt}
-          className="gmr-4"
-          direction="bottom"
-        />
+        <PromptTimeLabel createdAt={createdAt} className="gmr-4" />
         <GooeyTooltip
           text={copied ? "Copied" : "Copy"}
           direction="bottom"
@@ -306,7 +302,11 @@ function DisplayMessage({
             }}
             aria-label="Copy"
           >
-            {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+            {copied ? (
+              <IconCheck size={ACTION_ICON_SIZE} />
+            ) : (
+              <IconCopy size={ACTION_ICON_SIZE} />
+            )}
           </IconButton>
         </GooeyTooltip>
         {!isBusy && canEdit && (
@@ -317,7 +317,7 @@ function DisplayMessage({
               disabled={isBusy}
               aria-label="Edit"
             >
-              <IconPencilEdit size={18} />
+              <IconPencilEdit size={ACTION_ICON_SIZE} />
             </IconButton>
           </GooeyTooltip>
         )}

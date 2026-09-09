@@ -14,7 +14,7 @@ import ToolCalls from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
 import { useCopyFeedback } from "src/components/shared/useCopyFeedback";
-import { MESSAGE_GUTTER } from "../constants";
+import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -25,7 +25,7 @@ import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
-import { MessageTimeLabel } from "./MessageTime";
+import { ResponseTimingLabel } from "./MessageTime";
 import { StreamTimerLabel, useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
@@ -101,9 +101,9 @@ const IncomingMsgActions = ({
   const runTimeStr = formatRunTime(
     data?.run_time_sec ?? data?.run_time ?? measuredSec,
   );
-  // The age is the prompt's to report, so a response with a timestamp and no
-  // duration has nothing to put in the row.
-  const hasTiming = Boolean(runTimeStr);
+  // The response reports its own stamp again now, so either half is reason
+  // enough to draw the row.
+  const hasTiming = Boolean(runTimeStr || data?.created_at);
   // Copy puts the rendered message body on the clipboard, so it needs a body.
   const showCopy = hasText;
   const showDebugLink = showRunLink && Boolean(data?.web_url);
@@ -168,7 +168,11 @@ const IncomingMsgActions = ({
                 }}
                 className="text-muted d-flex justify-content-center align-items-center h-100"
               >
-                {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                {copied ? (
+                  <IconCheck size={ACTION_ICON_SIZE} />
+                ) : (
+                  <IconCopy size={ACTION_ICON_SIZE} />
+                )}
               </IconButton>
             </GooeyTooltip>
           )}
@@ -193,11 +197,21 @@ const IncomingMsgActions = ({
                 ),
             )}
           {showDebugLink && (
-            <a href={data?.web_url} target="_blank" rel="noopener noreferrer">
-              <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
-                <IconBug size={12} />
-              </IconButton>
-            </a>
+            <GooeyTooltip text="Debug this run">
+              {/* The tooltip's own click handler calls preventDefault, and an
+                  ancestor doing that cancels a link's navigation. Keeping the
+                  click here leaves the handler unreached and the link working. */}
+              <a
+                href={data?.web_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
+                  <IconBug size={ACTION_ICON_SIZE} />
+                </IconButton>
+              </a>
+            </GooeyTooltip>
           )}
           {showRerun && (
             <GooeyTooltip text="Re-run">
@@ -205,14 +219,13 @@ const IncomingMsgActions = ({
                 onClick={() => rerun?.(data?.web_url!)}
                 className="text-muted d-flex justify-content-center align-items-center h-100"
               >
-                <IconRefresh size={12} />
+                <IconRefresh size={ACTION_ICON_SIZE} />
               </IconButton>
             </GooeyTooltip>
           )}
-          <MessageTimeLabel
+          <ResponseTimingLabel
             createdAt={data?.created_at}
             runTimeStr={runTimeStr}
-            showAge={false}
             className="gml-4"
           />
         </ActionRow>
@@ -253,13 +266,17 @@ const FeedbackButton = ({
         }
       >
         <div className={clsx("gooey-feedback-button", "my-auto", className)}>
-          <Button
+          {/* IconButton, not Button: Button wraps its children in a div, whose
+              line box is sized by the inherited font and leaves the box 2px
+              taller than the row's other buttons with the glyph sitting high
+              in it. An icon-only button has no use for that wrapper. */}
+          <IconButton
             key={button.id}
             className="text-muted d-flex justify-content-center align-items-center h-100"
             onClick={onClick}
           >
             {icon}
-          </Button>
+          </IconButton>
         </div>
       </GooeyTooltip>
     );

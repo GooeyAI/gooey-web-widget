@@ -7,6 +7,7 @@ import IconGoogleSlides from "src/assets/SvgIcons/IconGoogleSlides";
 import IconPDF from "src/assets/SvgIcons/IconPDF";
 import IconYoutube from "src/assets/SvgIcons/IconYoutube";
 import IconGlobeNet from "src/assets/SvgIcons/IconGlobeNet";
+import { ACTION_ICON_SIZE } from "../constants";
 
 const GOOEY_META_SCRAPPER_API = "https://metascraper.gooey.ai";
 
@@ -120,7 +121,7 @@ export const fetchUrlMeta = async (url: string) => {
 };
 
 export const getFeedbackButtonIcon = (title: string, isFilled: boolean) => {
-  let size = 14;
+  const size = ACTION_ICON_SIZE;
   switch (title) {
     case "FEEDBACK_THUMBS_UP":
       return (
@@ -145,49 +146,39 @@ function parseTimestamp(iso?: string): Date | null {
   return isNaN(date.getTime()) ? null : date;
 }
 
-/**
- * The exact moment a message was sent, e.g. "1:24 PM" — with the date in front
- * of it once the message is no longer from today, because a bare clock time on
- * a message from last week names an hour without saying which day.
- *
- * This is the precise reading; the label on screen shows `formatRelativeTime`.
- */
-export function formatMessageTime(iso?: string): string {
+/** Clock time alone, e.g. "9:15 PM". Empty when there is nothing usable. */
+export function formatClockTime(iso?: string): string {
   const date = parseTimestamp(iso);
   if (!date) return "";
-  const time = date.toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const now = new Date();
-  if (date.toDateString() === now.toDateString()) return time;
-  return `${formatCalendarDate(date, now)}, ${time}`;
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/** The date alone, e.g. "Aug 3". Empty when there is nothing usable. */
+export function formatMessageDate(iso?: string): string {
+  const date = parseTimestamp(iso);
+  if (!date) return "";
+  return formatCalendarDate(date, new Date());
 }
 
 /**
- * Age of a message as "12s ago" / "5m ago" / "3h ago" / "2d ago". Past a week
- * an age stops being informative, so it gives the date instead.
- *
- * `now` is a parameter rather than read from the clock so a caller that ticks
- * can drive every label from one timestamp and the text stays reproducible.
+ * Whether a message is from today, which is what decides between naming an
+ * hour and naming a day: "9:15 PM" is unambiguous only while today lasts.
  */
-export function formatRelativeTime(
-  iso?: string,
-  now: number = Date.now(),
-): string {
+export function isFromToday(iso?: string): boolean {
   const date = parseTimestamp(iso);
-  if (!date) return "";
-  const ageSec = (now - date.getTime()) / 1000;
-  // A timestamp slightly in the future means the two clocks disagree, not that
-  // the message is from the future; the floor keeps that out of sight.
-  if (ageSec < 60) return `${Math.max(1, Math.round(ageSec))}s ago`;
-  const minutes = Math.floor(ageSec / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return formatCalendarDate(date, new Date(now));
+  if (!date) return false;
+  return date.toDateString() === new Date().toDateString();
+}
+
+/**
+ * When a message was sent, e.g. "1:24 PM" — trailed by the date once the
+ * message is no longer from today, because a bare clock time on a message from
+ * last week names an hour without saying which day.
+ */
+export function formatMessageTime(iso?: string): string {
+  const time = formatClockTime(iso);
+  if (!time || isFromToday(iso)) return time;
+  return `${time}, ${formatMessageDate(iso)}`;
 }
 
 /** "12 Aug", carrying the year only when it is not the current one. */

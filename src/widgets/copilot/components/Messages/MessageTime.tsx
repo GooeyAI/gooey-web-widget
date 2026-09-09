@@ -1,89 +1,97 @@
 import clsx from "clsx";
-import { useEffect, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { formatMessageTime, formatRelativeTime } from "./helpers";
+import {
+  formatClockTime,
+  formatMessageDate,
+  formatMessageTime,
+  isFromToday,
+} from "./helpers";
 import style from "./messageTime.scss?inline";
 
 addInlineStyle(style);
 
-const MINUTE_MS = 60 * 1000;
-const HOUR_MS = 60 * MINUTE_MS;
+type LabelProps = {
+  createdAt?: string;
+  className?: string;
+  direction?: TooltipDirection;
+};
+
+type TooltipDirection = "top" | "bottom" | "left" | "right";
 
 /**
- * A message's supporting time text, with the exact clock time a hover away.
- *
- * An age ("12s ago") is what a reader of a conversation wants at a glance —
- * how fresh is this? — but only once per exchange: a reply carries the same
- * age as the prompt directly above it, so `showAge` lets the response drop it
- * and show only how long it took. Either way the tooltip reports both, so the
- * precise reading is never further than a hover.
- *
- * Time and duration share one label and therefore one tooltip: they describe
- * one event between them, and splitting them into two hover targets would only
- * make the row fussier to read.
+ * When a prompt was sent: "6:09 PM", trailed by the date on anything older
+ * than today. It carries no tooltip because it holds nothing back — the label
+ * is already the precise reading.
  */
-export function MessageTimeLabel({
-  createdAt,
-  runTimeStr = "",
-  showAge = true,
-  className,
-  direction = "top",
-}: {
-  createdAt?: string;
-  runTimeStr?: string;
-  showAge?: boolean;
-  className?: string;
-  direction?: "top" | "bottom" | "left" | "right";
-}) {
-  // Withholding the timestamp also stops the clock: nothing on screen goes
-  // stale, so nothing needs a tick.
-  const relativeStr = useRelativeTime(showAge ? createdAt : undefined);
-  const label = [relativeStr, runTimeStr].filter(Boolean).join(" · ");
-  if (!label) return null;
-
-  const tooltip = [
-    formatMessageTime(createdAt),
-    runTimeStr && `Completed in ${runTimeStr}`,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
+export function PromptTimeLabel({ createdAt, className }: LabelProps) {
   return (
-    <GooeyTooltip text={tooltip} direction={direction}>
-      <MetaLabel className={className}>{label}</MetaLabel>
-    </GooeyTooltip>
+    <MetaLabel className={className}>{formatMessageTime(createdAt)}</MetaLabel>
   );
 }
 
 /**
- * Keeps a relative time honest by re-rendering it as it ages.
+ * What a response cost and when it landed: "10s · 10:34 PM", or "15s · Aug 3"
+ * once a clock time alone would no longer say which day.
  *
- * The tick follows the coarsest digit on screen, so a message minted seconds
- * ago updates every second while an old one — the overwhelming majority in any
- * loaded conversation — costs nothing and holds no timer at all.
+ * The pair earns its place in a way an age would not. The duration is only
+ * knowable here, and an absolute stamp is what someone comparing a reply
+ * against a log, a report or their own memory needs. The two share one label
+ * and one tooltip because they describe a single run between them, and the
+ * tooltip spells that out in full — nothing there has to be decoded.
  */
-function useRelativeTime(iso?: string): string {
-  const [now, setNow] = useState(() => Date.now());
-  const createdAt = iso ? new Date(iso).getTime() : NaN;
-  const tickMs = tickMsFor(now - createdAt);
+export function ResponseTimingLabel({
+  createdAt,
+  runTimeStr = "",
+  className,
+  direction = "top",
+}: LabelProps & { runTimeStr?: string }) {
+  const stamp = isFromToday(createdAt)
+    ? formatClockTime(createdAt)
+    : formatMessageDate(createdAt);
 
-  useEffect(() => {
-    if (tickMs === null) return;
-    const id = setInterval(() => setNow(Date.now()), tickMs);
-    return () => clearInterval(id);
-  }, [tickMs]);
-
-  return formatRelativeTime(iso, now);
+  return (
+    <TooltipLabel
+      tooltip={describeRun(runTimeStr, createdAt)}
+      className={className}
+      direction={direction}
+    >
+      {[runTimeStr, stamp].filter(Boolean).join(" · ")}
+    </TooltipLabel>
+  );
 }
 
-// NaN ages (no timestamp, or an unparseable one) fall through to null, as
-// every comparison against them is false.
-const tickMsFor = (ageMs: number): number | null => {
-  if (ageMs < MINUTE_MS) return 1000;
-  if (ageMs < HOUR_MS) return 30 * 1000;
-  return null;
-};
+/** "Generated in 15s at 9:15 PM, Aug 3", less whichever part is unknown. */
+function describeRun(runTimeStr: string, createdAt?: string): string {
+  const clock = formatClockTime(createdAt);
+  const moment =
+    clock && !isFromToday(createdAt)
+      ? `${clock}, ${formatMessageDate(createdAt)}`
+      : clock;
+  if (runTimeStr && moment) return `Generated in ${runTimeStr} at ${moment}`;
+  return runTimeStr ? `Generated in ${runTimeStr}` : moment;
+}
+
+/** Grey supporting text, explained on hover when there is more to say. */
+function TooltipLabel({
+  tooltip,
+  children,
+  className,
+  direction,
+}: {
+  tooltip: string;
+  children: string;
+  className?: string;
+  direction: TooltipDirection;
+}) {
+  if (!children) return null;
+  if (!tooltip) return <MetaLabel className={className}>{children}</MetaLabel>;
+  return (
+    <GooeyTooltip text={tooltip} direction={direction}>
+      <MetaLabel className={className}>{children}</MetaLabel>
+    </GooeyTooltip>
+  );
+}
 
 /** The grey supporting text in a message's action row (time, run time). */
 export function MetaLabel({
