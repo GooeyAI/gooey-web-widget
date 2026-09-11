@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import Button from "src/components/shared/Buttons/Button";
 import GooeyTooltip from "src/components/shared/Tooltip";
@@ -51,7 +52,7 @@ const OutgoingMsg = memo(
   }: OutgoingMsgProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState("");
-    const { onEditQuery, isControllerEdit, isSending, isReceiving } =
+    const { onEditQuery, isControllerEdit, isSending, isReceiving, rerun } =
       useMessagesContext();
 
     let mapUrl;
@@ -75,6 +76,9 @@ const OutgoingMsg = memo(
     // a controller-driven edit re-runs the originating run, so it needs web_url
     const canEdit =
       Boolean(onEditQuery) && (!isControllerEdit || Boolean(web_url));
+    // Re-run sits on the prompt, not the reply: it is the question being asked
+    // again. The host replays the run that produced this turn, so it needs web_url.
+    const canRerun = Boolean(rerun) && Boolean(web_url);
 
     const handleCopy = async () => {
       try {
@@ -199,6 +203,8 @@ const OutgoingMsg = memo(
               onCopy={handleCopy}
               onEdit={handleStartEdit}
               canEdit={canEdit}
+              onRerun={() => rerun?.(web_url!)}
+              canRerun={canRerun}
             />
           )}
         </div>
@@ -216,11 +222,13 @@ interface DisplayMessageProps {
   onCopy: () => void | Promise<void>;
   onEdit: () => void;
   canEdit: boolean;
+  onRerun: () => void;
+  canRerun: boolean;
 }
 
 /**
  * Read-only user message: text bubble (with expand/collapse) and the hover
- * toolbar (time, Copy, Edit). Renders nothing when there is no text.
+ * toolbar (time, Copy, Edit, Re-run). Renders nothing when there is no text.
  */
 function DisplayMessage({
   text,
@@ -229,6 +237,8 @@ function DisplayMessage({
   onCopy,
   onEdit,
   canEdit,
+  onRerun,
+  canRerun,
 }: DisplayMessageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   // Nothing to show without text (e.g. an attachment-only message): the bubble
@@ -296,6 +306,18 @@ function DisplayMessage({
               aria-label="Edit"
             >
               <IconPencilEdit size={ACTION_ICON_SIZE} />
+            </IconButton>
+          </GooeyTooltip>
+        )}
+        {!isBusy && canRerun && (
+          <GooeyTooltip text="Re-run">
+            <IconButton
+              className="text-muted"
+              onClick={onRerun}
+              disabled={isBusy}
+              aria-label="Re-run"
+            >
+              <IconRefresh size={ACTION_ICON_SIZE} />
             </IconButton>
           </GooeyTooltip>
         )}

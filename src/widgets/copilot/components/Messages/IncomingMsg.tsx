@@ -3,7 +3,6 @@ import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
-import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
@@ -82,7 +81,7 @@ const IncomingMsgActions = ({
 }) => {
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
-  const { initializeQuery, rerun } = useMessagesContext();
+  const { initializeQuery } = useMessagesContext();
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -121,7 +120,6 @@ const IncomingMsgActions = ({
   // Copy puts the rendered message body on the clipboard, so it needs a body.
   const showCopy = hasText;
   const showDebugLink = showRunLink && Boolean(data?.web_url);
-  const showRerun = Boolean(rerun) && Boolean(data?.web_url);
   // The action row stands on its own: thumbs are optional extras the backend
   // adds, not the reason the row exists. An empty response is the exception —
   // it paints no bubble, so a lone timestamp would float in the gutter.
@@ -130,8 +128,7 @@ const IncomingMsgActions = ({
     (hasTiming ||
       showCopy ||
       thumbButtons.length > 0 ||
-      showDebugLink ||
-      showRerun);
+      showDebugLink);
 
   return (
     <div className="mw-100">
@@ -214,16 +211,6 @@ const IncomingMsgActions = ({
                   <IconBug size={ACTION_ICON_SIZE} />
                 </IconButton>
               </a>
-            </GooeyTooltip>
-          )}
-          {showRerun && (
-            <GooeyTooltip text="Re-run">
-              <IconButton
-                onClick={() => rerun?.(data?.web_url!)}
-                className="text-muted d-flex justify-content-center align-items-center h-100"
-              >
-                <IconRefresh size={ACTION_ICON_SIZE} />
-              </IconButton>
             </GooeyTooltip>
           )}
           <MessageTimeLabel
