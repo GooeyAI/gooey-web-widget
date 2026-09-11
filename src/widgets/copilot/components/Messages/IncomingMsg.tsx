@@ -18,6 +18,7 @@ import {
   copyRenderedMessageToClipboard,
   formatRunTime,
   getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
+  isMobile,
 } from "./helpers";
 import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
@@ -35,8 +36,20 @@ type ReplyButton = {
 };
 
 /** The strip of actions and supporting text under a finished response. */
-const ActionRow = ({ children }: { children: React.ReactNode }) => (
-  <div className="gooey-feedback-actions d-flex align-center gmt-2 justify-content-start">
+const ActionRow = ({
+  hoverOnly,
+  children,
+}: {
+  hoverOnly: boolean;
+  children: React.ReactNode;
+}) => (
+  <div
+    className={clsx(
+      "gooey-feedback-actions d-flex align-center gmt-2 justify-content-start",
+      hoverOnly && "is-hover-only",
+      isMobile() && "is-mobile",
+    )}
+  >
     {children}
   </div>
 );
@@ -45,6 +58,7 @@ const IncomingMsgActions = ({
   data,
   showRunLink,
   showRunTime,
+  isLatestResponse,
   messageId,
   hasText,
   hasContent,
@@ -60,6 +74,7 @@ const IncomingMsgActions = ({
   };
   showRunLink: boolean;
   showRunTime: boolean;
+  isLatestResponse: boolean;
   messageId: string;
   hasText: boolean;
   hasContent: boolean;
@@ -150,7 +165,7 @@ const IncomingMsgActions = ({
         </div>
       )}
       {showActions && (
-        <ActionRow>
+        <ActionRow hoverOnly={!isLatestResponse}>
           {/* Copy Text Message to clipboard */}
           {showCopy && (
             <CopyButton
@@ -298,6 +313,10 @@ const IncomingMsg = memo(
     showRunLink: boolean;
     showRunTime: boolean;
     showToolCalls: boolean;
+    // The newest response keeps its action row on show; every response behind
+    // it reveals one on hover. Absent, a response is treated as the newest,
+    // so a caller that renders a response on its own does not lose the row.
+    isLatestResponse?: boolean;
     // Off for a response rendered as a still picture of itself — the share
     // card, whose container sets `pointer-events: none`, so a copy button
     // there could only be looked at.
@@ -378,6 +397,7 @@ const IncomingMsg = memo(
               data={props?.data}
               showRunLink={props.showRunLink}
               showRunTime={props.showRunTime}
+              isLatestResponse={props.isLatestResponse ?? true}
               messageId={props.id}
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}

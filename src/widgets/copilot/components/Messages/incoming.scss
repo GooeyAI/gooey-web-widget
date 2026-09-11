@@ -34,6 +34,22 @@
   gap: 4px;
 }
 
+// Once the conversation has moved past a response, its row has had its moment:
+// the newest response keeps one on show, older ones give theirs back on hover.
+// Same mechanism as the prompt row next door in outgoing.scss.
+.gooey-feedback-actions.is-hover-only {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.gooey-incomingMsg:hover .gooey-feedback-actions.is-hover-only,
+.gooey-feedback-actions.is-hover-only:focus-within {
+  opacity: 1;
+}
+// A touch device has no hover to give it back with, so it never goes away.
+.gooey-feedback-actions.is-hover-only.is-mobile {
+  opacity: 1;
+}
+
 .gooey-feedback-button {
   white-space: nowrap;
 }

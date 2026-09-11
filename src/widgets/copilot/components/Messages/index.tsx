@@ -46,6 +46,7 @@ const Responses = (props: any) => {
           showRunLink={config?.showRunLink || false}
           showRunTime={config?.showRunTime || false}
           showToolCalls={config?.showToolCalls || false}
+          isLatestResponse={id === props.latestResponseId}
         />
       );
     }
@@ -66,6 +67,15 @@ const Messages = () => {
   const beforeIds = lastUserIdx >= 0 ? queue.slice(0, lastUserIdx) : queue;
   const anchorIds = lastUserIdx >= 0 ? queue.slice(lastUserIdx) : [];
   const latestUserId = anchorIds[0] ?? null;
+  // The newest response is the only one that keeps its action row on show. Read
+  // from the conversation rather than from what arrived this session, so a
+  // reload leaves the row where the reader last saw it.
+  const latestResponseId = useMemo(() => {
+    for (let i = queue.length - 1; i >= 0; i--) {
+      if (messages?.get(queue[i])?.role !== "user") return queue[i];
+    }
+    return null;
+  }, [queue, messages]);
 
   const {
     scrollContainerRef,
@@ -95,11 +105,19 @@ const Messages = () => {
         )}
       >
         <div className="mw-760 mx-auto">
-          <Responses queue={beforeIds} data={data} />
+          <Responses
+            queue={beforeIds}
+            data={data}
+            latestResponseId={latestResponseId}
+          />
         </div>
         {anchorIds.length > 0 ? (
           <div ref={anchorRef} className="mw-760 mx-auto gooey-anchor-pair">
-            <Responses queue={anchorIds} data={data} />
+            <Responses
+              queue={anchorIds}
+              data={data}
+              latestResponseId={latestResponseId}
+            />
             <ResponseLoader show={isSending} />
           </div>
         ) : (
