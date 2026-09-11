@@ -155,6 +155,16 @@ A boolean that dictates whether sources of information (if any) should be shown.
 
 A boolean that dictates whether to show deatils of functions/tools called by LLM.
 
+##### `showRunTime`
+
+A boolean that dictates whether a response reports how long it took to generate,
+e.g. `3.2s · 6:09 PM` under the reply instead of `6:09 PM` alone. Defaults to
+`false`, on the view that a duration beside an answer reads as a verdict on the
+agent rather than as something a visitor asked for. Turn it on where the number
+is the point — while building and tuning an agent, or when debugging one.
+
+The time a message was sent is shown either way, and is not affected by this.
+
 
 ##### `branding: object`
 

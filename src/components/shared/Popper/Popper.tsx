@@ -18,11 +18,17 @@ interface PopperProps extends React.HTMLAttributes<HTMLDivElement> {
   direction?: PopperDirection;
   showModal: boolean;
   ModalProps?: Record<string, any>;
+  /** Gap in px between the modal and its anchor. */
+  offset?: number;
 }
 
 // Map your direction prop to Popper.js placement
 const getPopperPlacement = (direction: PopperDirection): Placement => {
   const { x, y } = direction;
+  // "auto" hands the choice to Popper, which takes whichever side has the most
+  // room. Worth asking for when no side is inherently right — a modal on a
+  // small anchor in a 360px column often has room on only one of them.
+  if (x === "auto" || y === "auto") return "auto";
   if (y === "top")
     return x === "left" ? "top-start" : x === "right" ? "top-end" : "top";
   if (y === "bottom")
@@ -44,6 +50,7 @@ const Modal = ({
   style: styleProp,
   className = "",
   showModal,
+  offset,
   ...rest
 }: {
   ModalContent: () => React.ReactNode;
@@ -52,6 +59,7 @@ const Modal = ({
   style?: React.CSSProperties;
   className?: string;
   showModal: boolean;
+  offset: number;
 }) => {
   const popperRef = useRef<HTMLDivElement>(null);
 
@@ -60,10 +68,25 @@ const Modal = ({
       const instance = createPopper(referenceElement, popperRef.current, {
         placement: getPopperPlacement(direction),
         modifiers: [
+          { name: "offset", options: { offset: [0, offset] } },
           { name: "preventOverflow", options: { padding: 8 } },
+          // Keeps a modal's pointer on its anchor after preventOverflow has slid
+          // the modal along that axis, and off the rounded corners. Modals with
+          // no `[data-popper-arrow]` child are unaffected.
+          { name: "arrow", options: { padding: 8 } },
           {
             name: "flip",
-            options: { fallbackPlacements: ["top", "bottom", "right", "left"] },
+            options: {
+              // Only give up on the requested side when that side itself has no
+              // room. Flip checks the cross axis too by default, which in a
+              // 360px column means a modal merely wider than the space either
+              // side of its anchor gets moved beside the anchor instead of
+              // above it — while the caller's arrow still points down. Sliding
+              // it along that axis is preventOverflow's job, not a reason to
+              // change sides.
+              altAxis: false,
+              fallbackPlacements: ["top", "bottom", "right", "left"],
+            },
           },
         ],
       });
@@ -71,7 +94,7 @@ const Modal = ({
         instance.destroy();
       };
     }
-  }, [referenceElement, direction, showModal]);
+  }, [referenceElement, direction, showModal, offset]);
 
   if (!referenceElement || !ModalContent || !showModal) return null;
   return (
@@ -92,6 +115,7 @@ const GooeyPopper = ({
   direction = { x: "center", y: "bottom" },
   showModal,
   ModalProps,
+  offset = 0,
   ...rest
 }: PopperProps) => {
   const refContainer = useRef<HTMLDivElement>(null);
@@ -106,6 +130,7 @@ const GooeyPopper = ({
             direction={direction}
             ModalContent={ModalContent}
             showModal={showModal}
+            offset={offset}
             {...ModalProps}
           />,
           shadowRoot?.querySelector(".gooey-embed-container") || document.body,

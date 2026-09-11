@@ -36,7 +36,7 @@ const Header = () => {
       <div className="d-flex align-center">
         {/* Sidebar button */}
         {layoutController?.showSidebarButton && (
-          <GooeyTooltip text="Open sidebar" direction="right">
+          <GooeyTooltip text="Open sidebar">
             <IconButton
               id="sidebar-toggle-icon-header"
               variant="text"
@@ -47,7 +47,7 @@ const Header = () => {
             </IconButton>
           </GooeyTooltip>
         )}
-        <GooeyTooltip text="New Chat" disabled={isEmpty} direction="bottom">
+        <GooeyTooltip text="New Chat" disabled={isEmpty}>
           <Button onClick={handleNewConversation} disabled={isEmpty}>
             <div className="d-flex align-center">
               <BotAvatar
@@ -71,7 +71,6 @@ const Header = () => {
               text={
                 layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
               }
-              direction="bottom"
             >
               <IconButton
                 variant="text"
@@ -88,7 +87,7 @@ const Header = () => {
           )}
           {/* Close / minimize button */}
           {layoutController?.showCloseButton && (
-            <GooeyTooltip text="Close" direction="left">
+            <GooeyTooltip text="Close">
               <IconButton
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
@@ -111,7 +110,7 @@ const Header = () => {
             )}
 
           {layoutController?.isInline && (
-            <GooeyTooltip text="New Chat" direction="left" disabled={isEmpty}>
+            <GooeyTooltip text="New Chat" disabled={isEmpty}>
               <IconButton
                 disabled={isEmpty}
                 variant="text"

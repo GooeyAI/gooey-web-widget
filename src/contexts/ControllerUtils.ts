@@ -11,7 +11,11 @@ import { Conversation } from "./ConversationLayer";
 export type CopilotChatWidgetController = {
   messages?: MessageMishmash[];
   onSendMessage?: (payload: RequestModel) => void;
-  editQuery?: (messageId: string, payload: RequestModel) => void;
+  onEditQuery?: (
+    messageId: string,
+    payload: RequestModel,
+    webUrl?: string,
+  ) => void;
   onNewConversation?: () => void;
   setMessages?: (messages: MessageMishmash[]) => void;
   updateConfig?: (config: CopilotConfigType) => void;
@@ -58,11 +62,15 @@ export function useController({
   }
 
   // Editing is controller-driven: delegate to the host when it provides
-  // editQuery, otherwise disable it. Assigning here (even undefined) overrides
-  // the provider's local fork+replace editQuery via the context spread, so a
-  // controller without editQuery hides the edit affordance instead of mutating
-  // the local conversation store.
-  ctx.editQuery = controller.editQuery;
+  // onEditQuery, otherwise disable it. Assigning here (even undefined)
+  // overrides the provider's local fork+replace handler via the context spread,
+  // so a controller without onEditQuery hides the edit affordance instead of
+  // mutating the local conversation store.
+  ctx.onEditQuery = controller.onEditQuery;
+  // The host re-runs the edited turn on the server, so it can only edit a
+  // message that carries the web_url of the run that produced it. Turns saved
+  // before web_url was recorded have none, and are not editable.
+  ctx.isControllerEdit = Boolean(controller.onEditQuery);
 
   if (controller.onNewConversation) {
     ctx.handleNewConversation = controller.onNewConversation;

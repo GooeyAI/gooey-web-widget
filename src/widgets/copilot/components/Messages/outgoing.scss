@@ -29,6 +29,12 @@
 .gooey-outgoing-actions:focus-within {
   opacity: 1;
 }
+// A touch device has no hover to reveal the row with, so it stays out. Keyed
+// off the user agent and not the viewport: an embed 380px wide on a 1440px
+// page is not a phone, and a tablet with a wide embed still cannot hover.
+.gooey-outgoing-actions.is-mobile {
+  opacity: 1;
+}
 
 // Inline edit mode
 .gooey-outgoingMsg.is-editing {

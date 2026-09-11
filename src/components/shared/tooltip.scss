@@ -1,0 +1,42 @@
+/**
+ * The tooltip's pointer.
+ *
+ * Everything here follows the placement Popper settled on rather than the one
+ * the caller asked for — under `auto` the caller asks for no side at all, and
+ * even a stated preference is dropped when that side has no room.
+ *
+ * The offset along the bubble's long axis is left to Popper's arrow modifier,
+ * which writes it inline on every reposition. That is what keeps the tip on the
+ * anchor after preventOverflow has slid the bubble sideways to fit the widget;
+ * a `left: 50%` here would fight it and point at nothing.
+ */
+.gooey-tooltip-arrow {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border: 0 solid transparent;
+}
+
+.gooey-modal[data-popper-placement^="top"] .gooey-tooltip-arrow {
+  bottom: -6px;
+  border-width: 10px 10px 0;
+  border-top-color: white;
+}
+
+.gooey-modal[data-popper-placement^="bottom"] .gooey-tooltip-arrow {
+  top: -6px;
+  border-width: 0 10px 10px;
+  border-bottom-color: white;
+}
+
+.gooey-modal[data-popper-placement^="left"] .gooey-tooltip-arrow {
+  right: -6px;
+  border-width: 10px 0 10px 10px;
+  border-left-color: white;
+}
+
+.gooey-modal[data-popper-placement^="right"] .gooey-tooltip-arrow {
+  left: -6px;
+  border-width: 10px 10px 10px 0;
+  border-right-color: white;
+}
