@@ -5,6 +5,7 @@
   --gooey-whatsapp-composer: #fffefd;
   --gooey-whatsapp-text: #0a0a0a;
   --gooey-whatsapp-muted: rgb(0 0 0 / 50%);
+  --gooey-whatsapp-accent: #008069;
   --gooey-message-content-max-width: 1000px;
   // Matches the composer's own `gpl-8 gpr-8`, so the message column and the
   // input line up on the same gutter.
@@ -13,7 +14,7 @@
   --gooey-button-outlined-background: #ffffff;
   --gooey-button-hover: #f0f2f5;
   --gooey-button-active: #e4e7ea;
-  --gooey-button-focus: var(--gooey-whatsapp-muted);
+  --gooey-button-focus: var(--gooey-whatsapp-accent);
   --gooey-tool-call-background: #ffffff;
   --gooey-file-preview-item-bg: #ffffff;
   // `b-1` uses the global #eee, which disappears on this canvas.
@@ -23,10 +24,7 @@
   --gooey-whatsapp-wallpaper: url("../assets/whatsapp-background.svg");
 
   color: var(--gooey-whatsapp-text);
-  font-family:
-    Inter,
-    system-ui,
-    sans-serif;
+  font-family: Inter, system-ui, sans-serif;
 
   .gooey-chat-main,
   .gooey-messages-container {
@@ -37,8 +35,262 @@
     background-size: cover;
   }
 
+  .gooey-incoming-bubble:has(+ .gooey-message-actions .gooey-options-trigger) {
+    width: min(700px, calc(100% - 32px));
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .gooey-incoming-bubble + .gooey-message-actions .gooey-options-trigger {
+    margin-top: 0 !important;
+    border-top-color: var(--gooey-button-active);
+  }
+
+  .gooey-options-trigger {
+    min-height: 44px;
+    max-width: min(700px, calc(100% - 32px));
+    border-radius: 0 0 8px 8px;
+    color: var(--gooey-whatsapp-accent);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+  }
+
+  .gooey-options-trigger-label {
+    padding-inline: 4px;
+  }
+
+  .gooey-dialog-backdrop:has(> .gooey-options-menu) {
+    padding: 16px !important;
+    backdrop-filter: none;
+  }
+
+  .gooey-options-menu {
+    max-width: 480px;
+    max-height: calc(100% - 32px);
+    border-radius: 12px;
+    background: var(--gooey-whatsapp-incoming);
+
+    .gooey-dialog-header {
+      display: grid !important;
+      grid-template-columns: 44px 1fr 44px;
+      align-items: center !important;
+      padding: 16px !important;
+    }
+
+    .gooey-dialog-header-text {
+      grid-column: 2;
+      text-align: center;
+    }
+
+    .gooey-dialog-title {
+      font-size: 18px !important;
+      font-weight: 600 !important;
+    }
+
+    .gooey-dialog-close {
+      grid-column: 3;
+      width: 44px;
+      height: 44px;
+      background: var(--gooey-button-hover);
+      color: var(--gooey-whatsapp-muted);
+      border-radius: 50% !important;
+    }
+
+    .gooey-dialog-close:hover {
+      background: var(--gooey-button-active);
+      transform: none;
+    }
+
+    .gooey-dialog-actions {
+      padding: 16px !important;
+      flex-shrink: 0;
+    }
+
+    .gooey-options-send {
+      background: var(--gooey-whatsapp-accent);
+      color: white;
+      min-height: 48px;
+      font-weight: 600;
+      border-radius: 24px;
+    }
+
+    .gooey-options-send,
+    .gooey-options-hint {
+      height: 48px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gooey-options-send:disabled {
+      opacity: 0.5;
+    }
+
+    .gooey-options-send:hover:not(:disabled) {
+      background: var(--gooey-whatsapp-accent);
+    }
+
+    .gooey-options-section {
+      padding-inline: 16px;
+    }
+
+    .gooey-options-row-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 36px;
+    }
+
+    .gooey-options-check {
+      flex: 0 0 20px;
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+      border: 2px solid var(--gooey-whatsapp-muted);
+      border-radius: 50%;
+    }
+
+    .gooey-options-row[aria-pressed="true"] .gooey-options-check {
+      border-color: var(--gooey-whatsapp-accent);
+      background: var(--gooey-whatsapp-accent);
+      box-shadow: inset 0 0 0 3px var(--gooey-whatsapp-incoming);
+    }
+
+    .gooey-options-row:focus-visible {
+      // Keep the focus ring inside the scrolling list so it is not clipped.
+      outline-offset: -2px;
+    }
+
+    .gooey-dialog-body {
+      // Override the shared dialog's per-side padding utilities.
+      padding: 12px 16px 0 !important;
+    }
+
+    .gooey-options-row {
+      border: 0;
+      border-bottom: 1px solid var(--gooey-button-active);
+      border-radius: 0;
+      color: var(--gooey-whatsapp-text);
+      overflow-wrap: anywhere;
+    }
+
+    .gooey-options-row > .pos-relative {
+      padding-inline: 16px;
+    }
+
+    .gooey-options-row:hover:not(:disabled) {
+      border: 0;
+      border-bottom: 1px solid var(--gooey-button-active);
+    }
+
+    .gooey-options-row .text-muted {
+      color: var(--gooey-whatsapp-muted) !important;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .gooey-dialog-backdrop:has(> .gooey-options-menu) {
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+
+    .gooey-options-menu {
+      max-width: 100%;
+      max-height: 85%;
+      border-radius: 24px 24px 0 0;
+
+      &::before {
+        content: "";
+        width: 32px;
+        height: 4px;
+        margin: 8px auto 0;
+        border-radius: 4px;
+        background: var(--gooey-whatsapp-muted);
+        flex-shrink: 0;
+      }
+
+      .gooey-dialog-header {
+        border-bottom: 1px solid var(--gooey-button-active);
+        padding: 12px 8px !important;
+        flex-shrink: 0;
+      }
+
+      .gooey-dialog-header-text {
+        grid-row: 1;
+      }
+
+      .gooey-dialog-close {
+        grid-column: 1;
+        grid-row: 1;
+        background: transparent;
+      }
+
+      .gooey-dialog-title {
+        font-weight: 400 !important;
+      }
+
+      .gooey-dialog-body {
+        padding: 0 !important;
+      }
+
+      .gooey-options-section {
+        padding: 24px 16px 8px !important;
+        font-weight: 400;
+      }
+
+      .gooey-options-row + .gooey-options-section {
+        border-top: 1px solid var(--gooey-button-active);
+      }
+
+      .gooey-options-row,
+      .gooey-options-row:hover:not(:disabled) {
+        border: 0;
+      }
+
+      .gooey-options-row {
+        padding-block: 14px !important;
+      }
+
+      .gooey-dialog-actions {
+        padding-bottom: calc(
+          16px + env(safe-area-inset-bottom, 0px)
+        ) !important;
+      }
+
+    }
+  }
+
   .gooey-chat-header {
     background-color: var(--gooey-whatsapp-composer) !important;
+  }
+
+  .gooey-chat-identity {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gooey-chat-title-button {
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+
+    div {
+      min-width: 0;
+    }
+
+    .bot-avatar {
+      flex-shrink: 0;
+    }
+  }
+
+  .gooey-chat-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500 !important;
   }
 
   // No flex column here. `align-items: flex-start` would take the sources
@@ -185,11 +437,8 @@
     border-radius: 0 !important;
     outline: 0 !important;
     background-color: transparent;
-    font-weight: 500;
-  }
-
-  .gooeyChat-chat-input-textarea {
     color: var(--gooey-whatsapp-text);
+    font-weight: 400 !important;
     line-height: 20px;
   }
 
