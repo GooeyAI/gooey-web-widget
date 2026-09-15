@@ -258,8 +258,8 @@ const OptionsMenu = ({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { initializeQuery, isSending, isReceiving } = useMessagesContext();
   const selected = buttons.find((button) => button.id === selectedId);
-  const section = buttons.find((button) => button.section)?.section;
-  const title = section || "Options";
+  const sections = new Set(buttons.map((button) => button.section).filter(Boolean));
+  const title = sections.size === 1 ? [...sections][0] : "Options";
 
   return (
     <>
