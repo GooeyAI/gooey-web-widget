@@ -128,6 +128,12 @@
       opacity: 0.5;
     }
 
+    .gooey-options-send > .pos-relative {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .gooey-options-send:hover:not(:disabled) {
       background: var(--gooey-whatsapp-accent);
     }
