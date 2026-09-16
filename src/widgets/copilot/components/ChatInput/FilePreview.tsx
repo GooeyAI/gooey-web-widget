@@ -8,7 +8,7 @@ import MediaPreview from "src/components/shared/Response/MediaPreview";
 import { addInlineStyle } from "src/addStyles";
 import { FullSourcePreview } from "../Messages/Sources";
 import { useSystemContext } from "src/contexts/hooks";
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect, useRef } from "react";
 import {
   extractFileDetails,
   isGoogleDocsEmbeddable,
@@ -20,6 +20,48 @@ addInlineStyle(style);
 
 const filePreviewCloseClass = "file-preview-close bg-white gp-4 b-1 br-circle";
 
+/**
+ * One blob URL per attached file, held for as long as the file is on show.
+ *
+ * Minting a fresh URL on each render hands the `<img>` a new src every time,
+ * and the browser answers by reloading and re-decoding the full-resolution
+ * photo. In the composer that happens on every keystroke, which stalls the
+ * next painted frame by well over a second for a phone-sized image.
+ */
+function useObjectUrls(files: Array<any>): string[] {
+  const cacheRef = useRef(new Map<string, string>());
+  const keyOf = (file: any, index: number) => file?.id ?? `index-${index}`;
+
+  const urls = files.map((file, index) => {
+    if (file?.url) return file.url;
+    const key = keyOf(file, index);
+    const cached = cacheRef.current.get(key);
+    if (cached) return cached;
+    const url = URL.createObjectURL(file?.data);
+    cacheRef.current.set(key, url);
+    return url;
+  });
+
+  useEffect(() => {
+    const live = new Set(files.map(keyOf));
+    for (const [key, url] of cacheRef.current) {
+      if (live.has(key)) continue;
+      URL.revokeObjectURL(url);
+      cacheRef.current.delete(key);
+    }
+  });
+
+  useEffect(() => {
+    const cache = cacheRef.current;
+    return () => {
+      cache.forEach((url) => URL.revokeObjectURL(url));
+      cache.clear();
+    };
+  }, []);
+
+  return urls;
+}
+
 const FilePreview = ({
   files,
   onRemove,
@@ -27,8 +69,9 @@ const FilePreview = ({
   files: Array<any>;
   onRemove?: (id: string) => void;
 }) => {
-  if (!files) return null;
   const { layoutController } = useSystemContext();
+  const fileURLs = useObjectUrls(files || []);
+  if (!files) return null;
 
   const openInSidebar = (file: any) => {
     layoutController?.toggleSecondaryDrawer?.(() => (
@@ -36,8 +79,7 @@ const FilePreview = ({
     ));
   };
 
-  const handleFileClick = (file: any) => {
-    const fileURL = file?.url || URL.createObjectURL(file?.data);
+  const handleFileClick = (file: any, fileURL: string) => {
     const mimeType = file?.data?.type || "";
     const fileKind = file?.type?.split("/")[0] || file?.type || "";
     const isImage = mimeType.includes("image") || fileKind === "image";
@@ -60,8 +102,8 @@ const FilePreview = ({
   return (
     <div className="d-flex overflow-scroll gooey-scroll-container file-preview-list">
       {files.map((file, index) => {
-        const { isUploading, data, url } = file;
-        const fileURL = url || URL.createObjectURL(data);
+        const { isUploading, url } = file;
+        const fileURL = fileURLs[index];
         const fileType = file?.type?.split("/")[0] || file?.type || "application";
 
         return (
@@ -88,7 +130,7 @@ const FilePreview = ({
                   layoutController?.toggleSecondaryDrawer?.(null);
                   onRemove?.(file?.id);
                 }}
-                onClick={() => handleFileClick(file)}
+                onClick={() => handleFileClick(file, fileURL)}
                 isUploading={isUploading}
                 isRemovable={!!onRemove}
               />
