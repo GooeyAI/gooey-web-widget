@@ -1,10 +1,11 @@
 import clsx from "clsx";
-import { memo, useRef } from "react";
+import { Fragment, memo, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import GooeyDialog from "src/components/shared/Dialog";
 import GooeyTextResponse from "src/components/shared/Response";
 import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls from "src/components/shared/ToolCalls";
@@ -31,6 +32,9 @@ addInlineStyle(style);
 type ReplyButton = {
   id: string;
   title: string;
+  description?: string;
+  menu?: boolean;
+  section?: string;
   isPressed?: boolean;
 };
 
@@ -82,6 +86,14 @@ const IncomingMsgActions = ({
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery } = useMessagesContext();
+  const nonLocationButtons = buttons.filter(
+    (button) => !button.id.includes("send_location"),
+  );
+  // The server marks <select><option> rows as `menu`; that alone determines
+  // whether they render in the Options dialog.
+  const menuButtons = nonLocationButtons.filter((button) => button.menu);
+  const showOptionsMenu = menuButtons.length > 0;
+  const menuButtonIds = new Set(menuButtons.map((button) => button.id));
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -90,6 +102,7 @@ const IncomingMsgActions = ({
   let hasSendLocationButton = false;
 
   buttons.forEach((button) => {
+    if (menuButtonIds.has(button.id)) return;
     if (
       button.id.includes("thumb") ||
       getFeedbackButtonIconWithTooltip(button.id, button.isPressed || false)
@@ -125,13 +138,13 @@ const IncomingMsgActions = ({
   // it paints no bubble, so a lone timestamp would float in the gutter.
   const showActions =
     hasContent &&
-    (hasTiming ||
-      showCopy ||
-      thumbButtons.length > 0 ||
-      showDebugLink);
+    (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink);
 
   return (
-    <div className="mw-100">
+    <div className="gooey-message-actions mw-100">
+      {showOptionsMenu && (
+        <OptionsMenu buttons={menuButtons} botMessageId={bot_message_id} />
+      )}
       {normalButtons.length > 0 && (
         <div className="gooey-feedback-buttons d-flex flex-col sm-flex-row gmt-12">
           {normalButtons.map(
@@ -231,6 +244,118 @@ const IncomingMsgActions = ({
         />
       )}
     </div>
+  );
+};
+
+const OptionsMenu = ({
+  buttons,
+  botMessageId,
+}: {
+  buttons: ReplyButton[];
+  botMessageId: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { initializeQuery, isSending, isReceiving } = useMessagesContext();
+  const selected = buttons.find((button) => button.id === selectedId);
+  const sections = new Set(buttons.map((button) => button.section).filter(Boolean));
+  const title = sections.size === 1 ? [...sections][0] : "Options";
+
+  return (
+    <>
+      <Button
+        variant="outlined"
+        className="gooey-options-trigger w-100 gmt-12"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => {
+          setSelectedId(null);
+          setOpen(true);
+        }}
+      >
+        <span className="d-flex align-center justify-center">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            className="gmr-8"
+          >
+            <path
+              d="M8 6h12M8 12h12M8 18h12M3 6h1M3 12h1M3 18h1"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="gooey-options-trigger-label">{title}</span>
+        </span>
+      </Button>
+      <GooeyDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title={title}
+        maxWidth="xs"
+        className="gooey-options-menu"
+        actions={
+          selected ? (
+            <Button
+              className="gooey-options-send w-100"
+              disabled={
+                !selected || selected.isPressed || isSending || isReceiving
+              }
+              onClick={() => {
+                if (!selected || selected.isPressed || isSending || isReceiving)
+                  return;
+                setOpen(false);
+                initializeQuery?.({
+                  button_pressed: {
+                    button_id: selected.id,
+                    button_title: selected.title,
+                    context_msg_id: botMessageId,
+                  },
+                });
+              }}
+            >
+              Send
+            </Button>
+          ) : (
+            <div className="gooey-options-hint w-100 text-center text-muted font_14_400">
+              Tap to select an item
+            </div>
+          )
+        }
+      >
+        {buttons.map((button, index) => (
+          <Fragment key={button.id}>
+            {(index === 0 || button.section !== buttons[index - 1].section) && (
+              <div className="gooey-options-section font_14_600 text-muted gpt-16 gpb-8">
+                {button.section || "Options"}
+              </div>
+            )}
+            <Button
+              className="gooey-options-row w-100 text-left gpt-20 gpb-20 gpl-0 gpr-0"
+              aria-pressed={selectedId === button.id}
+              disabled={button.isPressed || isSending || isReceiving}
+              onClick={() => setSelectedId(button.id)}
+            >
+              <div className="gooey-options-row-content">
+                <div>
+                  <span className="d-block font_16_400">{button.title}</span>
+                  {button.description && (
+                    <span className="d-block font_14_400 text-muted gmt-4">
+                      {button.description}
+                    </span>
+                  )}
+                </div>
+                <span className="gooey-options-check" aria-hidden="true" />
+              </div>
+            </Button>
+          </Fragment>
+        ))}
+      </GooeyDialog>
+    </>
   );
 };
 
