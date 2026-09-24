@@ -3,6 +3,83 @@
   min-width: 0;
 }
 
+// The list fades out above the input bar, is all but gone at the top of the
+// bar's controls, and is gone from the bar's centre line down. A message
+// passing behind the composer dissolves into the bar instead of being sliced
+// off, nothing legible sits in the gap beside the controls, and the composer
+// needs no opaque panel of its own. A mask fades the content's own pixels
+// rather than painting over them, so it is invisible against whatever it
+// passes - a white bubble or a dark code block - where a veil would read as a
+// grey band over the dark one.
+//
+// `--gooey-composer-solid` (top of the highest control) and
+// `--gooey-composer-center` (the bar's centre line) are measured up from the
+// bottom of the pane by ChatInput. The ramp above the controls is eased: a
+// straight ramp meeting the near-flat run below it put a visible corner at
+// the controls line.
+//
+// The ramp's depth follows the list's own scroll position - deepest through
+// the middle of a long conversation, eased back to a residual at the end
+// rather than off, so the edge keeps a little softness. Registering the
+// property is what makes it animatable. With nothing to scroll the timeline
+// is inactive and the 0px initial value leaves only the fixed band, which is
+// also the fallback where scroll-driven animations are unsupported.
+
+// Residual ramp at the end of the scroll. The list pads by this too, so the
+// last line rests above it rather than with its lower half in it.
+$fade-rest: 1rem;
+
+@property --gooey-messages-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+// A ramp stop, `$t` of the way from where the ramp starts (0) down to the top
+// of the controls (1), as a position measured from the bottom of the list.
+@function ramp($t) {
+  @return calc(
+    100% - var(--gooey-composer-solid, 0px) -
+      var(--gooey-messages-fade, 0px) * #{1 - $t}
+  );
+}
+
+$messages-mask: linear-gradient(
+  to bottom,
+  #000 ramp(0),
+  rgb(0 0 0 / 92%) ramp(0.2),
+  rgb(0 0 0 / 65%) ramp(0.45),
+  rgb(0 0 0 / 30%) ramp(0.7),
+  rgb(0 0 0 / 9%) ramp(0.88),
+  rgb(0 0 0 / 3%) ramp(1),
+  transparent calc(100% - var(--gooey-composer-center, 0px))
+);
+
+.gooey-messages-container {
+  // Room for the composer floating over the list, so the last message can be
+  // scrolled clear of it. useMessagesScroll reads this back from the computed
+  // style to know where the visible area ends.
+  padding-bottom: calc(var(--gooey-composer-height, 0px) + #{$fade-rest});
+  animation: gooey-messages-fade linear both;
+  animation-timeline: scroll(self);
+  mask-image: $messages-mask;
+  -webkit-mask-image: $messages-mask;
+}
+
+@keyframes gooey-messages-fade {
+  0% {
+    --gooey-messages-fade: 2.5rem;
+  }
+
+  50% {
+    --gooey-messages-fade: 4rem;
+  }
+
+  100% {
+    --gooey-messages-fade: #{$fade-rest};
+  }
+}
+
 // `.gooey-anchor-pair` also carries `mw-760`, so this covers both wrappers.
 .gooey-messages-container > .mw-760 {
   width: 100%;
@@ -18,13 +95,15 @@
   flex-direction: column;
 }
 
-// Anchored to `.gooey-messages-root`, a sibling of the composer in a flex
-// column — it cannot overlap the input, so z-index only orders it against the
-// message list. The new-chat control lives on the composer instead.
+// Anchored to `.gooey-messages-root`, and lifted 16px clear of the highest
+// control in the composer floating over the list - not the composer's full
+// height, whose top padding is empty. No z-index: it is painted after the
+// message list and before the composer, which is the order we want. The
+// new-chat control lives on the composer instead.
 .gooey-scroll-to-bottom-btn {
   position: absolute;
   left: 50%;
-  bottom: 16px;
+  bottom: calc(16px + var(--gooey-composer-solid, 0px));
   transform: translateX(-50%);
   width: 32px;
   height: 32px;
