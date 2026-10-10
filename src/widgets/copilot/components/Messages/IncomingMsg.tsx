@@ -7,7 +7,15 @@ import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
-import ToolCalls from "src/components/shared/ToolCalls";
+import {
+  THINKING_LABEL,
+  ThinkingLine,
+} from "src/components/shared/ThinkingLine";
+import ToolCalls, {
+  UNCOUNTED_TOOL_NAMES,
+  extractToolCallsFromFinalPrompt,
+  type ToolCall,
+} from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import { MESSAGE_GUTTER } from ".";
@@ -267,7 +275,24 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
-
+    const allToolCalls =
+      props?.showToolCalls && props?.data?.final_prompt
+        ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
+        : [];
+    // housekeeping calls (Load Tools) are not counted or listed, but a running
+    // one is still named by the thinking line
+    const toolCalls = allToolCalls.filter(
+      (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
+    );
+    const hasText = !!props?.data?.text;
+    // a streaming message always has a status row; a finished one only if tools ran
+    const hasStatusRow = isStreaming || toolCalls.length > 0;
+    // the server clears the status as soon as the model starts writing, so
+    // remember the last "Summarizing with …" to keep naming it
+    const summarizingRef = useRef<string>();
+    if (isSummarizingStatus(props?.data?.detail)) {
+      summarizingRef.current = props.data.detail;
+    }
     if (
       !props.data ||
       type === STREAM_MESSAGE_TYPES.CONVERSATION_START ||
@@ -284,18 +309,41 @@ const IncomingMsg = memo(
             "mw-100",
           )}
         >
-          {props?.data?.final_prompt && props?.showToolCalls && (
-            <div className="gmb-12">
-              <ToolCalls final_prompt={props?.data?.final_prompt} />
-            </div>
-          )}
-          <GooeyTextResponse
-            data={props.data}
-            linkColor={props?.linkColor}
-            showSources={props?.showSources}
-            isStreaming={isStreaming}
-            id={props?.id}
-          />
+          {/* The status row (thinking line / "Used N tools") and the answer share
+              one bubble. Bubble chrome only once there is something in it — an
+              empty response must not paint an empty bubble in themes that style it. */}
+          <div
+            className={clsx(
+              (hasText || hasStatusRow) && "gooey-incoming-bubble",
+            )}
+          >
+            {isStreaming ? (
+              <div className={clsx(hasText && "gmb-8")}>
+                <ToolCalls
+                  toolCalls={toolCalls}
+                  lead={
+                    <ThinkingLine
+                      label={getThinkingLabel(
+                        allToolCalls,
+                        summarizingRef.current,
+                      )}
+                    />
+                  }
+                />
+              </div>
+            ) : (
+              <ToolCalls toolCalls={toolCalls} />
+            )}
+            {(!isStreaming || hasText) && (
+              <GooeyTextResponse
+                data={props.data}
+                linkColor={props?.linkColor}
+                showSources={props?.showSources}
+                isStreaming={isStreaming}
+                id={props?.id}
+              />
+            )}
+          </div>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
               <audio
@@ -332,5 +380,17 @@ const IncomingMsg = memo(
     );
   },
 );
+
+// "Thinking…" until the run reaches its summarizing step, except while a tool
+// runs, which is named instead
+function getThinkingLabel(toolCalls: ToolCall[], status?: string) {
+  const running = toolCalls.filter((toolCall) => toolCall.is_running);
+  if (running.length) return running[running.length - 1].label;
+  return status || THINKING_LABEL;
+}
+
+function isSummarizingStatus(status?: string) {
+  return !!status && /^summari[sz]ing/i.test(status);
+}
 
 export default IncomingMsg;

@@ -61,7 +61,6 @@ const extractOutputText = (data: ResponseData): string => {
     type = "",
     status = "",
     text,
-    detail,
     output_text = [],
     raw_output_text = [],
   } = data;
@@ -69,7 +68,9 @@ const extractOutputText = (data: ResponseData): string => {
   let output = "";
 
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    output = text || detail || "";
+    // not `detail`: that is the run status ("Running…", "Summarizing with…"), which the
+    // thinking line already shows. Printing it here duplicated it inside the answer.
+    output = text || "";
   } else if (
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
     status === "completed"

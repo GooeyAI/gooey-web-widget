@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import { ThinkingLine } from "src/components/shared/ThinkingLine";
 import { useMessagesContext } from "src/contexts/hooks";
+import { MESSAGE_GUTTER } from "../Messages";
 
 const ResponseLoader = (props: any) => {
   const { scrollMessageContainer } = useMessagesContext();
@@ -15,8 +16,8 @@ const ResponseLoader = (props: any) => {
   }, [props.show, scrollMessageContainer]);
   if (!props.show) return null;
   return (
-    <div ref={LoaderRef} className="gpl-16">
-      <CircleBeat className="anim-blink gml-4" size={12} />
+    <div ref={LoaderRef} className={`gpl-${MESSAGE_GUTTER + 4}`}>
+      <ThinkingLine />
     </div>
   );
 };

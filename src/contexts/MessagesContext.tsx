@@ -296,7 +296,6 @@ const MessagesContextProvider = ({
     config,
     handleAddConversation,
     updateCurrentConversation,
-    scrollToMessage,
     setIsReceiving,
     setIsSendingMessage,
     setLatestMessageIds,

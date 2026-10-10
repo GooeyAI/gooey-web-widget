@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { addInlineStyle, Styles } from "src/addStyles";
 import { CopilotChatWidgetController } from "src/contexts/ControllerUtils";
+import { FontAwesomeStyles } from "src/fontAwesome";
 import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
@@ -57,6 +58,7 @@ export function CopilotChatWidget({
   return (
     <div className="gooey-embed-container" tabIndex={-1}>
       <Styles />
+      <FontAwesomeStyles />
       <Sentry.ErrorBoundary>
         <SystemContextProvider
           config={config}

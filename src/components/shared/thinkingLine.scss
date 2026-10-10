@@ -1,0 +1,82 @@
+// Live "thinking" line from the "One live line" design.
+$tl-ink: #0a1021; // --gy-ink
+$tl-ink-muted: #4b587a; // --gy-ink-muted — 7.06:1 on white
+// --gy-ink-soft (#8994b1) is only 3.03:1 on white; use --gooey-text-tertiary (4.57:1)
+$tl-ink-soft: #67759b;
+
+.gooey-thinking-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.gooey-thinking-label {
+  font-size: 14px;
+  line-height: 140%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  background: linear-gradient(
+    90deg,
+    $tl-ink-soft 0%,
+    $tl-ink 45%,
+    $tl-ink-soft 90%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gooeyThinkingShimmer 2s linear infinite;
+}
+
+.gooey-thinking-bot {
+  flex: none;
+  overflow: visible;
+}
+
+// ---- WhatsApp theme ----
+// Inside the incoming bubble the line is bare. On its own (the loader, before any message
+// exists) the wallpaper's doodles would swallow it, so it sits in a small white pill with
+// the bubble's shadow, like WhatsApp's own system chips (e.g. the date).
+.gooey-chat-theme[data-gooey-theme="whatsapp"] .gooey-thinking-line {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 12px 5px 9px;
+  border-radius: 12px;
+  background-color: var(--gooey-whatsapp-incoming, #ffffff);
+  box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+}
+
+.gooey-chat-theme[data-gooey-theme="whatsapp"]
+  .gooey-incoming-bubble
+  .gooey-thinking-line {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+@keyframes gooeyThinkingShimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gooey-thinking-line *,
+  .gooey-thinking-bot,
+  .gooey-thinking-bot * {
+    animation: none !important;
+  }
+
+  // without the sweep, fall back to solid muted text
+  .gooey-thinking-label {
+    color: $tl-ink-muted;
+    background: none;
+  }
+}

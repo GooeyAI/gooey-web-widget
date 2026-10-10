@@ -1,35 +1,128 @@
-@import "src/css/colors.module.scss";
+// "One live line" tool usage display.
+// Values come from the Gooey design system (colors_and_type.css). The widget is
+// embedded on third-party pages, so they are SCSS constants, not host CSS vars.
+$tc-ink: #0a1021; // --gy-ink
+$tc-ink-muted: #4b587a; // --gy-ink-muted — 7.06:1 on white, 6.48:1 on $tc-surface-100
+// --gy-ink-soft (#8994b1) is only 3.03:1 on white, below AA for text, so the
+// tertiary role uses --gooey-text-tertiary instead: 4.57:1 on white.
+$tc-ink-soft: #67759b;
+$tc-line-soft: #e6e6e6; // --gy-line-soft
+$tc-surface-50: #fbfaf8; // --gy-surface-50
+$tc-surface-100: #f7f5f2; // --gy-surface-100
+$tc-teal-700: #00998a; // --gy-teal-700
+$tc-mono:
+  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
 
-.tool-call-card {
-  border-radius: 12px;
-  margin: 8px 0;
-  background-color: transparent;
-  border: 1px solid #e9ecef;
+.tool-calls-container {
+  display: flex;
+  flex-direction: column;
 }
 
-.tool-call-card summary {
-  padding: 4px 8px;
-  cursor: pointer;
-  background-color: transparent;
-  color: $muted;
-  border-radius: 10px;
+.tool-calls-container summary {
+  list-style: none;
   user-select: none;
+  cursor: pointer;
+}
+
+.tool-calls-container summary::-webkit-details-marker {
+  display: none;
+}
+
+// ---- Settled summary ("Used 4 tools") ----
+
+// Shares a row with the thinking line while a reply is streaming
+.tool-calls-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+
+  // let a long status label truncate instead of pushing the summary off the row
+  > .gooey-thinking-line {
+    min-width: 0;
+  }
+}
+
+.tool-calls-separator {
+  flex: none;
+  font-size: 14px;
+  line-height: 140%;
+  color: $tc-ink-soft;
+}
+
+.tool-calls-summary {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  line-height: 140%;
+  color: $tc-ink-muted;
+  cursor: pointer;
+  user-select: none;
+  transition: color 180ms ease-out;
+}
+
+.tool-calls-summary:hover {
+  color: $tc-ink;
+}
+
+// IconChevronDown, turned to point right while closed
+.tool-calls-chevron {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform 220ms ease;
+}
+
+// the shared icon is outline-only; the design uses a solid chevron
+.tool-calls-chevron path {
+  fill: currentColor;
+}
+
+.tool-calls-summary[aria-expanded="true"] .tool-calls-chevron,
+.tool-call-row[open] > .tool-call-row-summary .tool-calls-chevron {
+  transform: rotate(0deg);
+}
+
+.tool-calls-table {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  border: 1px solid $tc-line-soft;
+  border-radius: 16px;
+  overflow: hidden;
+  animation: gooeyTcRise 220ms ease-out;
+}
+
+// ---- Individual call rows ----
+
+.tool-call-row + .tool-call-row {
+  border-top: 1px solid $tc-line-soft;
+}
+
+.tool-call-row-summary {
   display: flex;
   align-items: center;
   gap: 8px;
-  list-style: none;
+  padding: 11px 14px;
+  font-size: 13px;
+  line-height: 140%;
+  color: $tc-ink-muted;
+  transition:
+    background 160ms ease-out,
+    color 160ms ease-out;
 }
 
-.tool-call-card[open] {
-  padding-left: 0.6rem;
-  padding-right: 0.6rem;
+.tool-call-row-summary:hover {
+  background: $tc-surface-50;
+  color: $tc-ink;
 }
-
-.tool-call-card[open] summary {
-  margin-left: -0.6rem;
-  margin-right: -0.6rem;
-}
-
 
 .tool-call-icon-image {
   width: 14px;
@@ -38,66 +131,293 @@
   flex-shrink: 0;
 }
 
-.tool-call-icon-emoji {
-  font-size: 12px;
+.tool-call-icon-svg {
+  width: 13px;
+  height: 13px;
   flex-shrink: 0;
 }
 
-.tool-call-summary-content {
+.tool-call-icon-fa {
+  width: 14px;
+  font-size: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tool-call-row-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-  flex: 1;
-  gap: 4px;
-  margin-top: -3px;
+  flex: 0 1 auto;
 }
 
-.tool-call-summary-toggle {
-  color: #6c757d;
-  flex-shrink: 0;
+// e.g. the search query, in the tertiary text colour
+.tool-call-row-snippet {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $tc-ink-soft;
+}
+
+.tool-call-row-summary .tool-calls-chevron {
+  margin-left: auto;
+  transition-duration: 200ms;
+}
+
+// a call that has nothing to open yet
+.tool-call-row-summary.is-static {
+  cursor: default;
+}
+
+.tool-call-row-summary.is-static:hover {
+  background: none;
+  color: $tc-ink-muted;
+}
+
+.tool-call-running {
+  margin-left: auto;
+  font-size: 11px;
+  color: $tc-ink-soft;
+  animation: gooeyTcPulse 1.4s ease-in-out infinite;
+}
+
+.tool-call-row-summary .tool-call-running + .tool-calls-chevron {
+  margin-left: 0;
+}
+
+.tool-call-row-body {
   display: flex;
-  align-items: center;
-}
-
-.tool-call-body {
-  padding-top: 4px;
-  padding-bottom: 8px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 14px 12px 14px;
+  animation: gooeyTcRowIn 200ms ease-out;
 }
 
 .tool-call-section-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: $tc-ink-soft;
+}
+
+.tool-call-value + .tool-call-section-header {
+  margin-top: 4px;
 }
 
 .tool-call-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  font-size: 11px;
-  text-decoration: none;
   gap: 4px;
-  color: #6c757d;
   margin-left: auto;
-}
-
-.tool-call-link:hover {
+  font-size: 11px;
+  color: $tc-teal-700;
   text-decoration: underline;
 }
 
-.tool-call-json-block {
-  font-family:
-    ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code",
-    "Roboto Mono", Consolas, "Courier New", monospace;
-  font-size: 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  padding: 8px;
-  border-radius: 6px;
-  max-height: 200px;
+// Inputs / output, rendered by ToolValue as readable text
+.tool-call-value {
+  font-size: 12px;
+  line-height: 150%;
+  color: $tc-ink-muted;
+  background: $tc-surface-50;
+  border: 1px solid $tc-line-soft;
+  border-radius: 8px;
+  padding: 7px 9px;
+  max-height: 240px;
   overflow: auto;
+  word-break: break-word;
+}
+
+.tool-value-text {
   white-space: pre-wrap;
-  line-height: 1.4;
+}
+
+.tool-value-muted {
+  color: $tc-ink-soft;
+}
+
+.tool-value-link {
+  color: $tc-teal-700;
+  text-decoration: underline;
+}
+
+.tool-value-raw {
+  font-family: $tc-mono;
+  font-size: 11px;
+}
+
+.tool-value-object {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.tool-value-entry {
+  display: grid;
+  grid-template-columns: minmax(64px, 28%) minmax(0, 1fr);
+  gap: 2px 12px;
+  align-items: baseline;
+}
+
+.tool-value-entry > dt {
+  font-size: 11px;
+  color: $tc-ink-soft;
+}
+
+.tool-value-entry > dd {
+  margin: 0;
+  min-width: 0;
+  color: $tc-ink;
+}
+
+// Reddit-style nesting: a key with nested content shows the key on its own line and
+// the content below it, indented behind a vertical thread line.
+.tool-value-entry.is-block {
+  display: block;
+
+  > dt {
+    margin-bottom: 4px;
+  }
+
+  > dd {
+    margin-left: 3px;
+    padding-left: 10px;
+    border-left: 2px solid $tc-line-soft;
+  }
+}
+
+// inside a nested block, short label/value pairs stay tight
+.tool-value-entry.is-block > dd .tool-value-entry:not(.is-block) {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.tool-value-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.tool-value-list > li::marker {
+  color: $tc-ink-soft;
+}
+
+// a list of objects: no bullets, each item is its own ruled block
+.tool-value-list > li.is-nested {
+  list-style: none;
+  margin-left: -16px;
+}
+
+.tool-value-list > li.is-nested + li.is-nested {
+  padding-top: 6px;
+  border-top: 1px dashed $tc-line-soft;
+}
+
+.tool-value-link {
+  overflow-wrap: anywhere;
+}
+
+// ---- WhatsApp theme ----
+// The status row lives inside the incoming bubble, so it needs no chrome of its own and
+// the table is a flat inset card. The same row can also stand alone (the loader before
+// any message exists, see thinkingLine.scss), where it is a white pill like WhatsApp's
+// own system chips.
+.gooey-chat-theme[data-gooey-theme="whatsapp"] {
+  .tool-calls-header {
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px 12px 5px 9px;
+    border-radius: 12px;
+    background-color: var(--gooey-whatsapp-incoming, #ffffff);
+    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
+  }
+
+  // the pill is already on the header, so the line inside it is bare again
+  .tool-calls-header > .gooey-thinking-line {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .tool-calls-table {
+    margin-top: 6px;
+    border-radius: 12px;
+    background-color: var(--gooey-whatsapp-incoming, #ffffff);
+  }
+
+  // inside the bubble: no pill, no card shadow
+  .gooey-incoming-bubble .tool-calls-header {
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  // barely off the bubble's white: the wallpaper canvas colour read too dark here
+  .gooey-incoming-bubble .tool-calls-table {
+    border-color: rgb(0 0 0 / 10%);
+    background-color: $tc-surface-50;
+  }
+
+  // the table is already off-white, so the boxes inside it go white
+  .gooey-incoming-bubble .tool-call-value {
+    border-color: rgb(0 0 0 / 8%);
+    background-color: #ffffff;
+  }
+
+  .gooey-incoming-bubble .tool-call-row-summary:hover {
+    background: rgb(0 0 0 / 3%);
+  }
+}
+
+// ---- Motion ----
+
+@keyframes gooeyTcRise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes gooeyTcPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes gooeyTcRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-calls-container *,
+  .tool-calls-container *::before,
+  .tool-calls-container *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
