@@ -6,7 +6,7 @@ import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
 
 // Types
-interface ResponseData {
+export interface ResponseData {
   type?: string;
   status?: string;
   text?: string;
@@ -55,6 +55,14 @@ export const parseResponseBody = (
   const parserOptions = createReactParserOptions(processingData);
   return parse(rawHtml as string, parserOptions);
 };
+
+/**
+ * Whether a response has any text to show yet. Themes that give the response a
+ * visible bubble (background, padding, shadow) must not paint one around an
+ * empty or not-yet-streamed message.
+ */
+export const hasResponseText = (data: ResponseData): boolean =>
+  extractOutputText(data).trim().length > 0;
 
 const extractOutputText = (data: ResponseData): string => {
   const {

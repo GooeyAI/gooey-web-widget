@@ -4,8 +4,11 @@ import {
   attributesToProps,
 } from "html-react-parser";
 import { Highlight, themes } from "prism-react-renderer";
-import Button from "./Buttons/Button";
-import { useState } from "react";
+import clsx from "clsx";
+import IconCopy from "src/assets/SvgIcons/IconCopy";
+import IconCheck from "src/assets/SvgIcons/IconCheck";
+import { useCopyFeedback } from "./useCopyFeedback";
+import IconButton from "./Buttons/IconButton";
 
 function getTextBody(domNode: {
   attribs: { [key: string]: string };
@@ -21,16 +24,13 @@ function getTextBody(domNode: {
 }
 
 const CodeHeader = ({ body = "", language = "" }) => {
-  const [buttonText, setButtonText] = useState("Copy");
+  const { copied, signalCopied } = useCopyFeedback();
   if (!body) return null;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(body);
-      setButtonText("Copied");
-      setTimeout(() => {
-        setButtonText("Copy");
-      }, 5000); // Reset button text after 5 seconds
+      signalCopied();
     } catch (err) {
       console.error("Failed to copy: ", err);
     }
@@ -38,19 +38,20 @@ const CodeHeader = ({ body = "", language = "" }) => {
 
   return (
     <div
-      className="bg-darkGrey text-white d-flex align-center justify-between gp-4 gmt-6"
+      className="bg-darkGrey text-white d-flex align-center justify-between gp-2"
       style={{ borderRadius: "8px 8px 0 0" }}
     >
       <p className="font_12_500 gml-4" style={{ margin: 0 }}>
         {language}
       </p>
-      <Button
+      <IconButton
         onClick={handleCopy}
-        className="font_12_500 text-white gp-4"
+        className="font_12_500 text-white gp-4 d-flex align-center"
         variant="text"
+        aria-label={copied ? "Copied" : "Copy"}
       >
-        {buttonText}
-      </Button>
+        {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+      </IconButton>
     </div>
   );
 };
@@ -62,14 +63,13 @@ function CodeBlock({
 }) {
   const body = getTextBody(domNode);
   const language: string = domNode?.attribs?.class.split("-").pop() || "python";
+  const codeProps = attributesToProps(domNode.attribs);
   return (
-    <>
+    <div className="gmb-4">
       <CodeHeader body={body} language={language} />
       <code
-        {...attributesToProps(domNode.attribs)}
-        style={{
-          borderRadius: "4px",
-        }}
+        {...codeProps}
+        className={clsx(codeProps?.className, "gooey-code-block")}
       >
         <Highlight theme={themes.vsDark} code={body} language={language}>
           {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -85,7 +85,7 @@ function CodeBlock({
           )}
         </Highlight>
       </code>
-    </>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 const deviceWidths: Record<string, number> = {
   mobile: 768,
@@ -16,7 +16,7 @@ const useDeviceWidth = (
   const [isWindowMatches, setIsWindowMatches] = useState(false);
   const depTrigger = deps?.some((dep) => !dep);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const rootDiv = shadowRoot?.querySelector("#gooeyChat-container");
     if (!rootDiv) return;
 

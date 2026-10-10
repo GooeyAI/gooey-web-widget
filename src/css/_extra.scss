@@ -106,6 +106,10 @@
   border-radius: 16px !important;
 }
 
+.br-circle {
+  border-radius: 50% !important;
+}
+
 .b-1 {
   border: 1px solid $border-color;
 }
@@ -188,6 +192,9 @@
 .mw-760 {
   max-width: 760px;
   margin: 0 auto;
+}
+.min-w-0 {
+  min-width: 0;
 }
 @media (max-width: 1100px) {
   .xs-text-center {

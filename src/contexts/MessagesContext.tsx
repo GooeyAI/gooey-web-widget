@@ -1,4 +1,10 @@
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -7,7 +13,7 @@ import useConversations, {
   updateLocalUser,
   USER_ID_LS_KEY,
 } from "./ConversationLayer";
-import { CHAT_INPUT_ID } from "src/widgets/copilot/components/ChatInput";
+import { CHAT_INPUT_ID } from "src/widgets/copilot/components/constants";
 import {
   CopilotChatWidgetController,
   useController,
@@ -18,11 +24,15 @@ import { useStreamingHandler } from "./messages/useStreamingHandler";
 
 const CITATION_STYLE = "number";
 
-const createNewQuery = (payload: RequestModel) => {
+const createNewQuery = (
+  payload: RequestModel,
+  createdAt = new Date().toISOString(),
+) => {
   return {
     ...payload,
     id: uuidv4(),
     role: "user",
+    created_at: createdAt,
   };
 };
 
@@ -32,10 +42,18 @@ export interface MessagesContextType {
   messages?: Map<string, MessageMishmash>;
   isSending?: boolean;
   initializeQuery?: (payload: RequestModel) => void;
+  rerun?: (run_url: string) => void;
+  onEditQuery?: (
+    messageId: string,
+    payload: RequestModel,
+    webUrl?: string,
+  ) => void;
+  // true when a host controller owns onEditQuery. Such a host re-runs the
+  // edited turn on the server, so it needs the message's web_url; the local
+  // handler below forks in the browser and does not. See ControllerUtils.
+  isControllerEdit?: boolean;
   handleNewConversation?: () => void;
   cancelApiCall?: () => void;
-  scrollMessageContainer?: (y?: number) => void;
-  scrollContainerRef?: React.RefObject<HTMLDivElement>;
   isReceiving?: boolean;
   conversations?: Conversation[] | null;
   setActiveConversation?: (conversation: Conversation) => Promise<void>;
@@ -143,6 +161,9 @@ export interface OpenAPIMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  input_images?: string[];
+  input_documents?: string[];
+  input_audio?: Blob | string;
 }
 
 export interface RequestModel {
@@ -169,6 +190,9 @@ export interface RequestModel {
 export type MessageMishmash = {
   id: string;
   role: "user" | "assistant";
+  // the run this message belongs to. The server stamps it on both halves of a
+  // turn, so a user message can be pointed back at the run that answered it.
+  web_url?: string;
 } & (
   | RequestModel
   | ConversationStart
@@ -189,10 +213,8 @@ const MessagesContextProvider = ({
 }) => {
   const currentUserId = localStorage.getItem(USER_ID_LS_KEY) || "";
   const { config, layoutController } = useSystemContext();
-  const { conversations, handleAddConversation } = useConversations(
-    currentUserId,
-    config?.integration_id as string,
-  );
+  const { conversations, handleAddConversation, handleDeleteConversation } =
+    useConversations(currentUserId, config?.integration_id as string);
 
   const {
     messages,
@@ -210,14 +232,35 @@ const MessagesContextProvider = ({
   const [isMessagesLoading, setMessagesLoading] = useState(true);
   const [isSharedConversation, setIsSharedConversation] = useState(false);
 
-  const apiSource = useRef(axios.CancelToken.source());
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const currentConversation = useRef<Conversation | null>(null);
-  const controllerRef = useRef(controller);
+  const isServerMode = !!config?.controller?.fetchConversations;
 
-  useEffect(() => {
-    controllerRef.current = controller;
-  }, [controller]);
+  const apiSource = useRef(axios.CancelToken.source());
+  const currentConversation = useRef<Conversation | null>(null);
+  // Id of the conversation an edit is replacing. Editing a message forks a
+  // fresh backend conversation (new conversation_id); once that fork's first
+  // response is saved we delete this stale entry so the edit replaces it in the
+  // saved list rather than adding a duplicate. Set in onEditQuery, consumed on
+  // the next finalize, and cleared if the user switches conversations first
+  // (purgeMessages / setActiveConversation / controller.setConversationData).
+  const conversationIdToReplace = useRef<string | null>(null);
+
+  const handleConversationFinalized = async (
+    conversation: Conversation | null,
+  ) => {
+    if (isServerMode || !conversation) {
+      // No local conversation was persisted, so any armed edit replacement no
+      // longer has a matching finalize to consume it — clear it.
+      conversationIdToReplace.current = null;
+      return;
+    }
+    await handleAddConversation(conversation);
+    // Drop the pre-edit conversation now that its replacement is persisted.
+    const staleId = conversationIdToReplace.current;
+    conversationIdToReplace.current = null;
+    if (staleId && staleId !== conversation.id) {
+      await handleDeleteConversation(staleId);
+    }
+  };
 
   const updateCurrentConversation = (conversation: Conversation) => {
     currentConversation.current = {
@@ -226,17 +269,25 @@ const MessagesContextProvider = ({
     };
   };
 
-  const initializeQuery = (payload: RequestModel) => {
+  const initializeQuery = (
+    payload: RequestModel,
+    opts?: { startNewConversation?: boolean },
+  ) => {
     if (!payload || isSending || isReceiving) return;
     // Clear any previously received message IDs when starting a new query
     setLatestMessageIds(new Set());
 
     // calls the server and updates the state with user message
-    const conversationId = isSharedConversation
-      ? undefined
-      : currentConversation.current?.id;
+    const conversationId =
+      opts?.startNewConversation || isSharedConversation
+        ? undefined
+        : currentConversation.current?.id;
     setIsSendingMessage(true);
-    if (!conversationId && currentConversation.current?.messages) {
+    if (
+      !payload.messages &&
+      !conversationId &&
+      currentConversation.current?.messages
+    ) {
       // make messages array in payload from messages in currentConversation and add
       payload.messages = currentConversation.current?.messages?.map(
         (message) => ({
@@ -250,51 +301,73 @@ const MessagesContextProvider = ({
       );
     }
     setIsSharedConversation(false); //reset shared conversation flag
+    // Stamp created_at once so the sent payload and the local message (and thus
+    // the persisted conversation timestamp) agree on the same time.
+    const createdAt = new Date().toISOString();
+    const payloadWithCreatedAt = { ...payload, created_at: createdAt };
     sendPayload(
       {
-        ...payload,
+        ...payloadWithCreatedAt,
         conversation_id: conversationId,
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
       },
       { onFinally: () => setIsSendingMessage(false) },
     ).catch((e) => {
+      // An aborted/failed fork must not leave a pending edit replacement armed,
+      // or a later finalize could delete the wrong (pre-edit) conversation.
+      conversationIdToReplace.current = null;
       // report error to Sentry
       Sentry.captureException(e);
     });
-    const newQuery = createNewQuery(payload);
+    const newQuery = createNewQuery(payloadWithCreatedAt, createdAt);
     addResponse(newQuery);
   };
 
-  const scrollMessageContainer = useCallback(
-    (y: number = 0) => {
-      // scroll to y position
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scroll({
-          top: y,
-          behavior: "smooth",
-        });
+  const onEditQuery = (messageId: string, payload: RequestModel) => {
+    if (isSending || isReceiving) return;
+    const entries = Array.from(messages.entries());
+    const idx = entries.findIndex(([id]) => id === messageId);
+    if (idx < 0) return;
+    // keep everything before the edited message; drop it and all that follow
+    const kept = entries.slice(0, idx);
+    setMessages(new Map(kept));
+    // build the truncated history so the bot regenerates ignoring removed turns
+    const history: OpenAPIMessage[] = kept.map(([id, message]) => {
+      if (message.role === "user") {
+        const userMessage = message as RequestModel;
+        return {
+          id,
+          role: "user",
+          content: userMessage.input_prompt || "",
+          // keep prior-turn attachments so the fork regenerates with full context
+          input_images: userMessage.input_images,
+          input_documents: userMessage.input_documents,
+          input_audio: userMessage.input_audio,
+        };
       }
-    },
-    [scrollContainerRef],
-  );
-
-  const scrollToMessage = useCallback(() => {
-    // scroll to the last message
-    setTimeout(() => {
-      scrollMessageContainer(
-        scrollContainerRef?.current?.scrollHeight as number,
-      );
-    }, 10);
-  }, [scrollMessageContainer]);
-
-  useEffect(() => {
-    scrollToMessage();
-  }, [scrollToMessage]);
+      return {
+        id,
+        role: "assistant",
+        content:
+          (message as FinalResponse).raw_output_text?.[0] ||
+          (message as FinalResponse).output_text?.[0] ||
+          "",
+      };
+    });
+    // Fork a fresh backend conversation, then replace the conversation being
+    // edited: its saved entry is deleted once the fork's first response lands.
+    // Null when editing an unsaved conversation (nothing to replace).
+    conversationIdToReplace.current = currentConversation.current?.id ?? null;
+    initializeQuery(
+      { ...payload, messages: history },
+      { startNewConversation: true },
+    );
+  };
 
   const { sendPayload } = useStreamingHandler({
     config,
-    handleAddConversation,
+    onConversationFinalized: handleConversationFinalized,
     updateCurrentConversation,
     setIsReceiving,
     setIsSendingMessage,
@@ -310,7 +383,7 @@ const MessagesContextProvider = ({
     if (isReceiving || isSending) {
       cancelApiCall();
     }
-    if (layoutController?.isMobile && layoutController?.isSidebarOpen)
+    if (layoutController?.isNarrowWidth && layoutController?.isSidebarOpen)
       layoutController?.toggleSidebar();
     setIsReceiving(false);
     setIsSendingMessage(false);
@@ -323,9 +396,14 @@ const MessagesContextProvider = ({
   const purgeMessages = () => {
     purgeMessagesStore();
     currentConversation.current = {};
+    // Fresh chat: pending edit-replacement no longer applies.
+    conversationIdToReplace.current = null;
   };
 
   const cancelApiCall = useCallback(() => {
+    // Canceling an in-flight (possibly edit) request must not leave a pending
+    // edit replacement armed for a later, unrelated finalize.
+    conversationIdToReplace.current = null;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     if (window?.GooeyEventSource) GooeyEventSource.close();
@@ -371,13 +449,15 @@ const MessagesContextProvider = ({
       } else if (conversation.getMessages) {
         messages = await conversation.getMessages();
       }
-      if (conversation.id && controllerRef.current?.onConversationChange)
-        controllerRef.current?.onConversationChange?.(conversation.id);
+      if (conversation.id && controller?.onConversationChange)
+        controller?.onConversationChange?.(conversation.id);
       preLoadData(messages);
       updateCurrentConversation(conversation);
+      // Switched to a real saved conversation: cancel any pending replacement.
+      conversationIdToReplace.current = null;
       setMessagesLoading(false);
     },
-    [cancelApiCall, isReceiving, isSending],
+    [cancelApiCall, isReceiving, isSending, controller],
   );
 
   useEffect(() => {
@@ -413,6 +493,8 @@ const MessagesContextProvider = ({
     controller.setConversationData = async (conversation: Conversation) => {
       if (isSending || isReceiving) return;
       currentConversation.current = conversation;
+      // Host switched the conversation: cancel any pending replacement.
+      conversationIdToReplace.current = null;
       if (
         conversation.messages &&
         messagesChanged(Array.from(messages.values()), conversation.messages)
@@ -427,17 +509,15 @@ const MessagesContextProvider = ({
     apiUrl: config!.apiUrl!,
     isSending,
     isReceiving,
-    scrollToMessage,
   });
 
   let context: MessagesContextType = {
     messages,
     isSending,
     initializeQuery,
+    onEditQuery,
     handleNewConversation,
     cancelApiCall,
-    scrollMessageContainer,
-    scrollContainerRef,
     isReceiving,
     conversations,
     setActiveConversation,

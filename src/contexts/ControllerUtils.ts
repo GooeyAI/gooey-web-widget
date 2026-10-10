@@ -11,11 +11,18 @@ import { Conversation } from "./ConversationLayer";
 export type CopilotChatWidgetController = {
   messages?: MessageMishmash[];
   onSendMessage?: (payload: RequestModel) => void;
+  onEditQuery?: (
+    messageId: string,
+    payload: RequestModel,
+    webUrl?: string,
+  ) => void;
   onNewConversation?: () => void;
   setMessages?: (messages: MessageMishmash[]) => void;
   updateConfig?: (config: CopilotConfigType) => void;
   setConversationData?: (conversation: Conversation) => void;
   onConversationChange?: (conversationId: string) => void;
+  fetchConversations?: () => Promise<Conversation[]>;
+  rerun?: (run_url: string) => void;
 };
 
 export function useController({
@@ -23,13 +30,11 @@ export function useController({
   apiUrl,
   isSending,
   isReceiving,
-  scrollToMessage,
 }: {
   controller?: CopilotChatWidgetController;
   apiUrl: string;
   isSending: boolean;
   isReceiving: boolean;
-  scrollToMessage: () => void;
 }): MessagesContextType {
   let [messages, setMessages] = useState<Map<string, MessageMishmash>>(
     msgArrayToMap(controller?.messages || []),
@@ -44,7 +49,6 @@ export function useController({
       let newMessages = msgArrayToMap(entries);
       if (!isMapEqual(messages, newMessages)) {
         setMessages(newMessages);
-        scrollToMessage();
       }
     };
   }
@@ -57,8 +61,23 @@ export function useController({
     };
   }
 
+  // Editing is controller-driven: delegate to the host when it provides
+  // onEditQuery, otherwise disable it. Assigning here (even undefined)
+  // overrides the provider's local fork+replace handler via the context spread,
+  // so a controller without onEditQuery hides the edit affordance instead of
+  // mutating the local conversation store.
+  ctx.onEditQuery = controller.onEditQuery;
+  // The host re-runs the edited turn on the server, so it can only edit a
+  // message that carries the web_url of the run that produced it. Turns saved
+  // before web_url was recorded have none, and are not editable.
+  ctx.isControllerEdit = Boolean(controller.onEditQuery);
+
   if (controller.onNewConversation) {
     ctx.handleNewConversation = controller.onNewConversation;
+  }
+
+  if (controller.rerun) {
+    ctx.rerun = controller.rerun;
   }
 
   return ctx;

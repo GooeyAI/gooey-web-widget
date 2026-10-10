@@ -6,11 +6,10 @@ import {
   createStreamApi,
 } from "src/api/streaming";
 import { uploadPayloadFiles } from "src/api/file-upload";
-import { handleToolCall } from "../tools";
 
 type StreamingHandlerParams = {
   config: any;
-  handleAddConversation: (conversation: any) => void;
+  onConversationFinalized: (conversation: any) => void;
   updateCurrentConversation: (conversation: any) => void;
   setIsReceiving: (value: boolean) => void;
   setIsSendingMessage: (value: boolean) => void;
@@ -24,7 +23,7 @@ type StreamingHandlerParams = {
 
 export const useStreamingHandler = ({
   config,
-  handleAddConversation,
+  onConversationFinalized,
   updateCurrentConversation,
   setIsReceiving,
   setIsSendingMessage,
@@ -115,7 +114,7 @@ export const useStreamingHandler = ({
             bot_id: config?.integration_id,
           };
           updateCurrentConversation(conversationData);
-          handleAddConversation(
+          onConversationFinalized(
             Object.assign(
               {},
               {
@@ -141,11 +140,6 @@ export const useStreamingHandler = ({
           let final_prompt = prevMessage.final_prompt || [];
           for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
             final_prompt[idx] = value;
-            try {
-              handleToolCall(value, prevMessage.web_url);
-            } catch (e) {
-              console.error(`Error handling tool call ${value}`, e);
-            }
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,
@@ -163,7 +157,7 @@ export const useStreamingHandler = ({
     },
     [
       config?.integration_id,
-      handleAddConversation,
+      onConversationFinalized,
       setIsReceiving,
       setIsSendingMessage,
       setLatestMessageIds,

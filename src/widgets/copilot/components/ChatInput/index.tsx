@@ -13,6 +13,7 @@ import style from "./chatInput.scss?inline";
 import FilePreview from "./FilePreview";
 import { uploadFileToGooey } from "src/api/file-upload";
 import IconPlus from "src/assets/SvgIcons/IconPlus";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
 import GooeyPopper from "src/components/shared/Popper/Popper";
 import Button from "src/components/shared/Buttons/Button";
 import IconFile from "src/assets/SvgIcons/IconFile";
@@ -22,12 +23,14 @@ import { isMobile } from "../Messages/helpers";
 import IconCamera from "src/assets/SvgIcons/IconCamera";
 import { RequestModel } from "src/contexts/MessagesContext";
 import PlaceholderMessage from "../Messages/PlaceholderMessage";
+import GooeyTextArea from "./GooeyTextArea";
+import { themeCapabilities } from "src/themes";
+import { CHAT_INPUT_ID } from "../constants";
+import { useFilePicker } from "./useFilePicker";
 addInlineStyle(style);
 
-export const CHAT_INPUT_ID = "gooeyChat-input";
-const INPUT_HEIGHT = 44;
-const acceptedFileTypes = "application/*, text/*, audio/*";
-const acceptedImageTypes = "image/*, video/*,";
+const acceptedFileTypes = "application/*,text/*,audio/*";
+const acceptedImageTypes = "image/*,video/*";
 
 // Define a type for file state
 interface UploadedFile {
@@ -47,6 +50,7 @@ const ChatInput = () => {
     isSending,
     cancelApiCall,
     isReceiving,
+    handleNewConversation,
     preAttachedFileUsed,
     setPreAttachedFileUsed,
   } = useMessagesContext();
@@ -55,8 +59,6 @@ const ChatInput = () => {
   const [files, setFiles] = useState<UploadedFile[] | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement | null>(null);
-
-  const inputRef = useRef<null | HTMLElement>(null);
 
   // Handle preAttachedFile on mount
   useEffect(() => {
@@ -79,48 +81,22 @@ const ChatInput = () => {
     setFiles(newFiles as [UploadedFile]);
   }, [config?.payload?.input_images, preAttachedFileUsed]);
 
-  // Dismiss menu on outside click
   useEffect(() => {
     if (!isMenuOpen) return;
     const handleClick = (e: MouseEvent) => {
-      if (
-        menuButtonRef.current &&
-        !menuButtonRef.current.contains(e.target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
+      const path = e.composedPath(); // get the path of the click event as we are in shadow DOM
+      const isInsideTrigger =
+        !!menuButtonRef.current && path.includes(menuButtonRef.current);
+      const isInsideMenu = path.some(
+        (node) =>
+          node instanceof Element && node.classList.contains("gooey-modal"),
+      );
+      if (isInsideTrigger || isInsideMenu) return;
+      setIsMenuOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [isMenuOpen]);
-
-  // Reset textarea height when value becomes empty
-  useEffect(() => {
-    if (!value.trim()) {
-      const ele: HTMLElement | null = inputRef.current;
-      if (ele) {
-        ele.style.height = INPUT_HEIGHT + "px";
-      }
-    }
-  }, [value]);
-
-  const adjustTextareaHeight = () => {
-    const ele: HTMLElement | null = inputRef.current;
-    if (!ele) return;
-
-    // Reset height first to get accurate scrollHeight measurement
-    ele.style.height = INPUT_HEIGHT + "px";
-
-    if (ele.scrollHeight > INPUT_HEIGHT) {
-      ele.style.height = ele.scrollHeight + "px";
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = e.target;
-    setValue(value);
-    adjustTextareaHeight();
-  };
 
   const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.keyCode === 13 && !e.shiftKey) {
@@ -158,7 +134,6 @@ const ChatInput = () => {
     }
     initializeQuery?.(payload);
     setValue("");
-    adjustTextareaHeight();
   };
 
   const handleCancelSend = () => {
@@ -184,30 +159,38 @@ const ChatInput = () => {
       const id = uuidv4();
       try {
         if (!config || !config.apiUrl) return;
-        uploadFileToGooey(config.apiUrl, file).then((url) => {
-          setFiles((prev: any) => {
-            const idx = prev.findIndex((f: any) => f.id === id);
-            if (idx === -1) return prev; // if photo removed before upload completed
-            // @TODO: cancel upload if file removed
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              isUploading: false,
-              gooeyUrl: url,
-            };
-            return updated;
+        uploadFileToGooey(config.apiUrl, file)
+          .then((url) => {
+            setFiles((prev: any) => {
+              const idx = prev.findIndex((f: any) => f.id === id);
+              if (idx === -1) return prev; // if photo removed before upload completed
+              // @TODO: cancel upload if file removed
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                isUploading: false,
+                gooeyUrl: url,
+              };
+              return updated;
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            setFiles((prev: any) =>
+              (prev || []).filter((f: any) => f.id !== id),
+            );
+            // TODO: show error toast
           });
-        });
       } catch (err) {
         console.error(err);
-        setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
+        setFiles((prev: any) => (prev || []).filter((f: any) => f.id !== id));
         // TODO: show error toast
       }
 
       return {
         id,
         name: file.name,
-        type: file.type.split("/")[0],
+        type: (file.type || "application/octet-stream").split("/")[0],
         data: file,
         gooeyUrl: "",
         isUploading: true,
@@ -215,46 +198,47 @@ const ChatInput = () => {
     });
   };
 
-  const onFileAdded = (e: any) => {
-    const files = Array.from(e.target.files);
-    if (!files || !files.length) return;
-    setFiles((prev: any) =>
-      prev ? [...prev, ...processFiles(files)] : processFiles(files),
-    );
+  const handleFilesAdded = (selected: File[]) => {
+    if (!selected.length) return;
+    const added = processFiles(selected);
+    setFiles((prev: any) => (prev ? [...added, ...prev] : added));
   };
+
+  const openFilePicker = useFilePicker(
+    { accept: acceptedFileTypes, multiple: true },
+    handleFilesAdded,
+  );
+  const openPhotoPicker = useFilePicker(
+    { accept: acceptedImageTypes, multiple: true },
+    handleFilesAdded,
+  );
+  const openCameraPicker = useFilePicker(
+    { accept: acceptedImageTypes, capture: "environment" },
+    handleFilesAdded,
+  );
 
   const handleFileMenuClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedFileTypes;
-    input.onchange = onFileAdded;
-    input.multiple = true;
-    input.click();
+    openFilePicker();
   };
 
   const handlePhotoMenuClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedImageTypes;
-    input.onchange = onFileAdded;
-    input.multiple = true;
-    input.click();
+    openPhotoPicker();
   };
 
   const handleTakePhotoClick = () => {
     setIsMenuOpen(false);
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = acceptedImageTypes;
-    input.capture = "environment"; // opens camera directly on mobile
-    input.onchange = onFileAdded;
-    input.click();
+    openCameraPicker();
   };
 
   if (!config) return null;
-  const { colors } = config?.branding || {};
+  const theme = themeCapabilities(config.theme);
+  const showFloatingNewChat =
+    !!messages?.size &&
+    (theme.floatingNewChat === "always" ||
+      (theme.floatingNewChat === "when-chrome-hidden" &&
+        config.showHeader === false));
   const showStop = isSending || isReceiving;
   const disableSend =
     (!showStop && !isSending && value.trim().length === 0 && !files?.length) ||
@@ -267,12 +251,23 @@ const ChatInput = () => {
     <div
       className={clsx(
         !config.branding.showPoweredByGooey && "gpb-8",
+        !messages?.size && !isSending && "gooey-chat-input-empty",
         "gooeyChat-chat-input w-100 gpl-8 gpr-8 mw-760 gpt-8",
       )}
     >
+      {showFloatingNewChat && (
+        <IconButton
+          aria-label="New chat"
+          className="gooey-floating-new-chat-button"
+          onClick={handleNewConversation}
+          variant="text-alt"
+        >
+          <IconPencilEdit size={22} />
+        </IconButton>
+      )}
       {!messages?.size && !isSending && <PlaceholderMessage />}
       {files && files.length > 0 && (
-        <div className="gp-12 b-1 br-large gmb-12 gm-12">
+        <div className="gooey-file-preview-tray gp-12 b-1 br-large gmb-12 gm-12">
           <FilePreview files={files} onRemove={handleRemoveFile} />
         </div>
       )}
@@ -282,18 +277,17 @@ const ChatInput = () => {
           onCancel={() => setIsRecording(false)}
         />
       ) : (
-        <div className="pos-relative d-flex">
+        <div className="gooey-chat-input-bar pos-relative d-flex">
           {/* Left icons */}
           {isLeftButtons && (
-            <div className="input-left-buttons h-100 gmr-12 bg-lightGrey rounded-lg br-large">
+            <div className="input-left-buttons pos-relative br-circle d-flex">
               <GooeyPopper
                 showModal={isMenuOpen}
                 direction={{ x: "left", y: "top" }}
                 ModalContent={() => (
                   <div className="gp-8">
                     <Button
-                      className="w-100 text-left"
-                      style={{ minWidth: "100px" }}
+                      className="gooey-file-menu-button w-100 text-left"
                       variant="text-alt"
                       onClick={handleFileMenuClick}
                       LeftIconComponent={() => <IconFile size={16} />}
@@ -321,12 +315,15 @@ const ChatInput = () => {
                   </div>
                 )}
               >
-                <div ref={menuButtonRef} style={{ display: "inline-block" }}>
+                <div ref={menuButtonRef}>
                   <IconButton
                     onClick={() => setIsMenuOpen((v) => !v)}
                     variant="text-alt"
                     isPressed={isMenuOpen}
-                    className={clsx("gp-4 h-100", isMenuOpen && "depressed")}
+                    className={clsx(
+                      "gooey-input-control",
+                      isMenuOpen && "depressed",
+                    )}
                   >
                     <IconPlus size={18} />
                   </IconButton>
@@ -336,20 +333,18 @@ const ChatInput = () => {
           )}
 
           {/* Typing area */}
-          <textarea
+          <GooeyTextArea
             value={value}
-            ref={inputRef as any}
             id={CHAT_INPUT_ID}
-            onChange={handleInputChange}
+            minHeight={theme.inputMinHeight}
+            onChange={(e) => setValue(e?.target?.value)}
             onKeyDown={handlePressEnter}
-            className={clsx(
-              "br-large b-1 font_16_500 gpt-10 gpb-10 gpr-40 flex-1 gm-0 gpl-12",
-            )}
+            className={clsx("font_16_500 gm-0")}
             placeholder={
               config?.branding.inputPlaceholderText ||
               `Message ${config?.branding.title || ""}`
             }
-          ></textarea>
+          />
 
           {/* Right icons */}
           <div className="input-right-buttons">
@@ -357,21 +352,26 @@ const ChatInput = () => {
               !showStop &&
               config?.enableAudioMessage &&
               !value && (
-                <IconButton onClick={handleRecordClick} variant="text-alt">
+                <IconButton
+                  aria-label="Record audio"
+                  className="gooey-input-control"
+                  onClick={handleRecordClick}
+                  variant="text-alt"
+                >
                   <IconMicrophone size={18} />
                 </IconButton>
               )}
             {/* Send Actions */}
             {(!!value ||
+              theme.alwaysShowSendButton ||
               !config?.enableAudioMessage ||
               showStop ||
               !!files?.length) && (
               <IconButton
                 disabled={disableSend}
                 variant="text-alt"
-                className="gp-4"
+                className="gooey-input-control gooey-send-button"
                 onClick={showStop ? handleCancelSend : handleSendMessage}
-                style={{ color: colors?.primary || "default" }}
               >
                 {showStop ? <CircleStop size={24} /> : <CircleUP size={24} />}
               </IconButton>
@@ -381,10 +381,7 @@ const ChatInput = () => {
       )}
       {/* Gooey Branding */}
       {!!config.branding.showPoweredByGooey && (
-        <p
-          className="font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0"
-          style={{ fontSize: "8px" }}
-        >
+        <p className="gooey-powered-by font_10_500 gpt-4 gpb-6 text-darkGrey text-center gm-0">
           Powered by{" "}
           <a
             href="https://gooey.ai/copilot/"

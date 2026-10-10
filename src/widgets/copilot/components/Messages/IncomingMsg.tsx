@@ -2,11 +2,11 @@ import clsx from "clsx";
 import { memo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
-import IconCopy from "src/assets/SvgIcons/IconCopy";
 import IconBug from "src/assets/SvgIcons/IconBug";
 import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
+import { hasResponseText } from "src/components/shared/Response/responseParser";
 import {
   THINKING_LABEL,
   ThinkingLine,
@@ -17,45 +17,24 @@ import ToolCalls, {
   type ToolCall,
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
-import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
-import { MESSAGE_GUTTER } from ".";
+import { useMessagesContext } from "src/contexts/hooks";
+import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
+import CopyButton from "./CopyButton";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
+  formatRunTime,
   getFeedbackButtonIcon as getFeedbackButtonIconWithTooltip,
+  isMobile,
 } from "./helpers";
 import style from "./incoming.scss?inline";
 import type { LocationModalRef } from "./LocationModal";
 import LocationModal from "./LocationModal";
 import { SourcesSection } from "./Sources";
+import { MessageTimeLabel } from "./MessageTime";
+import { useStreamTimer } from "./StreamTimer";
 
 addInlineStyle(style);
-
-export const BotMessageLayout = (props: Record<string, any>) => {
-  const branding = useSystemContext().config?.branding;
-  return (
-    <div className="d-flex align-start">
-      {branding?.photoUrl && (
-        <div
-          className="bot-avatar bg-primary gmr-12"
-          style={{ width: "24px", height: "24px", borderRadius: "100%" }}
-        >
-          <img
-            src={branding?.photoUrl}
-            alt="bot-avatar"
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </div>
-      )}
-      <div className="gmt-2 mw-100 overflow-hidden">{props.children}</div>
-    </div>
-  );
-};
 
 type ReplyButton = {
   id: string;
@@ -63,24 +42,54 @@ type ReplyButton = {
   isPressed?: boolean;
 };
 
-const FeedbackButtons = ({
+/** The strip of actions and supporting text under a finished response. */
+const ActionRow = ({
+  hoverOnly,
+  children,
+}: {
+  hoverOnly: boolean;
+  children: React.ReactNode;
+}) => (
+  <div
+    className={clsx(
+      "gooey-feedback-actions d-flex align-center gmt-2 justify-content-start",
+      hoverOnly && "is-hover-only",
+      isMobile() && "is-mobile",
+    )}
+  >
+    {children}
+  </div>
+);
+
+const IncomingMsgActions = ({
   data,
   showRunLink,
+  showRunTime,
+  isLatestResponse,
   messageId,
+  hasText,
+  hasContent,
+  measuredSec,
 }: {
   data: {
-    buttons: ReplyButton[];
+    buttons?: ReplyButton[];
     bot_message_id: string;
     web_url?: string;
+    created_at?: string;
+    run_time_sec?: number;
+    run_time?: number;
   };
   showRunLink: boolean;
+  showRunTime: boolean;
+  isLatestResponse: boolean;
   messageId: string;
+  hasText: boolean;
+  hasContent: boolean;
+  measuredSec: number | null;
 }) => {
-  const { buttons, bot_message_id } = data;
+  const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
   const { initializeQuery } = useMessagesContext();
-
-  if (!buttons) return null;
 
   // Separate thumb buttons from normal buttons
   const thumbButtons: ReplyButton[] = [];
@@ -102,13 +111,34 @@ const FeedbackButtons = ({
     }
   });
 
+  // How long a run took is off by default: on a customer's own site it reads
+  // as a report card on their agent, not as information their visitors asked
+  // for. Gooey's own surfaces, where the number is the point, opt in.
+  //
+  // Whoever actually knows wins: `run_time_sec` is what the stream's final
+  // response carries, a bare `run_time` is accepted too so a host controller
+  // can use the name its own payloads use, and the browser's own measurement
+  // is the last resort for a response that streamed without either.
+  const runTimeStr = showRunTime
+    ? formatRunTime(data?.run_time_sec ?? data?.run_time ?? measuredSec)
+    : "";
+  // The response reports its own stamp again now, so either half is reason
+  // enough to draw the row.
+  const hasTiming = Boolean(runTimeStr || data?.created_at);
+  // Copy puts the rendered message body on the clipboard, so it needs a body.
+  const showCopy = hasText;
+  const showDebugLink = showRunLink && Boolean(data?.web_url);
+  // The action row stands on its own: thumbs are optional extras the backend
+  // adds, not the reason the row exists. An empty response is the exception —
+  // it paints no bubble, so a lone timestamp would float in the gutter.
+  const showActions =
+    hasContent &&
+    (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink);
+
   return (
     <div className="mw-100">
       {normalButtons.length > 0 && (
-        <div
-          className="d-flex flex-col sm-flex-row gmt-12"
-          style={{ gap: "12px", flexWrap: "wrap" }}
-        >
+        <div className="gooey-feedback-buttons d-flex flex-col sm-flex-row gmt-12">
           {normalButtons.map(
             (button) =>
               button && (
@@ -136,25 +166,21 @@ const FeedbackButtons = ({
           )}
         </div>
       )}
-      {(thumbButtons.length > 0 || showRunLink) && (
-        <div
-          className="d-flex gmt-2 justify-content-start"
-          style={{ gap: "4px" }}
-        >
+      {showActions && (
+        <ActionRow hoverOnly={!isLatestResponse}>
           {/* Copy Text Message to clipboard */}
-          <GooeyTooltip text="Copy Message">
-            <IconButton
-              onClick={async (e) =>
-                await copyRenderedMessageToClipboard({
-                  currentTarget: e.currentTarget,
+          {showCopy && (
+            <CopyButton
+              label="Copy Message"
+              className="d-flex justify-content-center align-items-center h-100"
+              onCopy={(event) =>
+                copyRenderedMessageToClipboard({
+                  currentTarget: event.currentTarget,
                   messageId,
                 })
               }
-              className="text-muted d-flex justify-content-center align-items-center h-100"
-            >
-              <IconCopy size={14} />
-            </IconButton>
-          </GooeyTooltip>
+            />
+          )}
           {thumbButtons &&
             thumbButtons.map(
               (button) =>
@@ -175,14 +201,29 @@ const FeedbackButtons = ({
                   />
                 ),
             )}
-          {showRunLink && data?.web_url && (
-            <a href={data?.web_url} target="_blank" rel="noopener noreferrer">
-              <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
-                <IconBug size={12} />
-              </IconButton>
-            </a>
+          {showDebugLink && (
+            <GooeyTooltip text="Debug this run">
+              {/* The tooltip's own click handler calls preventDefault, and an
+                  ancestor doing that cancels a link's navigation. Keeping the
+                  click here leaves the handler unreached and the link working. */}
+              <a
+                href={data?.web_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
+                  <IconBug size={ACTION_ICON_SIZE} />
+                </IconButton>
+              </a>
+            </GooeyTooltip>
           )}
-        </div>
+          <MessageTimeLabel
+            createdAt={data?.created_at}
+            runTimeStr={runTimeStr}
+            className="gml-4"
+          />
+        </ActionRow>
       )}
       {hasSendLocationButton && (
         <LocationModal
@@ -219,17 +260,18 @@ const FeedbackButton = ({
           button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response"
         }
       >
-        <div
-          className={clsx("my-auto", className)}
-          style={{ whiteSpace: "nowrap" }}
-        >
-          <Button
+        <div className={clsx("gooey-feedback-button", "my-auto", className)}>
+          {/* IconButton, not Button: Button wraps its children in a div, whose
+              line box is sized by the inherited font and leaves the box 2px
+              taller than the row's other buttons with the glyph sitting high
+              in it. An icon-only button has no use for that wrapper. */}
+          <IconButton
             key={button.id}
             className="text-muted d-flex justify-content-center align-items-center h-100"
             onClick={onClick}
           >
             {icon}
-          </Button>
+          </IconButton>
         </div>
       </GooeyTooltip>
     );
@@ -261,7 +303,16 @@ const IncomingMsg = memo(
     linkColor: string;
     autoPlay: boolean | undefined;
     showRunLink: boolean;
+    showRunTime: boolean;
     showToolCalls: boolean;
+    // The newest response keeps its action row on show; every response behind
+    // it reveals one on hover. Absent, a response is treated as the newest,
+    // so a caller that renders a response on its own does not lose the row.
+    isLatestResponse?: boolean;
+    // Off for a response rendered as a still picture of itself — the share
+    // card, whose container sets `pointer-events: none`, so a copy button
+    // there could only be looked at.
+    showActionRow?: boolean;
   }) => {
     const {
       output_audio = [],
@@ -275,6 +326,8 @@ const IncomingMsg = memo(
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const hasText = hasResponseText(props.data);
+    const { measuredSec } = useStreamTimer(isStreaming);
     const allToolCalls =
       props?.showToolCalls && props?.data?.final_prompt
         ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
@@ -284,7 +337,6 @@ const IncomingMsg = memo(
     const toolCalls = allToolCalls.filter(
       (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
     );
-    const hasText = !!props?.data?.text;
     // a streaming message always has a status row; a finished one only if tools ran
     const hasStatusRow = isStreaming || toolCalls.length > 0;
     // the server clears the status as soon as the model starts writing, so
@@ -293,6 +345,8 @@ const IncomingMsg = memo(
     if (isSummarizingStatus(props?.data?.detail)) {
       summarizingRef.current = props.data.detail;
     }
+
+    // Nothing has arrived yet, so there is nothing to put a row under.
     if (
       !props.data ||
       type === STREAM_MESSAGE_TYPES.CONVERSATION_START ||
@@ -305,8 +359,8 @@ const IncomingMsg = memo(
       <div className="gooey-incomingMsg gpb-12 mw-100">
         <div
           className={clsx(
-            `gpl-${MESSAGE_GUTTER + 4} gpr-${MESSAGE_GUTTER}`,
-            "mw-100",
+            `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
+            "gooey-incoming-content mw-100",
           )}
         >
           {/* The status row (thinking line / "Used N tools") and the answer share
@@ -357,19 +411,27 @@ const IncomingMsg = memo(
           {!isStreaming && videoTrack && (
             <div className="gmt-16 gmb-8">
               <video
+                className="gooey-incoming-video"
                 autoPlay={isAutoPlay}
                 playsInline={true}
                 controls
                 src={videoTrack}
-                style={{ backgroundColor: "#000" }}
               ></video>
             </div>
           )}
-          {!isStreaming && props?.data?.buttons && (
-            <FeedbackButtons
+          {/* The row belongs to a finished response. Copy and the timestamp do
+              not depend on the backend sending any reply buttons, so the row is
+              not gated on them. */}
+          {!isStreaming && props.showActionRow !== false && (
+            <IncomingMsgActions
               data={props?.data}
               showRunLink={props.showRunLink}
+              showRunTime={props.showRunTime}
+              isLatestResponse={props.isLatestResponse ?? true}
               messageId={props.id}
+              hasText={hasText}
+              hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
+              measuredSec={measuredSec}
             />
           )}
         </div>

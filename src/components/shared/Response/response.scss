@@ -17,7 +17,8 @@
 
 .markdown ul,
 .markdown ol {
-  /* Some container/global styles remove list markers; restore them for markdown. */
+  /* Some container/global styles remove list markers and padding; restore them
+     for markdown only, so app chrome (sidebar, menus) keeps the reset. */
   list-style-position: outside;
   padding-left: 1.25rem;
   margin: 0 0 12px 0;
@@ -29,6 +30,9 @@
 
 .markdown ol {
   list-style-type: decimal;
+  /* Ordered lists need more room than bullets: wide enough that a 3-digit
+     marker ("100.") isn't clipped. Bullets keep the narrower 1.25rem. */
+  padding-left: 2.5rem;
 }
 
 .markdown li {

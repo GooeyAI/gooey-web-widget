@@ -1,7 +1,11 @@
+import type { ThemeId } from "src/themes";
+
 export interface CopilotConfigType {
   target: string;
   integration_id: string;
   mode: "popup" | "inline" | "fullscreen";
+  theme?: ThemeId;
+  showHeader?: boolean;
   enableAudioMessage: boolean;
   enablePhotoUpload: boolean;
   enableLipsyncVideo: boolean;
@@ -16,6 +20,7 @@ export interface CopilotConfigType {
     GOOGLE_MAPS_API_KEY?: string;
   };
   showRunLink: boolean;
+  showRunTime?: boolean;
   showToolCalls: boolean;
   enableShareConversation: boolean;
   conversationData?: any;

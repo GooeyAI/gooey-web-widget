@@ -3,10 +3,18 @@ import style from "./outgoing.scss?inline";
 import { memo, useState } from "react";
 import FilePreview from "../ChatInput/FilePreview";
 import clsx from "clsx";
-import { MESSAGE_GUTTER } from ".";
+import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
+import IconPencilEdit from "src/assets/SvgIcons/PencilEdit";
+import IconRefresh from "src/assets/SvgIcons/IconRefresh";
 import IconButton from "src/components/shared/Buttons/IconButton";
+import Button from "src/components/shared/Buttons/Button";
 import GooeyTooltip from "src/components/shared/Tooltip";
+import { useMessagesContext } from "src/contexts/hooks";
+import GooeyTextArea from "../ChatInput/GooeyTextArea";
+import CopyButton from "./CopyButton";
+import { isMobile } from "./helpers";
+import { MessageTimeLabel } from "./MessageTime";
 addInlineStyle(style);
 
 interface ButtonPressed {
@@ -16,6 +24,8 @@ interface ButtonPressed {
 }
 
 interface OutgoingMsgProps {
+  id?: string;
+  created_at?: string;
   input_prompt?: string;
   input_audio?: Blob | string | string[];
   input_images?: string[];
@@ -25,18 +35,25 @@ interface OutgoingMsgProps {
     latitude?: number;
     longitude?: number;
   };
+  web_url?: string;
 }
 
 const OutgoingMsg = memo(
   ({
+    id,
+    created_at,
     input_prompt = "",
     input_audio = undefined,
     button_pressed = undefined,
     input_location: { latitude, longitude } = {},
     input_images = [],
     input_documents = [],
+    web_url = undefined,
   }: OutgoingMsgProps) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState("");
+    const { onEditQuery, isControllerEdit, isSending, isReceiving, rerun } =
+      useMessagesContext();
 
     let mapUrl;
     if (latitude && longitude) {
@@ -45,48 +62,68 @@ const OutgoingMsg = memo(
       input_prompt ||= button_pressed?.button_title || "";
     }
 
-    // Determine if message is large (more than 200 characters or more than 5 lines)
-    const isLargeMessage =
-      input_prompt &&
-      (input_prompt.length > 200 || input_prompt.split("\n").length > 5);
+    const input_audio_url = resolveInputAudioUrl(input_audio);
 
-    // Truncate text for collapsed view (first 200 characters or first 3 lines)
-    const getTruncatedText = (text: string): string => {
-      const lines = text.split("\n");
-      // If more than 3 lines, show first 3 lines with ellipsis
-      if (lines.length > 3) {
-        const firstThreeLines = lines.slice(0, 3).join("\n");
-        // Make sure we don't exceed 200 chars even with line breaks
-        if (firstThreeLines.length > 200) {
-          return firstThreeLines.slice(0, 200).trim() + "...";
-        }
-        return firstThreeLines + "...";
+    const reusableAudio = Array.isArray(input_audio)
+      ? input_audio[0]
+      : input_audio;
+    const hasAttachments =
+      input_images.length > 0 ||
+      input_documents.length > 0 ||
+      Boolean(reusableAudio);
+    const isBusy = Boolean(isSending || isReceiving);
+    const canSendEdit = Boolean(editValue.trim() || hasAttachments);
+    // a controller-driven edit re-runs the originating run, so it needs web_url
+    const canEdit =
+      Boolean(onEditQuery) && (!isControllerEdit || Boolean(web_url));
+    // Re-run sits on the prompt, not the reply: it is the question being asked
+    // again. The host replays the run that produced this turn, so it needs web_url.
+    const canRerun = Boolean(rerun) && Boolean(web_url);
+
+    const handleCopy = async () => {
+      try {
+        await navigator.clipboard?.writeText(input_prompt || "");
+      } catch (e) {
+        console.error("Failed to copy message", e);
       }
-      // If single line or few lines but long text, truncate to 200 chars
-      if (text.length > 200) {
-        // Try to break at word boundary if possible
-        const truncated = text.slice(0, 200);
-        const lastSpace = truncated.lastIndexOf(" ");
-        // If we find a space near the end (within last 30 chars), break there
-        if (lastSpace > 170) {
-          return truncated.slice(0, lastSpace) + "...";
-        }
-        return truncated.trim() + "...";
-      }
-      return text;
     };
 
-    const displayText =
-      isLargeMessage && !isExpanded
-        ? getTruncatedText(input_prompt)
-        : input_prompt;
+    const handleStartEdit = () => {
+      if (isBusy || !canEdit) return;
+      setEditValue(input_prompt || "");
+      setIsEditing(true);
+    };
 
-    const input_audio_url = resolveInputAudioUrl(input_audio);
+    const handleCancelEdit = () => {
+      setIsEditing(false);
+      setEditValue("");
+    };
+
+    const handleSendEdit = () => {
+      const text = editValue.trim();
+      if (!id || isBusy || !canEdit || (!text && !hasAttachments)) return;
+      setIsEditing(false);
+      onEditQuery?.(
+        id,
+        {
+          input_prompt: text,
+          input_images,
+          input_documents,
+          input_audio: reusableAudio,
+        },
+        web_url,
+      );
+    };
 
     return (
       <div className="d-flex flex-col align-end">
-        <div className="gooey-outgoingMsg gmb-24 d-flex flex-col align-end">
-          {input_images && input_images.length > 0 && (
+        <div
+          className={clsx(
+            "gooey-outgoingMsg d-flex flex-col align-end",
+            isEditing && "is-editing",
+          )}
+        >
+          {input_images.length > 0 && (
             <div
               className={clsx(
                 `gpr-${MESSAGE_GUTTER}`,
@@ -129,48 +166,6 @@ const OutgoingMsg = memo(
               <AudioPlayer url={input_audio_url} />
             </div>
           )}
-          {input_prompt && (
-            <div
-              className={clsx(
-                "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8 gmt-8",
-                `gmr-${MESSAGE_GUTTER}`,
-              )}
-            >
-              <p
-                className={clsx(
-                  "font_16_400 gp-4 overflow-hidden",
-                  isLargeMessage &&
-                    !isExpanded &&
-                    "gooey-outgoing-text-collapsed",
-                )}
-              >
-                {displayText}
-              </p>
-              {isLargeMessage && (
-                <div>
-                  <GooeyTooltip
-                    text={isExpanded ? "Collapse message" : "Expand message"}
-                  >
-                    <IconButton
-                      className="gooey-outgoing-expand-btn gmt-4"
-                      variant="text"
-                      onClick={() => setIsExpanded(!isExpanded)}
-                    >
-                      <IconChevronDown
-                        size={16}
-                        style={{
-                          transform: isExpanded
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                          transition: "transform 0.2s ease",
-                        }}
-                      />
-                    </IconButton>
-                  </GooeyTooltip>
-                </div>
-              )}
-            </div>
-          )}
           {latitude && longitude && (
             <div
               className={clsx(
@@ -191,6 +186,27 @@ const OutgoingMsg = memo(
               ></iframe>
             </div>
           )}
+          {isEditing ? (
+            <EditMessage
+              value={editValue}
+              onChange={setEditValue}
+              onCancel={handleCancelEdit}
+              onSend={handleSendEdit}
+              canSend={canSendEdit}
+              isBusy={isBusy}
+            />
+          ) : (
+            <DisplayMessage
+              text={input_prompt}
+              createdAt={created_at}
+              isBusy={isBusy}
+              onCopy={handleCopy}
+              onEdit={handleStartEdit}
+              canEdit={canEdit}
+              onRerun={() => rerun?.(web_url!)}
+              canRerun={canRerun}
+            />
+          )}
         </div>
       </div>
     );
@@ -198,6 +214,210 @@ const OutgoingMsg = memo(
 );
 
 export default OutgoingMsg;
+
+interface DisplayMessageProps {
+  text: string;
+  createdAt?: string;
+  isBusy: boolean;
+  onCopy: () => void | Promise<void>;
+  onEdit: () => void;
+  canEdit: boolean;
+  onRerun: () => void;
+  canRerun: boolean;
+}
+
+/**
+ * Read-only user message: text bubble (with expand/collapse) and the hover
+ * toolbar (time, Copy, Edit, Re-run). Renders nothing when there is no text.
+ */
+function DisplayMessage({
+  text,
+  createdAt,
+  isBusy,
+  onCopy,
+  onEdit,
+  canEdit,
+  onRerun,
+  canRerun,
+}: DisplayMessageProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  // Nothing to show without text (e.g. an attachment-only message): the bubble
+  // and the Copy/Edit actions all operate on text, so render nothing.
+  if (!text) return null;
+
+  // Large = more than 200 characters or more than 5 lines
+  const isLargeMessage = text.length > 200 || text.split("\n").length > 5;
+  const displayText =
+    isLargeMessage && !isExpanded ? getTruncatedText(text) : text;
+
+  return (
+    <>
+      <div
+        className={clsx(
+          "d-flex align-start pos-relative gooey-outgoing-text br-large gp-8 gmt-8",
+          `gmr-${MESSAGE_GUTTER}`,
+        )}
+      >
+        <p
+          className={clsx(
+            "font_16_400 gp-4 overflow-hidden",
+            isLargeMessage && !isExpanded && "gooey-outgoing-text-collapsed",
+          )}
+        >
+          {displayText}
+        </p>
+        {isLargeMessage && (
+          <div>
+            <GooeyTooltip
+              text={isExpanded ? "Collapse message" : "Expand message"}
+            >
+              <IconButton
+                className="gooey-outgoing-expand-btn gmt-4"
+                variant="text"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                <IconChevronDown
+                  size={16}
+                  style={{
+                    transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                />
+              </IconButton>
+            </GooeyTooltip>
+          </div>
+        )}
+      </div>
+      <div
+        className={clsx(
+          "gooey-outgoing-actions d-flex align-center gmt-2",
+          `gmr-${MESSAGE_GUTTER}`,
+          isMobile() && "is-mobile",
+        )}
+      >
+        <MessageTimeLabel createdAt={createdAt} className="gmr-4" />
+        <CopyButton onCopy={onCopy} />
+        {!isBusy && canEdit && (
+          <GooeyTooltip text="Edit">
+            <IconButton
+              className="text-muted"
+              onClick={onEdit}
+              disabled={isBusy}
+              aria-label="Edit"
+            >
+              <IconPencilEdit size={ACTION_ICON_SIZE} />
+            </IconButton>
+          </GooeyTooltip>
+        )}
+        {!isBusy && canRerun && (
+          <GooeyTooltip text="Re-run">
+            <IconButton
+              className="text-muted"
+              onClick={onRerun}
+              disabled={isBusy}
+              aria-label="Re-run"
+            >
+              <IconRefresh size={ACTION_ICON_SIZE} />
+            </IconButton>
+          </GooeyTooltip>
+        )}
+      </div>
+    </>
+  );
+}
+
+interface EditMessageProps {
+  value: string;
+  onChange: (value: string) => void;
+  onCancel: () => void;
+  onSend: () => void;
+  canSend: boolean;
+  isBusy: boolean;
+}
+
+/** Inline editor for a user message: textarea with Cancel/Send actions. */
+function EditMessage({
+  value,
+  onChange,
+  onCancel,
+  onSend,
+  canSend,
+  isBusy,
+}: EditMessageProps) {
+  return (
+    <div
+      className={clsx(
+        "gooey-outgoing-edit gmt-8 gmb-8 d-flex flex-col align-end",
+        `gpr-${MESSAGE_GUTTER} gpl-${MESSAGE_GUTTER}`,
+      )}
+    >
+      <GooeyTextArea
+        id="edit-message-input"
+        className="w-100 font_16_400"
+        value={value}
+        rows={4}
+        autoFocus
+        minHeight={88}
+        maxHeight={200}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={(e) => {
+          const textarea = e.currentTarget;
+          requestAnimationFrame(() => {
+            const end = textarea.value.length;
+            textarea.setSelectionRange(end, end);
+          });
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSend();
+          } else if (e.key === "Escape") {
+            onCancel();
+          }
+        }}
+      />
+      <div className="d-flex justify-end align-center gmt-8 gap-8">
+        <Button variant="text" className="font_14_500" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          variant="filled"
+          className="font_14_600"
+          onClick={onSend}
+          disabled={isBusy || !canSend}
+        >
+          Send
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// Truncate text for collapsed view (first 200 characters or first 3 lines)
+function getTruncatedText(text: string): string {
+  const lines = text.split("\n");
+  // If more than 3 lines, show first 3 lines with ellipsis
+  if (lines.length > 3) {
+    const firstThreeLines = lines.slice(0, 3).join("\n");
+    // Make sure we don't exceed 200 chars even with line breaks
+    if (firstThreeLines.length > 200) {
+      return firstThreeLines.slice(0, 200).trim() + "...";
+    }
+    return firstThreeLines + "...";
+  }
+  // If single line or few lines but long text, truncate to 200 chars
+  if (text.length > 200) {
+    // Try to break at word boundary if possible
+    const truncated = text.slice(0, 200);
+    const lastSpace = truncated.lastIndexOf(" ");
+    // If we find a space near the end (within last 30 chars), break there
+    if (lastSpace > 170) {
+      return truncated.slice(0, lastSpace) + "...";
+    }
+    return truncated.trim() + "...";
+  }
+  return text;
+}
 
 function resolveInputAudioUrl(
   input_audio?: Blob | string | string[],
