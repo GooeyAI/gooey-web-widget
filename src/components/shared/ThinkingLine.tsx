@@ -18,6 +18,10 @@ export function ThinkingLine({ label = THINKING_LABEL }: { label?: string }) {
 }
 
 const DOT_X = [15, 66, 117];
+// The dots grow out of the bot's eyes and must stay on that line, or the morph
+// between the two jumps. The eye line is also what `--gooey-thinking-bot-lift`
+// puts on the label's centre, so sitting here is what leaves the dots centred.
+const DOT_CY = 70.76;
 
 // Gooey bot mark from the design system, animated while the bot works: it bounces into
 // three dots, which play four different acts in turn (wave → 2D orbit → pogo → 3D orbit),
@@ -85,7 +89,7 @@ export function GooeyBotThinking() {
             key={cx}
             className={`gooey-thinking-bot-dot gooey-thinking-bot-dot-${i}`}
             cx={cx}
-            cy="70.76"
+            cy={DOT_CY}
             r="15"
           />
         ))}

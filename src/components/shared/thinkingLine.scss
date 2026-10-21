@@ -31,9 +31,22 @@ $tl-ink-soft: #67759b;
   animation: gooeyThinkingShimmer 2s linear infinite;
 }
 
+// Optical centring. The glyph's ink is bottom-heavy: the antenna is a thin
+// ascender (y 0-39 of the viewBox) while the mass — body, ears, eyes — sits at
+// y 41-100, centred on the eye line at y 70.7. Centring the *box* therefore put
+// the bot's face 3.7px below the label's centre, and the dots, which share the
+// eye line, with it. Lift the glyph so that line meets the text instead:
+//
+//   (70.7 - 48) viewBox units x (17px / 104 units) = 3.71px
+//
+// 48 is the box's own centre (-4 + 104/2). Treat the antenna as an ascender and
+// let it overhang, the way a letter's does. A transform, not a margin, so the
+// row's own centring has nothing to re-measure.
 .gooey-thinking-bot {
+  --gooey-thinking-bot-lift: 3.71px;
   flex: none;
   overflow: visible;
+  transform: translateY(calc(-1 * var(--gooey-thinking-bot-lift)));
 }
 
 // ---- WhatsApp theme ----
