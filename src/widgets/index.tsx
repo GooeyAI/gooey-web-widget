@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { addInlineStyle, Styles } from "src/addStyles";
 import { CopilotChatWidgetController } from "src/contexts/ControllerUtils";
-import { FontAwesomeStyles } from "src/fontAwesome";
 import MessagesContextProvider from "src/contexts/MessagesContext";
 import SystemContextProvider from "src/contexts/SystemContext";
 import rootStyle from "src/css/root.scss?inline";
@@ -117,7 +116,6 @@ function ThemedRoot({
       tabIndex={-1}
     >
       <Styles shadowRoot={shadowRoot} />
-      <FontAwesomeStyles />
       <Sentry.ErrorBoundary>{children}</Sentry.ErrorBoundary>
     </div>
   );
