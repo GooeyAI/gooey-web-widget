@@ -1,0 +1,440 @@
+// Thinking-bot animation: four "chat wave" acts played back to back, 28s in total.
+//
+// Each act is a 7s loop that starts and ends the same way:
+//
+//   0.0s  blink → crouch → bounce → squash into three dots (ear · head · ear)
+//   2.3s  … the dots do their own thing until 5.2s …
+//   5.3s  dots pop back into the bot, antenna springs up, eyes blink open
+//
+// Order of the middle section: wave → 2D orbit → pogo → 3D orbit → (repeat).
+//
+// The bot parts (body, ears, eyes, antenna) are a plain 7s loop that repeats four times;
+// each dot has a single 28s animation that holds all four acts. Dot paths are sampled into
+// keyframes at compile time, so the runtime is plain CSS (no JS, no CSS trig).
+// Geometry is in SVG user units (viewBox 0 -4 133 104); dots sit at x = 15 / 66 / 117.
+@use "sass:list";
+@use "sass:math";
+@use "sass:meta";
+
+$gtb-act: 7; // seconds per act
+$gtb-total: 28; // four acts
+$gtb-m0: 2.3; // dots start moving (relative to the act)
+$gtb-m1: 5.2; // dots are back in a line
+$gtb-samples: 32; // keyframes sampled across [m0, m1]
+$gtb-spacing: 51; // dot offset from the centre dot
+$gtb-ink: #0a1021;
+
+// ---------- helpers ----------
+
+@function gtb-pct($t) {
+  @return math.div(math.round(math.div($t, $gtb-total) * 100000), 1000) * 1%;
+}
+
+@function gtb-n($x, $places: 1) {
+  $p: math.pow(10, $places);
+  @return math.div(math.round($x * $p), $p);
+}
+
+@function gtb-ease($u) {
+  $u: math.max(0, math.min(1, $u));
+  @return 0.5 - 0.5 * math.cos(math.$pi * $u);
+}
+
+// 0 at the ends of the middle section, 1 in between (dots ease on/off their shape)
+@function gtb-ramp($t) {
+  @return gtb-ease(math.div($t - $gtb-m0, 0.5)) *
+    gtb-ease(math.div($gtb-m1 - $t, 0.5));
+}
+
+@function gtb-xf($dx, $dy, $sx, $sy) {
+  @return translate(#{gtb-n($dx)}px, #{gtb-n($dy)}px)
+    scale(#{gtb-n($sx, 2)}, #{gtb-n($sy, 2)});
+}
+
+// ---------- dot motion (return: dx dy sx sy opacity, relative to the dot's slot) ----------
+
+// Flat circle, dots 120° apart, orbiting a fixed centre.
+@function gtb-orbit-2d($i, $t) {
+  $w: gtb-ramp($t);
+  $phi: 2 * 2 * math.$pi * math.div($t - $gtb-m0, $gtb-m1 - $gtb-m0);
+  $th: $phi + 2 * math.$pi * math.div($i, 3) - math.div(math.$pi, 2);
+  @return ($w * (30 * math.cos($th) - ($i - 1) * $gtb-spacing))
+    ($w * 30 * math.sin($th)) 1 1 1;
+}
+
+// Tilted ring around a fixed centre, spinning about its vertical axis.
+// Front dots are larger and solid, back dots smaller and fainter.
+@function gtb-orbit-3d($i, $t) {
+  $w: gtb-ramp($t);
+  $phi: 2.5 * 2 * math.$pi * math.div($t - $gtb-m0, $gtb-m1 - $gtb-m0);
+  $th: $phi + 2 * math.$pi * math.div($i, 3);
+  $z: math.cos($th);
+  $scale: 1 + $w * 0.28 * $z;
+  @return ($w * (46 * math.sin($th) - ($i - 1) * $gtb-spacing)) ($w * 22 * $z)
+    $scale $scale (1 - $w * 0.45 * math.div(1 - $z, 2));
+}
+
+// ---------- keyframe pieces; $o is the act's start time within the 28s loop ----------
+
+$gtb-hidden: translate(0px, 0px) scale(0);
+
+// Pop-in (1.7–2.15s of the act)
+@mixin gtb-pop-in($i, $o) {
+  #{gtb-pct($o + 1.7 + $i * 0.05)} {
+    transform: $gtb-hidden;
+    opacity: 0;
+    animation-timing-function: ease-out;
+  }
+  #{gtb-pct($o + 1.95 + $i * 0.05)} {
+    transform: scale(1.3);
+    opacity: 1;
+    animation-timing-function: ease-in-out;
+  }
+  #{gtb-pct($o + 2.15 + $i * 0.05)} {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Pop-out (5.3–5.55s of the act)
+@mixin gtb-pop-out($o) {
+  #{gtb-pct($o + 5.3)} {
+    transform: scale(1);
+    opacity: 1;
+    animation-timing-function: ease-in;
+  }
+  #{gtb-pct($o + 5.55)} {
+    transform: $gtb-hidden;
+    opacity: 0;
+  }
+}
+
+// Sampled path: calls $fn($i, $t) at evenly spaced times in [m0, m1]
+@mixin gtb-sampled($i, $o, $fn) {
+  @include gtb-pop-in($i, $o);
+  @for $k from 0 through $gtb-samples {
+    $t: $gtb-m0 + math.div($gtb-m1 - $gtb-m0, $gtb-samples) * $k;
+    $s: meta.call($fn, $i, $t);
+    #{gtb-pct($o + $t)} {
+      transform: gtb-xf(
+        list.nth($s, 1),
+        list.nth($s, 2),
+        list.nth($s, 3),
+        list.nth($s, 4)
+      );
+      opacity: gtb-n(list.nth($s, 5), 2);
+    }
+  }
+  @include gtb-pop-out($o);
+}
+
+// Chat wave: each dot rises and falls three times, one after another
+@mixin gtb-wave($i, $o) {
+  @include gtb-pop-in($i, $o);
+  @for $k from 0 through 2 {
+    $t0: $o + $gtb-m0 + $i * 0.14 + $k * 0.9;
+    #{gtb-pct($t0)} {
+      transform: translateY(0);
+      opacity: 1;
+      animation-timing-function: ease-in-out;
+    }
+    #{gtb-pct($t0 + 0.22)} {
+      transform: translateY(-15px);
+      opacity: 1;
+      animation-timing-function: ease-in-out;
+    }
+    #{gtb-pct($t0 + 0.44)} {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @include gtb-pop-out($o);
+}
+
+// Pogo cascade: (jump start, jump height) per dot. Each jump is a crouch, a leap on a
+// rising/falling arc with stretch, then a landing squash. Dots scale about their centre,
+// so every state shifts by 15 * (1 - sy) to keep the squash pinned to the floor.
+$gtb-pogo: (
+  (2.3 22, 3.5 22, 4.7 16),
+  (2.6 22, 3.2 22, 3.8 22, 4.7 16),
+  (2.9 22, 4.1 22, 4.7 16)
+);
+
+@mixin gtb-pogo($i, $o) {
+  @include gtb-pop-in($i, $o);
+  @each $jump in list.nth($gtb-pogo, $i + 1) {
+    $ts: $o + list.nth($jump, 1);
+    $h: list.nth($jump, 2);
+    #{gtb-pct($ts - 0.08)} {
+      transform: translateY(2.3px) scale(1.15, 0.85);
+      animation-timing-function: ease-out;
+    }
+    #{gtb-pct($ts)} {
+      transform: translateY(-1.5px) scale(0.95, 1.1);
+      animation-timing-function: cubic-bezier(0.2, 0.65, 0.4, 1);
+    }
+    #{gtb-pct($ts + 0.21)} {
+      transform: translateY(#{-$h - 2.3}px) scale(0.9, 1.15);
+      animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.35);
+    }
+    #{gtb-pct($ts + 0.42)} {
+      transform: translateY(3px) scale(1.2, 0.8);
+      animation-timing-function: ease-out;
+    }
+    #{gtb-pct($ts + 0.5)} {
+      transform: translateY(0) scale(1, 1);
+    }
+  }
+  @include gtb-pop-out($o);
+}
+
+// ---------- bot parts (shared start / end) ----------
+
+// Both hops are half the height they were drawn at. The glyph is lifted onto the
+// label's centre line (thinkingLine.scss), which starts the bot higher in the
+// row, and at full height the first hop carried it 5.7px past the top of the
+// bubble. Halving the rise, not lowering the glyph, keeps the bot and the dots
+// on the text's centre at rest; only how far it jumps changes.
+//
+// The values are SVG user units, not screen pixels: `px` in a transform on an
+// SVG element is measured in the viewBox, where 1 unit = 17px / 104 = 0.16px.
+// A hop of 8 units is 1.3px on screen.
+@keyframes gooeyThinkingBotHop {
+  0%,
+  9% {
+    transform: translateY(0) scale(1, 1);
+  }
+  12.86% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  18.57% {
+    transform: translateY(-8px) scale(0.97, 1.04);
+  }
+  23.57% {
+    transform: translateY(0) scale(1.2, 0.78);
+  }
+  27.5% {
+    transform: translateY(0) scale(0.97, 1.04);
+  }
+  31%,
+  79.29% {
+    transform: translateY(0) scale(1, 1);
+  }
+  81.5% {
+    transform: translateY(0) scale(1.1, 0.9);
+  }
+  84% {
+    transform: translateY(-3px) scale(0.985, 1.02);
+  }
+  87% {
+    transform: translateY(0) scale(1.05, 0.95);
+  }
+  90%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes gooeyThinkingBotEyes {
+  0%,
+  4%,
+  10%,
+  23.57%,
+  87%,
+  90%,
+  93%,
+  100% {
+    transform: scale(1, 1);
+  }
+  7.14%,
+  91.5% {
+    transform: scale(1, 0.1);
+  }
+  26%,
+  79.29% {
+    transform: scale(0);
+  }
+  84% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes gooeyThinkingBotAntenna {
+  0%,
+  23.57% {
+    transform: scaleY(1) rotate(0);
+  }
+  12.86% {
+    transform: scaleY(1) rotate(8deg);
+  }
+  18.57% {
+    transform: scaleY(1) rotate(-20deg);
+  }
+  26.4%,
+  79.29% {
+    transform: scaleY(0) rotate(0);
+  }
+  // halved with the second hop it rides on, or it would be the new highest point
+  84% {
+    transform: scaleY(1.1) rotate(0);
+  }
+  87% {
+    transform: scaleY(1) rotate(12deg);
+  }
+  90% {
+    transform: scaleY(1) rotate(-6deg);
+  }
+  93%,
+  100% {
+    transform: scaleY(1) rotate(0);
+  }
+}
+
+// Ears slide to the outer dot positions (6 units) and shrink; body shrinks to the centre dot.
+@keyframes gooeyThinkingBotEarL {
+  0%,
+  23.57% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  26.43%,
+  79.29% {
+    transform: translateX(6px) scale(0.7);
+    opacity: 0.7;
+  }
+  30%,
+  75.71% {
+    transform: translateX(6px) scale(0.7);
+    opacity: 0;
+  }
+  84% {
+    transform: translateX(-2px) scale(1.1);
+    opacity: 1;
+  }
+  87%,
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gooeyThinkingBotEarR {
+  0%,
+  23.57% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  26.43%,
+  79.29% {
+    transform: translateX(-6px) scale(0.7);
+    opacity: 0.7;
+  }
+  30%,
+  75.71% {
+    transform: translateX(-6px) scale(0.7);
+    opacity: 0;
+  }
+  84% {
+    transform: translateX(2px) scale(1.1);
+    opacity: 1;
+  }
+  87%,
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gooeyThinkingBotBody {
+  0%,
+  23.57% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  26.43%,
+  79.29% {
+    transform: scale(0.35, 0.51);
+    opacity: 0.7;
+  }
+  30%,
+  75.71% {
+    transform: scale(0.35, 0.51);
+    opacity: 0;
+  }
+  84% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  87%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.gooey-thinking-bot-rig,
+.gooey-thinking-bot-antenna,
+.gooey-thinking-bot-eyes,
+.gooey-thinking-bot-ear-l,
+.gooey-thinking-bot-ear-r,
+.gooey-thinking-bot-body,
+.gooey-thinking-bot-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.gooey-thinking-bot-rig {
+  transform-origin: 50% 100%;
+  animation: gooeyThinkingBotHop #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-antenna {
+  transform-origin: 50% 100%;
+  animation: gooeyThinkingBotAntenna #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-eyes {
+  animation: gooeyThinkingBotEyes #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-ear-l {
+  transform-origin: 100% 50%;
+  animation: gooeyThinkingBotEarL #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-ear-r {
+  transform-origin: 0% 50%;
+  animation: gooeyThinkingBotEarR #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-body {
+  animation: gooeyThinkingBotBody #{$gtb-act}s ease-in-out infinite;
+}
+
+.gooey-thinking-bot-dot {
+  fill: $gtb-ink;
+  opacity: 0;
+}
+
+// ---------- the four acts, one 28s animation per dot ----------
+
+@for $i from 0 through 2 {
+  @keyframes gooeyThinkingBotDot#{$i} {
+    0% {
+      transform: $gtb-hidden;
+      opacity: 0;
+    }
+    @include gtb-wave($i, 0);
+    @include gtb-sampled($i, $gtb-act, meta.get-function("gtb-orbit-2d"));
+    @include gtb-pogo($i, $gtb-act * 2);
+    @include gtb-sampled($i, $gtb-act * 3, meta.get-function("gtb-orbit-3d"));
+    100% {
+      transform: $gtb-hidden;
+      opacity: 0;
+    }
+  }
+
+  .gooey-thinking-bot-dot-#{$i} {
+    animation: gooeyThinkingBotDot#{$i} #{$gtb-total}s linear infinite;
+  }
+}
