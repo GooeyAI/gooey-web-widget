@@ -190,6 +190,15 @@ $gtb-pogo: (
 
 // ---------- bot parts (shared start / end) ----------
 
+// Both hops are half the height they were drawn at. The glyph is lifted onto the
+// label's centre line (thinkingLine.scss), which starts the bot higher in the
+// row, and at full height the first hop carried it 5.7px past the top of the
+// bubble. Halving the rise, not lowering the glyph, keeps the bot and the dots
+// on the text's centre at rest; only how far it jumps changes.
+//
+// The values are SVG user units, not screen pixels: `px` in a transform on an
+// SVG element is measured in the viewBox, where 1 unit = 17px / 104 = 0.16px.
+// A hop of 8 units is 1.3px on screen.
 @keyframes gooeyThinkingBotHop {
   0%,
   9% {
@@ -199,7 +208,7 @@ $gtb-pogo: (
     transform: translateY(0) scale(1.1, 0.88);
   }
   18.57% {
-    transform: translateY(-16px) scale(0.94, 1.08);
+    transform: translateY(-8px) scale(0.97, 1.04);
   }
   23.57% {
     transform: translateY(0) scale(1.2, 0.78);
@@ -215,7 +224,7 @@ $gtb-pogo: (
     transform: translateY(0) scale(1.1, 0.9);
   }
   84% {
-    transform: translateY(-6px) scale(0.97, 1.04);
+    transform: translateY(-3px) scale(0.985, 1.02);
   }
   87% {
     transform: translateY(0) scale(1.05, 0.95);
@@ -265,8 +274,9 @@ $gtb-pogo: (
   79.29% {
     transform: scaleY(0) rotate(0);
   }
+  // halved with the second hop it rides on, or it would be the new highest point
   84% {
-    transform: scaleY(1.2) rotate(0);
+    transform: scaleY(1.1) rotate(0);
   }
   87% {
     transform: scaleY(1) rotate(12deg);
