@@ -83,6 +83,7 @@ function ToolCalls({
 function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
   const { name, label, inputs, return_value, run_url, icon, is_running } =
     toolCall;
+  const [open, setOpen] = useState(false);
   const hasInputs = !!inputs && Object.keys(inputs).length > 0;
   const snippet = getSnippet(toolCall);
 
@@ -101,7 +102,14 @@ function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
   }
 
   return (
-    <details className="tool-call-row">
+    // `open` tracks the element's own state so the body is built only once the
+    // row is opened. A <details> renders its children either way and lets the
+    // browser hide them, which meant opening the table laid out every tool's
+    // inputs and outputs, not just the one that was clicked.
+    <details
+      className="tool-call-row"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
       <summary className="tool-call-row-summary">
         <ToolCallIcon name={name} icon={icon} />
         <span className="tool-call-row-label">{label}</span>
@@ -110,37 +118,39 @@ function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
         <ToolCallsChevron size={10} />
       </summary>
 
-      <div className="tool-call-row-body">
-        {hasInputs && (
-          <>
-            <div className="tool-call-section-header">
-              <span>Inputs</span>
-              {run_url && (
-                <a
-                  href={run_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="tool-call-link"
-                >
-                  View tool call
-                  <IconExternalLink size={9} />
-                </a>
-              )}
-            </div>
-            <div className="tool-call-value">
-              <ToolValue value={inputs} />
-            </div>
-          </>
-        )}
-        <div className="tool-call-section-header">Output</div>
-        <div className="tool-call-value">
-          {is_running ? (
-            <span className="tool-value-muted">Running…</span>
-          ) : (
-            <ToolValue value={return_value} />
+      {open && (
+        <div className="tool-call-row-body">
+          {hasInputs && (
+            <>
+              <div className="tool-call-section-header">
+                <span>Inputs</span>
+                {run_url && (
+                  <a
+                    href={run_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tool-call-link"
+                  >
+                    View tool call
+                    <IconExternalLink size={9} />
+                  </a>
+                )}
+              </div>
+              <div className="tool-call-value">
+                <ToolValue value={inputs} />
+              </div>
+            </>
           )}
+          <div className="tool-call-section-header">Output</div>
+          <div className="tool-call-value">
+            {is_running ? (
+              <span className="tool-value-muted">Running…</span>
+            ) : (
+              <ToolValue value={return_value} />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </details>
   );
 }
