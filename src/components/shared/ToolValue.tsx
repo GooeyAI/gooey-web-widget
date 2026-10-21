@@ -42,9 +42,10 @@ function isInlineList(items: unknown[]) {
   );
 }
 
-// nested content gets its own block below its key, not beside it
-function isBlock(value: unknown) {
-  const data = typeof value === "string" ? parseIfJson(value) : value;
+// nested content gets its own block below its key, not beside it. Takes the
+// already-parsed value: the caller renders the same value straight after, and
+// parsing a tool result twice is the kind of thing that adds up on a big one.
+function isBlock(data: unknown) {
   if (Array.isArray(data)) return data.length > 0 && !isInlineList(data);
   if (data && typeof data === "object") return Object.keys(data).length > 0;
   return false;
@@ -102,9 +103,11 @@ export function ToolValue({
     );
   }
 
-  const entries = Object.entries(data as Record<string, unknown>).filter(
-    ([, v]) => v !== undefined,
-  );
+  const entries = Object.entries(data as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined)
+    .map(
+      ([key, v]) => [key, typeof v === "string" ? parseIfJson(v) : v] as const,
+    );
   if (!entries.length) return <span className="tool-value-muted">None</span>;
   if (depth >= MAX_DEPTH) return <ToolValueRaw value={data} />;
   return (
