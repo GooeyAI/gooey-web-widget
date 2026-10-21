@@ -144,6 +144,15 @@ $tc-mono:
   flex-shrink: 0;
 }
 
+// a glyph the backend supplied, e.g. "🌐"
+.tool-call-icon-glyph {
+  width: 14px;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 .tool-call-row-label {
   overflow: hidden;
   text-overflow: ellipsis;

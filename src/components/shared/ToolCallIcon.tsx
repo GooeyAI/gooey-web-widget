@@ -19,13 +19,32 @@ const TOOL_ICONS: Record<string, string> = {
   GOOEY_MEMORY_DELETE_VALUE: "fa-brain",
 };
 
+// The backend sends a per-tool `icon` — a URL, or a glyph like "🌐". Only URLs
+// were ever used, so a tool outside the table above fell through to the wrench
+// even when the server had said what it was. A customer's own tools are exactly
+// the ones this table cannot know about, so its icon is worth reading.
+const isUrlIcon = (icon: string) =>
+  icon.startsWith("http") || icon.startsWith("/");
+// a glyph or two, not a sentence that happened to arrive in the field
+const isGlyphIcon = (icon: string) =>
+  !!icon.trim() && Array.from(icon.trim()).length <= 2;
+
 export function ToolCallIcon({ name, icon }: { name: string; icon?: string }) {
   if (/google.?search/i.test(name)) {
     return <GoogleIcon />;
   }
   const faIcon = TOOL_ICONS[name];
-  if (!faIcon && icon && (icon.startsWith("http") || icon.startsWith("/"))) {
-    return <img src={icon} alt="" className="tool-call-icon-image" />;
+  if (!faIcon && icon) {
+    if (isUrlIcon(icon)) {
+      return <img src={icon} alt="" className="tool-call-icon-image" />;
+    }
+    if (isGlyphIcon(icon)) {
+      return (
+        <span className="tool-call-icon-glyph" aria-hidden="true">
+          {icon.trim()}
+        </span>
+      );
+    }
   }
   return (
     <i
