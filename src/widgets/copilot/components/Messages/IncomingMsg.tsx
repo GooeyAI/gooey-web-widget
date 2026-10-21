@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { memo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
@@ -328,14 +328,24 @@ const IncomingMsg = memo(
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
     const hasText = hasResponseText(props.data);
     const { measuredSec } = useStreamTimer(isStreaming);
-    const allToolCalls =
-      props?.showToolCalls && props?.data?.final_prompt
-        ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
-        : [];
+    // Every streamed chunk re-renders this message, and the extraction JSON.parses
+    // each call's arguments and each result's content — thousands of characters a
+    // render on a run with any real tool output. It only changes when the prompt does.
+    const allToolCalls = useMemo(
+      () =>
+        props?.showToolCalls && props?.data?.final_prompt
+          ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
+          : [],
+      [props?.showToolCalls, props?.data?.final_prompt],
+    );
     // housekeeping calls (Load Tools) are not counted or listed, but a running
     // one is still named by the thinking line
-    const toolCalls = allToolCalls.filter(
-      (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
+    const toolCalls = useMemo(
+      () =>
+        allToolCalls.filter(
+          (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
+        ),
+      [allToolCalls],
     );
     // a streaming message always has a status row; a finished one only if tools ran
     const hasStatusRow = isStreaming || toolCalls.length > 0;
