@@ -55,10 +55,52 @@ const ChatInput = () => {
     setPreAttachedFileUsed,
   } = useMessagesContext();
   const [value, setValue] = useState("");
+  // The composer floats over the message list, so the list has to know how tall
+  // it is to keep the last message clear of it. Published as a custom property
+  // on the chat pane rather than passed down: the message list is a sibling, and
+  // the height changes on its own (a growing textarea, an attachment tray).
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [files, setFiles] = useState<UploadedFile[] | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    const pane = el?.closest<HTMLElement>(".gooey-chat-main");
+    if (!el || !pane) return;
+    const publish = () => {
+      // How far the list must pad itself to scroll a message clear of the
+      // composer.
+      pane.style.setProperty("--gooey-composer-height", `${el.offsetHeight}px`);
+      // Where the list's fade bottoms out, and what the scroll-to-bottom control
+      // clears - both measured against the input bar rather than the wrapper,
+      // whose padding is empty. Falls back to the wrapper while the bar is
+      // swapped out, as it is during recording.
+      const bar = el.querySelector<HTMLElement>(".gooey-chat-input-bar") ?? el;
+      const paneBottom = pane.getBoundingClientRect().bottom;
+      const barRect = bar.getBoundingClientRect();
+      // The controls are nudged up out of the bar's box (see `.input-left-
+      // buttons`), so the hidden band starts at the highest of them, not the bar.
+      const controlsTop = Math.min(
+        barRect.top,
+        ...Array.from(bar.children, (c) => c.getBoundingClientRect().top),
+      );
+      const set = (name: string, value: number) =>
+        pane.style.setProperty(name, `${Math.max(0, Math.round(value))}px`);
+      set("--gooey-composer-solid", paneBottom - controlsTop);
+      set("--gooey-composer-center", paneBottom - (barRect.top + barRect.height / 2));
+    };
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      pane.style.removeProperty("--gooey-composer-height");
+      pane.style.removeProperty("--gooey-composer-solid");
+      pane.style.removeProperty("--gooey-composer-center");
+    };
+  }, []);
 
   // Handle preAttachedFile on mount
   useEffect(() => {
@@ -249,6 +291,7 @@ const ChatInput = () => {
   );
   return (
     <div
+      ref={rootRef}
       className={clsx(
         !config.branding.showPoweredByGooey && "gpb-8",
         !messages?.size && !isSending && "gooey-chat-input-empty",

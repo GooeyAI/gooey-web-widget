@@ -15,6 +15,16 @@ function measureRealContentEnd(
   return realLastRect.bottom - containerRect.top + container.scrollTop;
 }
 
+// How much of the container a reader can actually see. The composer floats
+// over its bottom edge, and the list keeps that much bottom padding (see
+// messages.scss) so the last message can scroll clear of it - so "the bottom"
+// of the visible area is the top of that padding, not the container's edge.
+// Read from the computed style so this cannot drift from the stylesheet.
+function visibleHeight(container: HTMLDivElement) {
+  const padding = parseFloat(getComputedStyle(container).paddingBottom) || 0;
+  return container.clientHeight - padding;
+}
+
 interface UseMessagesScrollArgs {
   messages?: Map<string, MessageMishmash>;
   latestUserId: string | null;
@@ -64,7 +74,7 @@ export function useMessagesScroll({
       setShowScrollToBottom(false);
       return;
     }
-    const distance = realEnd - container.scrollTop - container.clientHeight;
+    const distance = realEnd - container.scrollTop - visibleHeight(container);
     setShowScrollToBottom(distance > SCROLL_TO_BOTTOM_THRESHOLD_PX);
   }, []);
 
@@ -79,7 +89,7 @@ export function useMessagesScroll({
     const realEnd = measureRealContentEnd(container, anchorRef.current);
     if (!container || realEnd === null) return;
     container.scrollTo({
-      top: Math.max(0, realEnd - container.clientHeight),
+      top: Math.max(0, realEnd - visibleHeight(container)),
       behavior: "smooth",
     });
   };
