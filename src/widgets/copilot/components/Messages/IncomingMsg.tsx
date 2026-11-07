@@ -389,6 +389,8 @@ const IncomingMsg = memo(
                     <ThinkingLine
                       label={getThinkingLabel(
                         allToolCalls,
+                        // once text streams the status only reads "Streaming¹ …"
+                        hasText ? undefined : props?.data?.detail,
                         summarizingRef.current,
                       )}
                     />
@@ -453,16 +455,31 @@ const IncomingMsg = memo(
   },
 );
 
-// "Thinking…" until the run reaches its summarizing step, except while a tool
-// runs, which is named instead
-function getThinkingLabel(toolCalls: ToolCall[], status?: string) {
+// A running tool is named first. Until the answer starts, the server's own status
+// is shown: it is the only sign a long step is moving, and the server sends it in
+// place of text for exactly that reason. Knowledge-base runs spend minutes in
+// "[12/40] Creating knowledge embeddings..." — on gooey.ai each of those steps
+// also refreshes the page, which behind a fixed "Thinking…" reads as a loop.
+// After that, the last "Summarizing with …", else "Thinking…".
+function getThinkingLabel(
+  toolCalls: ToolCall[],
+  status: string | undefined,
+  summarizing: string | undefined,
+) {
   const running = toolCalls.filter((toolCall) => toolCall.is_running);
   if (running.length) return running[running.length - 1].label;
-  return status || THINKING_LABEL;
+  if (status && !isPlaceholderStatus(status)) return status;
+  return summarizing || THINKING_LABEL;
 }
 
 function isSummarizingStatus(status?: string) {
   return !!status && /^summari[sz]ing/i.test(status);
+}
+
+// the server's defaults for a step that names nothing (STARTING_STATE and
+// DEFAULT_RUN_STATUS in gooey-server); "Thinking…" says the same thing
+function isPlaceholderStatus(status: string) {
+  return /^(starting|running)[.…\s]*$/i.test(status.trim());
 }
 
 export default IncomingMsg;
