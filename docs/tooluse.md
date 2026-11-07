@@ -24,12 +24,17 @@ Evaluated in order, per render of `IncomingMsg`:
 ### Thinking label rules (`getThinkingLabel` in `IncomingMsg.tsx`)
 
 1. If any tool call is running → the **last running** tool's `label` (e.g. `Load Tools`, `Google search`). This includes uncounted tools (below).
-2. Else if a status starting with `Summarizing` / `Summarising` (case-insensitive) has been seen for this message → the **most recent** such status (e.g. `Summarizing with GPT 5.6 Sol...`). It is kept in a ref because the server clears `detail` as soon as the model starts writing.
-3. Else → `THINKING_LABEL` = `"Thinking…"` (exported from `ThinkingLine.tsx`).
+2. Else, while the message has no answer text, the server's current status (`data.detail`) as sent, unless it is one of the server's placeholders `Starting...` / `Running...` (`isPlaceholderStatus`).
+3. Else if a status starting with `Summarizing` / `Summarising` (case-insensitive) has been seen for this message → the **most recent** such status (e.g. `Summarizing with GPT 5.6 Sol...`). It is kept in a ref because once the model starts writing the server's status changes to `Streaming¹ …`, which rule 2 does not show.
+4. Else → `THINKING_LABEL` = `"Thinking…"` (exported from `ThinkingLine.tsx`).
 
-All other server statuses (`Running...`, etc.) are deliberately hidden behind "Thinking…".
+Rule 2 is load-bearing — do not narrow it to an allowlist. gooey-server sends the run status *in place of* text until text exists (`daras_ai_v2/bots.py`: "if no text, send the run status as text"), and it is the only sign a long step is moving. A knowledge-base run spends minutes in `[i/N] Fetching latest knowledge docs...` and `[i/N] Creating knowledge embeddings...` (`apply_parallel` in `daras_ai_v2/vector_search.py`), and on gooey.ai every one of those steps also refreshes the page through the realtime channel. 2.13.6 hid every status but `Summarizing…`: the widget sat on a fixed "Thinking…" while the page kept reloading, which read as a hang, and the release was rolled back.
 
 Observed sequence on a tool-using bot: `Thinking…` → `Summarizing with …` → `Load Tools` → `Summarizing with …` → `google search` → `Summarizing with …` → (final: line removed).
+
+On a knowledge-base bot: `Thinking…` → `[1/N] Fetching latest knowledge docs...` … → `[1/N] Creating knowledge embeddings...` … → `Searching knowledge base...` → `Summarizing with …` → (final: line removed).
+
+The tool calls are memoized on `data.final_prompt`'s reference, so the streaming handler (`useStreamingHandler.ts`) must build a new array for every chunk. Editing the previous one in place froze the tool row and the running tool's label at the first chunk until the final response arrived.
 
 ### Labels
 
