@@ -137,9 +137,13 @@ export const useStreamingHandler = ({
             ...(prevMessage.buttons || []),
             ...(payload.buttons || []),
           ];
-          let final_prompt = prevMessage.final_prompt || [];
+          // a copy, not the previous message's array edited in place: IncomingMsg
+          // memoizes its tool calls on this reference, and an array that keeps its
+          // identity across chunks reads as unchanged, freezing the tool row and the
+          // running tool's label at whatever the first chunk carried
+          const final_prompt = [...(prevMessage.final_prompt || [])];
           for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
-            final_prompt[idx] = value;
+            final_prompt[Number(idx)] = value;
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,
