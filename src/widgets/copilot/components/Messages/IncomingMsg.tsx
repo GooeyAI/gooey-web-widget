@@ -7,19 +7,15 @@ import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
 import { hasResponseText } from "src/components/shared/Response/responseParser";
-import {
-  THINKING_LABEL,
-  ThinkingLine,
-} from "src/components/shared/ThinkingLine";
 import ToolCalls, {
   UNCOUNTED_TOOL_NAMES,
   extractToolCallsFromFinalPrompt,
-  type ToolCall,
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import CopyButton from "./CopyButton";
+import StatusLine, { getStatusLabel } from "src/components/shared/StatusLine";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -133,7 +129,10 @@ const IncomingMsgActions = ({
   // it paints no bubble, so a lone timestamp would float in the gutter.
   const showActions =
     hasContent &&
-    (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink);
+    (hasTiming ||
+      showCopy ||
+      thumbButtons.length > 0 ||
+      showDebugLink);
 
   return (
     <div className="mw-100">
@@ -327,34 +326,24 @@ const IncomingMsg = memo(
     const videoTrack = output_video[0];
     const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
     const hasText = hasResponseText(props.data);
-    const { measuredSec } = useStreamTimer(isStreaming);
-    // Every streamed chunk re-renders this message, and the extraction JSON.parses
-    // each call's arguments and each result's content — thousands of characters a
-    // render on a run with any real tool output. It only changes when the prompt does.
-    const allToolCalls = useMemo(
+    // Every streamed chunk re-renders this message, and the extraction
+    // JSON.parses each call's arguments and each result's content — thousands
+    // of characters on a run with any real tool output. `final_prompt` is a
+    // fresh array per chunk (see useStreamingHandler), so this recomputes when
+    // the prompt actually grows and not on unrelated re-renders.
+    const toolCalls = useMemo(
       () =>
-        props?.showToolCalls && props?.data?.final_prompt
-          ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
+        // `FinalResponse` types final_prompt as `string | unknown[]`, so the
+        // completed run can land a string here. Iterating one yields its
+        // characters and quietly produces nothing; say so instead.
+        props?.showToolCalls && Array.isArray(props?.data?.final_prompt)
+          ? extractToolCallsFromFinalPrompt(props.data.final_prompt).filter(
+              (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
+            )
           : [],
       [props?.showToolCalls, props?.data?.final_prompt],
     );
-    // housekeeping calls (Load Tools) are not counted or listed, but a running
-    // one is still named by the thinking line
-    const toolCalls = useMemo(
-      () =>
-        allToolCalls.filter(
-          (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
-        ),
-      [allToolCalls],
-    );
-    // a streaming message always has a status row; a finished one only if tools ran
-    const hasStatusRow = isStreaming || toolCalls.length > 0;
-    // the server clears the status as soon as the model starts writing, so
-    // remember the last "Summarizing with …" to keep naming it
-    const summarizingRef = useRef<string>();
-    if (isSummarizingStatus(props?.data?.detail)) {
-      summarizingRef.current = props.data.detail;
-    }
+    const { measuredSec } = useStreamTimer(isStreaming);
 
     // Nothing has arrived yet, so there is nothing to put a row under.
     if (
@@ -373,31 +362,14 @@ const IncomingMsg = memo(
             "gooey-incoming-content mw-100",
           )}
         >
-          {/* The status row (thinking line / "Used N tools") and the answer share
-              one bubble. Bubble chrome only once there is something in it — an
-              empty response must not paint an empty bubble in themes that style it. */}
+          <ToolCalls toolCalls={toolCalls} />
+          {/* Bubble chrome only once there is something in it — an empty
+              response must not paint an empty bubble in themes that style it. */}
           <div
-            className={clsx(
-              (hasText || hasStatusRow) && "gooey-incoming-bubble",
-            )}
+            className={clsx((hasText || isStreaming) && "gooey-incoming-bubble")}
           >
-            {isStreaming ? (
-              <div className={clsx(hasText && "gmb-8")}>
-                <ToolCalls
-                  toolCalls={toolCalls}
-                  lead={
-                    <ThinkingLine
-                      label={getThinkingLabel(
-                        allToolCalls,
-                        summarizingRef.current,
-                      )}
-                    />
-                  }
-                />
-              </div>
-            ) : (
-              <ToolCalls toolCalls={toolCalls} />
-            )}
+            {/* No empty markdown container during the status-only phase: themes
+                give `.markdown` spacing, which would pad an empty bubble. */}
             {(!isStreaming || hasText) && (
               <GooeyTextResponse
                 data={props.data}
@@ -406,6 +378,12 @@ const IncomingMsg = memo(
                 isStreaming={isStreaming}
                 id={props?.id}
               />
+            )}
+            {/* Trails the answer: the status names the step the run is on, and
+                it stays for the whole run, so the text grows above a line that
+                does not move. */}
+            {isStreaming && (
+              <StatusLine label={getStatusLabel(props?.data?.detail)} />
             )}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
@@ -452,17 +430,5 @@ const IncomingMsg = memo(
     );
   },
 );
-
-// "Thinking…" until the run reaches its summarizing step, except while a tool
-// runs, which is named instead
-function getThinkingLabel(toolCalls: ToolCall[], status?: string) {
-  const running = toolCalls.filter((toolCall) => toolCall.is_running);
-  if (running.length) return running[running.length - 1].label;
-  return status || THINKING_LABEL;
-}
-
-function isSummarizingStatus(status?: string) {
-  return !!status && /^summari[sz]ing/i.test(status);
-}
 
 export default IncomingMsg;

@@ -1,32 +1,36 @@
 import { addInlineStyle } from "src/addStyles";
 import morphStyle from "./thinkingBotMorph.scss?inline";
-import style from "./thinkingLine.scss?inline";
+import style from "./statusLine.scss?inline";
 
 addInlineStyle(style);
 addInlineStyle(morphStyle);
 
 export const THINKING_LABEL = "Thinking…";
 
-// A single muted line that narrates what the bot is doing, led by the animated bot
-export function ThinkingLine({ label = THINKING_LABEL }: { label?: string }) {
-  return (
-    <div className="gooey-thinking-line" role="status">
-      <GooeyBotThinking />
-      <div className="gooey-thinking-label">{label}</div>
-    </div>
-  );
-}
+// The server's stand-ins for a step it cannot name. They say nothing that
+// "Thinking…" does not say more calmly, so they fold into it.
+//
+// Every other status is shown exactly as sent. A knowledge base run spends
+// minutes in "[12/40] Creating knowledge embeddings..." without a word of
+// answer text, and that climbing counter is the only evidence the run is
+// alive — behind a fixed label the same run reads as hung.
+const PLACEHOLDER_STATUS = /^(starting|running)[.…\s]*$/i;
+
+export const getStatusLabel = (detail?: string): string => {
+  const status = detail?.trim();
+  if (!status || PLACEHOLDER_STATUS.test(status)) return THINKING_LABEL;
+  return status;
+};
 
 const DOT_X = [15, 66, 117];
 // The dots grow out of the bot's eyes and must stay on that line, or the morph
-// between the two jumps. The eye line is also what `--gooey-thinking-bot-lift`
-// puts on the label's centre, so sitting here is what leaves the dots centred.
+// between the two jumps.
 const DOT_CY = 70.76;
 
-// Gooey bot mark from the design system, animated while the bot works: it bounces into
-// three dots, which play four different acts in turn (wave → 2D orbit → pogo → 3D orbit),
-// then re-forms into the bot. See thinkingBotMorph.scss.
-export function GooeyBotThinking() {
+// Gooey bot mark, animated while the bot works: it bounces into three dots, which
+// play four acts in turn (wave -> 2D orbit -> pogo -> 3D orbit), then re-form into
+// the bot. Classes are the contract thinkingBotMorph.scss animates.
+function GooeyBotThinking() {
   return (
     <svg
       className="gooey-thinking-bot"
@@ -67,22 +71,8 @@ export function GooeyBotThinking() {
           fill="#0a1021"
         />
         <g className="gooey-thinking-bot-eyes">
-          <ellipse
-            className="gooey-thinking-bot-eye"
-            cx="44.07"
-            cy="70.76"
-            rx="8.38"
-            ry="8.38"
-            fill="#fff"
-          />
-          <ellipse
-            className="gooey-thinking-bot-eye"
-            cx="88.17"
-            cy="70.76"
-            rx="8.38"
-            ry="8.38"
-            fill="#fff"
-          />
+          <ellipse cx="44.07" cy="70.76" rx="8.38" ry="8.38" fill="#fff" />
+          <ellipse cx="88.17" cy="70.76" rx="8.38" ry="8.38" fill="#fff" />
         </g>
         {DOT_X.map((cx, i) => (
           <circle
@@ -97,3 +87,15 @@ export function GooeyBotThinking() {
     </svg>
   );
 }
+
+/** The one live line a reply shows while it is working, under the answer. */
+const StatusLine = ({ label }: { label: string }) => (
+  <div className="gooey-status-line d-flex align-center" role="status">
+    <GooeyBotThinking />
+    <span className="gooey-status-label font_14_400 text-muted gml-8">
+      {label}
+    </span>
+  </div>
+);
+
+export default StatusLine;

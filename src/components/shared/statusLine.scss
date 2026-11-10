@@ -1,0 +1,45 @@
+// The label is server text of no fixed length ("[12/40] Creating knowledge
+// embeddings..."). `.gooey-messages-container` becomes a horizontal scroller
+// the moment any descendant outgrows the message column, so the label is
+// bounded here rather than left to drag the whole conversation sideways.
+.gooey-status-label {
+  // a flex item will not shrink below its own content without this, and
+  // text-overflow needs the clip it allows
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Only when an answer precedes it. During the status-only phase the line is the
+// bubble's sole child and a top margin would pad the bubble from inside. A sibling
+// selector rather than a `gmt-8` utility: the utility would need a className prop
+// on StatusLine and a `hasText` conditional at the call site, to express something
+// document order already states.
+.markdown + .gooey-status-line {
+  margin-top: 8px;
+}
+
+// Carried over from #56's thinkingLine.scss, which is not being lifted. The dots
+// travel outside the 22x17 box during the morph, so overflow must stay visible or
+// they are clipped mid-orbit. The lift puts the bot's eye line on the label's
+// centre — a transform, not a margin, so the row's own centring has nothing to
+// re-measure. thinkingBotMorph.scss only targets .gooey-thinking-bot-* children,
+// so this transform on the svg itself is never overwritten.
+.gooey-thinking-bot {
+  --gooey-thinking-bot-lift: 3.71px;
+  flex: none;
+  overflow: visible;
+  transform: translateY(calc(-1 * var(--gooey-thinking-bot-lift)));
+}
+
+// thinkingBotMorph.scss animates seven classes at once; this is the one switch that
+// stops all of them. `!important` because both sheets register on the `component`
+// layer, where only source order decides — and that order follows module imports,
+// which is too fragile to rest an accessibility guarantee on.
+@media (prefers-reduced-motion: reduce) {
+  .gooey-thinking-bot,
+  .gooey-thinking-bot * {
+    animation: none !important;
+  }
+}

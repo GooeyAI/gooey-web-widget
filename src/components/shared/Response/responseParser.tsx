@@ -76,8 +76,10 @@ const extractOutputText = (data: ResponseData): string => {
   let output = "";
 
   if (type === STREAM_MESSAGE_TYPES.MESSAGE_PART) {
-    // not `detail`: that is the run status ("Running…", "Summarizing with…"), which the
-    // thinking line already shows. Printing it here duplicated it inside the answer.
+    // not `detail`: that is the run's status ("[12/40] Creating knowledge
+    // embeddings..."), which StatusLine now shows on a line of its own. Printed
+    // here it became the answer, so `hasResponseText` read true and the message
+    // painted a bubble around a status.
     output = text || "";
   } else if (
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&

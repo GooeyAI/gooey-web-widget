@@ -1,10 +1,9 @@
 import clsx from "clsx";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { addInlineStyle } from "src/addStyles";
+import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
-import { ToolCallIcon } from "./ToolCallIcon";
-import { ToolValue } from "./ToolValue";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
@@ -20,110 +19,113 @@ export interface ToolCall {
   icon?: string;
 }
 
-// Tools that never count towards "Used N tools" and are not listed in its table
+// Housekeeping the agent does on its own behalf, not what a reader means by
+// "a tool the bot used". Neither counted nor listed.
 export const UNCOUNTED_TOOL_NAMES = ["load_tools"];
 
 const QUERY_KEYS = ["search_query", "query", "q", "search_term", "keywords"];
 
-// A short, single-line hint of what the call was about (e.g. a search query)
+// A one-line hint of what a call was about — its search query where there is
+// one, so four search rows read as four different searches instead of the same
+// tool name four times.
 function getSnippet({ name, label, inputs }: ToolCall): string {
   if (!inputs || typeof inputs !== "object") return "";
-  const values = Object.entries(inputs).filter(
+  const strings = Object.entries(inputs).filter(
     (entry): entry is [string, string] =>
       typeof entry[1] === "string" && !!entry[1].trim(),
   );
   const byKey = QUERY_KEYS.map((key) =>
-    values.find(([k]) => k.toLowerCase() === key),
+    strings.find(([k]) => k.toLowerCase() === key),
   ).find(Boolean);
-  const fallback = /search/i.test(`${name} ${label}`) ? values[0] : undefined;
+  const fallback = /search/i.test(`${name} ${label}`) ? strings[0] : undefined;
   return (byKey || fallback)?.[1].replace(/\s+/g, " ").trim() ?? "";
 }
 
-// The "Used N tools" summary. It shows as soon as a tool is used, and counts a tool that
-// is still running. `lead` (the thinking line) shares the summary's row:
-//   [bot] Thinking…  ·  Used 2 tools ⌄
-// and the table opens below that row.
-function ToolCalls({
-  toolCalls,
-  lead,
-}: {
-  toolCalls: ToolCall[];
-  lead?: ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
+/**
+ * "Used N tools", and the calls themselves once it is opened. Collapsed by
+ * default: on a run with any real tool use the calls outweigh the answer, and
+ * the answer is what the reader came for.
+ */
+function ToolCalls({ toolCalls }: { toolCalls: ToolCall[] }) {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  if (!toolCalls.length) return <>{lead}</>;
+  if (!toolCalls.length) return null;
 
   return (
-    <div className={clsx("tool-calls-container", "mw-100", !lead && "gmb-12")}>
-      <div className="tool-calls-header">
-        {lead}
-        {lead && <span className="tool-calls-separator">·</span>}
-        <button
-          type="button"
-          className="tool-calls-summary"
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
-          Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
-          <ToolCallsChevron size={11} />
-        </button>
-      </div>
-      {open && (
-        <div className="tool-calls-table">
-          {toolCalls.map((toolCall) => (
-            <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
-          ))}
-        </div>
-      )}
+    <div className={clsx("tool-calls-container gmb-12 mw-100")}>
+      <button
+        type="button"
+        className="tool-calls-summary font_12_600 text-muted gap-6 gp-0"
+        aria-expanded={isExpanded}
+        onClick={() => setIsExpanded((value) => !value)}
+      >
+        Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
+        <span className="d-flex align-center" aria-hidden="true">
+          {isExpanded ? (
+            <IconCaretUp size={10} />
+          ) : (
+            <IconChevronDown size={10} />
+          )}
+        </span>
+      </button>
+      {isExpanded &&
+        toolCalls.map((toolCall) => (
+          <ToolCallCard key={String(toolCall.id)} toolCall={toolCall} />
+        ))}
     </div>
   );
 }
 
-function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
-  const { name, label, inputs, return_value, run_url, icon, is_running } =
-    toolCall;
-  const [open, setOpen] = useState(false);
-  const hasInputs = !!inputs && Object.keys(inputs).length > 0;
-  const snippet = getSnippet(toolCall);
+function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
+  const { label, inputs, return_value, is_running, icon, run_url } = toolCall;
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // a running call with no inputs has nothing to show yet, so it isn't expandable
-  if (is_running && !hasInputs) {
-    return (
-      <div className="tool-call-row">
-        <div className="tool-call-row-summary is-static">
-          <ToolCallIcon name={name} icon={icon} />
-          <span className="tool-call-row-label">{label}</span>
-          {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
-          <span className="tool-call-running">Running…</span>
-        </div>
-      </div>
-    );
-  }
+  const snippet = getSnippet(toolCall);
+  const hasInputs = !!inputs && Object.keys(inputs).length > 0;
 
   return (
-    // `open` tracks the element's own state so the body is built only once the
-    // row is opened. A <details> renders its children either way and lets the
-    // browser hide them, which meant opening the table laid out every tool's
-    // inputs and outputs, not just the one that was clicked.
     <details
-      className="tool-call-row"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
+      open={isExpanded}
+      onToggle={(e) => setIsExpanded((e.target as HTMLDetailsElement).open)}
+      className="tool-call-card"
     >
-      <summary className="tool-call-row-summary">
-        <ToolCallIcon name={name} icon={icon} />
-        <span className="tool-call-row-label">{label}</span>
-        {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
-        {is_running && <span className="tool-call-running">Running…</span>}
-        <ToolCallsChevron size={10} />
+      <summary>
+        <div className="tool-call-icon">
+          {is_running ? (
+            <div className="tool-call-loader" />
+          ) : icon && (icon.startsWith("http") || icon.startsWith("/")) ? (
+            <img src={icon} alt="" className="tool-call-icon-image" />
+          ) : (
+            <span className="tool-call-icon-emoji">{icon || "🛠️"}</span>
+          )}
+        </div>
+        <div className="tool-call-summary-content">
+          <span className="font_12_600">{label}</span>
+          {snippet && (
+            <>
+              <span className="font_12_600"> - </span>
+              <span className="font_12_400 text-muted">{snippet}</span>
+            </>
+          )}
+        </div>
+        <div className="tool-call-summary-toggle">
+          {isExpanded ? (
+            <IconCaretUp size={10} />
+          ) : (
+            <IconChevronDown size={10} />
+          )}
+        </div>
       </summary>
 
-      {open && (
-        <div className="tool-call-row-body">
+      {/* Built only once this card is opened. A <details> renders its children
+          either way and lets the browser hide them, so opening the list laid
+          out every call's inputs and output, not just the one clicked. */}
+      {isExpanded && (
+        <div className="tool-call-body">
           {hasInputs && (
-            <>
+            <div className="mb-3">
               <div className="tool-call-section-header">
-                <span>Inputs</span>
+                <div className="font_12_600 text-dark">Inputs</div>
                 {run_url && (
                   <a
                     href={run_url}
@@ -131,40 +133,31 @@ function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
                     rel="noopener noreferrer"
                     className="tool-call-link"
                   >
-                    View tool call
-                    <IconExternalLink size={9} />
+                    <IconExternalLink size={10} />
+                    View Tool Call
                   </a>
                 )}
               </div>
-              <div className="tool-call-value">
-                <ToolValue value={inputs} />
+              <div className="tool-call-json-block">
+                {JSON.stringify(inputs, null, 2)}
               </div>
-            </>
+            </div>
           )}
-          <div className="tool-call-section-header">Output</div>
-          <div className="tool-call-value">
-            {is_running ? (
-              <span className="tool-value-muted">Running…</span>
-            ) : (
-              <ToolValue value={return_value} />
-            )}
-          </div>
+
+          {!is_running && (
+            <div>
+              <div className="font_12_600 text-dark gmt-6 gmb-6">Output</div>
+              <div className="tool-call-json-block">
+                {typeof return_value === "string"
+                  ? return_value
+                  : JSON.stringify(return_value, null, 2)}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </details>
   );
-}
-
-function ToolCallsChevron({ size }: { size: number }) {
-  return (
-    <span className="tool-calls-chevron" aria-hidden="true">
-      <IconChevronDown size={size} />
-    </span>
-  );
-}
-
-function capitalizeFirst(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 export function extractToolCallsFromFinalPrompt(
@@ -186,7 +179,7 @@ export function extractToolCallsFromFinalPrompt(
         inputs: inputs,
         return_value: null,
         is_running: true,
-        label: capitalizeFirst(tc.label || tc.function.name || ""),
+        label: tc.label || tc.function.name || "",
         icon: tc.icon,
         run_url: "",
       };

@@ -1,10 +1,10 @@
-import { ThinkingLine } from "src/components/shared/ThinkingLine";
+import CircleBeat from "src/assets/SvgIcons/CircleBeat";
 
 const ResponseLoader = (props: any) => {
   if (!props.show) return null;
   return (
     <div className="gpl-16">
-      <ThinkingLine />
+      <CircleBeat className="anim-blink gml-4" size={12} />
     </div>
   );
 };
