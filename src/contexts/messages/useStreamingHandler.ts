@@ -137,9 +137,13 @@ export const useStreamingHandler = ({
             ...(prevMessage.buttons || []),
             ...(payload.buttons || []),
           ];
-          let final_prompt = prevMessage.final_prompt || [];
-          for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
-            final_prompt[idx] = value;
+          // A copy, not the previous message's array written through. Every
+          // chunk reused one array, so its identity never changed; anything
+          // memoised on it (`useMemo`, `React.memo`) reads that as "unchanged"
+          // and freezes at whatever the first chunk carried.
+          const final_prompt = [...(prevMessage.final_prompt || [])];
+          for (const [idx, value] of Object.entries(payload.prompt_delta || {})) {
+            final_prompt[Number(idx)] = value;
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,
