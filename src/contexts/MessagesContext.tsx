@@ -146,6 +146,7 @@ export interface StreamError {
 export interface ReplyButton {
   id: string;
   title: string;
+  description?: string;
   action?: string;
   payload?: Record<string, unknown>;
 }
