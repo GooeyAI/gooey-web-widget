@@ -165,6 +165,9 @@ const styleContent = `
     display: inline-block;
     line-height: 0;
   }
+  /* Carries the play button only. It used to tint the whole frame 55% black,
+     which left every video thumbnail looking muddy — the icon has its own
+     scrim, so the picture is shown as it is. */
   .gw-media-play-overlay {
     position: absolute;
     inset: 0;
@@ -172,8 +175,6 @@ const styleContent = `
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.55);
-    border-radius: 8px;
   }
   .gw-media-play-icon {
     width: 48px;

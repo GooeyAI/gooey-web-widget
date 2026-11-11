@@ -14,14 +14,26 @@
   height: 40px;
 }
 
-.gooey-incomingMsg video {
+// Media inside a response's markdown arrives wrapped in MediaPreview's button,
+// which also carries the play scrim. The width cap belongs on that wrapper, not
+// on the <video>: a percentage cap is invisible to the wrapper's intrinsic
+// sizing, so the wrapper stayed full width while the video shrank, and the
+// scrim painted the leftover strip beside the frame.
+.gooey-incomingMsg .gw-media-inline-btn {
+  width: fit-content;
   max-width: 90%;
+}
+
+.gooey-incomingMsg video {
+  max-width: 100%;
   max-height: 360px;
   height: auto;
   border-radius: 12px;
 }
 
+// A response's own video track is rendered bare, with no wrapper to cap.
 .gooey-incoming-video {
+  max-width: 90%;
   background-color: #000;
 }
 

@@ -8,7 +8,7 @@ import MediaPreview from "src/components/shared/Response/MediaPreview";
 import { addInlineStyle } from "src/addStyles";
 import { FullSourcePreview } from "../Messages/Sources";
 import { useSystemContext } from "src/contexts/hooks";
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect, useRef, useState } from "react";
 import {
   extractFileDetails,
   isGoogleDocsEmbeddable,
@@ -20,6 +20,63 @@ addInlineStyle(style);
 
 const filePreviewCloseClass = "file-preview-close bg-white gp-4 b-1 br-circle";
 
+/**
+ * One blob URL per attached file, held for as long as that file is on show.
+ *
+ * Minting a fresh URL on each render hands the `<img>` a new src every time,
+ * and the browser answers by reloading and re-decoding the full-resolution
+ * photo. In the composer that happens on every keystroke, which stalls the
+ * next painted frame by well over a second for a phone-sized image.
+ *
+ * The URLs are made in an effect rather than during render. That is what keeps
+ * StrictMode honest: its simulated unmount revokes them, and the re-run of the
+ * first effect mints replacements and publishes them as state, so the `<img>`
+ * is told its src just died. Minting during render cannot do that — the DOM
+ * keeps the revoked URL and the browser paints a broken image, which for the
+ * composer means the filename spilling out of an empty preview box.
+ *
+ * The cache is keyed by file id so that removing one attachment leaves the
+ * others' URLs — and so their decoded pixels — untouched.
+ */
+function useObjectUrls(files: Array<any>): Record<string, string> {
+  const cacheRef = useRef(new Map<string, string>());
+  const [urls, setUrls] = useState<Record<string, string>>({});
+
+  // An uploaded file carries its own `url`; only a locally picked one needs this.
+  const localFiles = files.filter((file) => file?.id && file?.data && !file?.url);
+  // ids are uuids, so a comma cannot appear inside one.
+  const localIds = localFiles.map((file) => file.id).join(",");
+
+  useEffect(() => {
+    const cache = cacheRef.current;
+
+    for (const file of localFiles) {
+      if (!cache.has(file.id)) cache.set(file.id, URL.createObjectURL(file.data));
+    }
+
+    const live = new Set(localFiles.map((file) => file.id));
+    for (const [id, url] of cache) {
+      if (live.has(id)) continue;
+      URL.revokeObjectURL(url);
+      cache.delete(id);
+    }
+
+    setUrls(Object.fromEntries(cache));
+    // `localFiles` is derived from `localIds`, which is what actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localIds]);
+
+  useEffect(() => {
+    const cache = cacheRef.current;
+    return () => {
+      cache.forEach((url) => URL.revokeObjectURL(url));
+      cache.clear();
+    };
+  }, []);
+
+  return urls;
+}
+
 const FilePreview = ({
   files,
   onRemove,
@@ -27,8 +84,9 @@ const FilePreview = ({
   files: Array<any>;
   onRemove?: (id: string) => void;
 }) => {
-  if (!files) return null;
   const { layoutController } = useSystemContext();
+  const fileURLs = useObjectUrls(files || []);
+  if (!files) return null;
 
   const openInSidebar = (file: any) => {
     layoutController?.toggleSecondaryDrawer?.(() => (
@@ -36,8 +94,8 @@ const FilePreview = ({
     ));
   };
 
-  const handleFileClick = (file: any) => {
-    const fileURL = file?.url || URL.createObjectURL(file?.data);
+  const handleFileClick = (file: any, fileURL?: string) => {
+    if (!fileURL) return; // still waiting on this file's blob URL
     const mimeType = file?.data?.type || "";
     const fileKind = file?.type?.split("/")[0] || file?.type || "";
     const isImage = mimeType.includes("image") || fileKind === "image";
@@ -60,8 +118,8 @@ const FilePreview = ({
   return (
     <div className="d-flex overflow-scroll gooey-scroll-container file-preview-list">
       {files.map((file, index) => {
-        const { isUploading, data, url } = file;
-        const fileURL = url || URL.createObjectURL(data);
+        const { isUploading, url } = file;
+        const fileURL = url || fileURLs[file?.id];
         const fileType = file?.type?.split("/")[0] || file?.type || "application";
 
         return (
@@ -88,7 +146,7 @@ const FilePreview = ({
                   layoutController?.toggleSecondaryDrawer?.(null);
                   onRemove?.(file?.id);
                 }}
-                onClick={() => handleFileClick(file)}
+                onClick={() => handleFileClick(file, fileURL)}
                 isUploading={isUploading}
                 isRemovable={!!onRemove}
               />
@@ -110,7 +168,7 @@ const MediaPreviewItem = ({
   isRemovable,
 }: {
   onRemove: () => void;
-  fileURL: string;
+  fileURL?: string;
   alt?: string;
   mediaType: "image" | "video";
   showActions: boolean;
@@ -146,13 +204,15 @@ const MediaPreviewItem = ({
           "overflow-hidden file-preview-box",
         )}
       >
-        <MediaPreview
-          src={fileURL}
-          alt={alt}
-          mediaType={mediaType}
-          showActions={showActions}
-          inlineClassName="br-large b-1"
-        />
+        {fileURL && (
+          <MediaPreview
+            src={fileURL}
+            alt={alt}
+            mediaType={mediaType}
+            showActions={showActions}
+            inlineClassName="br-large b-1"
+          />
+        )}
       </div>
     </div>
   );
