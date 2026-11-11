@@ -42,6 +42,7 @@ type ReplyButton = {
   title: string;
   description?: string;
   menu?: boolean;
+  menu_title?: string;
   section?: string;
   isPressed?: boolean;
 };
@@ -266,8 +267,11 @@ const OptionsMenu = ({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { initializeQuery, isSending, isReceiving } = useMessagesContext();
   const selected = buttons.find((button) => button.id === selectedId);
-  const sections = new Set(buttons.map((button) => button.section).filter(Boolean));
-  const title = sections.size === 1 ? [...sections][0] : "Options";
+  const title =
+    buttons.find((button) => button.menu_title)?.menu_title ?? "Options";
+  // A lone section needs no heading.
+  const showSectionTitles =
+    new Set(buttons.map((button) => button.section || "")).size > 1;
 
   return (
     <>
@@ -337,11 +341,13 @@ const OptionsMenu = ({
       >
         {buttons.map((button, index) => (
           <Fragment key={button.id}>
-            {(index === 0 || button.section !== buttons[index - 1].section) && (
-              <div className="gooey-options-section font_14_600 text-muted gpt-16 gpb-8">
-                {button.section || "Options"}
-              </div>
-            )}
+            {showSectionTitles &&
+              (index === 0 ||
+                button.section !== buttons[index - 1].section) && (
+                <div className="gooey-options-section font_14_600 text-muted gpt-16 gpb-8">
+                  {button.section || "Options"}
+                </div>
+              )}
             <Button
               className="gooey-options-row w-100 text-left gpt-20 gpb-20 gpl-0 gpr-0"
               aria-pressed={selectedId === button.id}
