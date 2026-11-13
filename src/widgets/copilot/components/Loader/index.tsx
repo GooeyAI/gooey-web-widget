@@ -1,10 +1,16 @@
-import CircleBeat from "src/assets/SvgIcons/CircleBeat";
+import StatusLine, { THINKING_LABEL } from "src/components/shared/StatusLine";
+import { MESSAGE_GUTTER } from "../constants";
 
-const ResponseLoader = (props: any) => {
+/**
+ * Shown before a reply has any data of its own. Deliberately the same line the
+ * message shows once it does exist, in the same gutter, so the run opens with
+ * one indicator and never swaps glyph or position partway through.
+ */
+const ResponseLoader = (props: { show?: boolean }) => {
   if (!props.show) return null;
   return (
-    <div className="gpl-16">
-      <CircleBeat className="anim-blink gml-4" size={12} />
+    <div className={`gpl-${MESSAGE_GUTTER}`}>
+      <StatusLine label={THINKING_LABEL} />
     </div>
   );
 };
