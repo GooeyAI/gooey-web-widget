@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { addInlineStyle } from "src/addStyles";
-import IconCaretUp from "src/assets/SvgIcons/IconCaretUp";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import style from "./toolCalls.scss?inline";
@@ -55,77 +54,87 @@ function ToolCalls({ toolCalls }: { toolCalls: ToolCall[] }) {
     <div className={clsx("tool-calls-container gmb-12 mw-100")}>
       <button
         type="button"
-        className="tool-calls-summary font_12_600 text-muted gap-6 gp-0"
+        className="tool-calls-summary"
         aria-expanded={isExpanded}
         onClick={() => setIsExpanded((value) => !value)}
       >
         Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
-        <span className="d-flex align-center" aria-hidden="true">
-          {isExpanded ? (
-            <IconCaretUp size={10} />
-          ) : (
-            <IconChevronDown size={10} />
-          )}
-        </span>
+        <ToolCallsChevron size={11} />
       </button>
-      {isExpanded &&
-        toolCalls.map((toolCall) => (
-          <ToolCallCard key={String(toolCall.id)} toolCall={toolCall} />
-        ))}
+      {isExpanded && (
+        <div className="tool-calls-table">
+          {toolCalls.map((toolCall) => (
+            <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
+// One chevron, pointing right when closed and down when open. The rotation is
+// CSS on [aria-expanded] / [open], so no second icon and no state to read here.
+function ToolCallsChevron({ size }: { size: number }) {
+  return (
+    <span className="tool-calls-chevron" aria-hidden="true">
+      <IconChevronDown size={size} />
+    </span>
+  );
+}
+
+function ToolCallIcon({ icon }: { icon?: string }) {
+  const isUrl = !!icon && (icon.startsWith("http") || icon.startsWith("/"));
+  if (isUrl) return <img src={icon} alt="" className="tool-call-icon-image" />;
+  return (
+    <span className="tool-call-icon-glyph">{icon || "\u{1F6E0}\u{FE0F}"}</span>
+  );
+}
+
+function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
   const { label, inputs, return_value, is_running, icon, run_url } = toolCall;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const snippet = getSnippet(toolCall);
   const hasInputs = !!inputs && Object.keys(inputs).length > 0;
 
+  // A running call with no inputs has nothing to open yet, so it is a plain row
+  // rather than a disclosure that reveals an empty body.
+  if (is_running && !hasInputs) {
+    return (
+      <div className="tool-call-row">
+        <div className="tool-call-row-summary is-static">
+          <ToolCallIcon icon={icon} />
+          <span className="tool-call-row-label">{label}</span>
+          {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
+          <span className="tool-call-running">Running…</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <details
       open={isExpanded}
       onToggle={(e) => setIsExpanded((e.target as HTMLDetailsElement).open)}
-      className="tool-call-card"
+      className="tool-call-row"
     >
-      <summary>
-        <div className="tool-call-icon">
-          {is_running ? (
-            <div className="tool-call-loader" />
-          ) : icon && (icon.startsWith("http") || icon.startsWith("/")) ? (
-            <img src={icon} alt="" className="tool-call-icon-image" />
-          ) : (
-            <span className="tool-call-icon-emoji">{icon || "🛠️"}</span>
-          )}
-        </div>
-        <div className="tool-call-summary-content">
-          <span className="font_12_600">{label}</span>
-          {snippet && (
-            <>
-              <span className="font_12_600"> - </span>
-              <span className="font_12_400 text-muted">{snippet}</span>
-            </>
-          )}
-        </div>
-        <div className="tool-call-summary-toggle">
-          {isExpanded ? (
-            <IconCaretUp size={10} />
-          ) : (
-            <IconChevronDown size={10} />
-          )}
-        </div>
+      <summary className="tool-call-row-summary">
+        <ToolCallIcon icon={icon} />
+        <span className="tool-call-row-label">{label}</span>
+        {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
+        {is_running && <span className="tool-call-running">Running…</span>}
+        <ToolCallsChevron size={10} />
       </summary>
 
-      {/* Built only once this card is opened. A <details> renders its children
-          either way and lets the browser hide them, so opening the list laid
+      {/* Built only once this row is opened. A <details> renders its children
+          either way and lets the browser hide them, so opening the table laid
           out every call's inputs and output, not just the one clicked. */}
       {isExpanded && (
-        <div className="tool-call-body">
+        <div className="tool-call-row-body">
           {hasInputs && (
-            <div className="mb-3">
+            <>
               <div className="tool-call-section-header">
-                <div className="font_12_600 text-dark">Inputs</div>
+                <span>Inputs</span>
                 {run_url && (
                   <a
                     href={run_url}
@@ -133,27 +142,24 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
                     rel="noopener noreferrer"
                     className="tool-call-link"
                   >
-                    <IconExternalLink size={10} />
-                    View Tool Call
+                    View tool call
+                    <IconExternalLink size={9} />
                   </a>
                 )}
               </div>
-              <div className="tool-call-json-block">
+              <div className="tool-call-value">
                 {JSON.stringify(inputs, null, 2)}
               </div>
-            </div>
+            </>
           )}
-
-          {!is_running && (
-            <div>
-              <div className="font_12_600 text-dark gmt-6 gmb-6">Output</div>
-              <div className="tool-call-json-block">
-                {typeof return_value === "string"
-                  ? return_value
-                  : JSON.stringify(return_value, null, 2)}
-              </div>
-            </div>
-          )}
+          <div className="tool-call-section-header">Output</div>
+          <div className="tool-call-value">
+            {is_running
+              ? "Running\u2026"
+              : typeof return_value === "string"
+                ? return_value
+                : JSON.stringify(return_value, null, 2)}
+          </div>
         </div>
       )}
     </details>
