@@ -27,6 +27,34 @@ $tc-teal-700: #00998a; // --gy-teal-700
   display: none;
 }
 
+// The status line shares this row, so the dropdown reads as the end of the
+// loader's own sentence: "[bot] Summarizing with GPT… · Used 2 tools ⌄".
+.tool-calls-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+// let a long status label truncate rather than shove the summary off the row
+.tool-calls-header > .gooey-status-line {
+  min-width: 0;
+}
+
+.tool-calls-separator {
+  flex: none;
+  font-size: 14px;
+  line-height: 140%;
+  color: $tc-ink-soft;
+}
+
+// The same 8px a bare status line takes (statusLine.scss). With tool calls this
+// container is what follows the answer, so the gap belongs to it instead; with
+// none, ToolCalls renders the lead alone and that rule still applies.
+.markdown + .tool-calls-container {
+  margin-top: 8px;
+}
+
 // ---- Summary ("Used 4 tools") ----
 
 .tool-calls-summary {
@@ -77,6 +105,33 @@ $tc-teal-700: #00998a; // --gy-teal-700
   border-radius: 16px;
   overflow: hidden;
   animation: gooeyTcRise 220ms ease-out;
+}
+
+// Already open when it mounted: the summary moved from the status line into the
+// action row as the run ended. It is the table the reader already opened, so it
+// must not rise in a second time.
+.tool-calls-table.is-restored {
+  animation: none;
+}
+
+// ---- On the action row ----
+// Once the run ends the summary sits between copy and the timestamp. `contents`
+// drops the container's own box so its header and table join the row's flex
+// flow: the header stays inline, and the table, sent last by `order` and given
+// the full line, wraps below the row rather than squeezing in beside the icons.
+// The row's `flex-wrap` that this needs lives with the row, in incoming.scss.
+.gooey-feedback-actions .tool-calls-container {
+  display: contents;
+}
+
+// match the row's own supporting text (the timestamp is font_12_400)
+.gooey-feedback-actions .tool-calls-summary {
+  font-size: 12px;
+}
+
+.gooey-feedback-actions .tool-calls-table {
+  order: 1;
+  flex-basis: 100%;
 }
 
 // ---- Individual call rows ----

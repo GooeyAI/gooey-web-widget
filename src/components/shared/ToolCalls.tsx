@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -45,24 +45,50 @@ function getSnippet({ name, label, inputs }: ToolCall): string {
  * default: on a run with any real tool use the calls outweigh the answer, and
  * the answer is what the reader came for.
  */
-function ToolCalls({ toolCalls }: { toolCalls: ToolCall[] }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+function ToolCalls({
+  toolCalls,
+  lead,
+  isExpanded,
+  onToggle,
+}: {
+  toolCalls: ToolCall[];
+  lead?: ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  // Open state is owned by IncomingMsg, not here. When the run ends this summary
+  // moves from the status line into the action row — a different parent, so this
+  // component really does remount — and a reader who opened the dropdown must not
+  // lose it to that. The ref keeps the table's entrance animation from replaying
+  // when it remounts already open.
+  const mountedOpen = useRef(isExpanded);
+  // once closed, any later open is a real one and should rise in
+  if (!isExpanded) mountedOpen.current = false;
 
-  if (!toolCalls.length) return null;
+  if (!toolCalls.length) return <>{lead}</>;
 
   return (
-    <div className={clsx("tool-calls-container gmb-12 mw-100")}>
-      <button
-        type="button"
-        className="tool-calls-summary"
-        aria-expanded={isExpanded}
-        onClick={() => setIsExpanded((value) => !value)}
-      >
-        Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
-        <ToolCallsChevron size={11} />
-      </button>
+    <div className={clsx("tool-calls-container mw-100")}>
+      <div className="tool-calls-header">
+        {lead}
+        {lead && <span className="tool-calls-separator">·</span>}
+        <button
+          type="button"
+          className="tool-calls-summary"
+          aria-expanded={isExpanded}
+          onClick={onToggle}
+        >
+          Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
+          <ToolCallsChevron size={11} />
+        </button>
+      </div>
       {isExpanded && (
-        <div className="tool-calls-table">
+        <div
+          className={clsx(
+            "tool-calls-table",
+            mountedOpen.current && "is-restored",
+          )}
+        >
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
           ))}

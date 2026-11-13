@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { memo, useMemo, useRef } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
@@ -66,6 +66,8 @@ const IncomingMsgActions = ({
   hasText,
   hasContent,
   measuredSec,
+  toolCallsSummary,
+  isToolsExpanded,
 }: {
   data: {
     buttons?: ReplyButton[];
@@ -82,6 +84,9 @@ const IncomingMsgActions = ({
   hasText: boolean;
   hasContent: boolean;
   measuredSec: number | null;
+  // "Used N tools", already built by IncomingMsg; null when no tools ran
+  toolCallsSummary: React.ReactNode;
+  isToolsExpanded: boolean;
 }) => {
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -126,13 +131,15 @@ const IncomingMsgActions = ({
   const showDebugLink = showRunLink && Boolean(data?.web_url);
   // The action row stands on its own: thumbs are optional extras the backend
   // adds, not the reason the row exists. An empty response is the exception —
-  // it paints no bubble, so a lone timestamp would float in the gutter.
+  // it paints no bubble, so a lone timestamp would float in the gutter — unless
+  // tools ran: their summary lives on this row and gives it something to anchor.
   const showActions =
-    hasContent &&
-    (hasTiming ||
-      showCopy ||
-      thumbButtons.length > 0 ||
-      showDebugLink);
+    Boolean(toolCallsSummary) ||
+    (hasContent &&
+      (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink));
+  // An open tool table pins an older response's row. Hover-only would fade the
+  // table out from under the reader the moment the pointer left the message.
+  const hoverOnly = !isLatestResponse && !isToolsExpanded;
 
   return (
     <div className="mw-100">
@@ -166,7 +173,7 @@ const IncomingMsgActions = ({
         </div>
       )}
       {showActions && (
-        <ActionRow hoverOnly={!isLatestResponse}>
+        <ActionRow hoverOnly={hoverOnly}>
           {/* Copy Text Message to clipboard */}
           {showCopy && (
             <CopyButton
@@ -216,6 +223,12 @@ const IncomingMsgActions = ({
                 </IconButton>
               </a>
             </GooeyTooltip>
+          )}
+          {toolCallsSummary}
+          {toolCallsSummary && hasTiming && (
+            <span className="font_12_400 text-muted" aria-hidden="true">
+              ·
+            </span>
           )}
           <MessageTimeLabel
             createdAt={data?.created_at}
@@ -344,6 +357,9 @@ const IncomingMsg = memo(
       [props?.showToolCalls, props?.data?.final_prompt],
     );
     const { measuredSec } = useStreamTimer(isStreaming);
+    // Owned here, not by ToolCalls: the summary changes parent when the run ends
+    // (status line -> action row) and remounts, but this component keeps its key.
+    const [isToolsExpanded, setIsToolsExpanded] = useState(false);
 
     // Nothing has arrived yet, so there is nothing to put a row under.
     if (
@@ -354,6 +370,22 @@ const IncomingMsg = memo(
       return <ResponseLoader show={true} />;
     }
 
+    // On the action row once the run has ended and there is one; until then, and
+    // on the share card (which has no row), it ends the bubble instead.
+    const toolsOnActionRow = !isStreaming && props.showActionRow !== false;
+    const toolCallsSummary = (
+      <ToolCalls
+        toolCalls={toolCalls}
+        lead={
+          isStreaming ? (
+            <StatusLine label={getStatusLabel(props?.data?.detail)} />
+          ) : undefined
+        }
+        isExpanded={isToolsExpanded}
+        onToggle={() => setIsToolsExpanded((open) => !open)}
+      />
+    );
+
     return (
       <div className="gooey-incomingMsg gpb-12 mw-100">
         <div
@@ -362,11 +394,15 @@ const IncomingMsg = memo(
             "gooey-incoming-content mw-100",
           )}
         >
-          <ToolCalls toolCalls={toolCalls} />
           {/* Bubble chrome only once there is something in it — an empty
               response must not paint an empty bubble in themes that style it. */}
           <div
-            className={clsx((hasText || isStreaming) && "gooey-incoming-bubble")}
+            className={clsx(
+              (hasText ||
+                isStreaming ||
+                (toolCalls.length > 0 && !toolsOnActionRow)) &&
+                "gooey-incoming-bubble",
+            )}
           >
             {/* No empty markdown container during the status-only phase: themes
                 give `.markdown` spacing, which would pad an empty bubble. */}
@@ -379,12 +415,7 @@ const IncomingMsg = memo(
                 id={props?.id}
               />
             )}
-            {/* Trails the answer: the status names the step the run is on, and
-                it stays for the whole run, so the text grows above a line that
-                does not move. */}
-            {isStreaming && (
-              <StatusLine label={getStatusLabel(props?.data?.detail)} />
-            )}
+            {!toolsOnActionRow && toolCallsSummary}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
@@ -420,6 +451,8 @@ const IncomingMsg = memo(
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
               measuredSec={measuredSec}
+              toolCallsSummary={toolCalls.length > 0 ? toolCallsSummary : null}
+              isToolsExpanded={isToolsExpanded}
             />
           )}
         </div>
