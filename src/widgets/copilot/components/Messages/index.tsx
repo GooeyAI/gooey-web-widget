@@ -7,6 +7,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import { addInlineStyle } from "src/addStyles";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
@@ -77,13 +78,29 @@ const Messages = () => {
     return null;
   }, [queue, messages]);
 
+  // A reply is in progress until its own message is final - the test the
+  // message itself uses to show its status line. Not isReceiving: that is this
+  // widget's own stream, and a host that feeds the conversation in (gooey.ai's
+  // builder) never opens one, so the list never followed a reply there.
+  const lastMessage = messages?.get(queue[queue.length - 1]);
+  const isReplyInProgress =
+    isSending ||
+    (!!lastMessage &&
+      "type" in lastMessage &&
+      lastMessage.type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE);
+
   const {
     scrollContainerRef,
     anchorRef,
     showScrollToBottom,
     scrollToBottom,
     handleScroll,
-  } = useMessagesScroll({ messages, latestUserId, isMessagesLoading });
+  } = useMessagesScroll({
+    messages,
+    latestUserId,
+    isMessagesLoading,
+    isStreaming: isReplyInProgress,
+  });
 
   if (isMessagesLoading) {
     return (
@@ -119,6 +136,11 @@ const Messages = () => {
               latestResponseId={latestResponseId}
             />
             <ResponseLoader show={isSending} />
+            {/* Last in the pair, so useMessagesScroll counts it in the real end:
+                a followed reply keeps its status line this far above the
+                composer. Always rendered - dropping it when a run ends would
+                shrink the list and jump it. */}
+            <div className="gooey-anchor-gutter" aria-hidden="true" />
           </div>
         ) : (
           <div className="mw-760 mx-auto">
