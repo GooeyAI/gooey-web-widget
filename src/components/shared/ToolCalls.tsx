@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -40,6 +40,15 @@ function getSnippet({ name, label, inputs }: ToolCall): string {
   return (byKey || fallback)?.[1].replace(/\s+/g, " ").trim() ?? "";
 }
 
+/** "Using Google Search", or "Using Google Search +1" when others run too. */
+export function getRunningToolsLabel(toolCalls: ToolCall[]): string | null {
+  const running = toolCalls.filter((toolCall) => toolCall.is_running);
+  const latest = running[running.length - 1];
+  if (!latest) return null;
+  const more = running.length > 1 ? ` +${running.length - 1}` : "";
+  return `Using ${latest.label || latest.name}${more}`;
+}
+
 /**
  * "Used N tools", and the calls themselves once it is opened. Collapsed by
  * default: on a run with any real tool use the calls outweigh the answer, and
@@ -64,26 +73,63 @@ function ToolCalls({
   const mountedOpen = useRef(isExpanded);
   // once closed, any later open is a real one and should rise in
   if (!isExpanded) mountedOpen.current = false;
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  // On the newest response the table opens below the fold, so bring the end of
+  // its message into view. Scrolls the message list only — scrollIntoView would
+  // also scroll the host page. Measures the message, not the table, whose
+  // entrance animation offsets its rect.
+  useLayoutEffect(() => {
+    if (!isExpanded || mountedOpen.current) return;
+    const table = tableRef.current;
+    const scroller = table?.closest<HTMLElement>(".gooey-messages-container");
+    if (!table || !scroller) return;
+    const message = table.closest(".gooey-incomingMsg") ?? table;
+    const hidden =
+      message.getBoundingClientRect().bottom -
+      scroller.getBoundingClientRect().bottom;
+    // Instant while streaming: the list's follow sets scrollTop on every chunk,
+    // which cancels a smooth scroll mid-flight and snaps.
+    if (hidden > 0) {
+      scroller.scrollBy({ top: hidden, behavior: lead ? "instant" : "smooth" });
+    }
+  }, [isExpanded]);
 
   if (!toolCalls.length) return <>{lead}</>;
 
+  const summary = `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`;
+  // While a tool runs, the lead names it ("Using Google Search") and is the
+  // whole line, so the summary gives way to its chevron and the line opens the
+  // table. The lead only exists while streaming.
+  const isToolRunning =
+    !!lead && toolCalls.some((toolCall) => toolCall.is_running);
+
   return (
     <div className={clsx("tool-calls-container mw-100")}>
-      <div className="tool-calls-header">
+      <div
+        className={clsx(
+          "tool-calls-header",
+          isToolRunning && "is-tool-running",
+        )}
+      >
         {lead}
-        {lead && <span className="tool-calls-separator">·</span>}
+        {lead && !isToolRunning && (
+          <span className="tool-calls-separator">·</span>
+        )}
         <button
           type="button"
           className="tool-calls-summary"
           aria-expanded={isExpanded}
+          aria-label={isToolRunning ? summary : undefined}
           onClick={onToggle}
         >
-          Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
+          {!isToolRunning && summary}
           <ToolCallsChevron size={11} />
         </button>
       </div>
       {isExpanded && (
         <div
+          ref={tableRef}
           className={clsx(
             "tool-calls-table",
             mountedOpen.current && "is-restored",

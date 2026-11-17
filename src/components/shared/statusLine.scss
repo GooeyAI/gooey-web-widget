@@ -1,3 +1,5 @@
+@import "src/css/colors.module.scss";
+
 // The label is server text of no fixed length ("[12/40] Creating knowledge
 // embeddings..."). `.gooey-messages-container` becomes a horizontal scroller
 // the moment any descendant outgrows the message column, so the label is
@@ -9,6 +11,30 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  // The line only exists while the bot works, so it always shimmers: a dark
+  // band sweeps across muted text. The colour lives here, not in `text-muted`,
+  // because that utility's `!important` would keep the text from clearing to
+  // show the gradient.
+  color: transparent;
+  background: linear-gradient(
+      90deg,
+      $muted 35%,
+      $almost-black 50%,
+      $muted 65%
+    )
+    0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: gooeyStatusShimmer 1.6s linear infinite;
+}
+
+@keyframes gooeyStatusShimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
 }
 
 // Only when an answer precedes it. During the status-only phase the line is the
@@ -41,5 +67,11 @@
   .gooey-thinking-bot,
   .gooey-thinking-bot * {
     animation: none !important;
+  }
+
+  .gooey-status-label {
+    animation: none;
+    background: none;
+    color: $muted;
   }
 }

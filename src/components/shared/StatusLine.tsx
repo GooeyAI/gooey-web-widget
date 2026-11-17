@@ -92,7 +92,7 @@ function GooeyBotThinking() {
 const StatusLine = ({ label }: { label: string }) => (
   <div className="gooey-status-line d-flex align-center" role="status">
     <GooeyBotThinking />
-    <span className="gooey-status-label font_14_400 text-muted gml-8">
+    <span className="gooey-status-label font_14_400 gml-8">
       {label}
     </span>
   </div>

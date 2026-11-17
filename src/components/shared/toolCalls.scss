@@ -78,6 +78,18 @@ $tc-teal-700: #00998a; // --gy-teal-700
   color: $tc-ink;
 }
 
+// "[bot] Using Google Search ›": the button is just the chevron, and its hit
+// area stretches over the whole line so the tool's name opens the table too.
+.tool-calls-header.is-tool-running {
+  position: relative;
+}
+
+.tool-calls-header.is-tool-running > .tool-calls-summary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
 // IconChevronDown, turned to point right while closed
 .tool-calls-chevron {
   display: inline-flex;
@@ -124,9 +136,11 @@ $tc-teal-700: #00998a; // --gy-teal-700
   display: contents;
 }
 
-// match the row's own supporting text (the timestamp is font_12_400)
+// the timestamp's size (font_12_400), but heavier: it is the row's one
+// disclosure, not supporting text
 .gooey-feedback-actions .tool-calls-summary {
   font-size: 12px;
+  font-weight: 600;
 }
 
 .gooey-feedback-actions .tool-calls-table {

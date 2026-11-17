@@ -10,6 +10,7 @@ import { hasResponseText } from "src/components/shared/Response/responseParser";
 import ToolCalls, {
   UNCOUNTED_TOOL_NAMES,
   extractToolCallsFromFinalPrompt,
+  getRunningToolsLabel,
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
@@ -224,17 +225,18 @@ const IncomingMsgActions = ({
               </a>
             </GooeyTooltip>
           )}
-          {toolCallsSummary}
-          {toolCallsSummary && hasTiming && (
-            <span className="font_12_400 text-muted" aria-hidden="true">
-              ·
-            </span>
-          )}
           <MessageTimeLabel
             createdAt={data?.created_at}
             runTimeStr={runTimeStr}
             className="gml-4"
           />
+          {toolCallsSummary && hasTiming && (
+            <span className="font_12_400 text-muted" aria-hidden="true">
+              ·
+            </span>
+          )}
+          {/* Last on the row: the disclosure that opens the table beneath it */}
+          {toolCallsSummary}
         </ActionRow>
       )}
       {hasSendLocationButton && (
@@ -378,7 +380,12 @@ const IncomingMsg = memo(
         toolCalls={toolCalls}
         lead={
           isStreaming ? (
-            <StatusLine label={getStatusLabel(props?.data?.detail)} />
+            <StatusLine
+              label={
+                getRunningToolsLabel(toolCalls) ??
+                getStatusLabel(props?.data?.detail)
+              }
+            />
           ) : undefined
         }
         isExpanded={isToolsExpanded}
