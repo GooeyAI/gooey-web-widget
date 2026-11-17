@@ -312,7 +312,6 @@ const MessagesContextProvider = ({
         citation_style: CITATION_STYLE,
         user_id: currentUserId,
       },
-      { onFinally: () => setIsSendingMessage(false) },
     ).catch((e) => {
       // An aborted/failed fork must not leave a pending edit replacement armed,
       // or a later finalize could delete the wrong (pre-edit) conversation.
