@@ -45,8 +45,8 @@ export function useMessagesScroll({
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const lastAnchoredIdRef = useRef<string | null>(null);
   const wasLoadingRef = useRef<boolean>(true);
-  // Whether the list tracks a streaming reply. Only the reader scrolling up
-  // turns it off; reaching the bottom turns it on.
+  // Whether the list tracks a streaming reply. Each reply starts with it on.
+  // Only the reader scrolling up turns it off; reaching the bottom turns it on.
   const isFollowingRef = useRef(true);
   const lastScrollTopRef = useRef(0);
   const lastScrollHeightRef = useRef(0);
@@ -82,8 +82,13 @@ export function useMessagesScroll({
   // the send scroll above, and never scrolls up. Also runs on the render that
   // ends the stream, where the action row replaces the status line.
   useLayoutEffect(() => {
+    const justStarted = !wasStreamingRef.current && !!isStreaming;
     const justEnded = wasStreamingRef.current && !isStreaming;
     wasStreamingRef.current = !!isStreaming;
+    // Each reply starts followed, whatever the reader did during the last one.
+    // A re-run or edit replays the same question under the same id, so the pin
+    // above never fires for it.
+    if (justStarted) isFollowingRef.current = true;
     if (isMessagesLoading || !isFollowingRef.current) return;
     if (!isStreaming && !justEnded) return;
     const container = scrollContainerRef.current;
