@@ -43,87 +43,101 @@ export function useMessagesScroll({
 }: UseMessagesScrollArgs) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
-  const lastAnchoredIdRef = useRef<string | null>(null);
-  const wasLoadingRef = useRef<boolean>(true);
   // Whether the list tracks a streaming reply. Each reply starts with it on.
   // Only the reader scrolling up turns it off; reaching the bottom turns it on.
   const isFollowingRef = useRef(true);
+  // Where the last scroll event left the list. A scroll event does not say who
+  // moved it; these are how a move up is told to be the reader's.
   const lastScrollTopRef = useRef(0);
   const lastScrollHeightRef = useRef(0);
-  const wasStreamingRef = useRef(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
-  // Pin the latest user message to the top of the viewport on send / load.
-  // this effect only triggers the scroll.
-  useLayoutEffect(() => {
-    const wasLoading = wasLoadingRef.current;
-    wasLoadingRef.current = !!isMessagesLoading;
-    if (isMessagesLoading) {
-      lastAnchoredIdRef.current = null;
-      return;
-    }
-    if (!latestUserId) return;
-    if (latestUserId === lastAnchoredIdRef.current) return;
-    lastAnchoredIdRef.current = latestUserId;
-    isFollowingRef.current = true;
+  // While messages load the list is not rendered, so the helpers below find no
+  // container and do nothing.
+
+  // Our own instant scrolls go through here and record where they leave the
+  // list. The browser does not reliably fire a scroll event for a programmatic
+  // scroll, and the reader's next scroll is measured from this point.
+  const scrollListTo = (container: HTMLDivElement, top: number) => {
+    container.scrollTop = top;
+    lastScrollTopRef.current = container.scrollTop;
+    lastScrollHeightRef.current = container.scrollHeight;
+  };
+
+  // Bring the latest question to the top. Scrolls the widget's list only, not
+  // the host page.
+  const pinLatestQuestion = (behavior: ScrollBehavior) => {
     const container = scrollContainerRef.current;
     const anchor = anchorRef.current;
     if (!container || !anchor) return;
-    // Scroll only the widget's container — not the host page.
+    isFollowingRef.current = true;
     container.scrollTo({
       top: Math.max(0, measureAnchorTop(container, anchor)),
-      behavior: wasLoading ? "instant" : "smooth",
+      behavior,
     });
-  }, [latestUserId, isMessagesLoading]);
+  };
 
-  // Once the reply outgrows the space below the pinned user message, keep its
-  // end in view: the answer scrolls up out of sight and the status line stays
-  // at the bottom. Never scrolls above the pinned position, so it cannot fight
-  // the send scroll above, and never scrolls up. Also runs on the render that
-  // ends the stream, where the action row replaces the status line.
-  useLayoutEffect(() => {
-    const justStarted = !wasStreamingRef.current && !!isStreaming;
-    const justEnded = wasStreamingRef.current && !isStreaming;
-    wasStreamingRef.current = !!isStreaming;
-    // Each reply starts followed, whatever the reader did during the last one.
-    // A re-run or edit replays the same question under the same id, so the pin
-    // above never fires for it.
-    if (justStarted) isFollowingRef.current = true;
-    if (isMessagesLoading || !isFollowingRef.current) return;
-    if (!isStreaming && !justEnded) return;
+  // Once the reply outgrows the space below its question, keep its end in
+  // view: the answer scrolls up out of sight and the status line stays at the
+  // bottom. Never scrolls up, nor above the question, so it cannot fight a pin.
+  const followReplyEnd = () => {
     const container = scrollContainerRef.current;
     const anchor = anchorRef.current;
     const realEnd = measureRealContentEnd(container, anchor);
-    if (!container || !anchor || realEnd === null) return;
+    if (!isFollowingRef.current || !container || !anchor || realEnd === null) {
+      return;
+    }
     const target = realEnd - container.clientHeight;
     if (target <= measureAnchorTop(container, anchor)) return;
     if (target <= container.scrollTop + 1) return;
-    container.scrollTop = target;
-    lastScrollTopRef.current = container.scrollTop;
-    lastScrollHeightRef.current = container.scrollHeight;
-  }, [messages, isStreaming, isMessagesLoading]);
+    scrollListTo(container, target);
+  };
 
-  const updateBottomButton = useCallback(() => {
+  // A conversation finished loading: its last question goes to the top at once.
+  useLayoutEffect(() => {
+    if (!isMessagesLoading) pinLatestQuestion("instant");
+  }, [isMessagesLoading]);
+
+  // A new question: it glides to the top.
+  useLayoutEffect(() => {
+    pinLatestQuestion("smooth");
+  }, [latestUserId]);
+
+  // A reply's lifetime. Starting turns following back on, whatever the reader
+  // did during the last one: a re-run or an edit keeps its question, so no pin
+  // fires for it. The cleanup runs as it ends, for one last pass while the
+  // action row replaces the status line.
+  useLayoutEffect(() => {
+    if (!isStreaming) return;
+    isFollowingRef.current = true;
+    return followReplyEnd;
+  }, [isStreaming]);
+
+  useLayoutEffect(() => {
+    if (isStreaming) followReplyEnd();
+  }, [messages]);
+
+  const distanceToEnd = () => {
     const container = scrollContainerRef.current;
     const realEnd = measureRealContentEnd(container, anchorRef.current);
-    if (!container || realEnd === null) {
-      setShowScrollToBottom(false);
-      return;
-    }
-    const distance = realEnd - container.scrollTop - container.clientHeight;
-    // Only once the reader has scrolled away: following is on until they do,
-    // so content running below the fold never raises it by itself.
+    if (!container || realEnd === null) return null;
+    return realEnd - container.scrollTop - container.clientHeight;
+  };
+
+  // Only once the reader has scrolled away: following is on until they do, so
+  // content running below the fold never raises it by itself.
+  const updateBottomButton = (distance: number | null) =>
     setShowScrollToBottom(
-      !isFollowingRef.current && distance > SCROLL_TO_BOTTOM_THRESHOLD_PX,
+      !isFollowingRef.current &&
+        distance !== null &&
+        distance > SCROLL_TO_BOTTOM_THRESHOLD_PX,
     );
-  }, []);
 
   const handleScroll = () => {
     const container = scrollContainerRef.current;
-    const realEnd = measureRealContentEnd(container, anchorRef.current);
-    if (container && realEnd !== null) {
+    const distance = distanceToEnd();
+    if (container && distance !== null) {
       const { scrollTop, scrollHeight } = container;
-      const distance = realEnd - scrollTop - container.clientHeight;
       // Up without the content shrinking: when content shrinks the browser
       // clamps scrollTop itself, which is not the reader leaving.
       const readerScrolledUp =
@@ -137,27 +151,23 @@ export function useMessagesScroll({
       lastScrollTopRef.current = scrollTop;
       lastScrollHeightRef.current = scrollHeight;
     }
-    updateBottomButton();
+    updateBottomButton(distance);
   };
 
-  // Refresh button as content streams in (discrete reaction to message-map
+  // Content arriving can push the end below the fold while the reader is away.
   useEffect(() => {
-    if (isMessagesLoading) return;
-    updateBottomButton();
-  }, [messages, isMessagesLoading, updateBottomButton]);
+    updateBottomButton(distanceToEnd());
+  }, [messages, isMessagesLoading]);
 
   const scrollToBottom = () => {
     const container = scrollContainerRef.current;
-    const realEnd = measureRealContentEnd(container, anchorRef.current);
-    if (!container || realEnd === null) return;
+    const distance = distanceToEnd();
+    if (!container || distance === null) return;
     isFollowingRef.current = true;
     // Instant: a smooth scroll down a long reply lags, and while a reply
     // streams the follow sets scrollTop each chunk and cuts it short anyway.
-    container.scrollTo({
-      top: Math.max(0, realEnd - container.clientHeight),
-      behavior: "instant",
-    });
-    updateBottomButton();
+    scrollListTo(container, container.scrollTop + distance);
+    setShowScrollToBottom(false);
   };
 
   // Bring the end of `target` into view once it has grown below the fold (a
@@ -170,13 +180,9 @@ export function useMessagesScroll({
     const hidden = target.getBoundingClientRect().bottom - bottom;
     const room = keep.getBoundingClientRect().top - top;
     const by = Math.min(hidden, room);
-    if (by <= 0) return;
-    // Instant while a reply streams: the follow sets scrollTop on every chunk,
-    // which would cut a smooth scroll short.
-    container.scrollBy({
-      top: by,
-      behavior: wasStreamingRef.current ? "instant" : "smooth",
-    });
+    // Instant, like the scroll-down button: while a reply streams the follow
+    // sets scrollTop on every chunk and would cut a smooth scroll short.
+    if (by > 0) scrollListTo(container, container.scrollTop + by);
   }, []);
 
   return {
