@@ -1,0 +1,174 @@
+<!doctype html>
+<!--
+  Release test page: loads the widget with every option switched on. Used by
+  docs/release-testing.md, before a release.
+
+  Build, then serve the repo root:
+    SENTRY_AUTH_TOKEN="" npm run build
+    python3 -m http.server 5500
+  and open http://localhost:5500/docs/release-test.html
+
+  ?v=        a published release to load from jsDelivr instead of the local
+             build in dist/, e.g. ?v=2.14.0 to compare with the live version
+  ?mode=     inline | popup | fullscreen (default inline)
+  ?theme=    default | whatsapp | builder (default default)
+  ?id=       integration id (default Kbo: web search and tools)
+  ?header=0  hide the header
+  ?two=1     mount two widgets side by side
+  ?expanded=1  sources start expanded
+  ?autoplay=0  don't autoplay reply audio
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gooey widget release test</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family: system-ui, sans-serif;
+        background: #f4f4f5;
+      }
+      .bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 12px;
+        background: #18181b;
+        color: #fafafa;
+        font-size: 13px;
+        z-index: 1;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .bar a {
+        color: #a5b4fc;
+      }
+      .stage {
+        position: absolute;
+        top: 36px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      .slot {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        background: #fff;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .host-text {
+        padding: 16px;
+        color: #52525b;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <strong id="label"></strong>
+      <span id="links"></span>
+    </div>
+    <div class="stage" id="stage"></div>
+    <script>
+      const q = new URLSearchParams(location.search);
+      // No ?v= means the local build: what publish.sh will tag.
+      const version = q.get("v");
+      const libUrl = version
+        ? `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@${version}/dist/lib.js`
+        : "../dist/lib.js";
+      const source = version ? `@${version}` : "local build";
+      const mode = q.get("mode") || "inline";
+      const theme = q.get("theme") || "default";
+      const two = q.get("two") === "1";
+      document.getElementById("label").textContent =
+        `${source} · ${mode} · ${theme}${two ? " · ×2" : ""}`;
+
+      // Links to the other layouts, keeping the version and bot.
+      const keep = { v: version || "", id: q.get("id") || "" };
+      const link = (text, params) => {
+        const u = new URLSearchParams({ ...keep, ...params });
+        if (!keep.v) u.delete("v");
+        if (!keep.id) u.delete("id");
+        return `<a href="?${u}">${text}</a>`;
+      };
+      document.getElementById("links").innerHTML = [
+        link("inline", { mode: "inline" }),
+        link("popup · whatsapp", { mode: "popup", theme: "whatsapp" }),
+        link("builder", { mode: "inline", theme: "builder" }),
+        link("fullscreen", { mode: "fullscreen" }),
+        link("two widgets", { mode: "inline", two: "1" }),
+        link("no header", { mode: "inline", header: "0" }),
+      ].join(" ");
+
+      const stage = document.getElementById("stage");
+      const slots = two ? ["w1", "w2"] : ["w1"];
+      for (const id of slots) {
+        const slot = document.createElement("div");
+        slot.className = "slot";
+        slot.id = id;
+        if (mode === "popup")
+          slot.innerHTML =
+            '<div class="host-text">Host page content. The widget opens from the launcher at the bottom right.</div>';
+        stage.appendChild(slot);
+      }
+
+      const config = (target) => ({
+        target,
+        integration_id: q.get("id") || "Kbo",
+        mode,
+        theme,
+        showHeader: q.get("header") !== "0",
+        enableAudioMessage: true,
+        enablePhotoUpload: true,
+        enableConversations: true,
+        enableShareConversation: true,
+        enableSourcePreview: true,
+        autoPlayResponses: q.get("autoplay") !== "0",
+        showSources: true,
+        expandedSources: q.get("expanded") === "1",
+        showRunLink: true,
+        showRunTime: true,
+        showToolCalls: true,
+        branding: {
+          name: "Release Test Bot",
+          byLine: "By gooey.ai",
+          description: "Every widget option switched on, for release testing.",
+          conversationStarters: [
+            "Search the web for the height of the Hoover Dam and cite your sources",
+            "Reply with a markdown table of 3 dams, a short Python code block, and E = mc^2 in LaTeX",
+            "What's the weather in Bangalore?",
+          ],
+          fabLabel: "Ask the test bot",
+          websiteUrl: "https://gooey.ai",
+          showPoweredByGooey: true,
+          inputPlaceholderText: "Ask the release test bot…",
+          colors: { primary: "#6d28d9", secondary: "#ede9fe" },
+        },
+      });
+
+      const script = document.createElement("script");
+      script.src = libUrl;
+      script.onload = () =>
+        slots.forEach((id) => GooeyEmbed.mount(config("#" + id)));
+      script.onerror = () =>
+        (document.getElementById("label").textContent =
+          `could not load ${source}`);
+      document.head.appendChild(script);
+    </script>
+  </body>
+</html>
