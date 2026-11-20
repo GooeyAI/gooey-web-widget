@@ -8,7 +8,6 @@ export interface CopilotConfigType {
   showHeader?: boolean;
   enableAudioMessage: boolean;
   enablePhotoUpload: boolean;
-  enableLipsyncVideo: boolean;
   enableConversations: boolean;
   autoPlayResponses: boolean;
   showSources: boolean;
