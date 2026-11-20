@@ -25,8 +25,10 @@ const AUDIO_EMOJI_REPLACEMENTS = {
   "🎧:": "",
 };
 
-// Marked configuration
-const MARKED_OPTIONS = {
+// Marked configuration. Exported so anything else rendering model prose (the
+// reasoning block in ToolCalls) speaks the same markdown dialect as the answer
+// rather than drifting with its own copy.
+export const MARKED_OPTIONS = {
   async: false,
   breaks: true,
   gfm: true,

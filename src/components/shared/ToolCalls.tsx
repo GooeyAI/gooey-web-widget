@@ -1,8 +1,12 @@
 import clsx from "clsx";
-import { type ReactNode, useState } from "react";
+import parse from "html-react-parser";
+import { marked } from "marked";
+import { type ReactNode, useMemo, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
+import { MARKED_OPTIONS } from "./Response/responseParser";
+import { formatThoughtFor } from "./thinking";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
@@ -50,21 +54,31 @@ export function getRunningToolsLabel(toolCalls: ToolCall[]): string | null {
 }
 
 /**
- * "Used N tools", and the calls themselves once it is opened. Collapsed by
- * default: on a run with any real tool use the calls outweigh the answer, and
- * the answer is what the reader came for.
+ * What a run did, on one line: "Thought for 3s · Used 3 tools". Opening it
+ * reveals the reasoning and then the calls themselves. Collapsed by default: on
+ * a run with any real tool use the calls outweigh the answer, and the answer is
+ * what the reader came for.
+ *
+ * One disclosure rather than two because the row describes one run. Either half
+ * may be absent, so the label is assembled from the parts that exist.
  */
 function ToolCalls({
   toolCalls,
   lead,
   isExpanded,
   onToggle,
+  thinking,
+  thinkingDurationSec,
 }: {
   toolCalls: ToolCall[];
   lead?: ReactNode;
   isExpanded: boolean;
   // given the summary button, so the owner can keep that line in view
   onToggle: (summary: HTMLElement) => void;
+  /** The model's reasoning summary, already split out of the answer. */
+  thinking?: string;
+  /** Seconds the model spent reasoning, as measured server-side. */
+  thinkingDurationSec?: number;
 }) {
   // Open state is owned by IncomingMsg, not here. When the run ends this summary
   // moves from the status line into the action row — a different parent, so this
@@ -73,9 +87,29 @@ function ToolCalls({
   // rise in a second time; once the reader toggles it, opens are real again.
   const [isRestored, setIsRestored] = useState(isExpanded);
 
-  if (!toolCalls.length) return <>{lead}</>;
+  // Same markdown dialect as the answer: a reasoning summary arrives with its
+  // own "**Bold heading**" per part and reads as a wall otherwise. Memoised on
+  // the text so toggling a tool row below does not re-parse it.
+  const reasoningBody = useMemo(
+    () =>
+      thinking ? parse(marked.parse(thinking, MARKED_OPTIONS) as string) : null,
+    [thinking],
+  );
 
-  const summary = `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`;
+  const toolsPart = toolCalls.length
+    ? `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`
+    : null;
+  // A duration is only worth claiming when there is reasoning behind the
+  // chevron to account for it. A run can report thinking_duration_sec while its
+  // summary came back empty, and "Thought for 3s" opening onto nothing is a
+  // promise the panel does not keep.
+  const thoughtPart = thinking ? formatThoughtFor(thinkingDurationSec) : null;
+  const summary = [thoughtPart, toolsPart].filter(Boolean).join(" \u00b7 ");
+
+  // Nothing to name is nothing to open. Covers both a run with neither
+  // reasoning nor tools, and one with reasoning but no duration and no tools —
+  // the alternative there is a bare chevron, which is not a disclosure.
+  if (!summary) return <>{lead}</>;
   // While a tool runs, the lead names it ("Using Google Search") and is the
   // whole line, so the summary gives way to its chevron and the line opens the
   // table. The lead only exists while streaming.
@@ -110,6 +144,9 @@ function ToolCalls({
       </div>
       {isExpanded && (
         <div className={clsx("tool-calls-table", isRestored && "is-restored")}>
+          {reasoningBody && (
+            <div className="tool-calls-reasoning">{reasoningBody}</div>
+          )}
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
           ))}
