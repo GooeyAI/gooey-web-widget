@@ -423,9 +423,6 @@ const IncomingMsg = memo(
         isExpanded={isToolsExpanded}
         onToggle={toggleTools}
         thinking={thinking}
-        thinkingDurationSec={
-          (props?.data as FinalResponse)?.metrics?.thinking_duration_sec
-        }
       />
     );
 

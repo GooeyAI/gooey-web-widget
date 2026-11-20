@@ -6,7 +6,6 @@ import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
 import { MARKED_OPTIONS } from "./Response/responseParser";
-import { formatThoughtFor } from "./thinking";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
@@ -54,7 +53,7 @@ export function getRunningToolsLabel(toolCalls: ToolCall[]): string | null {
 }
 
 /**
- * What a run did, on one line: "Thought for 3s · Used 3 tools". Opening it
+ * What a run did, on one line: "Thought · Used 3 tools". Opening it
  * reveals the reasoning and then the calls themselves. Collapsed by default: on
  * a run with any real tool use the calls outweigh the answer, and the answer is
  * what the reader came for.
@@ -68,7 +67,6 @@ function ToolCalls({
   isExpanded,
   onToggle,
   thinking,
-  thinkingDurationSec,
 }: {
   toolCalls: ToolCall[];
   lead?: ReactNode;
@@ -77,8 +75,6 @@ function ToolCalls({
   onToggle: (summary: HTMLElement) => void;
   /** The model's reasoning summary, already split out of the answer. */
   thinking?: string;
-  /** Seconds the model spent reasoning, as measured server-side. */
-  thinkingDurationSec?: number;
 }) {
   // Open state is owned by IncomingMsg, not here. When the run ends this summary
   // moves from the status line into the action row — a different parent, so this
@@ -99,11 +95,12 @@ function ToolCalls({
   const toolsPart = toolCalls.length
     ? `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`
     : null;
-  // A duration is only worth claiming when there is reasoning behind the
-  // chevron to account for it. A run can report thinking_duration_sec while its
-  // summary came back empty, and "Thought for 3s" opening onto nothing is a
-  // promise the panel does not keep.
-  const thoughtPart = thinking ? formatThoughtFor(thinkingDurationSec) : null;
+  // Named, not timed. The server reports a thinking duration even when the
+  // summary itself comes back empty, so a label built on the clock said
+  // "Thought for 2s" on one reply and nothing on the next for no reason the
+  // reader could see. Keyed to the reasoning text instead, the label is there
+  // exactly when there is something behind the chevron to read.
+  const thoughtPart = thinking ? "Thought" : null;
   const summary = [thoughtPart, toolsPart].filter(Boolean).join(" \u00b7 ");
 
   // Nothing to name is nothing to open. Covers both a run with neither

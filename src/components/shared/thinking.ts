@@ -37,17 +37,3 @@ export function splitThinking(raw: string): ThinkingSplit {
 
   return { thinking, answer: raw.replace(THINKING_TAG_RE, "").trim() };
 }
-
-/**
- * `"Thought for 3s"`, or null when there is no duration worth showing.
- *
- * Null rather than a zero-length string so a caller can drop the whole part:
- * an absent `metrics` must not render "Thought for undefineds". Rounds up to
- * 1s so a fast run does not claim to have thought for no time at all.
- */
-export function formatThoughtFor(
-  seconds: number | undefined | null,
-): string | null {
-  if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) return null;
-  return `Thought for ${Math.max(1, Math.round(seconds))}s`;
-}
