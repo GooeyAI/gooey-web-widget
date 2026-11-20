@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -63,7 +63,8 @@ function ToolCalls({
   toolCalls: ToolCall[];
   lead?: ReactNode;
   isExpanded: boolean;
-  onToggle: () => void;
+  // given the summary button, so the owner can keep that line in view
+  onToggle: (summary: HTMLElement) => void;
 }) {
   // Open state is owned by IncomingMsg, not here. When the run ends this summary
   // moves from the status line into the action row — a different parent, so this
@@ -73,32 +74,6 @@ function ToolCalls({
   const mountedOpen = useRef(isExpanded);
   // once closed, any later open is a real one and should rise in
   if (!isExpanded) mountedOpen.current = false;
-  const headerRef = useRef<HTMLDivElement>(null);
-  const tableRef = useRef<HTMLDivElement>(null);
-
-  // On the newest response the table opens below the fold, so bring the end of
-  // its message into view. Scrolls the message list only — scrollIntoView would
-  // also scroll the host page. Measures the message, not the table, whose
-  // entrance animation offsets its rect.
-  useLayoutEffect(() => {
-    if (!isExpanded || mountedOpen.current) return;
-    const header = headerRef.current;
-    const table = tableRef.current;
-    const scroller = table?.closest<HTMLElement>(".gooey-messages-container");
-    if (!header || !table || !scroller) return;
-    const message = table.closest(".gooey-incomingMsg") ?? table;
-    const scrollerRect = scroller.getBoundingClientRect();
-    const hidden = message.getBoundingClientRect().bottom - scrollerRect.bottom;
-    // A table taller than the list stops with its header at the top, so the
-    // reader keeps the line they clicked and sees the first rows, not the last.
-    const headerRoom = header.getBoundingClientRect().top - scrollerRect.top;
-    const top = Math.min(hidden, headerRoom);
-    // Instant while streaming: the list's follow sets scrollTop on every chunk,
-    // which cancels a smooth scroll mid-flight and snaps.
-    if (top > 0) {
-      scroller.scrollBy({ top, behavior: lead ? "instant" : "smooth" });
-    }
-  }, [isExpanded]);
 
   if (!toolCalls.length) return <>{lead}</>;
 
@@ -112,7 +87,6 @@ function ToolCalls({
   return (
     <div className={clsx("tool-calls-container mw-100")}>
       <div
-        ref={headerRef}
         className={clsx(
           "tool-calls-header",
           isToolRunning && "is-tool-running",
@@ -127,7 +101,7 @@ function ToolCalls({
           className="tool-calls-summary"
           aria-expanded={isExpanded}
           aria-label={isToolRunning ? summary : undefined}
-          onClick={onToggle}
+          onClick={(event) => onToggle(event.currentTarget)}
         >
           {!isToolRunning && summary}
           <ToolCallsChevron size={11} />
@@ -135,7 +109,6 @@ function ToolCalls({
       </div>
       {isExpanded && (
         <div
-          ref={tableRef}
           className={clsx(
             "tool-calls-table",
             mountedOpen.current && "is-restored",

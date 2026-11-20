@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { memo, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
@@ -328,6 +329,8 @@ const IncomingMsg = memo(
     // card, whose container sets `pointer-events: none`, so a copy button
     // there could only be looked at.
     showActionRow?: boolean;
+    // from the message list; absent where there is no list to scroll
+    revealInList?: (target: Element, keep: Element) => void;
   }) => {
     const {
       output_audio = [],
@@ -363,6 +366,7 @@ const IncomingMsg = memo(
     // Owned here, not by ToolCalls: the summary changes parent when the run ends
     // (status line -> action row) and remounts, but this component keeps its key.
     const [isToolsExpanded, setIsToolsExpanded] = useState(false);
+    const rootRef = useRef<HTMLDivElement>(null);
 
     // Nothing has arrived yet, so there is nothing to put a row under.
     if (
@@ -376,6 +380,15 @@ const IncomingMsg = memo(
     // On the action row once the run has ended and there is one; until then, and
     // on the share card (which has no row), it ends the bubble instead.
     const toolsOnActionRow = !isStreaming && props.showActionRow !== false;
+    // Opening grows this message below the fold: commit the table first, then
+    // have the list bring it into view, keeping the clicked line on screen.
+    const toggleTools = (summary: HTMLElement) => {
+      const opening = !isToolsExpanded;
+      flushSync(() => setIsToolsExpanded(opening));
+      if (opening && rootRef.current) {
+        props.revealInList?.(rootRef.current, summary);
+      }
+    };
     const toolCallsSummary = (
       <ToolCalls
         toolCalls={toolCalls}
@@ -390,12 +403,12 @@ const IncomingMsg = memo(
           ) : undefined
         }
         isExpanded={isToolsExpanded}
-        onToggle={() => setIsToolsExpanded((open) => !open)}
+        onToggle={toggleTools}
       />
     );
 
     return (
-      <div className="gooey-incomingMsg gpb-12 mw-100">
+      <div ref={rootRef} className="gooey-incomingMsg gpb-12 mw-100">
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,

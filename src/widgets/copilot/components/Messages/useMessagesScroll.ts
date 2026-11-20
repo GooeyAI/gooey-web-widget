@@ -158,11 +158,31 @@ export function useMessagesScroll({
     updateBottomButton();
   };
 
+  // Bring the end of `target` into view once it has grown below the fold (a
+  // dropdown opening), but never push `keep`, the line the reader clicked,
+  // above the top. Only scrolls down.
+  const revealInList = useCallback((target: Element, keep: Element) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const { top, bottom } = container.getBoundingClientRect();
+    const hidden = target.getBoundingClientRect().bottom - bottom;
+    const room = keep.getBoundingClientRect().top - top;
+    const by = Math.min(hidden, room);
+    if (by <= 0) return;
+    // Instant while a reply streams: the follow sets scrollTop on every chunk,
+    // which would cut a smooth scroll short.
+    container.scrollBy({
+      top: by,
+      behavior: wasStreamingRef.current ? "instant" : "smooth",
+    });
+  }, []);
+
   return {
     scrollContainerRef,
     anchorRef,
     showScrollToBottom,
     scrollToBottom,
     handleScroll,
+    revealInList,
   };
 }

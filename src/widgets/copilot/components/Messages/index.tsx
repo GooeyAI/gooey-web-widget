@@ -48,6 +48,7 @@ const Responses = (props: any) => {
           showRunTime={config?.showRunTime || false}
           showToolCalls={config?.showToolCalls || false}
           isLatestResponse={id === props.latestResponseId}
+          revealInList={props.revealInList}
         />
       );
     }
@@ -91,6 +92,7 @@ const Messages = () => {
     showScrollToBottom,
     scrollToBottom,
     handleScroll,
+    revealInList,
   } = useMessagesScroll({
     messages,
     latestUserId,
@@ -122,6 +124,7 @@ const Messages = () => {
             queue={beforeIds}
             data={data}
             latestResponseId={latestResponseId}
+            revealInList={revealInList}
           />
         </div>
         {anchorIds.length > 0 ? (
@@ -130,6 +133,7 @@ const Messages = () => {
               queue={anchorIds}
               data={data}
               latestResponseId={latestResponseId}
+              revealInList={revealInList}
             />
             <ResponseLoader show={isSending} />
             {/* Last in the pair, so useMessagesScroll counts it in the real end:
