@@ -151,9 +151,11 @@ export function useMessagesScroll({
     const realEnd = measureRealContentEnd(container, anchorRef.current);
     if (!container || realEnd === null) return;
     isFollowingRef.current = true;
+    // Instant: a smooth scroll down a long reply lags, and while a reply
+    // streams the follow sets scrollTop each chunk and cuts it short anyway.
     container.scrollTo({
       top: Math.max(0, realEnd - container.clientHeight),
-      behavior: "smooth",
+      behavior: "instant",
     });
     updateBottomButton();
   };
