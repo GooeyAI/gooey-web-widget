@@ -14,6 +14,7 @@ import ToolCalls, {
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
+import { isReplyStreaming } from "src/contexts/MessagesContext";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import CopyButton from "./CopyButton";
 import StatusLine, { getStatusLabel } from "src/components/shared/StatusLine";
@@ -339,7 +340,7 @@ const IncomingMsg = memo(
     const isAutoPlay = props.autoPlay === false ? false : isNewlyReceived;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
-    const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const isStreaming = isReplyStreaming(props.data);
     const hasText = hasResponseText(props.data);
     // Every streamed chunk re-renders this message, and the extraction
     // JSON.parses each call's arguments and each result's content — thousands

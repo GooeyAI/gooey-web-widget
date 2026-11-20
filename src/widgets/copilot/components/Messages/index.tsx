@@ -7,7 +7,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import { addInlineStyle } from "src/addStyles";
-import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
+import { isReplyStreaming } from "src/contexts/MessagesContext";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
@@ -78,16 +78,12 @@ const Messages = () => {
     return null;
   }, [queue, messages]);
 
-  // A reply is in progress until its own message is final - the test the
-  // message itself uses to show its status line. Not isReceiving: that is this
-  // widget's own stream, and a host that feeds the conversation in (gooey.ai's
-  // builder) never opens one, so the list never followed a reply there.
+  // Read from the conversation, not isReceiving: that is this widget's own
+  // stream, and a host that feeds the conversation in (gooey.ai's builder)
+  // never opens one, so the list never followed a reply there.
   const lastMessage = messages?.get(queue[queue.length - 1]);
   const isReplyInProgress =
-    isSending ||
-    (!!lastMessage &&
-      "type" in lastMessage &&
-      lastMessage.type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE);
+    isSending || (!!lastMessage && isReplyStreaming(lastMessage));
 
   const {
     scrollContainerRef,
