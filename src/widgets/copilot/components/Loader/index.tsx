@@ -1,4 +1,4 @@
-import StatusLine, { THINKING_LABEL } from "src/components/shared/StatusLine";
+import StatusLine, { WORKING_LABEL } from "src/components/shared/StatusLine";
 import { MESSAGE_GUTTER } from "../constants";
 
 /**
@@ -10,7 +10,7 @@ const ResponseLoader = (props: { show?: boolean }) => {
   if (!props.show) return null;
   return (
     <div className={`gpl-${MESSAGE_GUTTER}`}>
-      <StatusLine label={THINKING_LABEL} />
+      <StatusLine label={WORKING_LABEL} />
     </div>
   );
 };

@@ -5,10 +5,10 @@ import style from "./statusLine.scss?inline";
 addInlineStyle(style);
 addInlineStyle(morphStyle);
 
-export const THINKING_LABEL = "Thinking…";
+export const WORKING_LABEL = "Working…";
 
 // The server's stand-ins for a step it cannot name. They say nothing that
-// "Thinking…" does not say more calmly, so they fold into it.
+// "Working…" does not say more calmly, so they fold into it.
 //
 // Every other status is shown exactly as sent. A knowledge base run spends
 // minutes in "[12/40] Creating knowledge embeddings..." without a word of
@@ -18,7 +18,7 @@ const PLACEHOLDER_STATUS = /^(starting|running)[.…\s]*$/i;
 
 export const getStatusLabel = (detail?: string): string => {
   const status = detail?.trim();
-  if (!status || PLACEHOLDER_STATUS.test(status)) return THINKING_LABEL;
+  if (!status || PLACEHOLDER_STATUS.test(status)) return WORKING_LABEL;
   return status;
 };
 
