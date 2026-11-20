@@ -30,6 +30,9 @@ const Header = () => {
   const isEmpty = !messages?.size;
   const branding = config?.branding;
   const onClose = config?.onClose;
+  const focusLabel = layoutController?.isFocusMode
+    ? "Disable Focus"
+    : "Enable Focus";
 
   return (
     <div className="gooey-chat-header bg-white b-btm-1 gp-8 d-flex justify-between align-center pos-sticky top-0 w-100 h-header">
@@ -38,6 +41,7 @@ const Header = () => {
         {layoutController?.showSidebarButton && (
           <GooeyTooltip text="Open sidebar">
             <IconButton
+              aria-label="Open sidebar"
               id="sidebar-toggle-icon-header"
               variant="text"
               className="cr-pointer"
@@ -67,12 +71,9 @@ const Header = () => {
         <div className="d-flex align-center">
           {/* Focus mode button */}
           {layoutController?.showFocusModeButton && (
-            <GooeyTooltip
-              text={
-                layoutController.isFocusMode ? "Disable Focus" : "Enable Focus"
-              }
-            >
+            <GooeyTooltip text={focusLabel}>
               <IconButton
+                aria-label={focusLabel}
                 variant="text"
                 className="gooey-focus-mode-button cr-pointer"
                 onClick={layoutController?.toggleFocusMode}
@@ -89,6 +90,7 @@ const Header = () => {
           {layoutController?.showCloseButton && (
             <GooeyTooltip text="Close">
               <IconButton
+                aria-label="Close"
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
                 onClick={layoutController?.toggleOpenClose}
@@ -112,6 +114,7 @@ const Header = () => {
           {layoutController?.isInline && (
             <GooeyTooltip text="New Chat" disabled={isEmpty}>
               <IconButton
+                aria-label="New Chat"
                 disabled={isEmpty}
                 variant="text"
                 className={clsx("gp-8 cr-pointer flex-1")}
@@ -124,6 +127,7 @@ const Header = () => {
 
           {!!onClose && (
             <IconButton
+              aria-label="Close"
               variant="text"
               className={clsx("gp-8 cr-pointer flex-1")}
               onClick={onClose}

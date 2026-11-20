@@ -7,7 +7,14 @@ import { peerDependencies } from "./package.json";
 export default defineConfig(({ mode, ...args }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    define: { "process.env": {} },
+    define: {
+      // Library mode leaves process.env.NODE_ENV alone, and the catch-all
+      // below would make it undefined, which picks React's development build.
+      "process.env.NODE_ENV": JSON.stringify(
+        mode === "development" ? "development" : "production",
+      ),
+      "process.env": {},
+    },
     build: {
       commonjsOptions: {
         transformMixedEsModules: true,

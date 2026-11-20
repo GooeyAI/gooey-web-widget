@@ -280,6 +280,7 @@ const ShareButton = ({
       />
       <GooeyTooltip text="Share Conversation" disabled={disabled}>
         <IconButton
+          aria-label="Share Conversation"
           variant="text"
           className={clsx("gp-8 cr-pointer flex-1")}
           onClick={handleShareConversation}

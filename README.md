@@ -59,7 +59,7 @@ const config = {
       "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
     websiteUrl: "https://digitalgreen.org/",
     showPoweredByGooey: true,
-    color: { primary: "purple", "secondary": "blue" },
+    colors: { primary: "purple", "secondary": "blue" },
   },
   secrets: {
     GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here",
@@ -240,11 +240,15 @@ Note: If you want to work with "variables" in payload, refer to our [Advanced pr
 
 1. Update the version in `package.json`, run `npm install` and commit the changes
 
-2. Publish the library:
+2. Test the build you are about to publish with the
+   [release checklist](docs/release-testing.md). Don't publish with a failing
+   check that isn't listed under its known issues.
+
+3. Publish the library:
    ```bash
    ./scripts/publish.sh
    ```
-3. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
+4. Purge the [jsdelivr cache](https://www.jsdelivr.com/tools/purge)
 
 Now "jsdeliver" will automatically catch the tagged commit by "2.x.x".
 If you want to ensure your clients get the latest version of the lib (ahead of the cache), please specify the version in the URL like so: `https://cdn.jsdelivr.net/gh/GooeyAI/gooey-web-widget@2.x.x/dist/lib.js`

@@ -140,6 +140,7 @@ const LocationModal = forwardRef<LocationModalRef, LocationModalProps>(
             <div className="flex items-center justify-end w-1/3">
               <GooeyTooltip text="Refresh Location">
                 <IconButton
+                  aria-label="Refresh Location"
                   className={clsx("button-outlined text-dark centre")}
                   onClick={() =>
                     getCurrentPosition({

@@ -159,6 +159,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
   return (
     <div className="gpl-8 gpr-8 d-flex align-center gpb-2">
       <IconButton
+        aria-label="Cancel recording"
         variant="text"
         className="bg-light gp-8"
         style={{ borderRadius: "100px", height: "41px" }}
@@ -187,6 +188,7 @@ const InlineAudioRecorder = (props: InlineAudioRecorderProps) => {
           </p>
         </div>
         <IconButton
+          aria-label="Send recording"
           onClick={handleSend}
           variant="text-alt"
           style={{ height: "44px" }}

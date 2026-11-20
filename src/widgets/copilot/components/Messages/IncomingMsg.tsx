@@ -221,7 +221,10 @@ const IncomingMsgActions = ({
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
               >
-                <IconButton className="text-muted d-flex justify-content-center align-items-center h-100">
+                <IconButton
+                  aria-label="Debug this run"
+                  className="text-muted d-flex justify-content-center align-items-center h-100"
+                >
                   <IconBug size={ACTION_ICON_SIZE} />
                 </IconButton>
               </a>
@@ -270,18 +273,17 @@ const FeedbackButton = ({
   );
 
   if (icon) {
+    const label =
+      button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response";
     return (
-      <GooeyTooltip
-        text={
-          button.id === "FEEDBACK_THUMBS_UP" ? "Good Response" : "Bad Response"
-        }
-      >
+      <GooeyTooltip text={label}>
         <div className={clsx("gooey-feedback-button", "my-auto", className)}>
           {/* IconButton, not Button: Button wraps its children in a div, whose
               line box is sized by the inherited font and leaves the box 2px
               taller than the row's other buttons with the glyph sitting high
               in it. An icon-only button has no use for that wrapper. */}
           <IconButton
+            aria-label={label}
             key={button.id}
             className="text-muted d-flex justify-content-center align-items-center h-100"
             onClick={onClick}

@@ -164,6 +164,7 @@ export const FullSourcePreview = (props: any) => {
             {data?.title}
           </p>
           <IconButton
+            aria-label="Open in new tab"
             onClick={() => window.open(data?.url, "_blank")}
             variant="text-alt"
             className="gml-4"
@@ -172,6 +173,7 @@ export const FullSourcePreview = (props: any) => {
           </IconButton>
         </div>
         <IconButton
+          aria-label="Close"
           onClick={() => layoutController?.toggleSecondaryDrawer(null)}
           variant="text-alt"
           className="gp-6"
@@ -335,6 +337,7 @@ export const SourcesSection = ({
         <div className="d-flex cr-pointer" onClick={toggleExpansion}>
           <h4 className="font_14_500 gmr-6">Sources</h4>
           <IconButton
+            aria-label={isExpanded ? "Hide sources" : "Show sources"}
             variant="filled"
             className={clsx(
               "bg-light gp-2",
