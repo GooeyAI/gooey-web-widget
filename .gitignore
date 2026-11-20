@@ -32,3 +32,4 @@ dist
 
 # Superpowers working notes (plans/specs) — local only
 docs/superpowers/
+.superpowers/
