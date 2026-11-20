@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSystemContext } from "./hooks";
 import axios from "axios";
@@ -125,6 +119,11 @@ export interface FinalResponse {
   raw_input_text?: string | null;
   raw_tts_text?: string[] | null;
   raw_output_text?: string[] | null;
+
+  // What the run cost in time. Written to ResponseModel.metrics server-side
+  // (daras_ai_v2/harness.py), so it arrives here and nowhere else -- there is no
+  // message_part that carries it.
+  metrics?: { thinking_duration_sec?: number } | null;
 
   // doc search
   references?: SearchReference[] | null;
