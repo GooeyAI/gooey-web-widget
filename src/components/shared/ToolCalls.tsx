@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -69,11 +69,9 @@ function ToolCalls({
   // Open state is owned by IncomingMsg, not here. When the run ends this summary
   // moves from the status line into the action row — a different parent, so this
   // component really does remount — and a reader who opened the dropdown must not
-  // lose it to that. The ref keeps the table's entrance animation from replaying
-  // when it remounts already open.
-  const mountedOpen = useRef(isExpanded);
-  // once closed, any later open is a real one and should rise in
-  if (!isExpanded) mountedOpen.current = false;
+  // lose it to that. Mounting already open is that move, so the table must not
+  // rise in a second time; once the reader toggles it, opens are real again.
+  const [isRestored, setIsRestored] = useState(isExpanded);
 
   if (!toolCalls.length) return <>{lead}</>;
 
@@ -101,19 +99,17 @@ function ToolCalls({
           className="tool-calls-summary"
           aria-expanded={isExpanded}
           aria-label={isToolRunning ? summary : undefined}
-          onClick={(event) => onToggle(event.currentTarget)}
+          onClick={(event) => {
+            setIsRestored(false);
+            onToggle(event.currentTarget);
+          }}
         >
           {!isToolRunning && summary}
           <ToolCallsChevron size={11} />
         </button>
       </div>
       {isExpanded && (
-        <div
-          className={clsx(
-            "tool-calls-table",
-            mountedOpen.current && "is-restored",
-          )}
-        >
+        <div className={clsx("tool-calls-table", isRestored && "is-restored")}>
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
           ))}
