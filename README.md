@@ -59,7 +59,7 @@ const config = {
       "https://digitalgreen.org/wp-content/themes/digital-green/images/favicons/apple-touch-icon.png",
     websiteUrl: "https://digitalgreen.org/",
     showPoweredByGooey: true,
-    color: { primary: "purple", "secondary": "blue" },
+    colors: { primary: "purple", "secondary": "blue" },
   },
   secrets: {
     GOOGLE_MAPS_API_KEY: "your-google-maps-api-key-here",
