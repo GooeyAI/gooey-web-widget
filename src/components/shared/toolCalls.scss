@@ -129,6 +129,49 @@ $tc-teal-700: #00998a; // --gy-teal-700
   animation: none;
 }
 
+// ---- The model's reasoning, above the calls it made ----
+// Prose, not a table row, so it gets reading measure and line height rather
+// than the row's single-line treatment.
+.tool-calls-reasoning {
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 155%;
+  color: $tc-ink-muted;
+  // `.gooey-messages-container` never declares `overflow-x`, so it computes to
+  // `auto` and anything wider than the column scrolls the whole conversation
+  // sideways. This is model text of no fixed shape, so bound it at its own level.
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+// Markdown's own block margins would double this block's padding at its ends.
+.tool-calls-reasoning > :first-child {
+  margin-top: 0;
+}
+
+.tool-calls-reasoning > :last-child {
+  margin-bottom: 0;
+}
+
+// Each summary part arrives with its own "**Bold heading**". They carry the
+// structure of the block, so they take the stronger ink.
+.tool-calls-reasoning strong,
+.tool-calls-reasoning b {
+  color: $tc-ink;
+  font-weight: 600;
+}
+
+// A long unbroken token scrolls itself rather than the conversation.
+.tool-calls-reasoning pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+// The same hairline the rows use between themselves.
+.tool-calls-reasoning + .tool-call-row {
+  border-top: 1px solid $tc-line-soft;
+}
+
 // ---- On the action row ----
 // Once the run ends the summary sits between copy and the timestamp. `contents`
 // drops the container's own box so its header and table join the row's flex
