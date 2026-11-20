@@ -19,6 +19,7 @@ import {
   useController,
 } from "src/contexts/ControllerUtils";
 import * as Sentry from "@sentry/react";
+import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import { useMessageStore } from "./messages/useMessageStore";
 import { useStreamingHandler } from "./messages/useStreamingHandler";
 
@@ -202,6 +203,15 @@ export type MessageMishmash = {
   | StreamError
 );
 
+/**
+ * A reply is still arriving until its message is the final response. The one
+ * test for it: the message shows its status line on it and the list follows
+ * on it, so the two cannot disagree.
+ */
+export const isReplyStreaming = (message: MessageMishmash): boolean =>
+  message.role !== "user" &&
+  !("type" in message && message.type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE);
+
 const MessagesContextProvider = ({
   controller,
   shadowRoot,
@@ -305,15 +315,12 @@ const MessagesContextProvider = ({
     // the persisted conversation timestamp) agree on the same time.
     const createdAt = new Date().toISOString();
     const payloadWithCreatedAt = { ...payload, created_at: createdAt };
-    sendPayload(
-      {
-        ...payloadWithCreatedAt,
-        conversation_id: conversationId,
-        citation_style: CITATION_STYLE,
-        user_id: currentUserId,
-      },
-      { onFinally: () => setIsSendingMessage(false) },
-    ).catch((e) => {
+    sendPayload({
+      ...payloadWithCreatedAt,
+      conversation_id: conversationId,
+      citation_style: CITATION_STYLE,
+      user_id: currentUserId,
+    }).catch((e) => {
       // An aborted/failed fork must not leave a pending edit replacement armed,
       // or a later finalize could delete the wrong (pre-edit) conversation.
       conversationIdToReplace.current = null;

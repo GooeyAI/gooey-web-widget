@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { memo, useMemo, useRef } from "react";
+import { memo, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { addInlineStyle } from "src/addStyles";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import IconBug from "src/assets/SvgIcons/IconBug";
@@ -7,19 +8,17 @@ import Button from "src/components/shared/Buttons/Button";
 import IconButton from "src/components/shared/Buttons/IconButton";
 import GooeyTextResponse from "src/components/shared/Response";
 import { hasResponseText } from "src/components/shared/Response/responseParser";
-import {
-  THINKING_LABEL,
-  ThinkingLine,
-} from "src/components/shared/ThinkingLine";
 import ToolCalls, {
   UNCOUNTED_TOOL_NAMES,
   extractToolCallsFromFinalPrompt,
-  type ToolCall,
+  getRunningToolsLabel,
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
+import { isReplyStreaming } from "src/contexts/MessagesContext";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import CopyButton from "./CopyButton";
+import StatusLine, { getStatusLabel } from "src/components/shared/StatusLine";
 import ResponseLoader from "../Loader";
 import {
   copyRenderedMessageToClipboard,
@@ -70,6 +69,8 @@ const IncomingMsgActions = ({
   hasText,
   hasContent,
   measuredSec,
+  toolCallsSummary,
+  isToolsExpanded,
 }: {
   data: {
     buttons?: ReplyButton[];
@@ -86,6 +87,9 @@ const IncomingMsgActions = ({
   hasText: boolean;
   hasContent: boolean;
   measuredSec: number | null;
+  // "Used N tools", already built by IncomingMsg; null when no tools ran
+  toolCallsSummary: React.ReactNode;
+  isToolsExpanded: boolean;
 }) => {
   const { buttons = [], bot_message_id } = data;
   const locationModalRef = useRef<LocationModalRef | null>(null);
@@ -130,10 +134,15 @@ const IncomingMsgActions = ({
   const showDebugLink = showRunLink && Boolean(data?.web_url);
   // The action row stands on its own: thumbs are optional extras the backend
   // adds, not the reason the row exists. An empty response is the exception —
-  // it paints no bubble, so a lone timestamp would float in the gutter.
+  // it paints no bubble, so a lone timestamp would float in the gutter — unless
+  // tools ran: their summary lives on this row and gives it something to anchor.
   const showActions =
-    hasContent &&
-    (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink);
+    Boolean(toolCallsSummary) ||
+    (hasContent &&
+      (hasTiming || showCopy || thumbButtons.length > 0 || showDebugLink));
+  // An open tool table pins an older response's row. Hover-only would fade the
+  // table out from under the reader the moment the pointer left the message.
+  const hoverOnly = !isLatestResponse && !isToolsExpanded;
 
   return (
     <div className="mw-100">
@@ -167,7 +176,7 @@ const IncomingMsgActions = ({
         </div>
       )}
       {showActions && (
-        <ActionRow hoverOnly={!isLatestResponse}>
+        <ActionRow hoverOnly={hoverOnly}>
           {/* Copy Text Message to clipboard */}
           {showCopy && (
             <CopyButton
@@ -223,6 +232,13 @@ const IncomingMsgActions = ({
             runTimeStr={runTimeStr}
             className="gml-4"
           />
+          {toolCallsSummary && hasTiming && (
+            <span className="font_12_400 text-muted" aria-hidden="true">
+              ·
+            </span>
+          )}
+          {/* Last on the row: the disclosure that opens the table beneath it */}
+          {toolCallsSummary}
         </ActionRow>
       )}
       {hasSendLocationButton && (
@@ -313,6 +329,8 @@ const IncomingMsg = memo(
     // card, whose container sets `pointer-events: none`, so a copy button
     // there could only be looked at.
     showActionRow?: boolean;
+    // from the message list; absent where there is no list to scroll
+    revealInList?: (target: Element, keep: Element) => void;
   }) => {
     const {
       output_audio = [],
@@ -325,36 +343,30 @@ const IncomingMsg = memo(
     const isAutoPlay = props.autoPlay === false ? false : isNewlyReceived;
     const audioTrack = output_audio[0];
     const videoTrack = output_video[0];
-    const isStreaming = type !== STREAM_MESSAGE_TYPES.FINAL_RESPONSE;
+    const isStreaming = isReplyStreaming(props.data);
     const hasText = hasResponseText(props.data);
-    const { measuredSec } = useStreamTimer(isStreaming);
-    // Every streamed chunk re-renders this message, and the extraction JSON.parses
-    // each call's arguments and each result's content — thousands of characters a
-    // render on a run with any real tool output. It only changes when the prompt does.
-    const allToolCalls = useMemo(
+    // Every streamed chunk re-renders this message, and the extraction
+    // JSON.parses each call's arguments and each result's content — thousands
+    // of characters on a run with any real tool output. `final_prompt` is a
+    // fresh array per chunk (see useStreamingHandler), so this recomputes when
+    // the prompt actually grows and not on unrelated re-renders.
+    const toolCalls = useMemo(
       () =>
-        props?.showToolCalls && props?.data?.final_prompt
-          ? extractToolCallsFromFinalPrompt(props.data.final_prompt)
+        // `FinalResponse` types final_prompt as `string | unknown[]`, so the
+        // completed run can land a string here. Iterating one yields its
+        // characters and quietly produces nothing; say so instead.
+        props?.showToolCalls && Array.isArray(props?.data?.final_prompt)
+          ? extractToolCallsFromFinalPrompt(props.data.final_prompt).filter(
+              (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
+            )
           : [],
       [props?.showToolCalls, props?.data?.final_prompt],
     );
-    // housekeeping calls (Load Tools) are not counted or listed, but a running
-    // one is still named by the thinking line
-    const toolCalls = useMemo(
-      () =>
-        allToolCalls.filter(
-          (toolCall) => !UNCOUNTED_TOOL_NAMES.includes(toolCall.name),
-        ),
-      [allToolCalls],
-    );
-    // a streaming message always has a status row; a finished one only if tools ran
-    const hasStatusRow = isStreaming || toolCalls.length > 0;
-    // the server clears the status as soon as the model starts writing, so
-    // remember the last "Summarizing with …" to keep naming it
-    const summarizingRef = useRef<string>();
-    if (isSummarizingStatus(props?.data?.detail)) {
-      summarizingRef.current = props.data.detail;
-    }
+    const { measuredSec } = useStreamTimer(isStreaming);
+    // Owned here, not by ToolCalls: the summary changes parent when the run ends
+    // (status line -> action row) and remounts, but this component keeps its key.
+    const [isToolsExpanded, setIsToolsExpanded] = useState(false);
+    const rootRef = useRef<HTMLDivElement>(null);
 
     // Nothing has arrived yet, so there is nothing to put a row under.
     if (
@@ -365,39 +377,56 @@ const IncomingMsg = memo(
       return <ResponseLoader show={true} />;
     }
 
+    // On the action row once the run has ended and there is one; until then, and
+    // on the share card (which has no row), it ends the bubble instead.
+    const toolsOnActionRow = !isStreaming && props.showActionRow !== false;
+    // Opening grows this message below the fold: commit the table first, then
+    // have the list bring it into view, keeping the clicked line on screen.
+    const toggleTools = (summary: HTMLElement) => {
+      const opening = !isToolsExpanded;
+      flushSync(() => setIsToolsExpanded(opening));
+      if (opening && rootRef.current) {
+        props.revealInList?.(rootRef.current, summary);
+      }
+    };
+    const toolCallsSummary = (
+      <ToolCalls
+        toolCalls={toolCalls}
+        lead={
+          isStreaming ? (
+            <StatusLine
+              label={
+                getRunningToolsLabel(toolCalls) ??
+                getStatusLabel(props?.data?.detail)
+              }
+            />
+          ) : undefined
+        }
+        isExpanded={isToolsExpanded}
+        onToggle={toggleTools}
+      />
+    );
+
     return (
-      <div className="gooey-incomingMsg gpb-12 mw-100">
+      <div ref={rootRef} className="gooey-incomingMsg gpb-12 mw-100">
         <div
           className={clsx(
             `gpl-${MESSAGE_GUTTER} gpr-${MESSAGE_GUTTER}`,
             "gooey-incoming-content mw-100",
           )}
         >
-          {/* The status row (thinking line / "Used N tools") and the answer share
-              one bubble. Bubble chrome only once there is something in it — an
-              empty response must not paint an empty bubble in themes that style it. */}
+          {/* Bubble chrome only once there is something in it — an empty
+              response must not paint an empty bubble in themes that style it. */}
           <div
             className={clsx(
-              (hasText || hasStatusRow) && "gooey-incoming-bubble",
+              (hasText ||
+                isStreaming ||
+                (toolCalls.length > 0 && !toolsOnActionRow)) &&
+                "gooey-incoming-bubble",
             )}
           >
-            {isStreaming ? (
-              <div className={clsx(hasText && "gmb-8")}>
-                <ToolCalls
-                  toolCalls={toolCalls}
-                  lead={
-                    <ThinkingLine
-                      label={getThinkingLabel(
-                        allToolCalls,
-                        summarizingRef.current,
-                      )}
-                    />
-                  }
-                />
-              </div>
-            ) : (
-              <ToolCalls toolCalls={toolCalls} />
-            )}
+            {/* No empty markdown container during the status-only phase: themes
+                give `.markdown` spacing, which would pad an empty bubble. */}
             {(!isStreaming || hasText) && (
               <GooeyTextResponse
                 data={props.data}
@@ -407,6 +436,7 @@ const IncomingMsg = memo(
                 id={props?.id}
               />
             )}
+            {!toolsOnActionRow && toolCallsSummary}
           </div>
           {!isStreaming && !videoTrack && audioTrack && (
             <div className="gmt-8 gmb-8 mw-100">
@@ -442,6 +472,8 @@ const IncomingMsg = memo(
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
               measuredSec={measuredSec}
+              toolCallsSummary={toolCalls.length > 0 ? toolCallsSummary : null}
+              isToolsExpanded={isToolsExpanded}
             />
           )}
         </div>
@@ -452,17 +484,5 @@ const IncomingMsg = memo(
     );
   },
 );
-
-// "Thinking…" until the run reaches its summarizing step, except while a tool
-// runs, which is named instead
-function getThinkingLabel(toolCalls: ToolCall[], status?: string) {
-  const running = toolCalls.filter((toolCall) => toolCall.is_running);
-  if (running.length) return running[running.length - 1].label;
-  return status || THINKING_LABEL;
-}
-
-function isSummarizingStatus(status?: string) {
-  return !!status && /^summari[sz]ing/i.test(status);
-}
 
 export default IncomingMsg;

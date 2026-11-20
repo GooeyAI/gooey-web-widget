@@ -51,6 +51,8 @@ export const useStreamingHandler = ({
             type: STREAM_MESSAGE_TYPES.FINAL_RESPONSE,
             status: "completed",
           });
+          // the stream can close or fail before CONVERSATION_START ends sending
+          setIsSendingMessage(false);
           setIsReceiving(false);
           return newMessages;
         }
@@ -137,9 +139,13 @@ export const useStreamingHandler = ({
             ...(prevMessage.buttons || []),
             ...(payload.buttons || []),
           ];
-          let final_prompt = prevMessage.final_prompt || [];
-          for (let [idx, value] of Object.entries(payload.prompt_delta || {})) {
-            final_prompt[idx] = value;
+          // A copy, not the previous message's array written through. Every
+          // chunk reused one array, so its identity never changed; anything
+          // memoised on it (`useMemo`, `React.memo`) reads that as "unchanged"
+          // and freezes at whatever the first chunk carried.
+          const final_prompt = [...(prevMessage.final_prompt || [])];
+          for (const [idx, value] of Object.entries(payload.prompt_delta || {})) {
+            final_prompt[Number(idx)] = value;
           }
           newConversations.set(lastResponseId, {
             ...prevMessage,
@@ -168,7 +174,7 @@ export const useStreamingHandler = ({
   );
 
   const sendPayload = useCallback(
-    async (payload: any, callbacks?: { onFinally?: () => void }) => {
+    async (payload: any) => {
       try {
         await uploadPayloadFiles(payload, config!.apiUrl!);
 
@@ -190,14 +196,15 @@ export const useStreamingHandler = ({
           payload,
           apiSource.current,
         );
+        // Still sending: the stream has a URL but no message yet. Clearing it
+        // here dropped the loader and the stop button until CONVERSATION_START,
+        // which is what ends sending (in updateStreamedMessage).
         getDataFromStream(streamUrl, updateStreamedMessage);
-        // setLoading false in updateStreamedMessage
       } catch (e) {
+        setIsSendingMessage(false);
         // report error to Sentry
         // Note: capture handled in caller to avoid moving sentry dependency here
         throw e;
-      } finally {
-        callbacks?.onFinally?.();
       }
     },
     [
@@ -205,6 +212,7 @@ export const useStreamingHandler = ({
       config,
       currentUserId,
       preAttachedFileUsed,
+      setIsSendingMessage,
       updateStreamedMessage,
     ],
   );

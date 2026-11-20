@@ -1,6 +1,6 @@
-// "One live line" tool usage display.
-// Values come from the Gooey design system (colors_and_type.css). The widget is
-// embedded on third-party pages, so they are SCSS constants, not host CSS vars.
+// Tool usage display. Values come from the Gooey design system
+// (colors_and_type.css). The widget is embedded on third-party pages inside a
+// shadow root, so they are SCSS constants, not host CSS variables.
 $tc-ink: #0a1021; // --gy-ink
 $tc-ink-muted: #4b587a; // --gy-ink-muted — 7.06:1 on white, 6.48:1 on $tc-surface-100
 // --gy-ink-soft (#8994b1) is only 3.03:1 on white, below AA for text, so the
@@ -8,10 +8,9 @@ $tc-ink-muted: #4b587a; // --gy-ink-muted — 7.06:1 on white, 6.48:1 on $tc-sur
 $tc-ink-soft: #67759b;
 $tc-line-soft: #e6e6e6; // --gy-line-soft
 $tc-surface-50: #fbfaf8; // --gy-surface-50
-$tc-surface-100: #f7f5f2; // --gy-surface-100
-$tc-teal-700: #00998a; // --gy-teal-700
 $tc-mono:
   ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+$tc-teal-700: #00998a; // --gy-teal-700
 
 .tool-calls-container {
   display: flex;
@@ -28,19 +27,18 @@ $tc-mono:
   display: none;
 }
 
-// ---- Settled summary ("Used 4 tools") ----
-
-// Shares a row with the thinking line while a reply is streaming
+// The status line shares this row, so the dropdown reads as the end of the
+// loader's own sentence: "[bot] Summarizing with GPT… · Used 2 tools ⌄".
 .tool-calls-header {
   display: flex;
   align-items: center;
   gap: 9px;
   min-width: 0;
+}
 
-  // let a long status label truncate instead of pushing the summary off the row
-  > .gooey-thinking-line {
-    min-width: 0;
-  }
+// let a long status label truncate rather than shove the summary off the row
+.tool-calls-header > .gooey-status-line {
+  min-width: 0;
 }
 
 .tool-calls-separator {
@@ -49,6 +47,15 @@ $tc-mono:
   line-height: 140%;
   color: $tc-ink-soft;
 }
+
+// The same 8px a bare status line takes (statusLine.scss). With tool calls this
+// container is what follows the answer, so the gap belongs to it instead; with
+// none, ToolCalls renders the lead alone and that rule still applies.
+.markdown + .tool-calls-container {
+  margin-top: 8px;
+}
+
+// ---- Summary ("Used 4 tools") ----
 
 .tool-calls-summary {
   display: inline-flex;
@@ -69,6 +76,18 @@ $tc-mono:
 
 .tool-calls-summary:hover {
   color: $tc-ink;
+}
+
+// "[bot] Using Google Search ›": the button is just the chevron, and its hit
+// area stretches over the whole line so the tool's name opens the table too.
+.tool-calls-header.is-tool-running {
+  position: relative;
+}
+
+.tool-calls-header.is-tool-running > .tool-calls-summary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 
 // IconChevronDown, turned to point right while closed
@@ -97,7 +116,39 @@ $tc-mono:
   border: 1px solid $tc-line-soft;
   border-radius: 16px;
   overflow: hidden;
+  // Themes that paint a canvas (whatsapp's wallpaper) set this, or the table
+  // on the action row, outside any bubble, shows the canvas through its rows.
+  background-color: var(--gooey-tool-call-background, transparent);
   animation: gooeyTcRise 220ms ease-out;
+}
+
+// Already open when it mounted: the summary moved from the status line into the
+// action row as the run ended. It is the table the reader already opened, so it
+// must not rise in a second time.
+.tool-calls-table.is-restored {
+  animation: none;
+}
+
+// ---- On the action row ----
+// Once the run ends the summary sits between copy and the timestamp. `contents`
+// drops the container's own box so its header and table join the row's flex
+// flow: the header stays inline, and the table, sent last by `order` and given
+// the full line, wraps below the row rather than squeezing in beside the icons.
+// The row's `flex-wrap` that this needs lives with the row, in incoming.scss.
+.gooey-feedback-actions .tool-calls-container {
+  display: contents;
+}
+
+// the timestamp's size (font_12_400), but heavier: it is the row's one
+// disclosure, not supporting text
+.gooey-feedback-actions .tool-calls-summary {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gooey-feedback-actions .tool-calls-table {
+  order: 1;
+  flex-basis: 100%;
 }
 
 // ---- Individual call rows ----
@@ -128,12 +179,6 @@ $tc-mono:
   width: 14px;
   height: 14px;
   object-fit: contain;
-  flex-shrink: 0;
-}
-
-.tool-call-icon-svg {
-  width: 13px;
-  height: 13px;
   flex-shrink: 0;
 }
 
@@ -221,10 +266,19 @@ $tc-mono:
   text-decoration: underline;
 }
 
-// Inputs / output, rendered by ToolValue as readable text
+// Inputs and output, rendered as JSON text rather than by ToolValue, so the
+// monospace face and `pre-wrap` live here — in 2.13.6 both sat on ToolValue's
+// own .tool-value-text, which this build does not render.
 .tool-call-value {
-  font-size: 12px;
+  // App.css sets the widget's sans face on `.gooey-embed-container * :not(code *)`,
+  // and it reaches the bundle through root.scss, which registers on the `utility`
+  // layer — that outranks this component layer at any specificity, so the mono face
+  // cannot win without `!important` (AGENTS.md 3.3). 2.13.5's .tool-call-json-block
+  // declared the same font without it and quietly rendered sans.
+  font-family: $tc-mono !important;
+  font-size: 11px;
   line-height: 150%;
+  white-space: pre-wrap;
   color: $tc-ink-muted;
   background: $tc-surface-50;
   border: 1px solid $tc-line-soft;
@@ -235,135 +289,10 @@ $tc-mono:
   word-break: break-word;
 }
 
-.tool-value-text {
-  white-space: pre-wrap;
-}
-
-.tool-value-muted {
-  color: $tc-ink-soft;
-}
-
-.tool-value-link {
-  color: $tc-teal-700;
-  text-decoration: underline;
-}
-
-.tool-value-raw {
-  font-family: $tc-mono;
-  font-size: 11px;
-}
-
-.tool-value-object {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-}
-
-.tool-value-entry {
-  display: grid;
-  grid-template-columns: minmax(64px, 28%) minmax(0, 1fr);
-  gap: 2px 12px;
-  align-items: baseline;
-}
-
-.tool-value-entry > dt {
-  font-size: 11px;
-  color: $tc-ink-soft;
-}
-
-.tool-value-entry > dd {
-  margin: 0;
-  min-width: 0;
-  color: $tc-ink;
-}
-
-// Reddit-style nesting: a key with nested content shows the key on its own line and
-// the content below it, indented behind a vertical thread line.
-.tool-value-entry.is-block {
-  display: block;
-
-  > dt {
-    margin-bottom: 4px;
-  }
-
-  > dd {
-    margin-left: 3px;
-    padding-left: 10px;
-    border-left: 2px solid $tc-line-soft;
-  }
-}
-
-// inside a nested block, short label/value pairs stay tight
-.tool-value-entry.is-block > dd .tool-value-entry:not(.is-block) {
-  grid-template-columns: max-content minmax(0, 1fr);
-}
-
-.tool-value-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding-left: 16px;
-}
-
-.tool-value-list > li::marker {
-  color: $tc-ink-soft;
-}
-
-// a list of objects: no bullets, each item is its own ruled block
-.tool-value-list > li.is-nested {
-  list-style: none;
-  margin-left: -16px;
-}
-
-.tool-value-list > li.is-nested + li.is-nested {
-  padding-top: 6px;
-  border-top: 1px dashed $tc-line-soft;
-}
-
-.tool-value-link {
-  overflow-wrap: anywhere;
-}
-
 // ---- WhatsApp theme ----
-// The status row lives inside the incoming bubble, so it needs no chrome of its own and
-// the table is a flat inset card. The same row can also stand alone (the loader before
-// any message exists, see thinkingLine.scss), where it is a white pill like WhatsApp's
-// own system chips.
+// Inside the incoming bubble the table is a flat inset card.
+
 .gooey-chat-theme[data-gooey-theme="whatsapp"] {
-  .tool-calls-header {
-    width: fit-content;
-    max-width: 100%;
-    padding: 5px 12px 5px 9px;
-    border-radius: 12px;
-    background-color: var(--gooey-whatsapp-incoming, #ffffff);
-    box-shadow: 0 1px 0.5px rgb(0 0 0 / 15%);
-  }
-
-  // the pill is already on the header, so the line inside it is bare again
-  .tool-calls-header > .gooey-thinking-line {
-    padding: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-
-  .tool-calls-table {
-    margin-top: 6px;
-    border-radius: 12px;
-    background-color: var(--gooey-whatsapp-incoming, #ffffff);
-  }
-
-  // inside the bubble: no pill, no card shadow
-  .gooey-incoming-bubble .tool-calls-header {
-    width: auto;
-    padding: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-
   // barely off the bubble's white: the wallpaper canvas colour read too dark here
   .gooey-incoming-bubble .tool-calls-table {
     border-color: rgb(0 0 0 / 10%);

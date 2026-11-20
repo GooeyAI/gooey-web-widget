@@ -154,6 +154,22 @@
     color: var(--gooey-whatsapp-muted) !important;
   }
 
+  // Both action rows sit on the wallpaper, where the theme's grey hover reads
+  // as a smudge; white matches the bubbles. The header and composer are white,
+  // so they keep the grey.
+  .gooey-feedback-actions,
+  .gooey-outgoing-actions {
+    --gooey-button-hover: var(--gooey-whatsapp-incoming);
+  }
+
+  // A reply's audio player also sits on the wallpaper. Chrome and Safari paint
+  // its pill #f1f3f4 through these pseudo-elements; Firefox draws its own
+  // player and ignores them.
+  .gooey-incomingMsg audio::-webkit-media-controls-enclosure,
+  .gooey-incomingMsg audio::-webkit-media-controls-panel {
+    background-color: var(--gooey-whatsapp-incoming);
+  }
+
   .gooeyChat-chat-input {
     border-radius: 0;
     background: var(--gooey-whatsapp-canvas);

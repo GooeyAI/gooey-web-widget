@@ -3,8 +3,6 @@ import { type ReactNode, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
-import { ToolCallIcon } from "./ToolCallIcon";
-import { ToolValue } from "./ToolValue";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
@@ -20,57 +18,98 @@ export interface ToolCall {
   icon?: string;
 }
 
-// Tools that never count towards "Used N tools" and are not listed in its table
+// Housekeeping the agent does on its own behalf, not what a reader means by
+// "a tool the bot used". Neither counted nor listed.
 export const UNCOUNTED_TOOL_NAMES = ["load_tools"];
 
 const QUERY_KEYS = ["search_query", "query", "q", "search_term", "keywords"];
 
-// A short, single-line hint of what the call was about (e.g. a search query)
+// A one-line hint of what a call was about — its search query where there is
+// one, so four search rows read as four different searches instead of the same
+// tool name four times.
 function getSnippet({ name, label, inputs }: ToolCall): string {
   if (!inputs || typeof inputs !== "object") return "";
-  const values = Object.entries(inputs).filter(
+  const strings = Object.entries(inputs).filter(
     (entry): entry is [string, string] =>
       typeof entry[1] === "string" && !!entry[1].trim(),
   );
   const byKey = QUERY_KEYS.map((key) =>
-    values.find(([k]) => k.toLowerCase() === key),
+    strings.find(([k]) => k.toLowerCase() === key),
   ).find(Boolean);
-  const fallback = /search/i.test(`${name} ${label}`) ? values[0] : undefined;
+  const fallback = /search/i.test(`${name} ${label}`) ? strings[0] : undefined;
   return (byKey || fallback)?.[1].replace(/\s+/g, " ").trim() ?? "";
 }
 
-// The "Used N tools" summary. It shows as soon as a tool is used, and counts a tool that
-// is still running. `lead` (the thinking line) shares the summary's row:
-//   [bot] Thinking…  ·  Used 2 tools ⌄
-// and the table opens below that row.
+/** "Using Google Search", or "Using Google Search +1" when others run too. */
+export function getRunningToolsLabel(toolCalls: ToolCall[]): string | null {
+  const running = toolCalls.filter((toolCall) => toolCall.is_running);
+  const latest = running[running.length - 1];
+  if (!latest) return null;
+  const more = running.length > 1 ? ` +${running.length - 1}` : "";
+  return `Using ${latest.label || latest.name}${more}`;
+}
+
+/**
+ * "Used N tools", and the calls themselves once it is opened. Collapsed by
+ * default: on a run with any real tool use the calls outweigh the answer, and
+ * the answer is what the reader came for.
+ */
 function ToolCalls({
   toolCalls,
   lead,
+  isExpanded,
+  onToggle,
 }: {
   toolCalls: ToolCall[];
   lead?: ReactNode;
+  isExpanded: boolean;
+  // given the summary button, so the owner can keep that line in view
+  onToggle: (summary: HTMLElement) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  // Open state is owned by IncomingMsg, not here. When the run ends this summary
+  // moves from the status line into the action row — a different parent, so this
+  // component really does remount — and a reader who opened the dropdown must not
+  // lose it to that. Mounting already open is that move, so the table must not
+  // rise in a second time; once the reader toggles it, opens are real again.
+  const [isRestored, setIsRestored] = useState(isExpanded);
 
   if (!toolCalls.length) return <>{lead}</>;
 
+  const summary = `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`;
+  // While a tool runs, the lead names it ("Using Google Search") and is the
+  // whole line, so the summary gives way to its chevron and the line opens the
+  // table. The lead only exists while streaming.
+  const isToolRunning =
+    !!lead && toolCalls.some((toolCall) => toolCall.is_running);
+
   return (
-    <div className={clsx("tool-calls-container", "mw-100", !lead && "gmb-12")}>
-      <div className="tool-calls-header">
+    <div className={clsx("tool-calls-container mw-100")}>
+      <div
+        className={clsx(
+          "tool-calls-header",
+          isToolRunning && "is-tool-running",
+        )}
+      >
         {lead}
-        {lead && <span className="tool-calls-separator">·</span>}
+        {lead && !isToolRunning && (
+          <span className="tool-calls-separator">·</span>
+        )}
         <button
           type="button"
           className="tool-calls-summary"
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
+          aria-expanded={isExpanded}
+          aria-label={isToolRunning ? summary : undefined}
+          onClick={(event) => {
+            setIsRestored(false);
+            onToggle(event.currentTarget);
+          }}
         >
-          Used {toolCalls.length} {toolCalls.length === 1 ? "tool" : "tools"}
+          {!isToolRunning && summary}
           <ToolCallsChevron size={11} />
         </button>
       </div>
-      {open && (
-        <div className="tool-calls-table">
+      {isExpanded && (
+        <div className={clsx("tool-calls-table", isRestored && "is-restored")}>
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
           ))}
@@ -80,19 +119,38 @@ function ToolCalls({
   );
 }
 
-function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
-  const { name, label, inputs, return_value, run_url, icon, is_running } =
-    toolCall;
-  const [open, setOpen] = useState(false);
-  const hasInputs = !!inputs && Object.keys(inputs).length > 0;
-  const snippet = getSnippet(toolCall);
+// One chevron, pointing right when closed and down when open. The rotation is
+// CSS on [aria-expanded] / [open], so no second icon and no state to read here.
+function ToolCallsChevron({ size }: { size: number }) {
+  return (
+    <span className="tool-calls-chevron" aria-hidden="true">
+      <IconChevronDown size={size} />
+    </span>
+  );
+}
 
-  // a running call with no inputs has nothing to show yet, so it isn't expandable
+function ToolCallIcon({ icon }: { icon?: string }) {
+  const isUrl = !!icon && (icon.startsWith("http") || icon.startsWith("/"));
+  if (isUrl) return <img src={icon} alt="" className="tool-call-icon-image" />;
+  return (
+    <span className="tool-call-icon-glyph">{icon || "\u{1F6E0}\u{FE0F}"}</span>
+  );
+}
+
+function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
+  const { label, inputs, return_value, is_running, icon, run_url } = toolCall;
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const snippet = getSnippet(toolCall);
+  const hasInputs = !!inputs && Object.keys(inputs).length > 0;
+
+  // A running call with no inputs has nothing to open yet, so it is a plain row
+  // rather than a disclosure that reveals an empty body.
   if (is_running && !hasInputs) {
     return (
       <div className="tool-call-row">
         <div className="tool-call-row-summary is-static">
-          <ToolCallIcon name={name} icon={icon} />
+          <ToolCallIcon icon={icon} />
           <span className="tool-call-row-label">{label}</span>
           {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
           <span className="tool-call-running">Running…</span>
@@ -102,23 +160,23 @@ function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
   }
 
   return (
-    // `open` tracks the element's own state so the body is built only once the
-    // row is opened. A <details> renders its children either way and lets the
-    // browser hide them, which meant opening the table laid out every tool's
-    // inputs and outputs, not just the one that was clicked.
     <details
+      open={isExpanded}
+      onToggle={(e) => setIsExpanded((e.target as HTMLDetailsElement).open)}
       className="tool-call-row"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary className="tool-call-row-summary">
-        <ToolCallIcon name={name} icon={icon} />
+        <ToolCallIcon icon={icon} />
         <span className="tool-call-row-label">{label}</span>
         {snippet && <span className="tool-call-row-snippet">{snippet}</span>}
         {is_running && <span className="tool-call-running">Running…</span>}
         <ToolCallsChevron size={10} />
       </summary>
 
-      {open && (
+      {/* Built only once this row is opened. A <details> renders its children
+          either way and lets the browser hide them, so opening the table laid
+          out every call's inputs and output, not just the one clicked. */}
+      {isExpanded && (
         <div className="tool-call-row-body">
           {hasInputs && (
             <>
@@ -137,34 +195,22 @@ function ToolCallRow({ toolCall }: { toolCall: ToolCall }) {
                 )}
               </div>
               <div className="tool-call-value">
-                <ToolValue value={inputs} />
+                {JSON.stringify(inputs, null, 2)}
               </div>
             </>
           )}
           <div className="tool-call-section-header">Output</div>
           <div className="tool-call-value">
-            {is_running ? (
-              <span className="tool-value-muted">Running…</span>
-            ) : (
-              <ToolValue value={return_value} />
-            )}
+            {is_running
+              ? "Running\u2026"
+              : typeof return_value === "string"
+                ? return_value
+                : JSON.stringify(return_value, null, 2)}
           </div>
         </div>
       )}
     </details>
   );
-}
-
-function ToolCallsChevron({ size }: { size: number }) {
-  return (
-    <span className="tool-calls-chevron" aria-hidden="true">
-      <IconChevronDown size={size} />
-    </span>
-  );
-}
-
-function capitalizeFirst(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 export function extractToolCallsFromFinalPrompt(
@@ -186,7 +232,7 @@ export function extractToolCallsFromFinalPrompt(
         inputs: inputs,
         return_value: null,
         is_running: true,
-        label: capitalizeFirst(tc.label || tc.function.name || ""),
+        label: tc.label || tc.function.name || "",
         icon: tc.icon,
         run_url: "",
       };

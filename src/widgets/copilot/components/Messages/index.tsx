@@ -7,6 +7,7 @@ import { useMessagesContext, useSystemContext } from "src/contexts/hooks";
 import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import { addInlineStyle } from "src/addStyles";
+import { isReplyStreaming } from "src/contexts/MessagesContext";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
@@ -47,6 +48,7 @@ const Responses = (props: any) => {
           showRunTime={config?.showRunTime || false}
           showToolCalls={config?.showToolCalls || false}
           isLatestResponse={id === props.latestResponseId}
+          revealInList={props.revealInList}
         />
       );
     }
@@ -77,13 +79,26 @@ const Messages = () => {
     return null;
   }, [queue, messages]);
 
+  // Read from the conversation, not isReceiving: that is this widget's own
+  // stream, and a host that feeds the conversation in (gooey.ai's builder)
+  // never opens one, so the list never followed a reply there.
+  const lastMessage = messages?.get(queue[queue.length - 1]);
+  const isReplyInProgress =
+    isSending || (!!lastMessage && isReplyStreaming(lastMessage));
+
   const {
     scrollContainerRef,
     anchorRef,
     showScrollToBottom,
     scrollToBottom,
     handleScroll,
-  } = useMessagesScroll({ messages, latestUserId, isMessagesLoading });
+    revealInList,
+  } = useMessagesScroll({
+    messages,
+    latestUserId,
+    isMessagesLoading,
+    isStreaming: isReplyInProgress,
+  });
 
   if (isMessagesLoading) {
     return (
@@ -109,6 +124,7 @@ const Messages = () => {
             queue={beforeIds}
             data={data}
             latestResponseId={latestResponseId}
+            revealInList={revealInList}
           />
         </div>
         {anchorIds.length > 0 ? (
@@ -117,8 +133,14 @@ const Messages = () => {
               queue={anchorIds}
               data={data}
               latestResponseId={latestResponseId}
+              revealInList={revealInList}
             />
             <ResponseLoader show={isSending} />
+            {/* Last in the pair, so useMessagesScroll counts it in the real end:
+                a followed reply keeps its status line this far above the
+                composer. Always rendered - dropping it when a run ends would
+                shrink the list and jump it. */}
+            <div className="gooey-anchor-gutter" aria-hidden="true" />
           </div>
         ) : (
           <div className="mw-760 mx-auto">

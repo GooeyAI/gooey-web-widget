@@ -44,6 +44,10 @@
 
 .gooey-feedback-actions {
   gap: 4px;
+  // Inert for the row's usual contents, a few icons and a timestamp that never
+  // fill a line. It is here for the tool-calls table, which joins this row once
+  // a run ends and takes a full line of its own below it (toolCalls.scss).
+  flex-wrap: wrap;
 }
 
 // Once the conversation has moved past a response, its row has had its moment:

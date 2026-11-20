@@ -18,6 +18,15 @@
   flex-direction: column;
 }
 
+// Clear space between the end of the latest exchange and the composer. With the
+// message's own 12px bottom padding, a followed reply keeps its status line about
+// 80px above the input. A fixed spacer rather than padding on the status line,
+// which leaves when the run ends and would shrink the list under the reader.
+.gooey-anchor-gutter {
+  flex: none;
+  height: 68px;
+}
+
 // Anchored to `.gooey-messages-root`, a sibling of the composer in a flex
 // column — it cannot overlap the input, so z-index only orders it against the
 // message list. The new-chat control lives on the composer instead.
