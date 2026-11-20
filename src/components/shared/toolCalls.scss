@@ -116,6 +116,9 @@ $tc-teal-700: #00998a; // --gy-teal-700
   border: 1px solid $tc-line-soft;
   border-radius: 16px;
   overflow: hidden;
+  // Themes that paint a canvas (whatsapp's wallpaper) set this, or the table
+  // on the action row, outside any bubble, shows the canvas through its rows.
+  background-color: var(--gooey-tool-call-background, transparent);
   animation: gooeyTcRise 220ms ease-out;
 }
 
