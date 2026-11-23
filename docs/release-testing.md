@@ -249,8 +249,10 @@ Confirmed in testing:
   live `gpt_5_5` run. The fix is a `thinking` field on `MessagePart`, which is
   a few lines since the value is already in hand. Until then the reasoning
   still renders as the answer during the run and is replaced by the clean
-  answer when `final_response` lands. Only affects `openai_responses` models,
-  of which production currently seeds none.
+  answer when `final_response` lands. **Confirmed live on production**: the
+  release-test bot (`Kbo`, the default `id` above) reasons, and the same
+  sentence was observed in the bubble mid-run and in the reasoning panel
+  afterwards. It is not hypothetical and not limited to local models.
 - **A network failure is silent** (N2): the question stays, no reply, no error. [#60](https://github.com/GooeyAI/gooey-web-widget/issues/60)
 - **Location with geolocation blocked:** the error replaces the map, so there is
   no way to pick a place by hand, and Send stays disabled. [#61](https://github.com/GooeyAI/gooey-web-widget/issues/61)
