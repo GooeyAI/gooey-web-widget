@@ -181,11 +181,13 @@ const SystemContextProvider = ({
   );
 
   useLayoutEffect(() => {
-    // set initial state based on isNarrowWidth and isInline
+    // Width does not open the sidebar: it starts closed and only
+    // `toggleSidebar` opens it. The header button is the only way in, so it
+    // tracks the inverse of the sidebar -- the old `isNarrowWidth` worked here
+    // only because a widget wider than 768px was force-opened on every resize.
     setLayoutState((prev) => ({
       ...prev,
-      isSidebarOpen: !isNarrowWidth,
-      showSidebarButton: forceHideSidebar ? false : isNarrowWidth,
+      showSidebarButton: forceHideSidebar ? false : !prev.isSidebarOpen,
       showFocusModeButton: isInline
         ? false
         : (isNarrowWidth && !isNarrowWindowWidth) || (!isNarrowWidth && !isNarrowWindowWidth),
