@@ -325,6 +325,12 @@ const IncomingMsg = memo(
     showRunLink: boolean;
     showRunTime: boolean;
     showToolCalls: boolean;
+    /**
+     * Whether the model's reasoning may be shown. Decided by the caller, which
+     * is the layer that holds the config: it is run internals like the tool
+     * calls, and on the builder theme the host has already drawn it.
+     */
+    showThinking: boolean;
     // The newest response keeps its action row on show; every response behind
     // it reveals one on hover. Absent, a response is treated as the newest,
     // so a caller that renders a response on its own does not lose the row.
@@ -375,7 +381,9 @@ const IncomingMsg = memo(
     // This is also why a reopened conversation still shows it: ConversationLayer
     // puts whole message objects into IndexedDB, raw_output_text among them, so
     // the reasoning comes back with the message and no server is asked.
-    const rawOutputText = (props?.data as FinalResponse)?.raw_output_text?.[0];
+    const rawOutputText = props?.showThinking
+      ? (props?.data as FinalResponse)?.raw_output_text?.[0]
+      : undefined;
     const { thinking } = useMemo(
       () => splitThinking(rawOutputText ?? ""),
       [rawOutputText],
