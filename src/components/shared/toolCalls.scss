@@ -139,12 +139,42 @@ $tc-teal-700: #00998a; // --gy-teal-700
 // sideways. The catch is that containment clips -- silently, with no way to
 // reach what is cut off -- so anything that can outgrow the column (a table, an
 // image) is made to fit or scroll itself below.
-.tool-calls-reasoning {
+.tool-calls-reasoning-block {
   padding: 12px 14px;
+}
+
+.tool-calls-reasoning {
   font-size: 13px;
   line-height: 155%;
   color: $tc-ink-muted;
   overflow-wrap: break-word;
+}
+
+// Collapsed to the first few lines. A reasoning summary is the model talking
+// to itself, so it opens as a glance rather than a wall: the reader asked what
+// the run did, not for a transcript.
+//
+// `-webkit-line-clamp` rather than a max-height in `em`: the block can hold a
+// heading or a list item as well as prose, and a height computed from one
+// line-height would cut those mid-glyph. The clamp counts rendered lines
+// whatever is on them.
+.tool-calls-reasoning.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+
+// A text control, not a button: `buttons.scss` gives every button 8px of
+// padding and a radius, which here would read as a second disclosure competing
+// with the chevron above it.
+.tool-calls-reasoning-toggle {
+  margin-top: 6px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 140%;
+  color: $tc-ink-muted;
 }
 
 // `App.css` zeroes the margins of every block element and strips list markers,
@@ -212,7 +242,7 @@ $tc-teal-700: #00998a; // --gy-teal-700
 }
 
 // The same hairline the rows use between themselves.
-.tool-calls-reasoning + .tool-call-row {
+.tool-calls-reasoning-block + .tool-call-row {
   border-top: 1px solid $tc-line-soft;
 }
 

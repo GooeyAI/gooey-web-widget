@@ -6,7 +6,13 @@ import parse, {
   type HTMLReactParserOptions,
 } from "html-react-parser";
 import { marked } from "marked";
-import { type ReactNode, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
@@ -118,6 +124,13 @@ function ToolCalls({
   // lose it to that. Mounting already open is that move, so the table must not
   // rise in a second time; once the reader toggles it, opens are real again.
   const [isRestored, setIsRestored] = useState(isExpanded);
+  const [isReasoningExpanded, setIsReasoningExpanded] = useState(false);
+  // Whether the clamp is actually hiding anything. A reasoning summary is often
+  // two or three lines, and a "Show more" that reveals nothing is worse than no
+  // control at all, so the toggle is offered only once we have measured that
+  // there is something behind it.
+  const [isReasoningClamped, setIsReasoningClamped] = useState(false);
+  const reasoningRef = useRef<HTMLDivElement>(null);
 
   // Same markdown dialect as the answer: a reasoning summary arrives with its
   // own "**Bold heading**" per part and reads as a wall otherwise. Built only
@@ -134,6 +147,16 @@ function ToolCalls({
         : null,
     [thinking, isExpanded],
   );
+
+  // Measured, not estimated: the text is model prose in a panel whose width
+  // depends on the embed, so line count cannot be guessed from its length.
+  // Skipped while expanded, where the element is not clamped and would measure
+  // as fitting -- the flag then keeps its value so "Show less" stays put.
+  useLayoutEffect(() => {
+    const el = reasoningRef.current;
+    if (!el || isReasoningExpanded) return;
+    setIsReasoningClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [reasoningBody, isReasoningExpanded]);
 
   const toolsPart = toolCalls.length
     ? `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`
@@ -184,7 +207,27 @@ function ToolCalls({
       {isExpanded && (
         <div className={clsx("tool-calls-table", isRestored && "is-restored")}>
           {reasoningBody && (
-            <div className="tool-calls-reasoning">{reasoningBody}</div>
+            <div className="tool-calls-reasoning-block">
+              <div
+                ref={reasoningRef}
+                className={clsx(
+                  "tool-calls-reasoning",
+                  !isReasoningExpanded && "is-clamped",
+                )}
+              >
+                {reasoningBody}
+              </div>
+              {isReasoningClamped && (
+                <button
+                  type="button"
+                  className="tool-calls-reasoning-toggle"
+                  aria-expanded={isReasoningExpanded}
+                  onClick={() => setIsReasoningExpanded((open) => !open)}
+                >
+                  {isReasoningExpanded ? "Show less" : "Show more\u2026"}
+                </button>
+              )}
+            </div>
           )}
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
