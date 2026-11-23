@@ -249,6 +249,7 @@ function DisplayMessage({
   const isLargeMessage = text.length > 200 || text.split("\n").length > 5;
   const displayText =
     isLargeMessage && !isExpanded ? getTruncatedText(text) : text;
+  const expandLabel = isExpanded ? "Collapse message" : "Expand message";
 
   return (
     <>
@@ -268,10 +269,9 @@ function DisplayMessage({
         </p>
         {isLargeMessage && (
           <div>
-            <GooeyTooltip
-              text={isExpanded ? "Collapse message" : "Expand message"}
-            >
+            <GooeyTooltip text={expandLabel}>
               <IconButton
+                aria-label={expandLabel}
                 className="gooey-outgoing-expand-btn gmt-4"
                 variant="text"
                 onClick={() => setIsExpanded(!isExpanded)}

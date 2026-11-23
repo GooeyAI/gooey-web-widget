@@ -187,6 +187,7 @@ const MediaPreviewItem = ({
       {isRemovable && (
         <div className="file-preview-remove">
           <IconButton
+            aria-label="Remove attachment"
             className={filePreviewCloseClass}
             onClick={(e) => {
               e.stopPropagation();
@@ -264,6 +265,7 @@ export const FilePreviewItem = ({
       {isRemovable && (
         <div className="file-preview-remove">
           <IconButton
+            aria-label="Remove attachment"
             className={filePreviewCloseClass}
             onClick={(e) => {
               e.stopPropagation();

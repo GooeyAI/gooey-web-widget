@@ -76,6 +76,7 @@ const SideNavbar = () => {
           {/* Sidebar button */}
           <GooeyTooltip text="Close sidebar">
             <IconButton
+              aria-label="Close sidebar"
               variant="text"
               className="cr-pointer"
               onClick={layoutController?.toggleSidebar}
