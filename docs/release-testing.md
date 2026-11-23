@@ -100,7 +100,7 @@ K on Safari (macOS or iOS) and once at phone width.
 
 | ID  | Check                                     | Expected                                                                                                                             |
 | --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| D1  | Send a question                           | Your message goes to the top; under it the bot animation and "Thinking…"                                                             |
+| D1  | Send a question                           | Your message goes to the top; under it the bot animation and "Working…"                                                             |
 | D2  | Watch the status line                     | Shows the server's own words ("Summarizing with…", "[3/40] Creating knowledge embeddings…"); never stuck on one label for a long run |
 | D3  | A question that searches the web          | "Using Google Search" while the tool runs, then "Used 1 tool ›" at the end of the status line                                        |
 | D4  | Stop button (replaces Send while running) | Stops the reply and removes the question; the composer works again                                                                   |
@@ -143,6 +143,10 @@ in LaTeX, and a numbered list of 12 facts."_
 | G3  | Open a row                                                | Inputs and Output as monospace JSON; a "View tool call" link to the run         |
 | G4  | Open the table mid-run, let the run finish                | Stays open, moves to the action row without animating again or jumping          |
 | G5  | Open a table that is taller than the window               | The line you clicked stays visible at the top                                   |
+| G6  | A reasoning model (`openai_responses` provider only)      | The action row reads "Thought · Used N tools ›"; opening shows the reasoning above the tool rows, clamped to five lines with "Show more…" |
+| G7  | "Show more…" / "Show less"                                | Toggles the clamp. A summary short enough to fit shows no toggle at all         |
+| G8  | `showToolCalls` off (the default)                         | No reasoning anywhere — it is run internals, like the calls themselves          |
+| G9  | Reload and reopen the conversation from history           | The same label, and the panel still holds the reasoning (it is kept in IndexedDB, not refetched) |
 
 ## H. Action rows
 
@@ -238,7 +242,17 @@ Confirmed in testing:
   gap ("tall ."). One combined citation control sits at the end of the text
   run, and expanding it splits the sentence. [#59](https://github.com/GooeyAI/gooey-web-widget/issues/59)
 - **Model reasoning can show in the answer while it streams** ("I'm thinking we
-  need…"). Not yet known whether the server or the widget should strip it.
+  need…"). **Server-side, and the widget cannot fix it.** `send_msg` already
+  separates the reasoning (`daras_ai_v2/bots.py:265`, `parse_bot_html`) and
+  discards it, but the delta is sliced *before* that parse (`:638`), so
+  mid-reasoning chunks arrive with no `<think>` tag to strip — measured on a
+  live `gpt_5_5` run. The fix is a `thinking` field on `MessagePart`, which is
+  a few lines since the value is already in hand. Until then the reasoning
+  still renders as the answer during the run and is replaced by the clean
+  answer when `final_response` lands. **Confirmed live on production**: the
+  release-test bot (`Kbo`, the default `id` above) reasons, and the same
+  sentence was observed in the bubble mid-run and in the reasoning panel
+  afterwards. It is not hypothetical and not limited to local models.
 - **A network failure is silent** (N2): the question stays, no reply, no error. [#60](https://github.com/GooeyAI/gooey-web-widget/issues/60)
 - **Location with geolocation blocked:** the error replaces the map, so there is
   no way to pick a place by hand, and Send stays disabled. [#61](https://github.com/GooeyAI/gooey-web-widget/issues/61)

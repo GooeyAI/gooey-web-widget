@@ -15,7 +15,11 @@ import ToolCalls, {
 } from "src/components/shared/ToolCalls";
 import GooeyTooltip from "src/components/shared/Tooltip";
 import { useMessagesContext } from "src/contexts/hooks";
-import { isReplyStreaming } from "src/contexts/MessagesContext";
+import {
+  isReplyStreaming,
+  type FinalResponse,
+} from "src/contexts/MessagesContext";
+import { splitThinking } from "src/components/shared/thinking";
 import { ACTION_ICON_SIZE, MESSAGE_GUTTER } from "../constants";
 import CopyButton from "./CopyButton";
 import StatusLine, { getStatusLabel } from "src/components/shared/StatusLine";
@@ -323,6 +327,12 @@ const IncomingMsg = memo(
     showRunLink: boolean;
     showRunTime: boolean;
     showToolCalls: boolean;
+    /**
+     * Whether the model's reasoning may be shown. Decided by the caller, which
+     * is the layer that holds the config: it is run internals like the tool
+     * calls, and on the builder theme the host has already drawn it.
+     */
+    showThinking: boolean;
     // The newest response keeps its action row on show; every response behind
     // it reveals one on hover. Absent, a response is treated as the newest,
     // so a caller that renders a response on its own does not lose the row.
@@ -363,6 +373,22 @@ const IncomingMsg = memo(
             )
           : [],
       [props?.showToolCalls, props?.data?.final_prompt],
+    );
+    // Reasoning reaches the widget in exactly one place: raw_output_text on the
+    // final response. The streamed message_part text carries no <think> tags at
+    // all -- the server consumes them in send_msg (daras_ai_v2/bots.py:265) and
+    // discards the thinking it separates -- so there is nothing to split during
+    // the run, and splitting per chunk would be dead work on every message.
+    //
+    // This is also why a reopened conversation still shows it: ConversationLayer
+    // puts whole message objects into IndexedDB, raw_output_text among them, so
+    // the reasoning comes back with the message and no server is asked.
+    const rawOutputText = props?.showThinking
+      ? (props?.data as FinalResponse)?.raw_output_text?.[0]
+      : undefined;
+    const { thinking } = useMemo(
+      () => splitThinking(rawOutputText ?? ""),
+      [rawOutputText],
     );
     const { measuredSec } = useStreamTimer(isStreaming);
     // Owned here, not by ToolCalls: the summary changes parent when the run ends
@@ -406,6 +432,7 @@ const IncomingMsg = memo(
         }
         isExpanded={isToolsExpanded}
         onToggle={toggleTools}
+        thinking={thinking}
       />
     );
 
@@ -423,7 +450,7 @@ const IncomingMsg = memo(
             className={clsx(
               (hasText ||
                 isStreaming ||
-                (toolCalls.length > 0 && !toolsOnActionRow)) &&
+                ((toolCalls.length > 0 || !!thinking) && !toolsOnActionRow)) &&
                 "gooey-incoming-bubble",
             )}
           >
@@ -474,7 +501,9 @@ const IncomingMsg = memo(
               hasText={hasText}
               hasContent={hasText || Boolean(audioTrack) || Boolean(videoTrack)}
               measuredSec={measuredSec}
-              toolCallsSummary={toolCalls.length > 0 ? toolCallsSummary : null}
+              toolCallsSummary={
+                toolCalls.length > 0 || thinking ? toolCallsSummary : null
+              }
               isToolsExpanded={isToolsExpanded}
             />
           )}

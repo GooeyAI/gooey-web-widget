@@ -8,6 +8,7 @@ import SpinLoader from "src/components/shared/SpinLoader";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import { addInlineStyle } from "src/addStyles";
 import { isReplyStreaming } from "src/contexts/MessagesContext";
+import { themeCapabilities } from "src/themes";
 import messagesStyle from "./messages.scss?inline";
 import { useMessagesScroll } from "./useMessagesScroll";
 import CircleBeat from "src/assets/SvgIcons/CircleBeat";
@@ -47,6 +48,10 @@ const Responses = (props: any) => {
           showRunLink={config?.showRunLink || false}
           showRunTime={config?.showRunTime || false}
           showToolCalls={config?.showToolCalls || false}
+          showThinking={
+            (config?.showToolCalls || false) &&
+            !themeCapabilities(config?.theme).thinkingRenderedByHost
+          }
           isLatestResponse={id === props.latestResponseId}
           revealInList={props.revealInList}
         />

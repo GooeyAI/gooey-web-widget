@@ -4,6 +4,7 @@ import { marked } from "marked";
 import { STREAM_MESSAGE_TYPES } from "src/api/streaming";
 import { latexProcessor, LaTeXExpression } from "./latexProcessor";
 import { domHandlers, DomNode, Reference, ProcessingData } from "./domHandlers";
+import { splitThinking } from "../thinking";
 
 // Types
 export interface ResponseData {
@@ -25,8 +26,10 @@ const AUDIO_EMOJI_REPLACEMENTS = {
   "🎧:": "",
 };
 
-// Marked configuration
-const MARKED_OPTIONS = {
+// Marked configuration. Exported so anything else rendering model prose (the
+// reasoning block in ToolCalls) speaks the same markdown dialect as the answer
+// rather than drifting with its own copy.
+export const MARKED_OPTIONS = {
   async: false,
   breaks: true,
   gfm: true,
@@ -85,7 +88,14 @@ const extractOutputText = (data: ResponseData): string => {
     type === STREAM_MESSAGE_TYPES.FINAL_RESPONSE &&
     status === "completed"
   ) {
-    output = output_text[0] || raw_output_text[0] || "";
+    // The two arms differ on purpose, so do not tidy this into one expression.
+    // output_text has already been through parse_bot_html server-side
+    // (routers/bots_api.py:372) and holds the answer alone. raw_output_text has
+    // not: it is the model's untouched reply, <think> markup and all. It is only
+    // reached when the answer is empty -- a run that reasoned and was cut off
+    // before answering -- and unsplit it would print the reasoning, and the raw
+    // tags around it, into the bubble.
+    output = output_text[0] || splitThinking(raw_output_text[0] || "").answer;
   }
 
   return replaceAudioEmojis(output);

@@ -1,11 +1,56 @@
 import clsx from "clsx";
-import { type ReactNode, useState } from "react";
+import parse, {
+  domToReact,
+  Element,
+  type DOMNode,
+  type HTMLReactParserOptions,
+} from "html-react-parser";
+import { marked } from "marked";
+import {
+  type ReactNode,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { addInlineStyle } from "src/addStyles";
 import IconChevronDown from "src/assets/SvgIcons/IconChevronDown";
 import IconExternalLink from "src/assets/SvgIcons/IconExternalLink";
+import { MARKED_OPTIONS } from "./Response/responseParser";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
+
+// The reasoning is the one model text the server hands over untouched. Every
+// other surface the widget renders has been through parse_bot_html server-side
+// (daras_ai_v2/bots.py), which keeps only top-level text nodes and so can never
+// carry markup. raw_output_text is raw by definition, and this panel is the
+// first place it is rendered.
+//
+// So HTML is escaped before markdown runs. A <style> here would land inside the
+// shadow root and could restyle or hide the widget's own chrome; an <iframe>
+// would load whatever it liked. Markdown still works -- raw tags render as the
+// text the model wrote.
+const escapeHtml = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Markdown can still mint a link, and `[x](javascript:...)` is a real payload,
+// so hrefs are an http(s) allowlist: anything else keeps its text and loses its
+// link. target/rel because without them a link in this panel navigates the
+// customer's host page away from their own site. The answer path needs none of
+// this -- its handler swaps every <a> for Link.tsx, which emits no href at all.
+const REASONING_PARSER: HTMLReactParserOptions = {
+  replace: (node) => {
+    if (!(node instanceof Element) || node.name !== "a") return;
+    const children = domToReact(node.children as DOMNode[], REASONING_PARSER);
+    if (!/^https?:\/\//i.test(node.attribs?.href ?? "")) return <>{children}</>;
+    return (
+      <a href={node.attribs.href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  },
+};
 
 export interface ToolCall {
   id: string | number;
@@ -50,21 +95,28 @@ export function getRunningToolsLabel(toolCalls: ToolCall[]): string | null {
 }
 
 /**
- * "Used N tools", and the calls themselves once it is opened. Collapsed by
- * default: on a run with any real tool use the calls outweigh the answer, and
- * the answer is what the reader came for.
+ * What a run did, on one line: "Thought · Used 3 tools". Opening it
+ * reveals the reasoning and then the calls themselves. Collapsed by default: on
+ * a run with any real tool use the calls outweigh the answer, and the answer is
+ * what the reader came for.
+ *
+ * One disclosure rather than two because the row describes one run. Either half
+ * may be absent, so the label is assembled from the parts that exist.
  */
 function ToolCalls({
   toolCalls,
   lead,
   isExpanded,
   onToggle,
+  thinking,
 }: {
   toolCalls: ToolCall[];
   lead?: ReactNode;
   isExpanded: boolean;
   // given the summary button, so the owner can keep that line in view
   onToggle: (summary: HTMLElement) => void;
+  /** The model's reasoning summary, already split out of the answer. */
+  thinking?: string;
 }) {
   // Open state is owned by IncomingMsg, not here. When the run ends this summary
   // moves from the status line into the action row — a different parent, so this
@@ -72,10 +124,54 @@ function ToolCalls({
   // lose it to that. Mounting already open is that move, so the table must not
   // rise in a second time; once the reader toggles it, opens are real again.
   const [isRestored, setIsRestored] = useState(isExpanded);
+  const [isReasoningExpanded, setIsReasoningExpanded] = useState(false);
+  // Whether the clamp is actually hiding anything. A reasoning summary is often
+  // two or three lines, and a "Show more" that reveals nothing is worse than no
+  // control at all, so the toggle is offered only once we have measured that
+  // there is something behind it.
+  const [isReasoningClamped, setIsReasoningClamped] = useState(false);
+  const reasoningRef = useRef<HTMLDivElement>(null);
 
-  if (!toolCalls.length) return <>{lead}</>;
+  // Same markdown dialect as the answer: a reasoning summary arrives with its
+  // own "**Bold heading**" per part and reads as a wall otherwise. Built only
+  // once the panel is open -- a restored conversation would otherwise parse
+  // every reasoning message on mount for a panel nobody opened, which is the
+  // same reason ToolCallRow below defers its own body.
+  const reasoningBody = useMemo(
+    () =>
+      isExpanded && thinking
+        ? parse(
+            marked.parse(escapeHtml(thinking), MARKED_OPTIONS) as string,
+            REASONING_PARSER,
+          )
+        : null,
+    [thinking, isExpanded],
+  );
 
-  const summary = `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`;
+  // Measured, not estimated: the text is model prose in a panel whose width
+  // depends on the embed, so line count cannot be guessed from its length.
+  // Skipped while expanded, where the element is not clamped and would measure
+  // as fitting -- the flag then keeps its value so "Show less" stays put.
+  useLayoutEffect(() => {
+    const el = reasoningRef.current;
+    if (!el || isReasoningExpanded) return;
+    setIsReasoningClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [reasoningBody, isReasoningExpanded]);
+
+  const toolsPart = toolCalls.length
+    ? `Used ${toolCalls.length} ${toolCalls.length === 1 ? "tool" : "tools"}`
+    : null;
+  // Named, not timed. The server reports a thinking duration even when the
+  // summary itself comes back empty, so a label built on the clock said
+  // "Thought for 2s" on one reply and nothing on the next for no reason the
+  // reader could see. Keyed to the reasoning text instead, the label is there
+  // exactly when there is something behind the chevron to read.
+  const thoughtPart = thinking ? "Thought" : null;
+  const summary = [thoughtPart, toolsPart].filter(Boolean).join(" \u00b7 ");
+
+  // Nothing to name is nothing to open: a run with neither reasoning nor tools
+  // returns the lead alone, exactly as before this feature existed.
+  if (!summary) return <>{lead}</>;
   // While a tool runs, the lead names it ("Using Google Search") and is the
   // whole line, so the summary gives way to its chevron and the line opens the
   // table. The lead only exists while streaming.
@@ -110,6 +206,29 @@ function ToolCalls({
       </div>
       {isExpanded && (
         <div className={clsx("tool-calls-table", isRestored && "is-restored")}>
+          {reasoningBody && (
+            <div className="tool-calls-reasoning-block">
+              <div
+                ref={reasoningRef}
+                className={clsx(
+                  "tool-calls-reasoning",
+                  !isReasoningExpanded && "is-clamped",
+                )}
+              >
+                {reasoningBody}
+              </div>
+              {isReasoningClamped && (
+                <button
+                  type="button"
+                  className="tool-calls-reasoning-toggle"
+                  aria-expanded={isReasoningExpanded}
+                  onClick={() => setIsReasoningExpanded((open) => !open)}
+                >
+                  {isReasoningExpanded ? "Show less" : "Show more\u2026"}
+                </button>
+              )}
+            </div>
+          )}
           {toolCalls.map((toolCall) => (
             <ToolCallRow key={String(toolCall.id)} toolCall={toolCall} />
           ))}

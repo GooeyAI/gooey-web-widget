@@ -4,7 +4,8 @@ export type ThemeId = (typeof THEME_IDS)[number];
 
 function isThemeId(value: unknown): value is ThemeId {
   return (
-    typeof value === "string" && (THEME_IDS as readonly string[]).includes(value)
+    typeof value === "string" &&
+    (THEME_IDS as readonly string[]).includes(value)
   );
 }
 
@@ -37,6 +38,17 @@ export interface ThemeCapabilities {
    * something to send.
    */
   alwaysShowSendButton: boolean;
+  /**
+   * The host already renders the model's reasoning into the message text, so
+   * the widget must not render it a second time.
+   *
+   * True for `builder` only: `get_chat_widget_messages` replaces the message
+   * body with `thinking_summary.html` -- a `<details>🧠 Thought for Ns</details>`
+   * block -- while still shipping the untouched `raw_output_text` beside it. The
+   * widget reads the latter, so without this flag the same reasoning appears
+   * twice: once inside the bubble and once on the action row.
+   */
+  thinkingRenderedByHost: boolean;
 }
 
 export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
@@ -44,6 +56,7 @@ export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
     inputMinHeight: 44,
     floatingNewChat: "when-chrome-hidden",
     alwaysShowSendButton: false,
+    thinkingRenderedByHost: false,
   },
   whatsapp: {
     inputMinHeight: 40,
@@ -51,6 +64,7 @@ export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
     // and showing both rendered the same icon and handler twice.
     floatingNewChat: "when-chrome-hidden",
     alwaysShowSendButton: false,
+    thinkingRenderedByHost: false,
   },
   builder: {
     inputMinHeight: 40,
@@ -59,6 +73,7 @@ export const THEME_CAPABILITIES: Record<ThemeId, ThemeCapabilities> = {
     // as an explicit choice rather than an accident of a missing branch.
     floatingNewChat: "never",
     alwaysShowSendButton: true,
+    thinkingRenderedByHost: true,
   },
 };
 
