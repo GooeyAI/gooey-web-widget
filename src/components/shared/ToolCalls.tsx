@@ -1,5 +1,10 @@
 import clsx from "clsx";
-import parse from "html-react-parser";
+import parse, {
+  domToReact,
+  Element,
+  type DOMNode,
+  type HTMLReactParserOptions,
+} from "html-react-parser";
 import { marked } from "marked";
 import { type ReactNode, useMemo, useState } from "react";
 import { addInlineStyle } from "src/addStyles";
@@ -9,6 +14,37 @@ import { MARKED_OPTIONS } from "./Response/responseParser";
 import style from "./toolCalls.scss?inline";
 
 addInlineStyle(style);
+
+// The reasoning is the one model text the server hands over untouched. Every
+// other surface the widget renders has been through parse_bot_html server-side
+// (daras_ai_v2/bots.py), which keeps only top-level text nodes and so can never
+// carry markup. raw_output_text is raw by definition, and this panel is the
+// first place it is rendered.
+//
+// So HTML is escaped before markdown runs. A <style> here would land inside the
+// shadow root and could restyle or hide the widget's own chrome; an <iframe>
+// would load whatever it liked. Markdown still works -- raw tags render as the
+// text the model wrote.
+const escapeHtml = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Markdown can still mint a link, and `[x](javascript:...)` is a real payload,
+// so hrefs are an http(s) allowlist: anything else keeps its text and loses its
+// link. target/rel because without them a link in this panel navigates the
+// customer's host page away from their own site. The answer path needs none of
+// this -- its handler swaps every <a> for Link.tsx, which emits no href at all.
+const REASONING_PARSER: HTMLReactParserOptions = {
+  replace: (node) => {
+    if (!(node instanceof Element) || node.name !== "a") return;
+    const children = domToReact(node.children as DOMNode[], REASONING_PARSER);
+    if (!/^https?:\/\//i.test(node.attribs?.href ?? "")) return <>{children}</>;
+    return (
+      <a href={node.attribs.href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  },
+};
 
 export interface ToolCall {
   id: string | number;
@@ -84,12 +120,19 @@ function ToolCalls({
   const [isRestored, setIsRestored] = useState(isExpanded);
 
   // Same markdown dialect as the answer: a reasoning summary arrives with its
-  // own "**Bold heading**" per part and reads as a wall otherwise. Memoised on
-  // the text so toggling a tool row below does not re-parse it.
+  // own "**Bold heading**" per part and reads as a wall otherwise. Built only
+  // once the panel is open -- a restored conversation would otherwise parse
+  // every reasoning message on mount for a panel nobody opened, which is the
+  // same reason ToolCallRow below defers its own body.
   const reasoningBody = useMemo(
     () =>
-      thinking ? parse(marked.parse(thinking, MARKED_OPTIONS) as string) : null,
-    [thinking],
+      isExpanded && thinking
+        ? parse(
+            marked.parse(escapeHtml(thinking), MARKED_OPTIONS) as string,
+            REASONING_PARSER,
+          )
+        : null,
+    [thinking, isExpanded],
   );
 
   const toolsPart = toolCalls.length
@@ -103,9 +146,8 @@ function ToolCalls({
   const thoughtPart = thinking ? "Thought" : null;
   const summary = [thoughtPart, toolsPart].filter(Boolean).join(" \u00b7 ");
 
-  // Nothing to name is nothing to open. Covers both a run with neither
-  // reasoning nor tools, and one with reasoning but no duration and no tools —
-  // the alternative there is a bare chevron, which is not a disclosure.
+  // Nothing to name is nothing to open: a run with neither reasoning nor tools
+  // returns the lead alone, exactly as before this feature existed.
   if (!summary) return <>{lead}</>;
   // While a tool runs, the lead names it ("Using Google Search") and is the
   // whole line, so the summary gives way to its chevron and the line opens the
