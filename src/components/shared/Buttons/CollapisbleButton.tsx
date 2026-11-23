@@ -26,6 +26,7 @@ const CollapsibleButton = ({ children, ...restProps }: any) => {
     >
       <IconButton
         {...restProps}
+        aria-label={isExpanded ? "Hide sources" : "Show sources"}
         variant=""
         id="expand-collapse-button"
         className="bg-light gp-4"

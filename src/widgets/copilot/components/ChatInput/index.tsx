@@ -317,6 +317,7 @@ const ChatInput = () => {
               >
                 <div ref={menuButtonRef}>
                   <IconButton
+                    aria-label="Add attachment"
                     onClick={() => setIsMenuOpen((v) => !v)}
                     variant="text-alt"
                     isPressed={isMenuOpen}
@@ -368,6 +369,7 @@ const ChatInput = () => {
               showStop ||
               !!files?.length) && (
               <IconButton
+                aria-label={showStop ? "Stop" : "Send"}
                 disabled={disableSend}
                 variant="text-alt"
                 className="gooey-input-control gooey-send-button"
