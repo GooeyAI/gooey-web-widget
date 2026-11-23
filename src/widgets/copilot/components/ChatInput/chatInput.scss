@@ -5,6 +5,14 @@
   max-width: var(--gooey-message-content-max-width, 760px) !important;
   position: sticky;
   bottom: 0;
+  // A block here could not be compressed: `min-height: auto` pinned the column
+  // to PlaceholderMessage + file-preview tray + input bar, and the overflow was
+  // cut off by `.gooey-inline-container`'s `overflow: clip` -- losing the input
+  // bar, the last child. As a flex column that can shrink, the negative space
+  // lands on PlaceholderMessage instead, whose `overflow: auto` then scrolls.
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   // Opaque surface on purpose: a translucent background + backdrop-filter
   // paints black in WebKit when the widget renders inside a shadow root.
   background: $white;
