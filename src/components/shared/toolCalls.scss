@@ -132,25 +132,56 @@ $tc-teal-700: #00998a; // --gy-teal-700
 // ---- The model's reasoning, above the calls it made ----
 // Prose, not a table row, so it gets reading measure and line height rather
 // than the row's single-line treatment.
+//
+// Nothing here bounds the width: `.tool-calls-table` above already carries
+// `overflow: hidden`, which both contains this block and zeroes the table's
+// automatic minimum size, so `.gooey-messages-container` never scrolls
+// sideways. The catch is that containment clips -- silently, with no way to
+// reach what is cut off -- so anything that can outgrow the column (a table, an
+// image) is made to fit or scroll itself below.
 .tool-calls-reasoning {
   padding: 12px 14px;
   font-size: 13px;
   line-height: 155%;
   color: $tc-ink-muted;
-  // `.gooey-messages-container` never declares `overflow-x`, so it computes to
-  // `auto` and anything wider than the column scrolls the whole conversation
-  // sideways. This is model text of no fixed shape, so bound it at its own level.
-  max-width: 100%;
   overflow-wrap: break-word;
 }
 
-// Markdown's own block margins would double this block's padding at its ends.
-.tool-calls-reasoning > :first-child {
-  margin-top: 0;
+// `App.css` zeroes the margins of every block element and strips list markers,
+// and `response.scss` only puts them back under `.markdown`. That class carries
+// `font-size: 16px !important`, which this 13px block cannot wear, so the few
+// rules the prose actually needs are restored here instead.
+.tool-calls-reasoning p {
+  margin-bottom: 10px;
 }
 
-.tool-calls-reasoning > :last-child {
-  margin-bottom: 0;
+.tool-calls-reasoning ul,
+.tool-calls-reasoning ol {
+  list-style-position: outside;
+  padding-left: 1.25rem;
+  margin: 0 0 10px;
+}
+
+.tool-calls-reasoning ul {
+  list-style-type: disc;
+}
+
+.tool-calls-reasoning ol {
+  list-style-type: decimal;
+}
+
+// A summary part names itself with a "**bold heading**", so a real heading is
+// rare. When one arrives it stays at prose size: this is a panel, not a page.
+.tool-calls-reasoning h1,
+.tool-calls-reasoning h2,
+.tool-calls-reasoning h3,
+.tool-calls-reasoning h4,
+.tool-calls-reasoning h5,
+.tool-calls-reasoning h6 {
+  font-size: 13px;
+  font-weight: 600;
+  color: $tc-ink;
+  margin: 12px 0 4px;
 }
 
 // Each summary part arrives with its own "**Bold heading**". They carry the
@@ -161,10 +192,23 @@ $tc-teal-700: #00998a; // --gy-teal-700
   font-weight: 600;
 }
 
-// A long unbroken token scrolls itself rather than the conversation.
-.tool-calls-reasoning pre {
-  max-width: 100%;
+// Scroll rather than be clipped by the table's `overflow: hidden`.
+.tool-calls-reasoning table {
+  display: block;
   overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 10px;
+}
+
+.tool-calls-reasoning img {
+  max-width: 100%;
+  height: auto;
+}
+
+// The trailing block's own bottom margin would double the padding at the end.
+// (`pre` keeps a 0.9rem one from App.css, which also already scrolls it.)
+.tool-calls-reasoning > :last-child {
+  margin-bottom: 0;
 }
 
 // The same hairline the rows use between themselves.
